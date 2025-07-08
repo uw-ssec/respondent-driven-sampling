@@ -1,0 +1,115 @@
+/* Header container */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: white;
+  position: sticky;  
+  top: 0;        
+  left: 0;      
+  right: 0;   
+  z-index: 1000;  
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo styles */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Logo text */
+.logo h1 {
+  font-size: 1.8rem;
+  margin: 0;
+  color: #3E236E;
+}
+
+/* Home icon */
+.home-icon {
+  display: flex;
+  align-items: center;
+}
+
+/* Navigation Icons */
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+/* Navigation icon styles */
+.nav-icon {
+  cursor: pointer;
+  position: relative;
+}
+
+
+
+/* Profile menu styles */
+.profile-icon {
+  position: relative;
+}
+
+/* Profile icon */
+.profile-menu {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background-color: rgba(62, 35, 110, 0.95);
+  width: 200px;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Profile menu items */
+.profile-menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Profile menu item styles */
+.profile-menu li {
+  color: white;
+  margin: 12px 0;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+/* Profile menu item hover effect */
+.profile-menu li:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  margin-top: 80px;
+}
+
+/* Logout option */
+.logout-option {
+  color: white;
+  cursor: pointer;
+}
+
+/* Logout option hover effect */
+.logout-option:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .nav-icons {
+    gap: 15px;
+  }
+  
+  .logo h1 {
+    font-size: 1.5rem;
+  }
+}

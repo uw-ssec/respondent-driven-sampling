@@ -1,0 +1,284 @@
+/*
+ * Dashboard Styles
+ * This CSS file contains styles for the dashboard component.
+ * It includes styles for the main container, title, buttons, and list items.
+ * The styles are designed to be responsive and adapt to different screen sizes.
+ */
+.dashboard-container {
+  margin: 0;
+  padding: 1rem;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* 🔹 Center the Dashboard title */
+.dashboard-title {
+  color: #3E236E;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.5rem;
+  position: sticky;
+  top: 6rem;
+  left: 0;
+  right: 0;
+  flex: 0 0 auto;
+}
+
+/* 🔹 Flexbox for the main dashboard container */
+.flex-box {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  background-color: white;
+  border: 1.5px solid #F2F2F2;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  margin-top: 3rem;
+}
+
+/* 🔹 Flexbox for the list items */
+.top-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: #FAFAFA;
+  padding: 0.75rem;
+  border-bottom: 1px solid #F2F2F2;
+}
+
+/* 🔹 Control buttons */
+.control-button {
+  padding: 0.25rem 0.5rem;
+  background: white;
+  color: #807A7A;
+  border: 1px solid #F2F2F2;
+  border-radius: 0.5rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: auto;
+  width: auto;
+  white-space: nowrap;
+}
+
+
+
+/* 🔹 Control button hover effect */
+.control-button img {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* 🔹 Control button hover effect */
+.search-input {
+  flex-grow: 1;
+  min-width: 200px;
+  padding: 0.5rem 1rem;
+  background: white;
+  color: #979797;
+  border: 1px solid #F2F2F2;
+  border-radius: 3.125rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.list-header,
+.list-row {
+  display: flex;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #F2F2F2;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list-header {
+  flex: 0 0 auto;
+}
+
+.list-row {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.list-header {
+  flex: 0 0 auto;
+}
+
+.list-row {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+/* 🔹 Style the header items */
+.header-item {
+  flex: 1 1 0;
+  font-family: 'Poppins', sans-serif;
+  color: #404040;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.test {
+  max-width: 66px;
+  justify-content: end;
+}
+
+.radio-button {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid #807A7A;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  cursor: pointer;
+  background-color: transparent;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.radio-button:checked {
+  background-color: #3E236E;
+  border-color: #3E236E;
+}
+
+/* 🔹 Style the list items */
+.list-edit {
+  cursor: pointer;
+  color: #807A7A;
+}
+
+/* 🔹 Style the edit button */
+.arrow-button {
+  width: 1.875rem;
+  height: 1.875rem;
+  background: white;
+  color: #807A7A;
+  border: 1px solid #F2F2F2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.arrow-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.status,
+.list-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 120px;
+  height: 100%;
+}
+
+.approval-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.approve-button,
+.reject-button {
+  border-radius: 15px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  width: 100px;
+  height: 2rem;
+  transition: 0.2s ease-in-out;
+}
+
+/* 🔹 Approve button */
+.approve-button {
+  background: #28a745;
+  color: white;
+}
+
+/* 🔹 Hover effect for Approve button */
+.approve-button:hover {
+  background: #218838;
+}
+
+/* 🔹 Hover effect for Approve button */
+.reject-button {
+  background: #dc3545;
+  color: white;
+}
+
+/* 🔹 Hover effect for Reject button */
+.reject-button:hover {
+  background: #c82333;
+}
+
+.staff-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  flex: 0 0 auto;
+}
+
+.new-user-button {
+  padding: 0.5rem 0.75rem;
+  width: fit-content;
+  min-width: 0;
+  background: #3E236E;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  box-shadow: 0 0.25rem 0.375rem rgba(0, 0, 0, 0.1);
+}
+
+.new-user-button:hover {
+  background: #5a3a8a;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pagination-info {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  color: #3E236E;
+}
+
+@media (max-width: 600px) {
+  .dashboard-title { font-size: 1.25rem; }
+  .control-button { font-size: 0.75rem; }
+  .search-input { font-size: 0.8rem; }
+  .header-item { font-size: 0.875rem; }
+  .new-user-button { font-size: 0.875rem; }
+  .list-header,
+  .list-row { padding: 0.5rem; }
+  .pagination-controls { gap: 0.5rem; }
+  .approve-button,
+  .reject-button {
+    width: auto;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}

@@ -1,0 +1,25 @@
+subscription_id = "subscription_id"
+
+# Resource Group Configuration
+resource_group_name = "<>"
+location           = "<>"
+
+# App Service Configuration
+app_service_plan_name = "<>"
+app_service_name      = "<>"
+node_version         = "<>"
+sku_name             = "<>"
+
+# Cosmos DB Configuration
+cosmos_db_account_name = "<>"
+cosmos_db_database_name = "<>"
+cosmos_db_consistency_level = "<>"
+cosmos_db_offer_type = "<>"
+
+# Non-sensitive Configuration
+node_env = "production"
+
+# Environment Variables
+twilio_account_sid  = "your-twilio-account-sid"
+twilio_auth_token   = "your-twilio-auth-token"
+twilio_verify_sid   = "your-twilio-verify-service-sid" 

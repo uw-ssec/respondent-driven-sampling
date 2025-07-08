@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/0673f84b-11e3-4273-b7fb-9c85be3bfab9/resourceGroups/appsvc_linux_eastus/providers/Microsoft.Web/sites/RDSApp",
+    "appService.deploySubpath": "."
+}

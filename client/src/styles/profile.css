@@ -1,0 +1,83 @@
+/* Centers the form vertically & horizontally */
+.edit-profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+  background-color: transparent; /* transparent or match your app background */
+}
+
+/* Card container with no white background */
+.edit-profile-card {
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  border-radius: 8px;
+}
+
+
+/* Title */
+.edit-profile-title,
+.profile-name {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 24px;
+  color: #3E236E;
+}
+
+/* Form spacing */
+.input-group {
+  margin-bottom: 20px;
+}
+
+/* Label style */
+.input-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+/* Input and select style */
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9; /* subtle field background */
+}
+
+/* Button */
+.save-button {
+  width: 100%;
+  padding: 14px;
+  background-color: #3e236e;
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+/* Status message */
+.status-message {
+  margin-top: 20px;
+  text-align: center;
+  color: #3e236e;
+  font-weight: 500;
+}
+
+/* Back link */
+.back-arrow-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #3e236e;
+}
+

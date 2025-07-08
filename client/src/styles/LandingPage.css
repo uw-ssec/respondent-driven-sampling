@@ -1,0 +1,70 @@
+/* Ensure the entire dashboard page is centered */
+.landing-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    margin: 0 auto;
+}
+
+/* Ensure "Welcome back, John" is properly aligned */
+.welcome-text {
+    font-size: 34px;
+    font-weight: bold;
+    color: #3E236E;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Center the actions box */
+.actions-box {
+    background-color: #f7f7f7;
+    padding: 40px;
+    width: 90%;
+    max-width: 500px;
+    min-height: 250px;
+    text-align: center;
+    margin: 20px auto; /* Centers it */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Center buttons inside the actions box */
+.actions-box .action-button {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 10px auto;
+    padding: 12px;
+    background-color: #3E236E;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Add hover effect for buttons */
+.action-button:hover {
+    opacity: 0.8;
+}
+
+/* Fix navbar spacing */
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #3E236E;
+    color: white;
+}
+
+/* Fix logout button */
+.logout-button {
+    background-color: #3E236E;
+    color: white;
+    margin-top: 20px;
+}

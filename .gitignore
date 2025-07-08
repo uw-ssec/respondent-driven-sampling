@@ -1,0 +1,65 @@
+# Ignore node_modules in all subdirectories
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Ignore cache and dependency files
+.pnp/
+.pnp.js
+.npm/
+.yarn/
+.cache/
+
+# Ignore test coverage
+coverage/
+
+# Ignore production builds
+build/
+client/build/
+/dist
+/out
+
+# Ignore data folder
+data/
+
+# Editor directories and files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Miscellaneous
+.DS_Store
+*.pem
+Thumbs.db
+desktop.ini
+
+# Ignore environment variable files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+/coverage
+.nyc_output
+
+# Specific to this project
+.temp/
+.tmp/

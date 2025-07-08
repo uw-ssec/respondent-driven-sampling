@@ -1,0 +1,22 @@
+/* CSS for Past Entries Page */
+.view-details-btn {
+    padding: 8px 12px;
+    background-color: #3E236E;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+    width: 8rem;
+}
+
+.view-details-btn:hover {
+    opacity: 0.8;
+}
+
+.header-item button {
+    margin: 0;
+    width: 9rem;
+    
+}

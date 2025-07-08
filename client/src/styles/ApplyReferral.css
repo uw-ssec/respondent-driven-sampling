@@ -1,0 +1,119 @@
+/* apply-referral-page */
+.apply-referral-page {
+    font-family: 'Montserrat', sans-serif;
+    padding: 20px;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    min-height: 100vh; /* Full viewport height */
+}
+
+/* Container for the entire referral application form */
+.apply-referral-container {
+    max-width: 1000px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Title and description */
+h2 {
+    color: #3E236E;
+    margin-bottom: 10px;
+}
+
+/* Description text */
+p {
+    font-size: 15px;
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+/* Input field for referral code */
+.referral-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 30px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    transition: 0.3s;
+}
+
+/* Placeholder text styling */
+.referral-input:focus {
+    border-color: #3E236E;
+    outline: none;
+}
+
+/* Button styles */
+.generate-btn {
+    padding: 15px 20px;
+    background-color: #3E236E;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    margin-bottom: 10px;
+}
+
+/* Button hover effect */
+.generate-btn:hover {
+    background-color: #5A2E8A;
+}
+
+/* Disabled button styles */
+.generate-btn:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+}
+
+/* Cancel button styles */
+.cancel-btn {
+    background-color: white;
+    color: black;
+    border: 1px solid #969696;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Cancel button hover effect */
+.cancel-btn:hover {
+    background-color: #969696; 
+    color: white; /* White text on hover */
+}
+
+/* Cancel button disabled styles */
+.cancel-btn:disabled {
+    background-color: #ddd;
+    color: #888;
+    cursor: not-allowed;
+    border-color: #ddd;
+}
+
+.new-seed-btn {
+  font-family: 'Montserrat', sans-serif;
+  color: #3E236E;           /* Purple color from your palette */
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: center;
+  padding-bottom: 20px;     /* Space under the button */
+  font-weight: 500;         /* Medium weight, similar to your styles */
+  font-size: 14px;
+  user-select: none;        /* Optional: prevent text selection on click */
+  width: 100%;              /* Make it take full width to center text */
+  display: block;
+}
