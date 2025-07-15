@@ -47,75 +47,97 @@ client/                   # Client-facing React application
 ├── src/                  # Source code for the app
 │   ├── components/
 │   │   └── survey/
-│   │       └── SurveyComponent.js        # Survey component logic
+│   │       └── SurveyComponent.tsx        # Survey component logic
 │   ├── pages/
 │   │   ├── AdminDashboard/               # Admin dashboard code. Shows staff
-│   │   │   ├── dashboard.js              # Admin dashboard functionality code
-│   │   │   ├── vdashboard.css            # Styling for admin dashboard
-│   │   │   ├── filter.png
-│   │   │   ├── magnifyingGlass.png
-│   │   │   ├── pencil.png
-│   │   │   ├── trash.png
-│   │   │   └── up-down.png
+│   │   │   ├── NewUser.tsx               # Admin new user creation
+│   │   │   └── StaffDashboard.tsx        # Admin dashboard UI
 │   │   ├── CompletedSurvey/
-│   │   │   ├── complete.js               # End of survey functionality code
-│   │   │   ├── complete.css              # Styling for end of survey
-│   │   │   └── qrpage.js                 # Displays generated QR code
+│   │   │   ├── CompletedSurvey.tsx       # End of survey functionality code
+│   │   │   └── QrPage.tsx                # Displays generated QR code
 │   │   ├── Header/
-│   │   │   ├── header.js                 # Header functionality code
-│   │   │   └── header.css                # Header styling
+│   │   │   └── Header.tsx                # Header functionality code
 │   │   ├── LandingPage/
-│   │   │   ├── landing.js                # App landing page functionality code
-│   │   │   └── landing.css               # Styling for app landing page
+│   │   │   └── LandingPage.tsx           # App landing page functionality code
 │   │   ├── Login/
-│   │   │   ├── login.js                  # Login functionality code
-│   │   │   └── login.css                 # Styling for login
+│   │   │   └── Login.tsx                 # Login functionality code
 │   │   ├── PastEntries/
-│   │   │   ├── PastEntries.js            # Past survey entries dashboard functionality
-│   │   │   ├── PastEntriesCss.css        # Styling for past survey entries dashboard
-│   │   │   ├── SurveyDetails.js          # Displays individual survey details
-│   │   │   └── SurveyDetailsCss.css      # Styling for displaying individual survey details
+│   │   │   ├── PastEntries.tsx           # Past survey entries dashboard functionality
+│   │   │   ├── SurveyDetails.tsx         # Displays individual survey details
 │   │   ├── Profile/
-│   │   │   ├── admineditprofile.js       # Edit profile functionalities
-│   │   │   └── profile.css               # Styling for profile page
+│   │   │   ├── AdminEditProfile.tsx      # Edit profile functionalities
+│   │   │   └── ViewProfile.tsx
 │   │   ├── QRCodeScan&Referral/
-│   │   │   ├── ApplyReferral.js          # Functionality to apply a referral code
-│   │   │   └── ApplyReferral.css         # Styling for applying referral code prompt box
+│   │   │   └── ApplyReferral.tsx         # Functionality to apply a referral code
 │   │   ├── Signup/
-│   │   │   ├── signup.js                 # Sign up functionality
-│   │   │   └── signup.css                # Styling for sign up page
+│   │   │   └── Signup.tsx                # Sign up functionality
 │   │   └── SurveyEntryDashboard/
-│   │       ├── survey-dashboard.js       # Displays all surveys as a dashboard
-│   │       └── survey-dashboard.css      # Styling for survey entry dashboard
-│   ├── App.js                            # Main component of the application
+│   │       └── SurveyEntryDashboard.tsx  # Displays all surveys as a dashboard
+│   ├── App.tsx                           # Main component of the application
 │   ├── App.test.js                       # Contains tests for the App component
-│   ├── AppCopyORIGINAL.js                # Copy of App tests
-│   ├── index.js                          # JS entry point; renders root React component
+│   ├── index.tsx                         # JS entry point; renders root React component
 │   ├── index.css                         # Global styles for the application
 │   ├── logo.svg                          # The React logo
-│   ├── reportWebVitals.js
-│   └── setupTests.js                     # Sets up the testing environment
+│   ├── setupTests.js                     # Sets up the testing environment
+│   ├── assets/                           # Image assets for UI
+│   │   ├── filter.png
+│   │   ├── magnifyingGlass.png
+│   │   ├── pencil.png
+│   │   ├── trash.png
+│   │   └── up-down.png
+│   ├── styles/                           # Styling files by page/component
+│   │   ├── ApplyReferral.css
+│   │   ├── LandingPage.css
+│   │   ├── PastEntriesCss.css
+│   │   ├── StaffDashboard.css
+│   │   ├── SurveyDashboard.css
+│   │   ├── SurveyDetailsCss.css
+│   │   ├── complete.css
+│   │   ├── header.css
+│   │   ├── login.css
+│   │   ├── profile.css
+│   │   └── signup.css
+│   ├── types/                            # TypeScript type definitions
+│   │   ├── AuthProps.ts
+│   │   ├── ReferralCode.ts
+│   │   ├── Survey.ts
+│   │   └── User.ts
+│   └── vite-env.d.ts                     # Vite's auto-imported type definitions
 ├── .gitignore                            # Specifies files to ignore in Git
 ├── README.md                             # Description of the project, usage, etc.
 ├── README.old.md                         # Old version of the project description
 ├── package.json                          # Frontend dependencies and scripts
-└── package-lock.json                     # Lockfile for frontend dependencies
-
+├── package-lock.json                     # Lockfile for frontend dependencies
+├── prettier.config.js                    # Code formatting configuration
+├── tsconfig.json                         # TypeScript config file
+└── vite.config.ts                        # Vite bundler configuration
 server/                   # Backend code
+├── __tests__/                     # Backend tests
+│   ├── database.test.js
+│   └── server.test.js
 ├── models/               # Mongoose schemas
-│   ├── Survey.js                       # Survey entries with responses and geolocation
-│   └── Users.js                        # User accounts, roles, and hashed passwords
+│   └── __tests__/                 # Models tests 
+│       ├── Survey.test.js
+│       └── Users.test.js
+│   ├── Survey.js                         # Survey entries with responses and geolocation
+│   └── Users.js                          # User accounts, roles, and hashed passwords
 ├── routes/               # API routes
-│   ├── auth.js                         # Handles login, registration, and approvals
-│   ├── pages.js                        # Future page-level routing logic
-│   └── surveys.js                      # Routes to submit, validate, and fetch surveys
+│   ├── __tests__/                 # Routes tests 
+│   │   ├── auth.test.js
+│   │   ├── pages.test.js
+│   │   └── surveys.test.js
+│   ├── auth.js                           # Handles login, registration, and approvals
+│   ├── pages.js                          # Future page-level routing logic
+│   └── surveys.js                        # Routes to submit, validate, and fetch surveys
 ├── utils/
-│   └── generateReferralCode.js         # Utility to generate unique referral codes
-├── database.js                         # Mongoose DB connection init
-├── index.js                            # Main entry point for Express backend
-├── .gitignore                          # Specifies files to ignore in Git
-├── package.json                        # Backend dependencies and scripts
-└── package-lock.json                   # Lockfile for backend dependencies
+│   ├── __tests__/                 # Utils tests                 
+│   │   └── generateReferralCode.test.js
+│   └── generateReferralCode.js           # Utility to generate unique referral codes
+├── database.js                           # Mongoose DB connection init
+├── index.js                              # Main entry point for Express backend
+├── .gitignore                            # Specifies files to ignore in Git
+├── package.json                          # Backend dependencies and scripts
+└── package-lock.json                     # Lockfile for backend dependencies
 ```
 
 ## Setup Instructions
@@ -187,3 +209,7 @@ Thanks to the following people for their work on this project.
 - Aryan Palave
 - Kaden Kapadia
 - Hrudhai Umashankar
+- Liya Finley Hutchison
+- Hana Amos
+- Zack Crouse
+- Kristen L Gustafson
