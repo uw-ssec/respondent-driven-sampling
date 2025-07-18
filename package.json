@@ -6,7 +6,8 @@
       "node": ">=20"
     },
     "scripts": {
-      "postinstall": "npm ci --prefix server && npm ci --prefix client && npm run build --prefix client",
+      "postinstall": "npm ci --prefix server && npm ci --prefix client",
+      "build": "npm run build --prefix client",
       "start": "node server/index.js"
     },
     "dependencies": {
