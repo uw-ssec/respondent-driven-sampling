@@ -123,7 +123,7 @@ app.use('/api/pages', securityWrapper(pageRoutes));
 app.use('/api/surveys', securityWrapper(surveyRoutes));
 
 // Serve static files with security headers
-const clientBuildPath = path.join(__dirname, '../client/build');
+const clientBuildPath = path.join(__dirname, '../client/dist');
 app.use(express.static(clientBuildPath, {
     setHeaders: (res) => {
         res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'");

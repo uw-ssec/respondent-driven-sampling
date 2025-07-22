@@ -16,7 +16,7 @@ coverage/
 # Ignore production builds
 build/
 client/build/
-/dist
+client/dist/
 /out
 
 # Ignore data folder

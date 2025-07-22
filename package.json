@@ -1,12 +1,13 @@
 {
-    "name": "pophealth_capstone_25",
+    "name": "respondent_driven_sampling",
     "version": "1.0.0",
     "private": true,
     "engines": {
       "node": ">=20"
     },
     "scripts": {
-      "postinstall": "npm ci --prefix server && npm ci --prefix client && npm run build --prefix client",
+      "postinstall": "npm ci --prefix server && npm ci --prefix client",
+      "build": "npm run build --prefix client",
       "start": "node server/index.js"
     },
     "dependencies": {
