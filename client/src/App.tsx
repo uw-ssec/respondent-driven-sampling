@@ -13,6 +13,7 @@ import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
 import QrPage from '@/pages/CompletedSurvey/QrPage';
 import LandingPage from '@/pages/LandingPage/LandingPage';
 import Login from '@/pages/Login/Login';
+import OfflineForm from '@/pages/OfflineForm/OfflineForm';
 import PastEntries from '@/pages/PastEntries/PastEntries';
 import SurveyDetails from '@/pages/PastEntries/SurveyDetails';
 import AdminEditProfile from '@/pages/Profile/AdminEditProfile';
@@ -150,6 +151,16 @@ function App() {
 					element={
 						isLoggedIn ? (
 							<ViewProfile onLogout={handleLogout} />
+						) : (
+							<Navigate replace to="/login" />
+						)
+					}
+				/>
+				<Route
+					path="/offline-form"
+					element={
+						isLoggedIn ? (
+							<OfflineForm />
 						) : (
 							<Navigate replace to="/login" />
 						)
