@@ -2,8 +2,10 @@
 
 The RDS App is a secure, accessible, and open-source web application that streamlines data collection for homelessness research using **Respondent-Driven Sampling (RDS)**. Developed in collaboration with the University of Washington iSchool and the King County Regional Homelessness Authority (KCRHA), this app enables volunteers and administrators to collect accurate survey data, track referrals, and generate population estimates more effectively than traditional Point-In-Time (PIT) counts.
 
-> 📍 **Live Deployment:** [Link to App](https://rdspitapp-b5aqd7czezfggta2.westus-01.azurewebsites.net/login)
-> 🧠 **Research-Driven:** Based on field-tested RDS methodologies  
+> 📍 **Live Deployment:** [Link to App](https://rds-main-g6e3dpefdabmcmca.westus-01.azurewebsites.net/login)
+
+> 🧠 **Research-Driven:** Based on field-tested RDS methodologies
+
 > 🔐 **Secure & Compliant:** Built with HIPAA and HUD compliance in mind
 
 ## 📄 Project Documentation
