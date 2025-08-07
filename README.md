@@ -151,26 +151,25 @@ cd <repository>
 ```
 
 2. **Set Environment Variables**
-Copy paste `.env.example` as `.env` in `client` and `server` folders, and paste the neccessary environment values. 
+Copy paste `.env.example` as `.env` in the base directory, and paste the neccessary environment values. 
 
-2. **Backend Setup**
+3. **Install Packages**
 ```bash
-cd server
 npm install
-node index.js
 ```
 
-3. **Frontend Setup**
+4. **Start Backend Server**
 ```bash
-cd ../client
-npm install
 npm start
 ```
 
-4. **Visit App**
+5. **Start Frontend Dev Server** (In seperate terminal)
 ```bash
-localhost:3000
+cd client
+npm run dev
 ```
+
+6. **Visit App** at http://localhost:3000.
 
 ## Future Directions
 The items listed below are features our team has identified out of scope for the duration of our project. These items are still considered high importance for the project as a whole, and are highly recommended as a jumping off point for teams taking over the project in the future.
