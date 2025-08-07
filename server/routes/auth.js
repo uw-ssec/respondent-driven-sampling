@@ -1,106 +1,122 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const User = require('../models/Users');
-const twilio = require('twilio');
-require('dotenv').config({ path: './.env' });
+const User = require("../models/Users");
+const twilio = require("twilio");
+require("dotenv").config({ path: "./.env" });
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken  = process.env.TWILIO_AUTH_TOKEN;
-const verifySid  = process.env.TWILIO_VERIFY_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const verifySid = process.env.TWILIO_VERIFY_SID;
 
 const client = twilio(accountSid, authToken);
 const verifyService = client.verify.v2.services(verifySid);
 
 // ─── Send OTP for SIGNUP ─────────────────────────────────────────────
-router.post('/send-otp-signup', async (req, res) => {
+router.post("/send-otp-signup", async (req, res) => {
   const { phone, email } = req.body;
   try {
     const existingUser = await User.findOne({ $or: [{ phone }, { email }] });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists – please log in.' });
+      return res
+        .status(400)
+        .json({ message: "User already exists – please log in." });
     }
-    await verifyService.verifications.create({ to: phone, channel: 'sms' });
-    res.json({ message: 'OTP sent!' });
+    await verifyService.verifications.create({ to: phone, channel: "sms" });
+    res.json({ message: "OTP sent!" });
   } catch (err) {
-    console.error('Send OTP signup error:', err);
-    res.status(500).json({ message: 'Failed to send OTP' });
+    console.error("Send OTP signup error:", err);
+    res.status(500).json({ message: "Failed to send OTP" });
   }
 });
 
 // ─── Send OTP for LOGIN ──────────────────────────────────────────────
-router.post('/send-otp-login', async (req, res) => {
+router.post("/send-otp-login", async (req, res) => {
   const { email, phone } = req.body;
   try {
     const user = await User.findOne({ email, phone });
     if (!user) {
-      return res.status(400).json({ message: 'Email and phone number do not match any user.' });
+      return res
+        .status(400)
+        .json({ message: "Email and phone number do not match any user." });
     }
-    await verifyService.verifications.create({ to: phone, channel: 'sms' });
-    res.json({ message: 'OTP sent!' });
+    await verifyService.verifications.create({ to: phone, channel: "sms" });
+    res.json({ message: "OTP sent!" });
   } catch (err) {
-    console.error('Send OTP login error:', err);
-    res.status(500).json({ message: 'Failed to send OTP' });
+    console.error("Send OTP login error:", err);
+    res.status(500).json({ message: "Failed to send OTP" });
   }
 });
 
 // ─── Verify OTP for SIGNUP ──────────────────────────────────────────
-router.post('/verify-otp-signup', async (req, res) => {
+router.post("/verify-otp-signup", async (req, res) => {
   const { phone, code, firstName, lastName, email, role } = req.body;
   try {
-    const check = await verifyService.verificationChecks.create({ to: phone, code });
-    if (check.status !== 'approved') {
-      return res.status(400).json({ message: 'Invalid OTP' });
+    const check = await verifyService.verificationChecks.create({
+      to: phone,
+      code,
+    });
+    if (check.status !== "approved") {
+      return res.status(400).json({ message: "Invalid OTP" });
     }
     if (await User.findOne({ phone })) {
-      return res.status(400).json({ message: 'User already exists – please log in.' });
+      return res
+        .status(400)
+        .json({ message: "User already exists – please log in." });
     }
     const newUser = new User({ firstName, lastName, email, phone, role });
     await newUser.save();
     res.json({
-      message: 'Signup successful!',
-      firstName:  newUser.firstName,
-      role:       newUser.role,
+      message: "Signup successful!",
+      firstName: newUser.firstName,
+      role: newUser.role,
       employeeId: newUser.employeeId,
-      redirectTo: '/dashboard'
+      redirectTo: "/dashboard",
     });
   } catch (err) {
-    console.error('Verify OTP signup error:', err);
-    res.status(500).json({ message: 'Failed to verify OTP during signup' });
+    console.error("Verify OTP signup error:", err);
+    res.status(500).json({ message: "Failed to verify OTP during signup" });
   }
 });
 
 // ─── Verify OTP for LOGIN ────────────────────────────────────────────
-router.post('/verify-otp-login', async (req, res) => {
+router.post("/verify-otp-login", async (req, res) => {
   const { phone, code } = req.body;
   try {
-    const check = await verifyService.verificationChecks.create({ to: phone, code });
-    if (check.status !== 'approved') {
-      return res.status(400).json({ message: 'Invalid OTP' });
+    const check = await verifyService.verificationChecks.create({
+      to: phone,
+      code,
+    });
+    if (check.status !== "approved") {
+      return res.status(400).json({ message: "Invalid OTP" });
     }
     const user = await User.findOne({ phone });
     if (!user) {
-      return res.status(400).json({ message: 'No account for this phone – please sign up.' });
+      return res
+        .status(400)
+        .json({ message: "No account for this phone – please sign up." });
     }
-    if (user.approvalStatus !== 'Approved') {
-      return res.status(403).json({ message: 'Account not approved yet. Please contact your admin.' });
+    if (user.approvalStatus !== "Approved") {
+      return res.status(403).json({
+        message: "Account not approved yet. Please contact your admin.",
+      });
     }
     res.json({
-      message: 'Login successful!',
-      firstName:  user.firstName,
-      role:       user.role,
+      message: "Login successful!",
+      firstName: user.firstName,
+      role: user.role,
       employeeId: user.employeeId,
-      redirectTo: '/dashboard'
+      redirectTo: "/dashboard",
     });
   } catch (err) {
-    console.error('Verify OTP login error:', err);
-    res.status(500).json({ message: 'Failed to verify OTP during login' });
+    console.error("Verify OTP login error:", err);
+    res.status(500).json({ message: "Failed to verify OTP during login" });
   }
 });
 
 // ─── Admin Approvals ────────────────────────────────────────────────
-router.get('/users', async (req, res) => {
+router.get("/users", async (req, res) => {
   try {
-    const users = await User.find({}, 'firstName lastName role approvalStatus');
+    const users = await User.find({}, "firstName lastName role approvalStatus");
     res.json(users);
   } catch (err) {
     console.error("Error fetching users:", err);
@@ -108,7 +124,7 @@ router.get('/users', async (req, res) => {
   }
 });
 
-router.put('/users/:id/approve', async (req, res) => {
+router.put("/users/:id/approve", async (req, res) => {
   try {
     const { status } = req.body;
     if (!["Approved", "Rejected"].includes(status)) {
@@ -125,19 +141,29 @@ router.put('/users/:id/approve', async (req, res) => {
     res.json({ message: `User ${status}`, user: updatedUser });
   } catch (err) {
     console.error("Error updating approval status:", err);
-    res.status(500).json({ message: "Server error: Unable to update approval status." });
+    res
+      .status(500)
+      .json({ message: "Server error: Unable to update approval status." });
   }
 });
 
-
 // ─── For Admin to PreAuthorize  ───────────────────────────────────────
-router.post('/preapprove', async (req, res) => {
+router.post("/preapprove", async (req, res) => {
   try {
-    const { firstName, lastName, email,phone, role} = req.body;
+    const { firstName, lastName, email, phone, role } = req.body;
     if (await User.findOne({ phone })) {
-      return res.status(400).json({ message: "User already exists with this phone" });
+      return res
+        .status(400)
+        .json({ message: "User already exists with this phone" });
     }
-    const newUser = new User({ firstName, lastName, email, phone, role, approvalStatus: "Approved" });
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      phone,
+      role,
+      approvalStatus: "Approved",
+    });
     await newUser.save();
     res.status(201).json({ message: "User registered successfully!" });
   } catch (error) {
@@ -146,9 +172,8 @@ router.post('/preapprove', async (req, res) => {
   }
 });
 
-
 // ─── View Profile   ───────────────────────────────────────
-router.get('/users/:employeeId', async (req, res) => {
+router.get("/users/:employeeId", async (req, res) => {
   try {
     const user = await User.findOne({ employeeId: req.params.employeeId });
     console.log("User found:", user);
@@ -159,12 +184,14 @@ router.get('/users/:employeeId', async (req, res) => {
     res.json(user);
   } catch (err) {
     console.error("Error fetching user profile:", err);
-    res.status(500).json({ message: "Server error: Unable to fetch user profile" });
+    res
+      .status(500)
+      .json({ message: "Server error: Unable to fetch user profile" });
   }
 });
 
 // ─── Edit User Profile  ───────────────────────────────────────
-router.put('/users/:employeeId', async (req, res) => {
+router.put("/users/:employeeId", async (req, res) => {
   try {
     const { firstName, lastName, email, phone, role } = req.body;
 
@@ -181,12 +208,14 @@ router.put('/users/:employeeId', async (req, res) => {
     res.json({ message: "Profile updated successfully", user: updatedUser });
   } catch (err) {
     console.error("Error updating user profile:", err);
-    res.status(500).json({ message: "Server error: Unable to update user profile" });
+    res
+      .status(500)
+      .json({ message: "Server error: Unable to update user profile" });
   }
 });
 
 // ─── View Profile by _id ───────────────────────────────────────
-router.get('/users/by-id/:id', async (req, res) => {
+router.get("/users/by-id/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     console.log("User found:", user);
@@ -197,12 +226,14 @@ router.get('/users/by-id/:id', async (req, res) => {
     res.json(user);
   } catch (err) {
     console.error("Error fetching user profile by _id:", err);
-    res.status(500).json({ message: "Server error: Unable to fetch user profile" });
+    res
+      .status(500)
+      .json({ message: "Server error: Unable to fetch user profile" });
   }
 });
 
 // ─── Edit User Profile by _id ───────────────────────────────────────
-router.put('/users/by-id/:id', async (req, res) => {
+router.put("/users/by-id/:id", async (req, res) => {
   try {
     const { firstName, lastName, email, phone, role } = req.body;
 
@@ -219,9 +250,10 @@ router.put('/users/by-id/:id', async (req, res) => {
     res.json({ message: "Profile updated successfully", user: updatedUser });
   } catch (err) {
     console.error("Error updating user profile by _id:", err);
-    res.status(500).json({ message: "Server error: Unable to update user profile" });
+    res
+      .status(500)
+      .json({ message: "Server error: Unable to update user profile" });
   }
 });
-
 
 module.exports = router;
