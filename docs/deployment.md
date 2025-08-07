@@ -103,7 +103,7 @@ If you don't have a App Service to deploy to or want to create a new one follow 
 4. Select Node 22 LTS as Runstack
 5. Select Pricing Tier
 
-### 3. Deploying your APp
+### 3. Deploying your App
 
 1. Delete the `node_modules` folder in `server`.
    - These folders take up a lot of space and will already be reinstalled on the server so this will save time when deploying
