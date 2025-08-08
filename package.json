@@ -3,18 +3,18 @@
     "version": "1.0.0",
     "private": true,
     "engines": {
-      "node": ">=20"
+        "node": ">=20"
     },
     "scripts": {
-      "postinstall": "npm ci --prefix server && npm ci --prefix client && npm run build --prefix client",
-      "start": "node server/index.js"
+        "postinstall": "npm ci --prefix server && npm ci --prefix client && npm run build --prefix client",
+        "start": "node server/index.js"
     },
     "dependencies": {
-      "cors": "^2.8.5",
-      "dotenv": "^16.4.7",
-      "express": "^4.21.2",
-      "mongoose": "^8.10.1",
-      "bcryptjs": "^3.0.1"
+        "bcryptjs": "^3.0.1",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.7",
+        "express": "^4.21.2",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.10.1"
     }
-  }
-  
+}
