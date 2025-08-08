@@ -26,6 +26,9 @@ const surveySchema = new mongoose.Schema({
   employeeName: { type: String, required: true },
   responses: { type: Object, required: true },
   createdAt: { type: Date, default: Date.now },
+  lastUpdated: { type: Date, default: Date.now }, // Date this survey was last edited
+  inProgress: {type: Boolean, required: false}, // TODO: Edit later to required: True - currently this is fixing a bug but should look at this later
+
 
   // 2 referral codes stored here
   referralCodes: [referralCodeSchema],
