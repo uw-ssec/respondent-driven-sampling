@@ -178,6 +178,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 							</div>
 						))}
 						<div className="header-item">Survey Responses</div>
+						<div className="header-item">Progress</div>
 					</div>
 
 					{loading ? (
@@ -187,46 +188,35 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 					) : (
 						<>
 							{currentSurveys.map((s, i) => (
-								<div className="list-row" key={i}>
-									<div className="header-item">
-										{toPacificDateTimeString(s.createdAt)}
-									</div>
-									<div className="header-item">
-										{s.employeeId}
-									</div>
-									<div className="header-item">
-										{s.employeeName}
-									</div>
-									<div className="header-item">
-										{s.responses?.location || 'N/A'}
-									</div>
-									<div className="header-item">
-										{s.referredByCode || 'N/A'}
-									</div>
-									<div className="header-item">
-										<button
-											onClick={() =>
-												navigate(`/survey/${s._id}`)
-											}
-											className="view-details-btn"
-										>
-											View Details
-										</button>
-									</div>
+							<div className="list-row" key={i}>
+								<div className="header-item">
+								{toPacificDateTimeString(s.createdAt)}
 								</div>
+								<div className="header-item">{s.employeeId}</div>
+								<div className="header-item">{s.employeeName}</div>
+								<div className="header-item">{s.responses?.location || 'N/A'}</div>
+								<div className="header-item">{s.referredByCode || 'N/A'}</div>
+								<div className="header-item">
+								<button
+									onClick={() => navigate(`/survey/${s._id}`)}
+									className="view-details-btn"
+								>
+									View Details
+								</button>
+								</div>
+								<div className="header-item">
+								{s.inProgress ? (
+									<button onClick={() => window.location.href = `/survey/${s._id}/survey`}>
+									Continue
+									</button>
+								) : (
+									<span className="submitted-text">Submitted</span>
+								)}
+								</div>
+							</div>
 							))}
-							{currentSurveys.length < itemsPerPage &&
-								Array.from({
-									length: itemsPerPage - currentSurveys.length
-								}).map((_, valuePage) => (
-									<div
-										className="list-row"
-										key={`empty-${valuePage}`}
-									/>
-								))}
 						</>
 					)}
-
 					<div className="staff-footer">
 						<div className="pagination-controls">
 							<button
