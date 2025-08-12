@@ -1,15 +1,16 @@
 const express = require("express");
 const Survey = require("../models/Survey");
+const authenticateToken = require('../utils/tokenHandling')
 const generateReferralCode = require("../utils/generateReferralCode");
 
 const router = express.Router();
 
 
-// validate Referral Code - GET /api/surveys/validate-ref/:code
+// Validate Referral Code - GET /api/surveys/validate-ref/:code
 // This route checks if a referral code is valid and has not been used yet
 // It returns a success message if the code is valid
 // and a failure message if the code is invalid or already used
-router.get("/validate-ref/:code", async (req, res) => {
+router.get("/validate-ref/:code", authenticateToken, async (req, res) => {
   try {
       const { code } = req.params;
 
@@ -49,10 +50,10 @@ router.get("/validate-ref/:code", async (req, res) => {
 // If the user is an Admin, they can see all surveys
 // If the user is not an Admin, they can only see their own surveys
 // It returns the surveys in descending order of creation date
-router.get("/all", async (req, res) => {
+router.get("/all", authenticateToken, async (req, res) => {
     try {
-        const userRole = req.headers["x-user-role"];
-        const userEmployeeId = req.headers["x-employee-id"];
+        const userRole = req.decodedToken.role;
+        const userEmployeeId = req.decodedToken.employeeId;
 
         if (userRole === "Admin") {
             const surveys = await Survey.find().sort({ createdAt: -1 });
@@ -72,14 +73,16 @@ router.get("/all", async (req, res) => {
 // It checks for required fields in the request body
 // It creates a new survey document in the database
 // It generates three referral codes for the new survey
-router.post("/submit", async (req, res) => {
+router.post("/submit", authenticateToken, async (req, res) => {
     try {
-        const { employeeId, employeeName, responses, referredByCode, coords} = req.body;
-        //let newId = '';
+        const employeeId = req.decodedToken.employeeId;
+        const employeeName = req.decodedToken.firstName;
+        const { responses, referredByCode, coords} = req.body;
+        
         const surveyWithCode = await Survey.findOne({ "referredByCode": referredByCode });
 
 
-        if (!employeeId || !employeeName || !responses) {
+        if (!responses) {
             return res.status(400).json({ message: "Missing required fields" });
         }
 
@@ -179,9 +182,11 @@ router.post("/submit", async (req, res) => {
 // It creates a new survey document in the database
 
 // TODO: Add path for possibility that the survey is a root; currently, this endpoint just ignores it. Waiting to add once front end provides functionality
-router.post("/autosave", async (req, res) => {
+router.post("/autosave", authenticateToken, async (req, res) => {
     try {
-        const { employeeId, employeeName, responses, referredByCode, coords} = req.body;
+        const employeeId = req.decodedToken.employeeId;
+        const employeeName = req.decodedToken.firstName;
+        const { responses, referredByCode, coords} = req.body;
 
         console.log("These are responses!");
         console.log(responses);
@@ -256,10 +261,10 @@ router.post("/autosave", async (req, res) => {
 // It checks the user's role and employee ID from headers
 // If the user is an Admin, they can view any survey
 // If the user is not an Admin, they can only view their own survey
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticateToken, async (req, res) => {
     try {
-        const userRole = req.headers["x-user-role"];
-        const userEmployeeId = req.headers["x-employee-id"];
+        const userRole = req.decodedToken.role;
+        const userEmployeeId = req.decodedToken.employeeId;
 
         const survey = await Survey.findById(req.params.id);
         if (!survey) {
@@ -288,7 +293,7 @@ router.get("/:id", async (req, res) => {
 // and has not been used yet
 // It returns a success message if the code is valid
 // and a failure message if the code is invalid or already used
-router.get("/validate-ref/:code", async (req, res) => {
+router.get("/validate-ref/:code", authenticateToken, async (req, res) => {
   try {
       const { code } = req.params;
 

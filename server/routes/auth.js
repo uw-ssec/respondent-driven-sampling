@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/Users');
+const {authenticateToken, createToken} = require('../utils/tokenHandling')
 const twilio = require('twilio');
+const jwt = require('jsonwebtoken');
 require('dotenv').config({ path: './.env' });
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken  = process.env.TWILIO_AUTH_TOKEN;
-const verifySid  = process.env.TWILIO_VERIFY_SID;
+const accountSid  = process.env.TWILIO_ACCOUNT_SID;
+const authToken   = process.env.TWILIO_AUTH_TOKEN;
+const verifySid   = process.env.TWILIO_VERIFY_SID;
+const tokenSecret = process.env.TOKEN_SECRET;
 
 const client = twilio(accountSid, authToken);
 const verifyService = client.verify.v2.services(verifySid);
@@ -56,11 +59,11 @@ router.post('/verify-otp-signup', async (req, res) => {
     }
     const newUser = new User({ firstName, lastName, email, phone, role });
     await newUser.save();
+    const token = createToken(newUser.firstName, newUser.role, newUser.employeeId)
+
     res.json({
       message: 'Signup successful!',
-      firstName:  newUser.firstName,
-      role:       newUser.role,
-      employeeId: newUser.employeeId,
+      token: token,
       redirectTo: '/dashboard'
     });
   } catch (err) {
@@ -84,11 +87,11 @@ router.post('/verify-otp-login', async (req, res) => {
     if (user.approvalStatus !== 'Approved') {
       return res.status(403).json({ message: 'Account not approved yet. Please contact your admin.' });
     }
+    const token = createToken(user.firstName, user.role, user.employeeId)
+
     res.json({
       message: 'Login successful!',
-      firstName:  user.firstName,
-      role:       user.role,
-      employeeId: user.employeeId,
+      token: token,
       redirectTo: '/dashboard'
     });
   } catch (err) {
@@ -98,7 +101,10 @@ router.post('/verify-otp-login', async (req, res) => {
 });
 
 // ─── Admin Approvals ────────────────────────────────────────────────
-router.get('/users', async (req, res) => {
+router.get('/users', authenticateToken, async (req, res) => {
+  if (req.decodedToken.role != 'Admin') {
+    return res.sendStatus(403)
+  }
   try {
     const users = await User.find({}, 'firstName lastName role approvalStatus');
     res.json(users);
@@ -108,7 +114,10 @@ router.get('/users', async (req, res) => {
   }
 });
 
-router.put('/users/:id/approve', async (req, res) => {
+router.put('/users/:id/approve', authenticateToken, async (req, res) => {
+  if (req.decodedToken.role != 'Admin') {
+    return res.sendStatus(403)
+  }
   try {
     const { status } = req.body;
     if (!["Approved", "Rejected"].includes(status)) {
@@ -131,7 +140,10 @@ router.put('/users/:id/approve', async (req, res) => {
 
 
 // ─── For Admin to PreAuthorize  ───────────────────────────────────────
-router.post('/preapprove', async (req, res) => {
+router.post('/preapprove', authenticateToken, async (req, res) => {
+  if (req.decodedToken.role != 'Admin') {
+    return res.sendStatus(403)
+  }
   try {
     const { firstName, lastName, email,phone, role} = req.body;
     if (await User.findOne({ phone })) {
@@ -148,7 +160,10 @@ router.post('/preapprove', async (req, res) => {
 
 
 // ─── View Profile   ───────────────────────────────────────
-router.get('/users/:employeeId', async (req, res) => {
+router.get('/users/:employeeId', authenticateToken, async (req, res) => {
+  if ( !['Admin', 'Manager'].includes(req.decodedToken.role) && req.decodedToken.employeeId != req.params.employeeId) {
+    return res.sendStatus(403)
+  }
   try {
     const user = await User.findOne({ employeeId: req.params.employeeId });
     console.log("User found:", user);
@@ -164,7 +179,10 @@ router.get('/users/:employeeId', async (req, res) => {
 });
 
 // ─── Edit User Profile  ───────────────────────────────────────
-router.put('/users/:employeeId', async (req, res) => {
+router.put('/users/:employeeId', authenticateToken, async (req, res) => {
+  if ( req.decodedToken.role != 'Admin' && req.decodedToken.employeeId != req.params.employeeId) {
+    return res.sendStatus(403)
+  }
   try {
     const { firstName, lastName, email, phone, role } = req.body;
 
@@ -186,7 +204,10 @@ router.put('/users/:employeeId', async (req, res) => {
 });
 
 // ─── View Profile by _id ───────────────────────────────────────
-router.get('/users/by-id/:id', async (req, res) => {
+router.get('/users/by-id/:id', authenticateToken, async (req, res) => {
+  if (req.decodedToken.role != 'Admin') {
+    return res.sendStatus(403)
+  }
   try {
     const user = await User.findById(req.params.id);
     console.log("User found:", user);
@@ -202,7 +223,10 @@ router.get('/users/by-id/:id', async (req, res) => {
 });
 
 // ─── Edit User Profile by _id ───────────────────────────────────────
-router.put('/users/by-id/:id', async (req, res) => {
+router.put('/users/by-id/:id', authenticateToken, async (req, res) => {
+  if (req.decodedToken.role != 'Admin') {
+    return res.sendStatus(403)
+  }
   try {
     const { firstName, lastName, email, phone, role } = req.body;
 
