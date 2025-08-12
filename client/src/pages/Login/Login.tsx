@@ -114,7 +114,7 @@ export default function Login({ onLogin }: LoginProps) {
 	return (
 		<div className="page-wrapper">
 			<div className="login-container">
-				<h2>{otpSent ? 'Verify OTP' : 'Welcome to RDS Mobile!'}</h2>
+				<h2>{otpSent ? 'Verify OTP' : 'Hi, welcome to RDS Mobile!'}</h2>
 
 				{/* Initial login page */}
 				{!otpSent ? (
