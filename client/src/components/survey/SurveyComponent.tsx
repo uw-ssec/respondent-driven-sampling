@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+// OG: import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Model } from 'survey-core';
 import { Survey } from 'survey-react-ui';
 
@@ -20,13 +21,13 @@ import Header from '@/pages/Header/Header';
 // It uses the useState hook to manage component state
 // It uses the useGeolocated hook to get the user's geolocation
 const SurveyComponent = ({ onLogout }: LogoutProps) => {
-	const [employeeId, setEmployeeId] = useState('');
-	const [employeeName, setEmployeeName] = useState('');
+	const [employeeId, setEmployeeId] = useState(localStorage.getItem('employeeId'));
+	const [employeeName, setEmployeeName] = useState(localStorage.getItem('firstName'));
 	const [referredByCode, setReferredByCode] = useState<string | null>(null);
 	const [isReferralValid, setIsReferralValid] = useState(true);
 
 	const [searchParams] = useSearchParams();
-	const location = useLocation();
+	//const location = useLocation();
 	const navigate = useNavigate();
 	const surveyRef = useRef<Model | null>(null);
 
@@ -37,6 +38,16 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		userDecisionTimeout: 5000
 	});
 
+	// Sync local referredByCode state from URL param
+	useEffect(() => {
+		const codeInUrl = searchParams.get('ref');
+		if (codeInUrl !== referredByCode) {
+			setReferredByCode(codeInUrl);
+		}
+	}, [searchParams]);
+
+	console.log("referredByCode from URL: " + referredByCode);
+
 	useEffect(() => {
 		// 1) Load from localStorage
 		const storedId = localStorage.getItem('employeeId');
@@ -44,21 +55,26 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		if (storedId) setEmployeeId(storedId);
 		if (storedName) setEmployeeName(storedName);
 
-		// 2) Check if referral is passed via location.state
-		const codeFromState = location.state?.referralCode;
-		if (codeFromState) {
-			setReferredByCode(codeFromState);
-			validateReferralCode(codeFromState);
-			return; // Skip reading from URL if we have it in state
-		}
-
-		// 3) Otherwise, check the URL query param "?ref=XXXX"
+		/* 3) Otherwise, check the URL query param "?ref=XXXX"
 		const codeInUrl = searchParams.get('ref');
 		if (codeInUrl) {
+			console.log("Code from the URL: " + codeInUrl);
 			setReferredByCode(codeInUrl);
 			validateReferralCode(codeInUrl);
+			console.log("referredByCode: " + referredByCode);
+			//return; maybe necessary or not??? idk
 		}
-	}, [location.state, searchParams]);
+		*/
+
+		// validate referral code whenever it changes in state?
+		if (referredByCode) {
+			validateReferralCode(referredByCode);
+		} else {
+			setIsReferralValid(false);
+		}
+	}, [referredByCode]); // runs whenver URL ?ref= changes
+
+	console.log("referredByCode from URL: " + referredByCode);
 
 	async function validateReferralCode(code: string) {
 		try {
@@ -70,6 +86,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 						'Invalid referral code. Please check again.'
 				);
 				setReferredByCode(null);
+				//searchParams.delete('ref'); is this necessary?
 				setIsReferralValid(false);
 			} else {
 				setIsReferralValid(true);

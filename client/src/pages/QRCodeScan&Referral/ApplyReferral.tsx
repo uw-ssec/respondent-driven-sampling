@@ -96,7 +96,8 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 				return;
 			}
 
-			navigate('/survey', { state: { referralCode } });
+			//navigate('/survey', { state: { referralCode } });
+			navigate(`/survey?ref=${referralCode}`);
 		} catch (error) {
 			console.error('Error validating referral code:', error);
 			alert('Server error. Please try again.');
