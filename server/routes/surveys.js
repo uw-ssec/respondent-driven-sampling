@@ -1,6 +1,6 @@
 const express = require("express");
 const Survey = require("../models/Survey");
-const authenticateToken = require('../utils/tokenHandling')
+const { authenticateToken } = require('../utils/tokenHandling')
 const generateReferralCode = require("../utils/generateReferralCode");
 
 const router = express.Router();
