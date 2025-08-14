@@ -10,6 +10,7 @@ import trash from '@/assets/trash.png';
 
 import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
+import { getToken } from '@/utils/tokenHandling';
 
 // Description: Dashboard for administrators to view, approve/reject, search, and sort application users.
 
@@ -40,7 +41,16 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 	useEffect(() => {
 		async function fetchUsers() {
 			try {
-				const res = await fetch('/api/auth/users');
+				const token = getToken();
+				const res = await fetch('/api/auth/users', {
+					headers: { 'Authorization': `Bearer ${token}`}
+				});
+				if (!res.ok) {
+					// Error fetching user data, possibly user does not have permission
+					// to get requested data or token has expired.
+					console.error(res);
+					return;
+				}
 				const data = await res.json();
 				const formatted = data.map(
 					(user: {
@@ -79,9 +89,10 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 	// Handles the approval/rejection of new accounts
 	const handleApproval = async (id: string, status: string) => {
 		try {
+			const token = getToken();
 			const res = await fetch(`/api/auth/users/${id}/approve`, {
 				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
 				body: JSON.stringify({ status })
 			});
 			if (res.ok) {
@@ -92,6 +103,11 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 							: staffMem
 					)
 				);
+			} else {
+				// Error approving account, possibly user does not have permission
+				// to get requested data or token has expired.
+				console.error(res);
+				return;
 			}
 		} catch (err) {
 			console.error(`Error updating status to ${status}:`, err);

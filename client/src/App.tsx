@@ -20,20 +20,20 @@ import ViewProfile from '@/pages/Profile/ViewProfile';
 import ApplyReferral from '@/pages/QRCodeScan&Referral/ApplyReferral';
 import Signup from '@/pages/Signup/Signup';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
+import { deleteToken, hasToken } from './utils/tokenHandling';
 
 function App() {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
-		localStorage.getItem('isLoggedIn') === 'true'
+		hasToken()
 	);
 
 	const handleLogin = () => {
 		setIsLoggedIn(true);
-		localStorage.setItem('isLoggedIn', 'true');
 	};
 
 	const handleLogout = () => {
 		setIsLoggedIn(false);
-		localStorage.clear();
+		deleteToken()
 	};
 
 	return (

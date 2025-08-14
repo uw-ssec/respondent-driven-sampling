@@ -6,6 +6,7 @@ import '@/styles/login.css';
 import { useNavigate } from 'react-router-dom';
 
 import { LoginProps } from '../../types/AuthProps';
+import { saveToken } from '@/utils/tokenHandling';
 
 //Description: Login using email or phone number and OTP verification
 export default function Login({ onLogin }: LoginProps) {
@@ -84,10 +85,7 @@ export default function Login({ onLogin }: LoginProps) {
 			if (res.ok) {
 				// Successful login and store user data
 				onLogin();
-				localStorage.setItem('isLoggedIn', 'true');
-				localStorage.setItem('firstName', data.firstName);
-				localStorage.setItem('role', data.role);
-				localStorage.setItem('employeeId', data.employeeId);
+				saveToken(data.token);
 				navigate(data.redirectTo);
 			} else {
 				setErrorMessage(data.message);

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import '@/styles/signup.css';
 
 import { useNavigate } from 'react-router-dom';
+import { saveToken } from '@/utils/tokenHandling';
 
 export default function Signup() {
 	const navigate = useNavigate();
@@ -72,9 +73,7 @@ export default function Signup() {
 			});
 			const data = await res.json();
 			if (res.ok) {
-				localStorage.setItem('firstName', data.firstName);
-				localStorage.setItem('role', data.role);
-				localStorage.setItem('employeeId', data.employeeId);
+				saveToken(data.token);
 				navigate(data.redirectTo);
 			} else {
 				setErrorMessage(data.message);
