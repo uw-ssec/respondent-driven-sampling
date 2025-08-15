@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config({ path: './.env' });
+const User = require('../models/Users');
 
 const tokenSecret = process.env.TOKEN_SECRET;
 
@@ -15,12 +16,14 @@ function authenticateToken (req, res, next) {
   jwt.verify(token, tokenSecret, async (err, decodedToken) => {
     if (err) {
         console.log(err);
-        return res.sendStatus(403);
+        return res
+          .status(401)
+          .json({ message: `Invalid Token: ${err.name}`})
     }
     req.decodedToken = decodedToken;
 
     // Checking if the user's account is approved
-    const user = await User.findOne({ email: decodedToken.employeeId });
+    const user = await User.findOne({ employeeId: decodedToken.employeeId });
     if (!user) {
       // This case means that the user has a valid JWT signed by our server but
       // the account it is linked to does not exist in our database.
