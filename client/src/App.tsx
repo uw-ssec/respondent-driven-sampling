@@ -33,7 +33,7 @@ function App() {
 
 	const handleLogout = () => {
 		setIsLoggedIn(false);
-		deleteToken()
+		deleteToken();
 	};
 
 	return (
