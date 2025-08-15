@@ -5,14 +5,17 @@ import '@/styles/profile.css';
 import { LogoutProps } from '@/types/AuthProps';
 import { User } from '@/types/User';
 import Header from '@/pages/Header/Header';
+import { getEmployeeId, getToken } from '@/utils/tokenHandling';
+import { useNavigate } from 'react-router-dom';
 
 export default function ViewProfile({ onLogout }: LogoutProps) {
 	const [user, setUser] = useState<User | null>(null);
 	const [message, setMessage] = useState('');
 	const [error, setError] = useState('');
+	const navigate = useNavigate();
 
 	useEffect(() => {
-		const employeeId = localStorage.getItem('employeeId');
+		const employeeId = getEmployeeId();
 
 		if (!employeeId) {
 			setError('No employee ID found.');
@@ -21,12 +24,22 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 
 		const fetchProfile = async () => {
 			try {
-				const response = await fetch(`/api/auth/users/${employeeId}`);
-				if (!response.ok) {
+				const token = getToken();
+				const response = await fetch(`/api/auth/users/${employeeId}`, {
+					headers: { 'Authorization': `Bearer ${token}`}
+				});
+				if (response.ok) {
+					const data = await response.json();
+					setUser(data);
+				} else if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log user out so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
+				} else {
 					throw new Error('Failed to fetch user profile.');
 				}
-				const data = await response.json();
-				setUser(data);
 			} catch (err) {
 				console.error('Error fetching profile:', err);
 				setError('Error fetching profile.');
@@ -40,10 +53,12 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 		if (!user) return;
 
 		try {
+			const token = getToken();
 			const response = await fetch(`/api/auth/users/${user.employeeId}`, {
 				method: 'PUT',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`
 				},
 				body: JSON.stringify({
 					email: user.email,
@@ -54,6 +69,12 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 			const data = await response.json();
 			if (response.ok) {
 				setMessage('Profile updated successfully!');
+			} else if (response.status == 401) {
+				// Token Error, either expired or invalid for some other reason.
+				// Log user out so they can relogin to generate a new valid token
+				onLogout();
+				navigate('/login');
+				return;
 			} else {
 				setMessage(data.message || 'Failed to update profile.');
 			}

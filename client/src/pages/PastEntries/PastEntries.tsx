@@ -9,6 +9,7 @@ import '@/styles/StaffDashboard.css';
 
 import { LogoutProps } from '@/types/AuthProps';
 import { Survey } from '@/types/Survey';
+import { getEmployeeId, getRole, getToken } from '@/utils/tokenHandling';
 
 export default function PastEntries({ onLogout }: LogoutProps) {
 	const [surveys, setSurveys] = useState<Survey[]>([]);
@@ -20,14 +21,16 @@ export default function PastEntries({ onLogout }: LogoutProps) {
 		const fetchSurveys = async () => {
 			try {
 				// Retrieve from localStorage
-				const role = localStorage.getItem('role') || '';
-				const employeeId = localStorage.getItem('employeeId') || '';
+				const role = getRole();
+				const employeeId = getEmployeeId();
 
 				// Fetch surveys from the server
+				const token = getToken();
 				const response = await fetch('/api/surveys/all', {
 					headers: {
 						'x-user-role': role,
-						'x-employee-id': employeeId
+						'x-employee-id': employeeId,
+						'Authorization': `Bearer ${token}`
 					}
 				});
 
@@ -35,6 +38,12 @@ export default function PastEntries({ onLogout }: LogoutProps) {
 					const data = await response.json();
 					console.log('Fetched surveys: ', data);
 					setSurveys(data);
+				} else if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log user out so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
 				} else {
 					console.error('Failed to fetch surveys.');
 				}

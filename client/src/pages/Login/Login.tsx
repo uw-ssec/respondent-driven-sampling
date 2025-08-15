@@ -50,13 +50,13 @@ export default function Login({ onLogin }: LoginProps) {
 			return;
 		}
 		try {
-			const res = await fetch('/api/auth/send-otp-login', {
+			const response = await fetch('/api/auth/send-otp-login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email, phone })
 			});
-			const data = await res.json();
-			if (res.ok) {
+			const data = await response.json();
+			if (response.ok) {
 				setOtpSent(true);
 				setCountdown(60);
 				setErrorMessage('');
@@ -76,13 +76,13 @@ export default function Login({ onLogin }: LoginProps) {
 	// Verifies entered OTP matches with the backend database
 	const verifyOtp = async () => {
 		try {
-			const res = await fetch('/api/auth/verify-otp-login', {
+			const response = await fetch('/api/auth/verify-otp-login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ phone, code: otp })
 			});
-			const data = await res.json();
-			if (res.ok) {
+			const data = await response.json();
+			if (response.ok) {
 				// Successful login and store user data
 				onLogin();
 				saveToken(data.token);

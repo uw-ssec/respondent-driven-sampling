@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { LogoutProps } from '@/types/AuthProps';
 import { User } from '@/types/User';
 import Header from '@/pages/Header/Header';
+import { getRole, getToken } from '@/utils/tokenHandling';
 
 export default function AdminEditProfile({ onLogout }: LogoutProps) {
 	const { id } = useParams();
@@ -12,22 +13,34 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 	const [message, setMessage] = useState('');
 	const [error, setError] = useState('');
 	const [storedRole, setStoredRole] = useState<string | null>('');
+	const navigate = useNavigate();
 
 	// useEffect to retrieve role from localStorage
 	useEffect(() => {
-		const storedRole = localStorage.getItem('role');
+		const storedRole = getRole();
 		setStoredRole(storedRole);
 	});
 
 	useEffect(() => {
 		const fetchProfile = async () => {
 			try {
-				const response = await fetch(`/api/auth/users/by-id/${id}`);
-				if (!response.ok) {
+				const token = getToken();
+				const response = await fetch(`/api/auth/users/by-id/${id}`, {
+					headers: { 'Authorization': `Bearer ${token}` }
+				});
+				if (response.ok) {
+					const data = await response.json();
+					setUser(data);
+				} else if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log user out so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
+				} else {
 					throw new Error('Failed to fetch user profile.');
 				}
-				const data = await response.json();
-				setUser(data);
+				
 			} catch (err) {
 				console.error('Error fetching profile:', err);
 				setError('Error fetching profile.');
@@ -43,10 +56,12 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 		if (!user) return;
 
 		try {
+			const token = getToken();
 			const response = await fetch(`/api/auth/users/by-id/${id}`, {
 				method: 'PUT',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`
 				},
 				body: JSON.stringify({
 					role: user.role,
@@ -58,6 +73,12 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 			const data = await response.json();
 			if (response.ok) {
 				setMessage('Profile updated successfully!');
+			} else if (response.status == 401) {
+				// Token Error, either expired or invalid for some other reason.
+				// Log user out so they can relogin to generate a new valid token
+				onLogout();
+				navigate('/login');
+				return;
 			} else {
 				setMessage(data.message || 'Failed to update profile.');
 			}

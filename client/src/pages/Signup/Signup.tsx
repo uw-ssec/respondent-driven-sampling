@@ -44,7 +44,7 @@ export default function Signup() {
 	const sendOtp = async () => {
 		setErrorMessage('');
 		try {
-			const res = await fetch('/api/auth/send-otp-signup', {
+			const response = await fetch('/api/auth/send-otp-signup', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -52,8 +52,8 @@ export default function Signup() {
 					email: userData.email
 				})
 			});
-			const data = await res.json();
-			if (res.ok) {
+			const data = await response.json();
+			if (response.ok) {
 				setOtpSent(true);
 				setCountdown(60);
 			} else {
@@ -66,13 +66,13 @@ export default function Signup() {
 
 	const verifyOtp = async () => {
 		try {
-			const res = await fetch('/api/auth/verify-otp-signup', {
+			const response = await fetch('/api/auth/verify-otp-signup', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ ...userData, code: otp })
 			});
-			const data = await res.json();
-			if (res.ok) {
+			const data = await response.json();
+			if (response.ok) {
 				saveToken(data.token);
 				navigate(data.redirectTo);
 			} else {

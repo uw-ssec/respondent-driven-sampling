@@ -13,6 +13,7 @@ import trash from '@/assets/trash.png';
 
 import { LogoutProps } from '@/types/AuthProps';
 import { Survey } from '@/types/Survey';
+import { getEmployeeId, getRole, getToken } from '@/utils/tokenHandling';
 
 export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();
@@ -60,16 +61,28 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 	useEffect(() => {
 		(async () => {
 			try {
-				const role = localStorage.getItem('role') || '';
-				const employeeId = localStorage.getItem('employeeId') || '';
-				const res = await fetch('/api/surveys/all', {
+				const role = getRole();
+				const employeeId = getEmployeeId();
+
+				const token = getToken();
+				const response = await fetch('/api/surveys/all', {
 					headers: {
 						'x-user-role': role,
-						'x-employee-id': employeeId
+						'x-employee-id': employeeId,
+						'Authorization': `Bearer ${token}`
 					}
 				});
-				if (res.ok) setSurveys(await res.json());
-				else console.error('Failed to fetch surveys.');
+				if (response.ok) {
+					setSurveys(await response.json());
+				} else if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log user out so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
+				} else {
+					console.error('Failed to fetch surveys.');
+				}
 			} catch (e) {
 				console.error('Error fetching surveys:', e);
 			} finally {

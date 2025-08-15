@@ -10,6 +10,7 @@ import { useGeolocated } from 'react-geolocated';
 
 import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
+import { getEmployeeId, getFirstName, getToken } from '@/utils/tokenHandling';
 
 // This component is responsible for rendering the survey and handling its logic
 // It uses the SurveyJS library to create and manage the survey
@@ -39,8 +40,8 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 	useEffect(() => {
 		// 1) Load from localStorage
-		const storedId = localStorage.getItem('employeeId');
-		const storedName = localStorage.getItem('firstName');
+		const storedId = getEmployeeId();
+		const storedName = getFirstName();
 		if (storedId) setEmployeeId(storedId);
 		if (storedName) setEmployeeName(storedName);
 
@@ -62,9 +63,19 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 	async function validateReferralCode(code: string) {
 		try {
-			const res = await fetch(`/api/surveys/validate-ref/${code}`);
-			if (!res.ok) {
-				const errData = await res.json();
+			const token = getToken();
+			const response = await fetch(`/api/surveys/validate-ref/${code}`, {
+				headers: { 'Authorization': `Bearer ${token}`}
+			});
+			if (!response.ok) {
+				if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log user out so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
+				}
+				const errData = await response.json();
 				alert(
 					errData.message ||
 						'Invalid referral code. Please check again.'
@@ -1071,10 +1082,14 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			console.log('Survey Submitted:', surveyData);
 
 			try {
-				console.log('Survey Data Being Sent:', surveyData);
+				console.log('Survey Data Being Sent:', surveyData); // Should we be printing survey data?
+				const token = getToken();
 				const response = await fetch('/api/surveys/submit', {
 					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
+					headers: { 
+						'Content-Type': 'application/json', 
+						'Authorization': `Bearer ${token}` 
+					},
 					body: JSON.stringify(surveyData)
 				});
 
@@ -1085,6 +1100,12 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 					navigate('/qrcode', {
 						state: { referralCodes: data.referralCodes }
 					});
+				} else if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log user out so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
 				} else {
 					console.error(
 						'Error saving survey:',

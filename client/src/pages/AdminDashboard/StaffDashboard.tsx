@@ -42,16 +42,23 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 		async function fetchUsers() {
 			try {
 				const token = getToken();
-				const res = await fetch('/api/auth/users', {
-					headers: { 'Authorization': `Bearer ${token}`}
+				const response = await fetch('/api/auth/users', {
+					headers: { 'Authorization': `Bearer ${token}` }
 				});
-				if (!res.ok) {
+				if (!response.ok) {
 					// Error fetching user data, possibly user does not have permission
 					// to get requested data or token has expired.
-					console.error(res);
+					if (response.status == 401) {
+						// Token Error, either expired or invalid for some other reason.
+						// Log user out so they can relogin to generate a new valid token
+						onLogout();
+						navigate('/login');
+						return;
+					}
+					console.error(response);
 					return;
 				}
-				const data = await res.json();
+				const data = await response.json();
 				const formatted = data.map(
 					(user: {
 						_id: any;
@@ -90,12 +97,15 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 	const handleApproval = async (id: string, status: string) => {
 		try {
 			const token = getToken();
-			const res = await fetch(`/api/auth/users/${id}/approve`, {
+			const response = await fetch(`/api/auth/users/${id}/approve`, {
 				method: 'PUT',
-				headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+				headers: { 
+					'Content-Type': 'application/json', 
+					'Authorization': `Bearer ${token}` 
+				},
 				body: JSON.stringify({ status })
 			});
-			if (res.ok) {
+			if (response.ok) {
 				setStaffMembers(prev =>
 					prev.map(staffMem =>
 						staffMem.id === id
@@ -103,11 +113,15 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 							: staffMem
 					)
 				);
+			} else if (response.status === 401) {
+				// Token Error, either expired or invalid for some other reason.
+				// Log user out so they can relogin to generate a new valid token
+				onLogout();
+				navigate('/login');
 			} else {
-				// Error approving account, possibly user does not have permission
-				// to get requested data or token has expired.
-				console.error(res);
-				return;
+				// Other Error, possibly user does not have permission to make 
+				// the request or their account is not approved.
+				console.error(response);
 			}
 		} catch (err) {
 			console.error(`Error updating status to ${status}:`, err);
