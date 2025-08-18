@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { Html5QrcodeScanner } from 'html5-qrcode'; // Import QR scanner
+import { Html5Qrcode } from 'html5-qrcode';
 import { useNavigate } from 'react-router-dom';
 
 import Header from '@/pages/Header/Header';
@@ -14,44 +14,68 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 	const [referralCode, setReferralCode] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [isScanning, setIsScanning] = useState(false); // Track scanning state
-	const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+	const scannerRef = useRef<Html5Qrcode | null>(null);
 	const readerRef = useRef<HTMLDivElement | null>(null);
 
 	// Effect to initialize the QR scanner
 	// This effect runs when the component mounts and when isScanning changes
+	// Defaults to back camera unless there is no back camera
 	useEffect(() => {
 		if (isScanning && readerRef.current) {
-			const config = { fps: 10, qrbox: 250 };
-			const verbose = false;
-			scannerRef.current = new Html5QrcodeScanner(
-				'qr-reader',
-				config,
-				verbose
-			);
+			const html5QrCode = new Html5Qrcode('qr-reader');
+			scannerRef.current = html5QrCode;
 
-			scannerRef.current.render(onScanSuccess, onScanFailure);
+			const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+			html5QrCode
+				.start(
+					{ facingMode: 'environment' }, // If you want to prefer back camera
+					config,
+					onScanSuccess,
+					onScanFailure
+				)
+				.catch(err => {
+					console.error('Failed to start scanning:', err);
+					alert(
+						'We could not access the camera. Make sure camera permissions are granted.'
+					);
+					setIsScanning(false);
+				});
 		}
 
 		// Cleanup function to stop the scanner when the component unmounts or scanning stops
 		return () => {
 			if (scannerRef.current) {
-				scannerRef.current
-					.clear()
-					.catch(err =>
-						console.warn('Failed to clear QR scanner:', err)
-					);
+				if (scannerRef.current.isScanning) {
+					scannerRef.current
+						.stop()
+						.then(() => scannerRef.current?.clear())
+						.catch(err =>
+							console.warn(
+								'Failed to stop and clear QR scanner:',
+								err
+							)
+						);
+				} else {
+					try {
+						scannerRef.current.clear();
+					} catch (err) {
+						console.warn('Failed to clear QR scanner:', err);
+					}
+				}
 			}
 		};
 	}, [isScanning]);
 
-	// Function to handle logout
+	// Function to handle successful QR code scan
 	const onScanSuccess = (decodedText: string) => {
 		if (scannerRef.current) {
 			scannerRef.current
-				.clear()
-				.then(() =>
-					console.log('Scanner stopped after successful scan')
-				)
+				.stop()
+				.then(() => {
+					scannerRef.current?.clear();
+					console.log('Scanner stopped after successful scan.');
+				})
 				.catch(error =>
 					console.error('Failed to stop scanner:', error)
 				);
