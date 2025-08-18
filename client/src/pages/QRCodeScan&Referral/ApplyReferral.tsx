@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { Html5Qrcode } from 'html5-qrcode';
-import { useNavigate } from 'react-router-dom'; // (note to self: isn't react-router-dom the old version?)
+import { useNavigate } from 'react-router-dom';
 
 import Header from '@/pages/Header/Header';
 
@@ -27,16 +27,20 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 
 			const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-			html5QrCode.start(
-				{ facingMode: "environment" },
-				config,
-				onScanSuccess,
-				onScanFailure
-			).catch((err) => {
-				console.error("Failed to start scanning:", err);
-				alert("We could not access the camera. Make sure camera permissions are granted.");
-				setIsScanning(false);
-			});
+			html5QrCode
+				.start(
+					{ facingMode: 'environment' }, // If you want to prefer back camera
+					config,
+					onScanSuccess,
+					onScanFailure
+				)
+				.catch(err => {
+					console.error('Failed to start scanning:', err);
+					alert(
+						'We could not access the camera. Make sure camera permissions are granted.'
+					);
+					setIsScanning(false);
+				});
 		}
 
 		// Cleanup function to stop the scanner when the component unmounts or scanning stops
@@ -47,26 +51,29 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 						.stop()
 						.then(() => scannerRef.current?.clear())
 						.catch(err =>
-							console.warn("Failed to stop and clear QR scanner:", err)
+							console.warn(
+								'Failed to stop and clear QR scanner:',
+								err
+							)
 						);
 				} else {
 					try {
 						scannerRef.current.clear();
 					} catch (err) {
-						console.warn("Failed to clear QR scanner:", err);
+						console.warn('Failed to clear QR scanner:', err);
 					}
 				}
 			}
 		};
 	}, [isScanning]);
 
-	// (New/Modified) Function to handle logout
+	// Function to handle successful QR code scan
 	const onScanSuccess = (decodedText: string) => {
 		if (scannerRef.current) {
 			scannerRef.current
 				.stop()
 				.then(() => {
-					scannerRef.current?.clear()
+					scannerRef.current?.clear();
 					console.log('Scanner stopped after successful scan.');
 				})
 				.catch(error =>
@@ -107,7 +114,7 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 			if (!response.ok) {
 				alert(
 					data.message ||
-					'Invalid or already used referral code. Please try again.'
+						'Invalid or already used referral code. Please try again.'
 				);
 				setLoading(false);
 				return;
