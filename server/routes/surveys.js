@@ -316,44 +316,4 @@ router.get("/validate-ref/:code", authenticateToken, async (req, res) => {
   }
 });
 
-// Test token
-// This is a temporary endpoint meant to test JWT
-router.get("/token/token", async (req, res) => {
-  try {
-    console.log("Testing tihs");
-    const token = createToken();
-    return res.status(201).json({
-        token: token
-    });
-  } catch(error) {
-      console.error("Error!", error);
-      res.status(500).json({ message: "Server error. Please try again." });
-  }
-});
-
-// Token article: https://www.geeksforgeeks.org/web-tech/json-web-token-jwt/
-function createToken() {
-    const jwt = require('jsonwebtoken');
-    const secretKey = 'abcde12345';
-
-    const token = jwt.sign({
-    id: 1,
-    username: 'GFG'
-    }, secretKey, { expiresIn: '1h' });
-
-    console.log(token);
-    return token;
-}
-
-function verifyToken(token) {
-    jwt.verify(token, 'abcde12345', (err, decoded) => {
-    if (err) {
-      console.log('Token is invalid');
-    } else {
-      console.log('Decoded Token:', decoded);
-    }
-  });
-}
-
-
 module.exports = router;
