@@ -1072,8 +1072,6 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 		survey.onComplete.add(async sender => {
 			const surveyData = {
-				employeeId: employeeId || 'TEST-ID',
-				employeeName: employeeName || 'Test User',
 				responses: sender.data || {},
 				referredByCode: isReferralValid ? referredByCode : null,
 				coords: coords || { latitude: 0, longitude: 0 }
