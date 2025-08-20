@@ -6,10 +6,9 @@ const twilio = require('twilio');
 const jwt = require('jsonwebtoken');
 require('dotenv').config({ path: './.env' });
 
-const accountSid  = process.env.TWILIO_ACCOUNT_SID;
-const authToken   = process.env.TWILIO_AUTH_TOKEN;
-const verifySid   = process.env.TWILIO_VERIFY_SID;
-const tokenSecret = process.env.TOKEN_SECRET;
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken  = process.env.TWILIO_AUTH_TOKEN;
+const verifySid  = process.env.TWILIO_VERIFY_SID;
 
 const client = twilio(accountSid, authToken);
 const verifyService = client.verify.v2.services(verifySid);
