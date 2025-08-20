@@ -48,7 +48,7 @@ function createToken(firstName, role, employeeId) {
         firstName:  firstName,
         role:       role,
         employeeId: employeeId,
-    }, tokenSecret, { expiresIn: '1h' });
+    }, tokenSecret, { expiresIn: '12h' });
 }
 
 module.exports = {
