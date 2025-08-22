@@ -9,16 +9,16 @@ const locationSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
-    lon:     { type: Double, required: true},
-    lat:     { type: Double, required: true},
+    lon:     { type: Number, required: true},
+    lat:     { type: Number, required: true},
     type:    { type: String, required: true },
     loctype: { type: String, required: true },
     address: { type: String, required: true },
-    north:   { type: Double, required: true},
-    south:   { type: Double, required: true},
-    east:    { type: Double, required: true},
-    west:    { type: Double, required: true}
+    north:   { type: Number, required: true},
+    south:   { type: Number, required: true},
+    east:    { type: Number, required: true},
+    west:    { type: Number, required: true}
 }, { timestamps: false });
 
-const Location = mongoose.model('User', locationSchema);
+const Location = mongoose.model('Location', locationSchema);
 module.exports = Location;
