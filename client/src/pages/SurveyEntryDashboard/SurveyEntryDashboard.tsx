@@ -8,12 +8,12 @@ import Header from '@/pages/Header/Header';
 
 import '@/styles/SurveyDashboard.css';
 
-import filter from '@/assets/filter.png';
-import trash from '@/assets/trash.png';
+import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
 
 import { LogoutProps } from '@/types/AuthProps';
 import { Survey } from '@/types/Survey';
-import { getEmployeeId, getRole, getToken } from '@/utils/tokenHandling';
+import filter from '@/assets/filter.png';
+import trash from '@/assets/trash.png';
 
 export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();
@@ -64,12 +64,12 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 				const role = getRole();
 				const employeeId = getEmployeeId();
 
-				const token = getToken();
+				const token = getAuthToken();
 				const response = await fetch('/api/surveys/all', {
 					headers: {
 						'x-user-role': role,
 						'x-employee-id': employeeId,
-						'Authorization': `Bearer ${token}`
+						Authorization: `Bearer ${token}`
 					}
 				});
 				if (response.ok) {

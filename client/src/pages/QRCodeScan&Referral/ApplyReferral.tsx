@@ -7,8 +7,9 @@ import Header from '@/pages/Header/Header';
 
 import '@/styles/ApplyReferral.css';
 
+import { getAuthToken } from '@/utils/authTokenHandler';
+
 import { LogoutProps } from '@/types/AuthProps';
-import { getToken } from '@/utils/tokenHandling';
 
 export default function ApplyReferral({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();
@@ -107,10 +108,11 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 		setLoading(true);
 
 		try {
-			const token = getToken();
+			const token = getAuthToken();
 			const response = await fetch(
-				`/api/surveys/validate-ref/${referralCode}`, {
-					headers: { 'Authorization': `Bearer ${token}` }
+				`/api/surveys/validate-ref/${referralCode}`,
+				{
+					headers: { Authorization: `Bearer ${token}` }
 				}
 			);
 			const data = await response.json();
