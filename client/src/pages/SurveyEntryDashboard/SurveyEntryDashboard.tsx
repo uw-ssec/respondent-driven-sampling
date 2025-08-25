@@ -14,6 +14,8 @@ import trash from '@/assets/trash.png';
 import { LogoutProps } from '@/types/AuthProps';
 import { Survey } from '@/types/Survey';
 
+
+
 export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(true);
@@ -34,6 +36,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 	});
 	const [currentPage, setCurrentPage] = useState(1);
 	const itemsPerPage = 10;
+	  
 
 	const toPacificDateOnlyString = (input: string | number | Date) => {
 		const d = input instanceof Date ? input : new Date(input);
@@ -68,8 +71,11 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 						'x-employee-id': employeeId
 					}
 				});
-				if (res.ok) setSurveys(await res.json());
-				else console.error('Failed to fetch surveys.');
+				if (res.ok) {
+					const data = await res.json();
+
+					setSurveys(data);
+				  } else console.error('Failed to fetch surveys.');
 			} catch (e) {
 				console.error('Error fetching surveys:', e);
 			} finally {
@@ -167,7 +173,10 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 							['employeeId', 'Employee ID'],
 							['employeeName', 'Employee Name'],
 							['responses.location', 'Location'],
-							['referredByCode', 'Referred By Code']
+							['referredByCode', 'Referred By Code'],
+							['responses.first_two_letters_fname', 'First 2 Letters (First Name)'],
+							['responses.first_two_letters_lname', 'First 2 Letters (Last Name)'],
+							['responses.year_born', 'Year Born']
 						].map(([key, label]) => (
 							<div
 								key={key}
@@ -196,6 +205,9 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 								<div className="header-item">{s.employeeName}</div>
 								<div className="header-item">{s.responses?.location || 'N/A'}</div>
 								<div className="header-item">{s.referredByCode || 'N/A'}</div>
+								<div className="header-item">{s.responses?.first_two_letters_fname || 'N/A'}</div>
+								<div className="header-item">{s.responses?.first_two_letters_lname || 'N/A'}</div>
+								<div className="header-item">{s.responses?.year_born || 'N/A'}</div>
 								<div className="header-item">
 								<button
 									onClick={() => navigate(`/survey/${s._id}`)}
@@ -205,13 +217,15 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 								</button>
 								</div>
 								<div className="header-item">
-								{s.inProgress ? (
-									<button onClick={() => window.location.href = `/survey/${s._id}/survey`}>
-									Continue
-									</button>
-								) : (
-									<span className="submitted-text">Submitted</span>
-								)}
+								<div className="header-item">
+							{s.inProgress ? (
+								<button onClick={() => navigate(`/survey/${s._id}/survey`)}>
+								Continue
+								</button>
+							) : (
+								<span className="submitted-text">Submitted</span>
+							)}
+							</div>
 								</div>
 							</div>
 							))}

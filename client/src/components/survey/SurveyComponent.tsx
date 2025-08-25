@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { Model } from 'survey-core';
 import { Survey } from 'survey-react-ui';
 
@@ -11,48 +10,64 @@ import { useGeolocated } from 'react-geolocated';
 import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
 
-// This component is responsible for rendering the survey and handling its logic
-// It uses the SurveyJS library to create and manage the survey
-// It also handles referral code validation and geolocation
-// It uses React Router for navigation and URL parameter handling
-// It uses localStorage to persist data across sessions
-// It uses the useEffect hook to manage side effects, such as fetching data and updating state
-// It uses the useState hook to manage component state
-// It uses the useGeolocated hook to get the user's geolocation
 const SurveyComponent = ({ onLogout }: LogoutProps) => {
+	const location = useLocation();
+	const { id } = useParams();
 	const [employeeId, setEmployeeId] = useState('');
 	const [employeeName, setEmployeeName] = useState('');
-	const [referredByCode, setReferredByCode] = useState<string | null>(null);
+	const [surveyData, setSurveyData] = useState<any>(null);
+	const [loading, setLoading] = useState(true);
+	const [referredByCode, setReferredByCode] = useState<string | null>(location.state?.referralCode);
 	const [isReferralValid, setIsReferralValid] = useState(true);
+	localStorage.setItem('objectId', '');
 
 	const [searchParams] = useSearchParams();
-	const location = useLocation();
 	const navigate = useNavigate();
 	const surveyRef = useRef<Model | null>(null);
 
 	const { coords } = useGeolocated({
-		positionOptions: {
-			enableHighAccuracy: false
-		},
+		positionOptions: { enableHighAccuracy: false },
 		userDecisionTimeout: 5000
 	});
 
 	useEffect(() => {
-		// 1) Load from localStorage
+	if (!id) return;
+
+	const fetchSurvey = async () => {
+		try {
+		const res = await fetch(`/api/surveys/${id}`);
+		if (res.ok) {
+			const data = await res.json();
+			setSurveyData(data);
+			setEmployeeId(data.employeeId || '');
+			setEmployeeName(data.employeeName || '');
+			setReferredByCode(data.referredByCode || null);
+		} else {
+			console.error('Failed to fetch survey');
+		}
+		} catch (e) {
+		console.error('Error fetching survey:', e);
+		} finally {
+		setLoading(false);
+		}
+	};
+
+  fetchSurvey();
+}, [id]);
+
+	useEffect(() => {
 		const storedId = localStorage.getItem('employeeId');
 		const storedName = localStorage.getItem('firstName');
 		if (storedId) setEmployeeId(storedId);
 		if (storedName) setEmployeeName(storedName);
 
-		// 2) Check if referral is passed via location.state
 		const codeFromState = location.state?.referralCode;
 		if (codeFromState) {
 			setReferredByCode(codeFromState);
 			validateReferralCode(codeFromState);
-			return; // Skip reading from URL if we have it in state
+			return;
 		}
 
-		// 3) Otherwise, check the URL query param "?ref=XXXX"
 		const codeInUrl = searchParams.get('ref');
 		if (codeInUrl) {
 			setReferredByCode(codeInUrl);
@@ -65,10 +80,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			const res = await fetch(`/api/surveys/validate-ref/${code}`);
 			if (!res.ok) {
 				const errData = await res.json();
-				alert(
-					errData.message ||
-						'Invalid referral code. Please check again.'
-				);
+				alert(errData.message || 'Invalid referral code. Please check again.');
 				setReferredByCode(null);
 				setIsReferralValid(false);
 			} else {
@@ -1036,162 +1048,146 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		[]
 	);
 
-	// INITIALIZE SURVEY + EVENTS
 	useEffect(() => {
 		const pushHistoryState = (pageNo: number) => {
 			const currentState = window.history.state;
 			if (!currentState || currentState.pageNo !== pageNo) {
-				window.history.pushState(
-					{ pageNo },
-					'',
-					window.location.pathname
-				);
+				window.history.pushState({ pageNo }, '', window.location.pathname);
 			}
 		};
 
-		const survey = new Model(surveyJson);
-		surveyRef.current = survey;
+		const initSurvey = async () => {
+			const survey = new Model(surveyJson);
 
-		pushHistoryState(survey.currentPageNo);
-
-		survey.onCurrentPageChanged.add(sender => {
-			const currentPageNo = sender.currentPageNo;
-			pushHistoryState(currentPageNo);
-		});
-
-		survey.onComplete.add(async sender => {
-			const surveyData = {
-				employeeId: employeeId || 'TEST-ID',
-				employeeName: employeeName || 'Test User',
-				responses: sender.data || {},
-				referredByCode: isReferralValid ? referredByCode : null,
-				coords: coords || { latitude: 0, longitude: 0 }
-			};
-
-			console.log('Survey Submitted:', surveyData);
-
-			try {
-				console.log('Survey Data Being Sent:', surveyData);
-				const response = await fetch('/api/surveys/submit', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(surveyData)
-				});
-
-				if (response.ok) {
-					const data = await response.json();
-					console.log('Survey saved successfully!', data);
-
-					navigate('/qrcode', {
-						state: { referralCodes: data.referralCodes }
+			if (id) {
+				try {
+					const role = localStorage.getItem('role') || '';
+					const empId = localStorage.getItem('employeeId') || '';
+					const res = await fetch(`/api/surveys/${id}`, {
+						headers: {
+							'x-user-role': role,
+							'x-employee-id': empId
+						}
 					});
-				} else {
-					console.error(
-						'Error saving survey:',
-						await response.text()
-					);
+					if (res.ok) {
+						const savedSurvey = await res.json();
+						if (savedSurvey.responses) {
+							survey.data = savedSurvey.responses;
+						}
+						localStorage.setItem('objectId', savedSurvey._id);
+					}
+				} catch (err) {
+					console.error('Failed to load in-progress survey', err);
 				}
-			} catch (error) {
-				console.error('Request failed:', error);
 			}
-		});
-	}, [
-		employeeId,
-		employeeName,
-		isReferralValid,
-		referredByCode,
-		coords,
-		navigate,
-		surveyJson
-	]);
 
-	// BACK BUTTON BEHAVIOR
+			surveyRef.current = survey;
+			pushHistoryState(survey.currentPageNo);
+
+			survey.onCurrentPageChanged.add(async sender => {
+				const currentPageNo = sender.currentPageNo;
+				pushHistoryState(currentPageNo);
+
+				const surveyData = {
+					employeeId: employeeId || 'TEST-ID',
+					employeeName: employeeName || 'Test User',
+					responses: sender.data || {},
+					referredByCode: isReferralValid ? referredByCode : null,
+					coords: coords || { latitude: 0, longitude: 0 },
+					objectId: localStorage.getItem('objectId')
+				};
+
+				try {
+					const response = await fetch('/api/surveys/autosave', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(surveyData)
+					});
+					if (response.ok) {
+						const data = await response.json();
+						localStorage.setItem('objectId', data.objectId);
+					}
+				} catch (error) {
+					console.error('Request failed:', error);
+				}
+			});
+
+			survey.onComplete.add(async sender => {
+				const surveyData = {
+					employeeId: employeeId || 'TEST-ID',
+					employeeName: employeeName || 'Test User',
+					responses: sender.data || {},
+					referredByCode: isReferralValid ? referredByCode : null,
+					coords: coords || { latitude: 0, longitude: 0 },
+					objectId: localStorage.getItem('objectId')
+				};
+
+				try {
+					const response = await fetch('/api/surveys/submit', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(surveyData)
+					});
+					if (response.ok) {
+						const data = await response.json();
+						navigate('/qrcode', { state: { referralCodes: data.referralCodes } });
+					}
+				} catch (error) {
+					console.error('Request failed:', error);
+				}
+			});
+		};
+
+		initSurvey();
+	}, [id, employeeId, employeeName, isReferralValid, referredByCode, coords, navigate, surveyJson]);
+
 	useEffect(() => {
 		const handlePopState = (event: { state: { pageNo: any } }) => {
 			const survey = surveyRef.current;
 			if (!survey) return;
-
 			const currentPageNo = survey.currentPageNo;
 			const targetPageNo = event.state?.pageNo;
-
-			if (typeof targetPageNo !== 'number') return; // prevent invalid jumps
-
-			if (targetPageNo < currentPageNo) {
-				survey.prevPage();
-			} else if (targetPageNo > currentPageNo) {
-				survey.nextPage();
-			}
+			if (typeof targetPageNo !== 'number') return;
+			if (targetPageNo < currentPageNo) survey.prevPage();
+			else if (targetPageNo > currentPageNo) survey.nextPage();
 		};
-
 		window.addEventListener('popstate', handlePopState);
 		return () => window.removeEventListener('popstate', handlePopState);
 	}, []);
 
-	// RENDER COMPONENT
+	if (loading) return <p>Loading survey...</p>;
+	if (!surveyData) return <p>Survey not found.</p>;
+	
 	return (
 		<>
 			<Header onLogout={onLogout} />
 			<div style={{ padding: '20px' }}>
 				{surveyRef.current && <Survey model={surveyRef.current} />}
-
-				<div
-					style={{
-						display: 'flex',
-						justifyContent: 'center',
-						gap: '24px',
-						marginTop: '12px'
-					}}
-				>
+				<div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '12px' }}>
 					<div
 						onClick={() => {
-							if (
-								surveyRef.current &&
-								surveyRef.current.currentPageNo > 0
-							) {
+							if (surveyRef.current && surveyRef.current.currentPageNo > 0) {
 								surveyRef.current.prevPage();
 							}
 						}}
 						style={{ cursor: 'pointer' }}
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							width="36px"
-							height="36px"
-						>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36px" height="36px">
 							<circle cx="12" cy="12" r="10" fill="#3E236E" />
-							<path
-								d="M14 7l-5 5 5 5"
-								stroke="white"
-								strokeWidth="2"
-								fill="none"
-							/>
+							<path d="M14 7l-5 5 5 5" stroke="white" strokeWidth="2" fill="none" />
 						</svg>
 					</div>
 					<div
 						onClick={() => {
-							if (
-								surveyRef.current &&
-								!surveyRef.current.isLastPage
-							) {
+							if (surveyRef.current && !surveyRef.current.isLastPage) {
 								surveyRef.current.nextPage();
 							}
 						}}
 						style={{ cursor: 'pointer' }}
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							width="36px"
-							height="36px"
-						>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36px" height="36px">
 							<circle cx="12" cy="12" r="10" fill="#3E236E" />
-							<path
-								d="M10 7l5 5-5 5"
-								stroke="white"
-								strokeWidth="2"
-								fill="none"
-							/>
+							<path d="M10 7l5 5-5 5" stroke="white" strokeWidth="2" fill="none" />
 						</svg>
 					</div>
 				</div>
