@@ -20,13 +20,14 @@ import Header from '@/pages/Header/Header';
 // It uses the useState hook to manage component state
 // It uses the useGeolocated hook to get the user's geolocation
 const SurveyComponent = ({ onLogout }: LogoutProps) => {
-	const [employeeId, setEmployeeId] = useState('');
-	const [employeeName, setEmployeeName] = useState('');
-	const [referredByCode, setReferredByCode] = useState<string | null>(null);
+	const location = useLocation();
+	const [employeeId, setEmployeeId] = useState(localStorage.getItem('employeeId'));
+	const [employeeName, setEmployeeName] = useState(localStorage.getItem('firstName'));
+	const [referredByCode, setReferredByCode] = useState<string | null>(location.state?.referralCode);
 	const [isReferralValid, setIsReferralValid] = useState(true);
+	localStorage.setItem('objectId', '');
 
 	const [searchParams] = useSearchParams();
-	const location = useLocation();
 	const navigate = useNavigate();
 	const surveyRef = useRef<Model | null>(null);
 
@@ -1054,9 +1055,44 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 		pushHistoryState(survey.currentPageNo);
 
-		survey.onCurrentPageChanged.add(sender => {
+		survey.onCurrentPageChanged.add(async sender => {
 			const currentPageNo = sender.currentPageNo;
 			pushHistoryState(currentPageNo);
+
+			
+			// Autosave survey after page change
+			
+			const surveyData = {
+				employeeId: employeeId || 'TEST-ID',
+				employeeName: employeeName || 'Test User',
+				responses: sender.data || {},
+				referredByCode: isReferralValid ? referredByCode : null,
+				coords: coords || { latitude: 0, longitude: 0 }, 
+				objectId: localStorage.getItem('objectId')
+			};
+
+			try {
+				console.log('Survey Data Being Sent:', surveyData);
+				const response = await fetch('/api/surveys/autosave', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(surveyData)
+				});
+
+				if (response.ok) {
+					const data = await response.json();
+					console.log('Survey autosaved successfully!', data);
+					localStorage.setItem('objectId', data.objectId);
+
+				} else {
+					console.error(
+						'Error autosaving survey:',
+						await response.text()
+					);
+				}
+			} catch (error) {
+				console.error('Request failed:', error);
+			}
 		});
 
 		survey.onComplete.add(async sender => {
@@ -1065,7 +1101,8 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				employeeName: employeeName || 'Test User',
 				responses: sender.data || {},
 				referredByCode: isReferralValid ? referredByCode : null,
-				coords: coords || { latitude: 0, longitude: 0 }
+				coords: coords || { latitude: 0, longitude: 0 }, 
+				objectId: localStorage.getItem('objectId')
 			};
 
 			console.log('Survey Submitted:', surveyData);
