@@ -1192,7 +1192,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 	if (loading) return <p>Loading survey...</p>;
 	if (id && !surveyData) return <p>Survey not found.</p>;
-	
+
 	return (
 		<>
 			<Header onLogout={onLogout} />
