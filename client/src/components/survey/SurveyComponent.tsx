@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { Model } from 'survey-core';
 import { Survey } from 'survey-react-ui';
@@ -10,87 +10,122 @@ import { useGeolocated } from 'react-geolocated';
 import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
 
+// This component is responsible for rendering the survey and handling its logic
+// It uses the SurveyJS library to create and manage the survey
+// It also handles referral code validation and geolocation
+// It uses React Router for navigation and URL parameter handling
+// It uses localStorage to persist data across sessions
+// It uses the useEffect hook to manage side effects, such as fetching data and updating state
+// It uses the useState hook to manage component state
+// It uses the useGeolocated hook to get the user's geolocation
 const SurveyComponent = ({ onLogout }: LogoutProps) => {
-	const location = useLocation();
-	const { id } = useParams();
-	const [employeeId, setEmployeeId] = useState('');
-	const [employeeName, setEmployeeName] = useState('');
-	const [surveyData, setSurveyData] = useState<any>(null);
-	const [loading, setLoading] = useState(true);
-	const [referredByCode, setReferredByCode] = useState<string | null>(location.state?.referralCode);
-	const [isReferralValid, setIsReferralValid] = useState(true);
-	localStorage.setItem('objectId', '');
+  const location = useLocation();
+  const { id } = useParams();
+  const [employeeId, setEmployeeId] = useState('');
+  const [employeeName, setEmployeeName] = useState('');
+  const [surveyData, setSurveyData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [referredByCode, setReferredByCode] = useState<string | null>(null);
+  const [isReferralValid, setIsReferralValid] = useState(true);
 
-	const [searchParams] = useSearchParams();
-	const navigate = useNavigate();
-	const surveyRef = useRef<Model | null>(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const surveyRef = useRef<Model | null>(null);
 
-	const { coords } = useGeolocated({
-		positionOptions: { enableHighAccuracy: false },
-		userDecisionTimeout: 5000
-	});
+  const { coords } = useGeolocated({
+    positionOptions: { enableHighAccuracy: false },
+    userDecisionTimeout: 5000
+  });
 
-	useEffect(() => {
-	if (!id) return;
+  // Persist survey objectId in localStorage
+  localStorage.setItem('objectId', '');
 
-	const fetchSurvey = async () => {
-		try {
-		const res = await fetch(`/api/surveys/${id}`);
-		if (res.ok) {
-			const data = await res.json();
-			setSurveyData(data);
-			setEmployeeId(data.employeeId || '');
-			setEmployeeName(data.employeeName || '');
-			setReferredByCode(data.referredByCode || null);
-		} else {
-			console.error('Failed to fetch survey');
-		}
-		} catch (e) {
-		console.error('Error fetching survey:', e);
-		} finally {
-		setLoading(false);
-		}
-	};
+  // 1) Load employee info from localStorage
+  useEffect(() => {
+    const storedId = localStorage.getItem('employeeId');
+    const storedName = localStorage.getItem('firstName');
+    if (storedId) setEmployeeId(storedId);
+    if (storedName) setEmployeeName(storedName);
+  }, []);
 
-  fetchSurvey();
-}, [id]);
+  // 2) Fetch survey data if id is present
+  useEffect(() => {
+    if (!id) return;
 
-	useEffect(() => {
-		const storedId = localStorage.getItem('employeeId');
-		const storedName = localStorage.getItem('firstName');
-		if (storedId) setEmployeeId(storedId);
-		if (storedName) setEmployeeName(storedName);
+    const initSurvey = async () => {
+      setLoading(true);
+      try {
+        const role = localStorage.getItem('role') || '';
+        const empId = localStorage.getItem('employeeId') || '';
+        const res = await fetch(`/api/surveys/${id}`, {
+          headers: { 'x-user-role': role, 'x-employee-id': empId }
+        });
 
-		const codeFromState = location.state?.referralCode;
-		if (codeFromState) {
-			setReferredByCode(codeFromState);
-			validateReferralCode(codeFromState);
-			return;
-		}
+        if (res.ok) {
+          const data = await res.json();
+          setSurveyData(data);
+          setEmployeeId(data.employeeId || '');
+          setEmployeeName(data.employeeName || '');
+          if (data.responses && surveyRef.current) {
+            surveyRef.current.data = data.responses;
+          }
+          localStorage.setItem('objectId', data._id);
+        } else {
+          console.error('Survey not found');
+        }
+      } catch (err) {
+        console.error('Error fetching survey', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-		const codeInUrl = searchParams.get('ref');
-		if (codeInUrl) {
-			setReferredByCode(codeInUrl);
-			validateReferralCode(codeInUrl);
-		}
-	}, [location.state, searchParams]);
+    initSurvey();
+  }, [id]);
 
-	async function validateReferralCode(code: string) {
-		try {
-			const res = await fetch(`/api/surveys/validate-ref/${code}`);
-			if (!res.ok) {
-				const errData = await res.json();
-				alert(errData.message || 'Invalid referral code. Please check again.');
-				setReferredByCode(null);
-				setIsReferralValid(false);
-			} else {
-				setIsReferralValid(true);
-			}
-		} catch (error) {
-			console.error('Error validating referral code:', error);
-			setIsReferralValid(false);
-		}
-	}
+  // 3) Fresh survey initialization for new surveys
+  useEffect(() => {
+    if (id) return; // skip if continuing a survey
+
+    // surveyJson should be your survey definition for new surveys
+    const survey = new Model(surveyJson);
+    surveyRef.current = survey;
+    setLoading(false); // survey ready immediately
+  }, [id]);
+
+  // 4) Handle referral codes from URL or location state
+  useEffect(() => {
+    const codeFromState = location.state?.referralCode;
+    if (codeFromState) {
+      setReferredByCode(codeFromState);
+      validateReferralCode(codeFromState);
+      return; // Skip reading from URL if we have it in state
+    }
+
+    const codeInUrl = searchParams.get('ref');
+    if (codeInUrl) {
+      setReferredByCode(codeInUrl);
+      validateReferralCode(codeInUrl);
+    }
+  }, [location.state, searchParams]);
+
+  // Function to validate referral code
+  async function validateReferralCode(code: string) {
+    try {
+      const res = await fetch(`/api/surveys/validate-ref/${code}`);
+      if (!res.ok) {
+        const errData = await res.json();
+        alert(errData.message || 'Invalid referral code. Please check again.');
+        setReferredByCode(null);
+        setIsReferralValid(false);
+      } else {
+        setIsReferralValid(true);
+      }
+    } catch (error) {
+      console.error('Error validating referral code:', error);
+      setIsReferralValid(false);
+    }
+  }
 
 	const surveyJson = useMemo(
 		() => ({
@@ -1156,7 +1191,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 	}, []);
 
 	if (loading) return <p>Loading survey...</p>;
-	if (!surveyData) return <p>Survey not found.</p>;
+	if (id && !surveyData) return <p>Survey not found.</p>;
 	
 	return (
 		<>
