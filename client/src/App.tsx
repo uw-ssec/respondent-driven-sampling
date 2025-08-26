@@ -21,6 +21,7 @@ import ApplyReferral from '@/pages/QRCodeScan&Referral/ApplyReferral';
 import Signup from '@/pages/Signup/Signup';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
 
+
 function App() {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
 		localStorage.getItem('isLoggedIn') === 'true'
@@ -43,6 +44,15 @@ function App() {
 				<Route
 					path="/login"
 					element={<Login onLogin={handleLogin} />}
+				/>
+				<Route path="/survey/:id/survey"
+					element={
+						isLoggedIn ? (
+						<SurveyComponent onLogout={handleLogout} />
+						) : (
+						<Navigate replace to="/login" />
+						)
+					}
 				/>
 				<Route path="/signup" element={<Signup />} />
 				<Route
