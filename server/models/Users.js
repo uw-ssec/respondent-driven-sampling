@@ -12,7 +12,7 @@ const permissionSchema = new mongoose.Schema({
   },
   limiter: { 
     type: String,
-    enum: ['Self', 'Location', 'All'],
+    enum: ['Self', 'All'],
     required: true
   }
 });
