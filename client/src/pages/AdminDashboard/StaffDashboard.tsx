@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/StaffDashboard.css';
 
+import { getAuthToken } from '@/utils/authTokenHandler';
+
+import { LogoutProps } from '@/types/AuthProps';
 import filter from '@/assets/filter.png';
 import editPencil from '@/assets/pencil.png';
 import trash from '@/assets/trash.png';
-
-import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
 
 // Description: Dashboard for administrators to view, approve/reject, search, and sort application users.
@@ -40,8 +41,24 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 	useEffect(() => {
 		async function fetchUsers() {
 			try {
-				const res = await fetch('/api/auth/users');
-				const data = await res.json();
+				const token = getAuthToken();
+				const response = await fetch('/api/auth/users', {
+					headers: { Authorization: `Bearer ${token}` }
+				});
+				if (!response.ok) {
+					// Error fetching user data, possibly user does not have permission
+					// to get requested data or token has expired.
+					if (response.status == 401) {
+						// Token Error, either expired or invalid for some other reason.
+						// Log user out so they can relogin to generate a new valid token
+						onLogout();
+						navigate('/login');
+						return;
+					}
+					console.error(response);
+					return;
+				}
+				const data = await response.json();
 				const formatted = data.map(
 					(user: {
 						_id: any;
@@ -79,12 +96,16 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 	// Handles the approval/rejection of new accounts
 	const handleApproval = async (id: string, status: string) => {
 		try {
-			const res = await fetch(`/api/auth/users/${id}/approve`, {
+			const token = getAuthToken();
+			const response = await fetch(`/api/auth/users/${id}/approve`, {
 				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`
+				},
 				body: JSON.stringify({ status })
 			});
-			if (res.ok) {
+			if (response.ok) {
 				setStaffMembers(prev =>
 					prev.map(staffMem =>
 						staffMem.id === id
@@ -92,6 +113,15 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 							: staffMem
 					)
 				);
+			} else if (response.status === 401) {
+				// Token Error, either expired or invalid for some other reason.
+				// Log user out so they can relogin to generate a new valid token
+				onLogout();
+				navigate('/login');
+			} else {
+				// Other Error, possibly user does not have permission to make
+				// the request or their account is not approved.
+				console.error(response);
 			}
 		} catch (err) {
 			console.error(`Error updating status to ${status}:`, err);
