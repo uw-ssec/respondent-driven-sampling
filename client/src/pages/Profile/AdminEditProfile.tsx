@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 
+import { getAuthToken, getRole } from '@/utils/authTokenHandler';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { LogoutProps } from '@/types/AuthProps';
 import { User } from '@/types/User';
 import Header from '@/pages/Header/Header';
-import { getRole, getToken } from '@/utils/tokenHandling';
 
 export default function AdminEditProfile({ onLogout }: LogoutProps) {
 	const { id } = useParams();
@@ -24,9 +24,9 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 	useEffect(() => {
 		const fetchProfile = async () => {
 			try {
-				const token = getToken();
+				const token = getAuthToken();
 				const response = await fetch(`/api/auth/users/by-id/${id}`, {
-					headers: { 'Authorization': `Bearer ${token}` }
+					headers: { Authorization: `Bearer ${token}` }
 				});
 				if (response.ok) {
 					const data = await response.json();
@@ -40,7 +40,6 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 				} else {
 					throw new Error('Failed to fetch user profile.');
 				}
-				
 			} catch (err) {
 				console.error('Error fetching profile:', err);
 				setError('Error fetching profile.');
@@ -56,12 +55,12 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 		if (!user) return;
 
 		try {
-			const token = getToken();
+			const token = getAuthToken();
 			const response = await fetch(`/api/auth/users/by-id/${id}`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${token}`
+					Authorization: `Bearer ${token}`
 				},
 				body: JSON.stringify({
 					role: user.role,

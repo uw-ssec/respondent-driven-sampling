@@ -6,11 +6,15 @@ import { Survey } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
+import {
+	getAuthToken,
+	getEmployeeId,
+	getFirstName
+} from '@/utils/authTokenHandler';
 import { useGeolocated } from 'react-geolocated';
 
 import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
-import { getEmployeeId, getFirstName, getToken } from '@/utils/tokenHandling';
 
 // This component is responsible for rendering the survey and handling its logic
 // It uses the SurveyJS library to create and manage the survey
@@ -40,10 +44,10 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 	useEffect(() => {
 		// 1) Load from localStorage
-		const storedId = getEmployeeId();
-		const storedName = getFirstName();
-		if (storedId) setEmployeeId(storedId);
-		if (storedName) setEmployeeName(storedName);
+		const storedEmployeeId = getEmployeeId();
+		const storedFirstName = getFirstName();
+		if (storedEmployeeId) setEmployeeId(storedEmployeeId);
+		if (storedFirstName) setEmployeeName(storedFirstName);
 
 		// 2) Check if referral is passed via location.state
 		const codeFromState = location.state?.referralCode;
@@ -63,14 +67,14 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 	async function validateReferralCode(code: string) {
 		try {
-			const token = getToken();
+			const token = getAuthToken();
 			const response = await fetch(`/api/surveys/validate-ref/${code}`, {
-				headers: { 'Authorization': `Bearer ${token}`}
+				headers: { Authorization: `Bearer ${token}` }
 			});
 			if (!response.ok) {
 				if (response.status == 401) {
 					// Token Error, either expired or invalid for some other reason.
-					// Log user out so they can relogin to generate a new valid token
+					// Log out user so they can relogin to generate a new valid token
 					onLogout();
 					navigate('/login');
 					return;
@@ -1081,12 +1085,12 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 			try {
 				console.log('Survey Data Being Sent:', surveyData); // Should we be printing survey data?
-				const token = getToken();
+				const token = getAuthToken();
 				const response = await fetch('/api/surveys/submit', {
 					method: 'POST',
-					headers: { 
-						'Content-Type': 'application/json', 
-						'Authorization': `Bearer ${token}` 
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`
 					},
 					body: JSON.stringify(surveyData)
 				});

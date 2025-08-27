@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 
 import '@/styles/login.css';
 
+import { saveAuthToken } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 
 import { LoginProps } from '../../types/AuthProps';
-import { saveToken } from '@/utils/tokenHandling';
 
 //Description: Login using email or phone number and OTP verification
 export default function Login({ onLogin }: LoginProps) {
@@ -85,7 +85,7 @@ export default function Login({ onLogin }: LoginProps) {
 			if (response.ok) {
 				// Successful login and store user data
 				onLogin();
-				saveToken(data.token);
+				saveAuthToken(data.token);
 				navigate(data.redirectTo);
 			} else {
 				setErrorMessage(data.message);

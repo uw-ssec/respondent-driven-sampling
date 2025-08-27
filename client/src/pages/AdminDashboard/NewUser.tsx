@@ -2,12 +2,11 @@ import { useState } from 'react';
 
 import '@/styles/profile.css';
 
-import { LogoutProps } from '@/types/AuthProps';
-import Header from '@/pages/Header/Header';
-import { getToken } from '@/utils/tokenHandling';
+import { getAuthToken } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 
-// description: allows admins to manually create and add new users
+import { LogoutProps } from '@/types/AuthProps';
+import Header from '@/pages/Header/Header';
 
 export default function NewUser({ onLogout }: LogoutProps) {
 	const [firstName, setFirstName] = useState('');
@@ -23,12 +22,12 @@ export default function NewUser({ onLogout }: LogoutProps) {
 
 		try {
 			// Sends request to pre-approve users
-			const token = getToken();
+			const token = getAuthToken();
 			const response = await fetch('/api/auth/preapprove', {
 				method: 'POST',
-				headers: { 
-					'Content-Type': 'application/json', 
-					'Authorization': `Bearer ${token}` 
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`
 				},
 				body: JSON.stringify({
 					firstName,

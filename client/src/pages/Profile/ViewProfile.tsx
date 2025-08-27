@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 
 import '@/styles/profile.css';
 
+import { getAuthToken, getEmployeeId } from '@/utils/authTokenHandler';
+import { useNavigate } from 'react-router-dom';
+
 import { LogoutProps } from '@/types/AuthProps';
 import { User } from '@/types/User';
 import Header from '@/pages/Header/Header';
-import { getEmployeeId, getToken } from '@/utils/tokenHandling';
-import { useNavigate } from 'react-router-dom';
 
 export default function ViewProfile({ onLogout }: LogoutProps) {
 	const [user, setUser] = useState<User | null>(null);
@@ -24,9 +25,9 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 
 		const fetchProfile = async () => {
 			try {
-				const token = getToken();
+				const token = getAuthToken();
 				const response = await fetch(`/api/auth/users/${employeeId}`, {
-					headers: { 'Authorization': `Bearer ${token}`}
+					headers: { Authorization: `Bearer ${token}` }
 				});
 				if (response.ok) {
 					const data = await response.json();
@@ -53,12 +54,12 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 		if (!user) return;
 
 		try {
-			const token = getToken();
+			const token = getAuthToken();
 			const response = await fetch(`/api/auth/users/${user.employeeId}`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${token}`
+					Authorization: `Bearer ${token}`
 				},
 				body: JSON.stringify({
 					email: user.email,

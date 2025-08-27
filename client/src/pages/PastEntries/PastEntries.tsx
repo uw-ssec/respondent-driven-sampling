@@ -7,9 +7,10 @@ import Header from '@/pages/Header/Header';
 import '@/styles/PastEntriesCss.css';
 import '@/styles/StaffDashboard.css';
 
+import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
+
 import { LogoutProps } from '@/types/AuthProps';
 import { Survey } from '@/types/Survey';
-import { getEmployeeId, getRole, getToken } from '@/utils/tokenHandling';
 
 export default function PastEntries({ onLogout }: LogoutProps) {
 	const [surveys, setSurveys] = useState<Survey[]>([]);
@@ -25,12 +26,12 @@ export default function PastEntries({ onLogout }: LogoutProps) {
 				const employeeId = getEmployeeId();
 
 				// Fetch surveys from the server
-				const token = getToken();
+				const token = getAuthToken();
 				const response = await fetch('/api/surveys/all', {
 					headers: {
 						'x-user-role': role,
 						'x-employee-id': employeeId,
-						'Authorization': `Bearer ${token}`
+						Authorization: `Bearer ${token}`
 					}
 				});
 

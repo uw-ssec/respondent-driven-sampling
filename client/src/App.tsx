@@ -20,12 +20,11 @@ import ViewProfile from '@/pages/Profile/ViewProfile';
 import ApplyReferral from '@/pages/QRCodeScan&Referral/ApplyReferral';
 import Signup from '@/pages/Signup/Signup';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
-import { deleteToken, hasToken } from './utils/tokenHandling';
+
+import { deleteAuthToken, hasAuthToken } from './utils/authTokenHandler';
 
 function App() {
-	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
-		hasToken()
-	);
+	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(hasAuthToken());
 
 	const handleLogin = () => {
 		setIsLoggedIn(true);
@@ -33,7 +32,7 @@ function App() {
 
 	const handleLogout = () => {
 		setIsLoggedIn(false);
-		deleteToken();
+		deleteAuthToken();
 	};
 
 	return (

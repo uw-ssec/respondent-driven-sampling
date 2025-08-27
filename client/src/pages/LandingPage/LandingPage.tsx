@@ -4,11 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/LandingPage.css';
 
+import { getFirstName, getRole } from '@/utils/authTokenHandler';
+
 import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
-import { getFirstName, getRole } from '@/utils/tokenHandling';
-
-// Description: landing page shown after user logs in
 
 export default function LandingPage({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();

@@ -6,9 +6,10 @@ import Header from '@/pages/Header/Header';
 
 import '@/styles/SurveyDetailsCss.css';
 
+import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
+
 import { LogoutProps } from '@/types/AuthProps';
 import { Survey } from '@/types/Survey';
-import { getEmployeeId, getRole, getToken } from '@/utils/tokenHandling';
 
 export default function SurveyDetails({ onLogout }: LogoutProps) {
 	const { id } = useParams();
@@ -60,12 +61,12 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 				const employeeId = getEmployeeId();
 
 				// Fetch survey details from the server
-				const token = getToken();
+				const token = getAuthToken();
 				const response = await fetch(`/api/surveys/${id}`, {
 					headers: {
 						'x-user-role': role,
 						'x-employee-id': employeeId,
-						'Authorization': `Bearer ${token}` 
+						Authorization: `Bearer ${token}`
 					}
 				});
 
