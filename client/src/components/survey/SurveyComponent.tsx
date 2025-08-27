@@ -1060,9 +1060,9 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			pushHistoryState(currentPageNo);
 
 			
-			// Autosave survey after page change
+			// EXAMPLE FETCH: Example of how to ping autosave endpoint
 			
-			const surveyData = {
+			/*const surveyData = {
 				employeeId: employeeId || 'TEST-ID',
 				employeeName: employeeName || 'Test User',
 				responses: sender.data || {},
@@ -1092,7 +1092,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				}
 			} catch (error) {
 				console.error('Request failed:', error);
-			}
+			}*/
 		});
 
 		survey.onComplete.add(async sender => {

@@ -12,9 +12,14 @@ const router = express.Router();
 router.get("/validate-ref/:code", async (req, res) => {
   try {
       const { code } = req.params;
+      const inProgressSurvey = await Survey.findOne({ "referredByCode": code });
+      if(inProgressSurvey && inProgressSurvey.inProgress == true)  { // Survey is in progress
+        return res.status(400).json({ message: "This survey is in progress. Please continue.", survey: inProgressSurvey});
+      }
+
       const surveyWithCode = await Survey.findOne({ "referralCodes.code": code });
 
-      if (!surveyWithCode) {
+      if (!surveyWithCode) { // No parent has this referral code
           return res.status(400).json({ message: "Invalid referral code. Please check again." });
       }
 
@@ -269,6 +274,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
+// THIS ONE IS DELETED IN MAIN:
 // Validate Referral Code - GET /api/surveys/validate-ref/:code
 // This route checks if a referral code is valid
 // and has not been used yet
