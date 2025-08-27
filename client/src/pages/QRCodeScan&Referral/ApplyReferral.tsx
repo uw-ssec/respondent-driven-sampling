@@ -114,13 +114,13 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 			if (!response.ok) {
 				alert(
 					data.message ||
-						'Invalid or already used referral code. Please try again.'
+					'Invalid or already used referral code. Please try again.'
 				);
 				setLoading(false);
 				return;
 			}
+			navigate(`/survey?ref=${referralCode}`);
 
-			navigate('/survey', { state: { referralCode } });
 		} catch (error) {
 			console.error('Error validating referral code:', error);
 			alert('Server error. Please try again.');
