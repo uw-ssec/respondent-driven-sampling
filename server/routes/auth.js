@@ -69,7 +69,20 @@ router.post('/verify-otp-signup', async (req, res) => {
 				.status(400)
 				.json({ message: 'User already exists – please log in.' });
 		}
-		const newUser = new User({ firstName, lastName, email, phone, role });
+    // Defining default permissions for role requested.
+    let permissions = []
+    switch (role) {
+      case 'Volunteer':
+        permissions = [{type: 'view_survey', limiter: 'Self'}, {type: 'delete_survey', limiter: 'Self'}, {type: 'view_profile', limiter: 'Self'}, {type: 'edit_profile', limiter: 'Self'}]
+        break;
+      case 'Manager':
+        permissions = [{type: 'view_survey', limiter: 'All'}, {type: 'delete_survey', limiter: 'Self'}, {type: 'change_perms', limiter: 'All'}, {type: 'view_profile', limiter: 'All'}, {type: 'edit_profile', limiter: 'Self'}, {type: 'approve_user', limiter: 'All'}];
+        break;
+      case 'Admin':
+        permissions = [{type: 'view_survey', limiter: 'All'}, {type: 'delete_survey', limiter: 'All'}, {type: 'change_perms', limiter: 'All'}, {type: 'view_profile', limiter: 'All'}, {type: 'edit_profile', limiter: 'All'}, {type: 'approve_user', limiter: 'All'}];
+        break;
+    }
+		const newUser = new User({ firstName, lastName, email, phone, role, permissions });
 		await newUser.save();
 		const token = generateAuthToken(
 			newUser.firstName,
