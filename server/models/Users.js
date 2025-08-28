@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const permissionSchema = new mongoose.Schema({
   type: { 
     type: String,
-    enum: ['view_survey', 'delete_survey', 'change_perms', 'edit_profile', 'approve_user'],
+    enum: ['view_survey', 'delete_survey', 'change_perms', 'view_profile', 'edit_profile', 'approve_user'],
     required: true 
   },
   limiter: { 
