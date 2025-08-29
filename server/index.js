@@ -143,7 +143,8 @@ app.use("/api/pages", securityWrapper(pageRoutes));
 app.use("/api/surveys", securityWrapper(surveyRoutes));
 
 // Serve static files with security headers
-const clientBuildPath = path.join(__dirname, "./dist");
+// const clientBuildPath = path.join(__dirname, '../client/dist'); // RUN LOCALLY
+const clientBuildPath = path.join(__dirname, "./dist"); // FOR GITHUB BUILD
 app.use(
   express.static(clientBuildPath, {
     setHeaders: (res) => {
@@ -226,6 +227,12 @@ app.use((err, req, res, next) => {
     process.exit(1);
   }
 })();
+
+// Schedule cleaning up stale surveys once a day
+cron.schedule("0 0 * * *", function() {
+//cron.schedule("*/20 * * * * *", function() { // Every 20 seconds
+    deleteStaleSurvey();
+});
 
 // // Set the port
 // const PORT = process.env.PORT || 1234;

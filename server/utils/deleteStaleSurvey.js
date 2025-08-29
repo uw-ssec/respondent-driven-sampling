@@ -8,7 +8,6 @@ module.exports = async function deleteStaleSurveys() {
 
     // Delete links
     const surveys = await Survey.find({ "referralCodes.inProgress": true});
-    //console.log(surveys);
     for(let i = 0; i < surveys.length; i++) {
         let curSurvey = surveys[i];
         let referralCodes = curSurvey.referralCodes;

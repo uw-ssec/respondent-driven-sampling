@@ -6,6 +6,11 @@ import { Survey } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
+import {
+	getAuthToken,
+	getEmployeeId,
+	getFirstName
+} from '@/utils/authTokenHandler';
 import { useGeolocated } from 'react-geolocated';
 
 import { LogoutProps } from '@/types/AuthProps';
@@ -40,10 +45,10 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 	useEffect(() => {
 		// 1) Load from localStorage
-		const storedId = localStorage.getItem('employeeId');
-		const storedName = localStorage.getItem('firstName');
-		if (storedId) setEmployeeId(storedId);
-		if (storedName) setEmployeeName(storedName);
+		const storedEmployeeId = getEmployeeId();
+		const storedFirstName = getFirstName();
+		if (storedEmployeeId) setEmployeeId(storedEmployeeId);
+		if (storedFirstName) setEmployeeName(storedFirstName);
 
 		// 2) Check if referral is passed via location.state
 		const codeFromState = location.state?.referralCode;
@@ -63,9 +68,19 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 	async function validateReferralCode(code: string) {
 		try {
-			const res = await fetch(`/api/surveys/validate-ref/${code}`);
-			if (!res.ok) {
-				const errData = await res.json();
+			const token = getAuthToken();
+			const response = await fetch(`/api/surveys/validate-ref/${code}`, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			if (!response.ok) {
+				if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log out user so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
+				}
+				const errData = await response.json();
 				alert(
 					errData.message ||
 						'Invalid referral code. Please check again.'
@@ -1059,12 +1074,10 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			const currentPageNo = sender.currentPageNo;
 			pushHistoryState(currentPageNo);
 
-			
-			// EXAMPLE FETCH: Example of how to ping autosave endpoint
-			
+
+			// EXAMPLE FETCH FOR AUTOSAVE - this pings every page change
+
 			/*const surveyData = {
-				employeeId: employeeId || 'TEST-ID',
-				employeeName: employeeName || 'Test User',
 				responses: sender.data || {},
 				referredByCode: isReferralValid ? referredByCode : null,
 				coords: coords || { latitude: 0, longitude: 0 }, 
@@ -1072,10 +1085,14 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			};
 
 			try {
-				console.log('Survey Data Being Sent:', surveyData);
+				//console.log('Survey Data Being Sent:', surveyData); // Should we be printing survey data?
+				const token = getAuthToken();
 				const response = await fetch('/api/surveys/autosave', {
 					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`
+					},
 					body: JSON.stringify(surveyData)
 				});
 
@@ -1083,10 +1100,15 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 					const data = await response.json();
 					console.log('Survey autosaved successfully!', data);
 					localStorage.setItem('objectId', data.objectId);
-
+				} else if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log user out so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
 				} else {
 					console.error(
-						'Error autosaving survey:',
+						'Error saving survey:',
 						await response.text()
 					);
 				}
@@ -1097,8 +1119,6 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 		survey.onComplete.add(async sender => {
 			const surveyData = {
-				employeeId: employeeId || 'TEST-ID',
-				employeeName: employeeName || 'Test User',
 				responses: sender.data || {},
 				referredByCode: isReferralValid ? referredByCode : null,
 				coords: coords || { latitude: 0, longitude: 0 }, 
@@ -1108,10 +1128,14 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			console.log('Survey Submitted:', surveyData);
 
 			try {
-				console.log('Survey Data Being Sent:', surveyData);
+				console.log('Survey Data Being Sent:', surveyData); // Should we be printing survey data?
+				const token = getAuthToken();
 				const response = await fetch('/api/surveys/submit', {
 					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`
+					},
 					body: JSON.stringify(surveyData)
 				});
 
@@ -1122,6 +1146,12 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 					navigate('/qrcode', {
 						state: { referralCodes: data.referralCodes }
 					});
+				} else if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log user out so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
 				} else {
 					console.error(
 						'Error saving survey:',

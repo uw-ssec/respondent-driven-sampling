@@ -2,10 +2,11 @@ import { useState } from 'react';
 
 import '@/styles/profile.css';
 
+import { getAuthToken } from '@/utils/authTokenHandler';
+import { useNavigate } from 'react-router-dom';
+
 import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
-
-// description: allows admins to manually create and add new users
 
 export default function NewUser({ onLogout }: LogoutProps) {
 	const [firstName, setFirstName] = useState('');
@@ -14,15 +15,20 @@ export default function NewUser({ onLogout }: LogoutProps) {
 	const [phone, setPhone] = useState('');
 	const [role, setRole] = useState('');
 	const [message, setMessage] = useState('');
+	const navigate = useNavigate();
 
 	const handleSubmit = async (e: { preventDefault: () => void }) => {
 		e.preventDefault();
 
 		try {
 			// Sends request to pre-approve users
+			const token = getAuthToken();
 			const response = await fetch('/api/auth/preapprove', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${token}`
+				},
 				body: JSON.stringify({
 					firstName,
 					lastName,
@@ -36,6 +42,11 @@ export default function NewUser({ onLogout }: LogoutProps) {
 
 			if (response.ok) {
 				setMessage('User registered successfully!');
+			} else if (response.status == 401) {
+				// Token Error, either expired or invalid for some other reason.
+				// Log user out so they can relogin to generate a new valid token
+				onLogout();
+				navigate('/login');
 			} else {
 				setMessage(data.message || 'Failed to register user.');
 			}

@@ -1,4 +1,3 @@
-
 // Import Mongoose for MongoDB object modeling.
 const mongoose = require('mongoose');
 // const { FaBullseye } = require('react-icons/fa6');
@@ -8,13 +7,13 @@ const mongoose = require('mongoose');
 // The referral code is used to track which survey referred this one.
 // The `usedBySurvey` field references the survey that used this referral code.
 const referralCodeSchema = new mongoose.Schema({
-  code: { type: String, required: true },
-  usedBySurvey: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Survey',
-    default: null
-  },
-  usedAt: { type: Date, default: null }, 
+	code: { type: String, required: true },
+	usedBySurvey: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Survey',
+		default: null
+	},
+	usedAt: { type: Date, default: null }, 
   inProgress: {type: Boolean, required: false, default: false}
 });
 
@@ -31,14 +30,14 @@ const surveySchema = new mongoose.Schema({
   inProgress: {type: Boolean, required: false}, 
 
 
-  // 2 referral codes stored here
-  referralCodes: [referralCodeSchema],
+	// 2 referral codes stored here
+	referralCodes: [referralCodeSchema],
 
-  // The code that referred this new survey
-  referredByCode: { type: String, default: null },
+	// The code that referred this new survey
+	referredByCode: { type: String, default: null },
 
-  //geolocation
-  coords: { type: Object, required: false },
+	//geolocation
+	coords: { type: Object, required: false }
 });
 
 // Create the model for the survey using the defined schema.
