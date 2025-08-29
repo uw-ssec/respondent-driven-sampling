@@ -9,20 +9,19 @@ const router = express.Router();
 // This route checks if a referral code is valid and has not been used yet
 // It returns a success message if the code is valid
 // and a failure message if the code is invalid or already used
-router.get('/validate-ref/:code', [auth], async (req, res) => {
-	try {
-		const { code } = req.params;
+router.get("/validate-ref/:code", async (req, res) => {
+  try {
+      const { code } = req.params;
+      const inProgressSurvey = await Survey.findOne({ "referredByCode": code });
+      if(inProgressSurvey && inProgressSurvey.inProgress == true)  { // Survey is in progress
+        return res.status(400).json({ message: "This survey is in progress. Please continue.", survey: inProgressSurvey});
+      }
 
-		// This is the referral code being validated
-		const surveyWithCode = await Survey.findOne({
-			'referralCodes.code': code
-		});
+      const surveyWithCode = await Survey.findOne({ "referralCodes.code": code });
 
-		if (!surveyWithCode) {
-			return res.status(400).json({
-				message: 'Invalid referral code. Please check again.'
-			});
-		}
+      if (!surveyWithCode) { // No parent has this referral code
+          return res.status(400).json({ message: "Invalid referral code. Please check again." });
+      }
 
 		const referralObj = surveyWithCode.referralCodes.find(
 			rc => rc.code === code
@@ -92,76 +91,87 @@ router.post('/submit', [auth], async (req, res) => {
 	try {
 		const employeeId = req.decodedAuthToken.employeeId;
 		const employeeName = req.decodedAuthToken.firstName;
-		const { responses, referredByCode, coords } = req.body;
+		const { responses, referredByCode, coords, objectId} = req.body;
+        //console.log("OBJECTID: " + objectId);
+        const surveyWithCode = await findSurvey(referredByCode, objectId);
 
-		if (!employeeId || !employeeName || !responses) {
-			return res.status(400).json({ message: 'Missing required fields' });
-		}
+        if (!employeeId || !employeeName || !responses) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+        let newId = null;
+        let code1 = null;
+        let code2 = null;
+        let code3 = null;
 
-		// 1️ Create the new Survey document
-		const newSurvey = new Survey({
-			employeeId,
-			employeeName,
-			responses,
-			referredByCode: referredByCode || null,
-			coords
-		});
+        if (!surveyWithCode) {
+            const inProgress = false;
+            const lastUpdated = new Date();
 
-		// 2️ Generate two referral codes for this new survey
-		const code1 = generateReferralCode();
-		const code2 = generateReferralCode();
-		const code3 = generateReferralCode();
+            const newSurvey = new Survey({
+                employeeId,
+                employeeName,
+                responses,
+                referredByCode: referredByCode || null,
+                coords, 
+                lastUpdated,
+                inProgress
+            });
 
-		newSurvey.referralCodes.push({ code: code1 });
-		newSurvey.referralCodes.push({ code: code2 });
-		newSurvey.referralCodes.push({ code: code3 });
+            code1 = generateReferralCode();
+            code2 = generateReferralCode();
+            code3 = generateReferralCode();
+            
+            newSurvey.referralCodes.push({ code: code1 });
+            newSurvey.referralCodes.push({ code: code2 });
+            newSurvey.referralCodes.push({ code: code3 });
 
-		// 3️ Save the new survey to the database
-		await newSurvey.save();
+            await newSurvey.save();
+            newId = newSurvey._id;
+        } else {
+            if (surveyWithCode.inProgress == true) {
+                await Survey.updateOne(
+                { _id: objectId },
+                {
+                    $set: { 
+                        responses: responses,
+                        inProgress: false
+                    },
+                    $currentDate: { lastUpdated: true }
+                }
+                );
+            } 
+            newId = surveyWithCode._id;
+            code1 = surveyWithCode.referralCodes[0].code
+            code2 = surveyWithCode.referralCodes[1].code
+            code3 = surveyWithCode.referralCodes[2].code
+        }
 
-		// 4️ If the new survey was created using a referral code, mark that code as used
-		if (referredByCode) {
-			const parentSurvey = await Survey.findOne({
-				'referralCodes.code': referredByCode
-			});
 
-			if (!parentSurvey) {
-				return res
-					.status(400)
-					.json({ message: 'Invalid referral code.' });
-			}
+        // If the new survey was created using a referral code, mark that code as used
+        if (referredByCode) {
+          const parentSurvey = await Survey.findOne({ "referralCodes.code": referredByCode });
+          const referralObj = parentSurvey.referralCodes.find(rc => rc.code === referredByCode);
+      
+          // Mark referral code as used
+          referralObj.usedBySurvey = newId;
+          referralObj.usedAt = new Date();
+          referralObj.inProgress = false;
+          await parentSurvey.save();
+      }
+      
 
-			const referralObj = parentSurvey.referralCodes.find(
-				rc => rc.code === referredByCode
-			);
+        // Return success message + new referral codes
+        return res.status(201).json({
+            message: "Survey submitted successfully!",
+            newSurveyId: newId,
+            referralCodes: [code1, code2, code3]  // Return all 3 codes
+        });
 
-			if (!referralObj || referralObj.usedBySurvey) {
-				return res.status(400).json({
-					message: 'This referral code has already been used.'
-				});
-			}
-
-			// Mark referral code as used
-			referralObj.usedBySurvey = newSurvey._id;
-			referralObj.usedAt = new Date();
-			await parentSurvey.save();
-		}
-
-		// Return success message + new referral codes
-		return res.status(201).json({
-			message: 'Survey submitted successfully!',
-			newSurveyId: newSurvey._id,
-			referralCodes: [code1, code2, code3] // Return all 3 codes
-		});
-	} catch (error) {
-		console.error('Error saving survey:', error);
-		res.status(500).json({
-			message: 'Server error: Could not save survey'
-		});
-	}
+    } catch (error) {
+        console.error("Error saving survey:", error);
+        res.status(500).json({ message: "Server error: Could not save survey" });
+    }
 });
-
-// ─── DRAFT CODE  ───────────────────────────────────────
 
 // POST /api/surveys/autosave - Autosaves a new survey
 // This route handles the  temporary submission of a new survey
@@ -173,79 +183,75 @@ router.post('/autosave', [auth], async (req, res) => {
 	try {
 		const employeeId = req.decodedAuthToken.employeeId;
 		const employeeName = req.decodedAuthToken.firstName;
-		const { responses, referredByCode, coords } = req.body;
+		const { responses, referredByCode, coords, objectId} = req.body;
 
-		console.log('These are responses!');
-		console.log(responses);
 
 		if (!employeeId || !employeeName || !responses) {
 			return res.status(400).json({ message: 'Missing required fields' });
 		}
 
-		const surveyWithCode = await Survey.findOne({
-			referredByCode: referredByCode
-		});
-		console.log('Survey with code?');
-		console.log(surveyWithCode);
+        const surveyWithCode = await findSurvey(referredByCode, objectId);
+        let objId = null;
+        
+        // Create new survey
+        if (!surveyWithCode) {
+            const inProgress = true;
+            const lastUpdated = new Date();
 
-		// If root
-		if (
-			referredByCode == null ||
-			(surveyWithCode && !surveyWithCode.inProgress)
-		) {
-			return res.status(201).json({
-				message: 'This survey is a root, cannot be autosaved.'
-			});
-		}
-		//---------------------------------------------------------------------------------------------------------------
-		// 1 See if there is a survey with this refferal code already in progress or if a new one needs to be created
-		if (!surveyWithCode) {
-			// Create and submit new survey
-			const inProgress = true;
-			const lastUpdated = new Date();
+            const newSurvey = new Survey({
+                employeeId,
+                employeeName,
+                responses,
+                referredByCode: referredByCode || null,
+                coords, 
+                inProgress, 
+                lastUpdated
+            });
 
-			// 2 Create the new Survey document
-			const newSurvey = new Survey({
-				employeeId,
-				employeeName,
-				responses,
-				referredByCode: referredByCode || null,
-				coords,
-				inProgress,
-				lastUpdated
-			});
+            await newSurvey.save();
 
-			// 3️ Save the new survey to the database
-			await newSurvey.save();
-		} else {
-			// Update survey only if there is one in progress
-			// 2 Update survey responses and last updated
-			//console.log("Im getting to update right now");
-			if (surveyWithCode.inProgress == true) {
-				//console.log("I passed this test!");
+            // Refferal codes + Link account 
+            const code1 = generateReferralCode();
+            const code2 = generateReferralCode();
+            const code3 = generateReferralCode();
+            
+            newSurvey.referralCodes.push({ code: code1 });
+            newSurvey.referralCodes.push({ code: code2 });
+            newSurvey.referralCodes.push({ code: code3 });
 
-				await Survey.updateOne(
-					{ referredByCode: referredByCode },
-					{
-						$set: { responses: responses },
-						$currentDate: { lastUpdated: true }
-					}
-				);
-			}
-		}
+            // Link code to parent
+            if(referredByCode) {
+                const parentSurvey = await Survey.findOne({ "referralCodes.code": referredByCode });
+                const referralObj = parentSurvey.referralCodes.find(rc => rc.code === referredByCode);
+                referralObj.usedAt = new Date();
+                referralObj.inProgress = true;
+                referralObj.usedBySurvey = newSurvey._id;
+                await parentSurvey.save();
+            }
 
-		//https://www.mongodb.com/docs/manual/tutorial/update-documents/ - update docs
+            let promise = await newSurvey.save();
+            objId = promise._id.valueOf();
+        } else {
+            if (surveyWithCode.inProgress == true) {
+                await Survey.updateOne( 
+                { referredByCode: referredByCode },
+                {
+                    $set: { responses: responses},
+                    $currentDate: { lastUpdated: true }
+                }
+                );
+                objId = surveyWithCode._id;
+            } 
+        }
+        return res.status(201).json({
+            message: "Survey autosaved successfully!", 
+            objectId: objId
+        });
 
-		// Return success message + new referral codes
-		return res.status(201).json({
-			message: 'Survey autosaved successfully!'
-		});
-	} catch (error) {
-		console.error('Error saving survey:', error);
-		res.status(500).json({
-			message: 'Server error: Could not save survey'
-		});
-	}
+    } catch (error) {
+        console.error("Error saving survey:", error);
+        res.status(500).json({ message: "Server error: Could not save survey" });
+    }
 });
 
 // GET /api/surveys/:id - Fetch a specific survey
@@ -283,5 +289,24 @@ router.get('/:id', [auth], async (req, res) => {
 		});
 	}
 });
+
+/**
+ * Find a survey with a refferal code and an object ID. Returns null if 
+ * a survey does not exist. 
+ * @param {String} refferalCode refferal code for survey. Can be null
+ * @param {String} objectId object id for survey. Cab be null
+ */
+async function findSurvey(refferalCode, objectId) {
+    if (objectId != '') {
+        // find with object id
+        const surveyWithCode = await Survey.findOne({ "_id": objectId });
+        return surveyWithCode;
+    } else if(refferalCode != null) {
+        // look for refferral code, then return 
+        const surveyWithCode = await Survey.findOne({ "referredByCode": refferalCode });
+        return surveyWithCode;
+    } 
+    return null;
+}
 
 module.exports = router;
