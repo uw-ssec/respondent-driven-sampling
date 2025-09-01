@@ -21,13 +21,14 @@ const permissionSchema = new mongoose.Schema({
 // This schema defines the structure of the user data in the MongoDB database.
 // It includes a role along with a list of permissions each user has.
 const userSchema = new mongoose.Schema({
-  employeeId: {
+  /*employeeId: {
     type: String,
     unique: true,
     default: function () {
       return `EMP${Math.floor(1000 + Math.random() * 9000)}`;
     }
-  },
+  },*/
+  employeeId:  { type: String, required: true }, // instead of automatically generating, employee id should be handed
   firstName:  { type: String, required: true },
   lastName:   { type: String, required: true },
   email:      { type: String, required: true, unique: true },

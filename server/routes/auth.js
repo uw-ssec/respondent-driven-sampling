@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/Users');
 const { generateAuthToken } = require('../utils/authTokenHandler');
 const { auth } = require('../middleware/auth');
+const generateEmployeeId = require('../utils/generateEmployeeId');
 
 const twilio = require('twilio');
 const jwt = require('jsonwebtoken');
@@ -82,7 +83,8 @@ router.post('/verify-otp-signup', async (req, res) => {
         permissions = [{type: 'view_survey', limiter: 'All'}, {type: 'delete_survey', limiter: 'All'}, {type: 'change_perms', limiter: 'All'}, {type: 'view_profile', limiter: 'All'}, {type: 'edit_profile', limiter: 'All'}, {type: 'approve_user', limiter: 'All'}];
         break;
     }
-		const newUser = new User({ firstName, lastName, email, phone, role, permissions });
+		const employeeId = await generateEmployeeId();
+		const newUser = new User({ employeeId, firstName, lastName, email, phone, role, permissions });
 		await newUser.save();
 		const token = generateAuthToken(
 			newUser.firstName,

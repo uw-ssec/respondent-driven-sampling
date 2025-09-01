@@ -108,9 +108,9 @@ router.post('/submit', [auth], async (req, res) => {
 		});
 
 		// 2️ Generate two referral codes for this new survey
-		const code1 = generateReferralCode();
-		const code2 = generateReferralCode();
-		const code3 = generateReferralCode();
+		const code1 = await generateReferralCode();
+		const code2 = await generateReferralCode();
+		const code3 = await generateReferralCode();
 
 		newSurvey.referralCodes.push({ code: code1 });
 		newSurvey.referralCodes.push({ code: code2 });
