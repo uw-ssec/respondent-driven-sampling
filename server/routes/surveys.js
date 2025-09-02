@@ -284,4 +284,48 @@ router.get('/:id', [auth], async (req, res) => {
 	}
 });
 
+
+// POST /api/surveys/delete/:id - Delete a specific survey
+// This route deletes a specific survey by its ID
+router.get('/delete/:id', [auth], async (req, res) => {
+	try {
+		const userRole = req.decodedAuthToken.role;
+		const userEmployeeId = req.decodedAuthToken.employeeId;
+
+		const id = req.params.id;
+
+		const survey = await Survey.findById(id);
+		if (!survey) {
+			return res.status(404).json({ message: 'Survey not found' });
+		}
+
+		// Otherwise, check if the survey belongs to this user
+		if (survey.employeeId !== userEmployeeId) {
+			return res.status(403).json({
+				message: 'Forbidden: You do not have access to delete this survey'
+			});
+		}
+
+		Survey.findByIdAndDelete(id)
+			.then(deletedSurvey => {
+				if (deletedSurvey) {
+					return res.status(201).json({
+						message: 'Survey deleted successfully!'
+					});
+				} else {
+					return res.status(404).json({ message: 'Survey not found' });
+				}
+			})
+			.catch(error => {
+				console.error('Error deleting survey:', error);
+		});
+
+	} catch (error) {
+		console.error('Error deleting survey:', error);
+		res.status(500).json({
+			message: 'Server error: Unable to  delete survey'
+		});
+	}
+});
+
 module.exports = router;
