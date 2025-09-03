@@ -140,6 +140,52 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 						}
 					]
 				},
+				// Consent Page
+				{
+					name: 'consent_page',
+					title: 'Consent Confirmation',
+					elements: [
+						{
+							type: 'html',
+							name: 'consent-instructions',
+							html: '<div><strong>Please ask the respondent if they are above the age of 18. The survey will end if they are not at least 18 years old.</strong></div>'
+						},
+						{
+							type: 'radiogroup',
+							name: 'age_for_consent',
+							title: 'Is the respondent at least 18?',
+							choices: ['Yes', 'No'],
+							isRequired: true
+						},
+						{
+							type: 'html',
+							name: 'consent-note',
+							html: `<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>
+        <p>Participation in research is voluntary. The decision to participate, or not participate, is entirely up to you. You have the right to decline to participate in, or withdraw from, this study at any point without penalty or loss of benefits to which you already receive or to which you are entitled.</p>
+        <p>This study has been explained to me and I understand. I volunteer to take part in this research. I have had the opportunity to ask questions. If I have questions later about the research, or if I have been harmed by participating in this study, I can contact one of the researchers listed on the first page of this consent form. If I have questions about my rights as a research subject, I can call the Human Subjects Division at (206) 543-0098. I will receive a copy of this consent form.</p>
+        <p><strong>Let the respondent know that the survey will end here if they do not give consent.</strong></p>`,
+							visibleIf: "{age_for_consent} = 'Yes'"
+						},
+						{
+							type: 'radiogroup',
+							name: 'consent_given',
+							title: 'Did the subject orally consent to participate?',
+							choices: ['Yes', 'No'],
+							isRequired: true,
+							visibleIf: "{age_for_consent} = 'Yes'"
+						}
+					],
+					triggers: [
+						{
+							type: 'complete',
+							expression: "{age_for_consent} = 'No'"
+						},
+						{
+							type: 'complete',
+							expression: "{consent_given} = 'No'"
+						}
+					]
+				},
 				// Pre-Screening Respondent
 				{
 					name: 'pre-screen-2',
@@ -187,51 +233,6 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 							title: 'Can we message the respondent regarding survey results?',
 							choices: ['Yes', 'No'],
 							isRequired: true
-						}
-					]
-				},
-				{
-					name: 'consent_page',
-					title: 'Consent Confirmation',
-					elements: [
-						{
-							type: 'html',
-							name: 'consent-instructions',
-							html: '<div><strong>Please ask the respondent if they are above the age of 18. The survey will end if they are not at least 18 years old.</strong></div>'
-						},
-						{
-							type: 'radiogroup',
-							name: 'age_for_consent',
-							title: 'Is the respondent at least 18?',
-							choices: ['Yes', 'No'],
-							isRequired: true
-						},
-						{
-							type: 'html',
-							name: 'consent-note',
-							html: `<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>
-        <p>Participation in research is voluntary. The decision to participate, or not participate, is entirely up to you. You have the right to decline to participate in, or withdraw from, this study at any point without penalty or loss of benefits to which you already receive or to which you are entitled.</p>
-        <p>This study has been explained to me and I understand. I volunteer to take part in this research. I have had the opportunity to ask questions. If I have questions later about the research, or if I have been harmed by participating in this study, I can contact one of the researchers listed on the first page of this consent form. If I have questions about my rights as a research subject, I can call the Human Subjects Division at (206) 543-0098. I will receive a copy of this consent form.</p>
-        <p><strong>Let the respondent know that the survey will end here if they do not give consent.</strong></p>`,
-							visibleIf: "{age_for_consent} = 'Yes'"
-						},
-						{
-							type: 'radiogroup',
-							name: 'consent_given',
-							title: 'Did the subject orally consent to participate?',
-							choices: ['Yes', 'No'],
-							isRequired: true,
-							visibleIf: "{age_for_consent} = 'Yes'"
-						}
-					],
-					triggers: [
-						{
-							type: 'complete',
-							expression: "{age_for_consent} = 'No'"
-						},
-						{
-							type: 'complete',
-							expression: "{consent_given} = 'No'"
 						}
 					]
 				},
