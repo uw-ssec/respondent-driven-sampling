@@ -28,7 +28,26 @@ const roleToNumberMap = {
   "Volunteer": 0
 }
 
+/**
+ * Determines if a given permission list has the required permission.
+ * @param {Array<Permission>} permissionList 
+ * @param {string} permissionType the type of permission to check for
+ * @param {string} limiter the required limiter of the permission 
+ * @returns {boolean} true/false for if the permission list had the permission
+ */
+function hasPermission(permissionList, permissionType, limiter) {
+  let found = false;
+  permissionList.forEach(perm => {
+    if (perm.type == permissionType &&
+       (perm.limiter == limiter || limiter == 'Self')) {
+      found = true;
+    }
+  });
+  return found;
+}
+
 module.exports = {
   generateEmployeeId,
-  roleToNumberMap
+  roleToNumberMap,
+  hasPermission
 }
