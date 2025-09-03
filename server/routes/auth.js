@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/Users');
 const { generateAuthToken } = require('../utils/authTokenHandler');
 const { auth } = require('../middleware/auth');
-const {generateEmployeeId, roleToNumberMap} = require('../utils/userUtils');
+const {generateEmployeeId, roleToNumberMap, hasPermission} = require('../utils/userUtils');
 const httpMessages = require('../messages');
 
 const twilio = require('twilio');
@@ -147,7 +147,7 @@ router.post('/verify-otp-login', async (req, res) => {
 // ─── Admin Approvals ────────────────────────────────────────────────
 router.get('/users', [auth], async (req, res) => {
 	try {
-		if (!req.permissions.includes({type:'view_profile', limiter:'All'})) {
+		if (!hasPermission(req.permissions, 'view_profile', 'All')) {
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 		}
 		const users = await User.find(
@@ -166,7 +166,7 @@ router.get('/users', [auth], async (req, res) => {
 router.put('/users/:id/approve', auth, async (req, res) => {
 	try {
 		// Check if user has approval perms
-		if (!req.permissions.includes({type:'approve_user', limiter:'All'}))
+		if (!hasPermission(req.permissions, 'approve_user', 'All'))
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 		const { status } = req.body;
 
@@ -181,11 +181,12 @@ router.put('/users/:id/approve', auth, async (req, res) => {
 		// equal to requesters role
 		if (!user)
 			return res.status(404).json({ message: 'User not found.' });
-		if (roleToNumberMap(user.role) > roleToNumberMap(req.decodedAuthToken.role))
-			return res.status(403).json({ message: httpMessages.err_invalid_perms});
+		if (roleToNumberMap[user.role] > roleToNumberMap[req.decodedAuthToken.role])
+			return res.status(403).json({ message: httpMessages.err_invalid_role});
 
 		user.approvalStatus = status;
-		res.json({ message: `User ${status}`, user: updatedUser });
+		user.save();
+		res.json({ message: `User ${status}`, user: user });
 	} catch (err) {
 		console.error('Error updating approval status:', err);
 		res.status(500).json({
