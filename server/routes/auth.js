@@ -3,7 +3,8 @@ const router = express.Router();
 const User = require('../models/Users');
 const { generateAuthToken } = require('../utils/authTokenHandler');
 const { auth } = require('../middleware/auth');
-const generateEmployeeId = require('../utils/generateEmployeeId');
+const {generateEmployeeId, roleToNumberMap} = require('../utils/userUtils');
+const httpMessages = require('../messages');
 
 const twilio = require('twilio');
 const jwt = require('jsonwebtoken');
@@ -134,6 +135,7 @@ router.post('/verify-otp-login', async (req, res) => {
 		res.json({
 			message: 'Login successful!',
 			token: token,
+			permissions: user.permissions,
 			redirectTo: '/dashboard'
 		});
 	} catch (err) {
@@ -144,10 +146,10 @@ router.post('/verify-otp-login', async (req, res) => {
 
 // ─── Admin Approvals ────────────────────────────────────────────────
 router.get('/users', [auth], async (req, res) => {
-	if (req.decodedAuthToken.role != 'Admin') {
-		return res.sendStatus(403);
-	}
 	try {
+		if (!req.permissions.includes({type:'view_profile', limiter:'All'})) {
+			return res.status(403).json({ message: httpMessages.err_invalid_perms});
+		}
 		const users = await User.find(
 			{},
 			'firstName lastName role approvalStatus'
@@ -162,22 +164,27 @@ router.get('/users', [auth], async (req, res) => {
 });
 
 router.put('/users/:id/approve', auth, async (req, res) => {
-	if (req.decodedAuthToken.role != 'Admin') {
-		return res.sendStatus(403);
-	}
 	try {
+		// Check if user has approval perms
+		if (!req.permissions.includes({type:'approve_user', limiter:'All'}))
+			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 		const { status } = req.body;
-		if (!['Approved', 'Rejected'].includes(status)) {
+
+		if (!['Approved', 'Rejected'].includes(status))
 			return res.status(400).json({ message: 'Invalid status update.' });
-		}
-		const updatedUser = await User.findByIdAndUpdate(
+
+		const user = await User.findById(
 			req.params.id,
-			{ approvalStatus: status },
-			{ new: true }
 		);
-		if (!updatedUser) {
+
+		// Check if user to approve exists and if that user's role is less than or
+		// equal to requesters role
+		if (!user)
 			return res.status(404).json({ message: 'User not found.' });
-		}
+		if (roleToNumberMap(user.role) > roleToNumberMap(req.decodedAuthToken.role))
+			return res.status(403).json({ message: httpMessages.err_invalid_perms});
+
+		user.approvalStatus = status;
 		res.json({ message: `User ${status}`, user: updatedUser });
 	} catch (err) {
 		console.error('Error updating approval status:', err);
