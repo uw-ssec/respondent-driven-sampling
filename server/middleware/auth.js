@@ -23,7 +23,6 @@ async function auth(req, res, next) {
 		const user = await User.findOne({
 			employeeId: decodedAuthToken.employeeId
 		});
-		console.log(user);
 		if (!user) {
 			// This case means that the user has a valid JWT signed by our server but
 			// the account it is linked to does not exist in our database.
@@ -38,7 +37,7 @@ async function auth(req, res, next) {
 			});
 		}
 		// Add permission list to request
-		req.permisssions = user.permissions;
+		req.permissions = user.permissions;
 		next();
 	} catch (err) {
 		return res.status(401).json({ message: `Invalid Token: ${err.name}` });
