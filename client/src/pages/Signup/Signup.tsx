@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import '@/styles/signup.css';
 
+import { saveAuthToken } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 
 export default function Signup() {
@@ -43,7 +44,7 @@ export default function Signup() {
 	const sendOtp = async () => {
 		setErrorMessage('');
 		try {
-			const res = await fetch('/api/auth/send-otp-signup', {
+			const response = await fetch('/api/auth/send-otp-signup', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -51,8 +52,8 @@ export default function Signup() {
 					email: userData.email
 				})
 			});
-			const data = await res.json();
-			if (res.ok) {
+			const data = await response.json();
+			if (response.ok) {
 				setOtpSent(true);
 				setCountdown(60);
 			} else {
@@ -65,16 +66,14 @@ export default function Signup() {
 
 	const verifyOtp = async () => {
 		try {
-			const res = await fetch('/api/auth/verify-otp-signup', {
+			const response = await fetch('/api/auth/verify-otp-signup', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ ...userData, code: otp })
 			});
-			const data = await res.json();
-			if (res.ok) {
-				localStorage.setItem('firstName', data.firstName);
-				localStorage.setItem('role', data.role);
-				localStorage.setItem('employeeId', data.employeeId);
+			const data = await response.json();
+			if (response.ok) {
+				saveAuthToken(data.token);
 				navigate(data.redirectTo);
 			} else {
 				setErrorMessage(data.message);
