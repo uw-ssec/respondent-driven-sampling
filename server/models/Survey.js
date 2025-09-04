@@ -13,7 +13,8 @@ const referralCodeSchema = new mongoose.Schema({
 		ref: 'Survey',
 		default: null
 	},
-	usedAt: { type: Date, default: null }
+	usedAt: { type: Date, default: null }, 
+  inProgress: {type: Boolean, required: false, default: false}
 });
 
 // Main schema for the survey.
@@ -21,12 +22,13 @@ const referralCodeSchema = new mongoose.Schema({
 // The `employeeId` and `employeeName` fields are required.
 // The `responses` field is an object that contains the survey responses.
 const surveySchema = new mongoose.Schema({
-	employeeId: { type: String, required: true },
-	employeeName: { type: String, required: true },
-	responses: { type: Object, required: true },
-	createdAt: { type: Date, default: Date.now },
-	lastUpdated: { type: Date, default: Date.now }, // Date the survey was last edited
-	inProgress: { type: Boolean, required: false }, // TODO: Edit later to required: True - currently this is fixing a bug but should look at this later
+  employeeId: { type: String, required: true },
+  employeeName: { type: String, required: true },
+  responses: { type: Object, required: true },
+  createdAt: { type: Date, default: Date.now },
+  lastUpdated: { type: Date, default: Date.now }, // Date this survey was last edited
+  inProgress: {type: Boolean, required: false}, 
+
 
 	// 2 referral codes stored here
 	referralCodes: [referralCodeSchema],
