@@ -2,6 +2,8 @@ const express = require('express');
 const Survey = require('../models/Survey');
 const { auth } = require('../middleware/auth');
 const generateReferralCode = require('../utils/generateReferralCode');
+const { hasPermission } = require('../utils/userUtils');
+const httpMessages = require('../messages');
 
 const router = express.Router();
 
@@ -63,18 +65,21 @@ router.get('/validate-ref/:code', [auth], async (req, res) => {
 // It returns the surveys in descending order of creation date
 router.get('/all', [auth], async (req, res) => {
 	try {
-		const userRole = req.decodedAuthToken.role;
 		const userEmployeeId = req.decodedAuthToken.employeeId;
 
-		if (userRole === 'Admin') {
-			const surveys = await Survey.find().sort({ createdAt: -1 });
+		if (hasPermission(req.permissions, 'view_survey', 'All')) {
+			const surveys = await Survey
+				.find()
+				.sort({createdAt: -1});
 			return res.json(surveys);
+		} else if (hasPermission(req.permissions, 'view_survey', "Self")) {
+			const surveys = await Survey
+				.find({employeeId: userEmployeeId })
+				.sort({createdAt: -1});
+			return res.json(surveys);
+		} else {
+			return res.status(403).json({ message: httpMessages.err_invalid_perms });
 		}
-
-		const surveys = await Survey.find({ employeeId: userEmployeeId }).sort({
-			createdAt: -1
-		});
-		return res.json(surveys);
 	} catch (error) {
 		console.error('Error fetching surveys:', error);
 		res.status(500).json({
@@ -95,9 +100,9 @@ router.post('/submit', [auth], async (req, res) => {
 		const { responses, referredByCode, coords } = req.body;
 
 		if (!employeeId || !employeeName || !responses) {
-			return res.status(400).json({ message: 'Missing required fields' });
+			return res.status(400).json({ message: httpMessages.err_missing_fields });
 		}
-
+		
 		// 1️ Create the new Survey document
 		const newSurvey = new Survey({
 			employeeId,
@@ -128,7 +133,7 @@ router.post('/submit', [auth], async (req, res) => {
 			if (!parentSurvey) {
 				return res
 					.status(400)
-					.json({ message: 'Invalid referral code.' });
+					.json({ message: httpMessages.err_invalid_code });
 			}
 
 			const referralObj = parentSurvey.referralCodes.find(
@@ -137,7 +142,7 @@ router.post('/submit', [auth], async (req, res) => {
 
 			if (!referralObj || referralObj.usedBySurvey) {
 				return res.status(400).json({
-					message: 'This referral code has already been used.'
+					message: httpMessages.err_used_code
 				});
 			}
 
@@ -149,7 +154,7 @@ router.post('/submit', [auth], async (req, res) => {
 
 		// Return success message + new referral codes
 		return res.status(201).json({
-			message: 'Survey submitted successfully!',
+			message: httpMessages.success_submit,
 			newSurveyId: newSurvey._id,
 			referralCodes: [code1, code2, code3] // Return all 3 codes
 		});
@@ -179,7 +184,7 @@ router.post('/autosave', [auth], async (req, res) => {
 		console.log(responses);
 
 		if (!employeeId || !employeeName || !responses) {
-			return res.status(400).json({ message: 'Missing required fields' });
+			return res.status(400).json({ message: httpMessages.err_missing_fields });
 		}
 
 		const surveyWithCode = await Survey.findOne({
@@ -194,7 +199,7 @@ router.post('/autosave', [auth], async (req, res) => {
 			(surveyWithCode && !surveyWithCode.inProgress)
 		) {
 			return res.status(201).json({
-				message: 'This survey is a root, cannot be autosaved.'
+				message: httpMessages.info_autosave_root
 			});
 		}
 		//---------------------------------------------------------------------------------------------------------------
@@ -238,7 +243,7 @@ router.post('/autosave', [auth], async (req, res) => {
 
 		// Return success message + new referral codes
 		return res.status(201).json({
-			message: 'Survey autosaved successfully!'
+			message: httpMessages.success_autosave
 		});
 	} catch (error) {
 		console.error('Error saving survey:', error);
@@ -255,25 +260,17 @@ router.post('/autosave', [auth], async (req, res) => {
 // If the user is not an Admin, they can only view their own survey
 router.get('/:id', [auth], async (req, res) => {
 	try {
-		const userRole = req.decodedAuthToken.role;
 		const userEmployeeId = req.decodedAuthToken.employeeId;
-
 		const survey = await Survey.findById(req.params.id);
-		if (!survey) {
-			return res.status(404).json({ message: 'Survey not found' });
-		}
+		if (!survey)
+			return res.status(404).json({ message: httpMessages.err_survey_not_found });
 
-		// If Admin, they can view any survey
-		if (userRole === 'Admin') {
-			return res.json(survey);
-		}
-
-		// Otherwise, check if the survey belongs to this user
-		if (survey.employeeId !== userEmployeeId) {
-			return res.status(403).json({
-				message: 'Forbidden: You do not have access to this survey'
-			});
-		}
+		// Check if user has view all perms or view self perms and this 
+		// survey was created by them.
+		if (!hasPermission(req.permissions, 'view_survey', 'All') &&  // Doesn't have global view perms
+			!hasPermission(req.permissions, 'view_survey', 'Self') || // Doesn't have self view perms
+			survey.employeeId !== userEmployeeId )					  // Not viewing self
+			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 
 		return res.json(survey);
 	} catch (error) {
@@ -285,35 +282,31 @@ router.get('/:id', [auth], async (req, res) => {
 });
 
 
-// POST /api/surveys/delete/:id - Delete a specific survey
+// DELETE /api/surveys/:id - Delete a specific survey
 // This route deletes a specific survey by its ID
-router.get('/delete/:id', [auth], async (req, res) => {
+router.delete('/:id', [auth], async (req, res) => {
 	try {
-		const userRole = req.decodedAuthToken.role;
 		const userEmployeeId = req.decodedAuthToken.employeeId;
-
 		const id = req.params.id;
-
 		const survey = await Survey.findById(id);
-		if (!survey) {
-			return res.status(404).json({ message: 'Survey not found' });
-		}
+		if (!survey)
+			return res.status(404).json({ message: httpMessages.err_survey_not_found });
 
-		// Otherwise, check if the survey belongs to this user
-		if (survey.employeeId !== userEmployeeId) {
-			return res.status(403).json({
-				message: 'Forbidden: You do not have access to delete this survey'
-			});
-		}
+		// Check if user has delete all perms or delete self perms and this
+		// survey was created by them.
+		if (!hasPermission(req.permissions, 'delete_survey', 'All') &&  // Doesn't have global delete perms
+			!hasPermission(req.permissions, 'delete_survey', 'Self') || // Doesn't have self delete perms
+			survey.employeeId !== userEmployeeId )					    // Not viewing self
+			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 
 		Survey.findByIdAndDelete(id)
 			.then(deletedSurvey => {
 				if (deletedSurvey) {
 					return res.status(201).json({
-						message: 'Survey deleted successfully!'
+						message: httpMessages.success_delete
 					});
 				} else {
-					return res.status(404).json({ message: 'Survey not found' });
+					return res.status(404).json({ message: httpMessages.err_survey_not_found });
 				}
 			})
 			.catch(error => {

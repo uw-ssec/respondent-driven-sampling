@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config({ path: './.env' });
 const User = require('../models/Users');
 const { verifyAuthToken } = require('../utils/authTokenHandler');
+const httpMessages = require('../messages');
 
 // Middleware for verifying token signature and storing token info in response
 // If this call passes to the next handler, it means the user is atleast a volunteer
@@ -13,7 +14,7 @@ async function auth(req, res, next) {
 	if (!token)
 		return res
 			.status(401)
-			.json({ message: 'Access denied. No token provided' });
+			.json({ message: httpMessages.err_missing_token });
 
 	try {
 		const decodedAuthToken = verifyAuthToken(token);
@@ -26,14 +27,13 @@ async function auth(req, res, next) {
 		if (!user) {
 			// This case means that the user has a valid JWT signed by our server but
 			// the account it is linked to does not exist in our database.
-			return res.status(400).json({
-				message: 'User account not found. Please contact your admin.'
+			return res.status(404).json({
+				message: httpMessages.err_account_not_found
 			});
 		}
 		if (user.approvalStatus !== 'Approved') {
 			return res.status(403).json({
-				message:
-					'User account not approved yet. Please contact your admin.'
+				message: httpMessages.err_unapproved_account
 			});
 		}
 		// Add permission list to request and user id

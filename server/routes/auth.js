@@ -19,18 +19,23 @@ const verifyService = client.verify.v2.services(verifySid);
 
 // ─── Send OTP for SIGNUP ─────────────────────────────────────────────
 router.post('/send-otp-signup', async (req, res) => {
-	const { phone, email } = req.body;
 	try {
+		const { phone, email } = req.body;
+		if (!phone || !email) {
+			return res.status(400).json({ message: httpMessages.err_missing_fields });
+		}
+
 		const existingUser = await User.findOne({
 			$or: [{ phone }, { email }]
 		});
 		if (existingUser) {
 			return res
 				.status(400)
-				.json({ message: 'User already exists – please log in.' });
+				.json({ message: httpMessages.err_user_exist_login });
 		}
+
 		await verifyService.verifications.create({ to: phone, channel: 'sms' });
-		res.json({ message: 'OTP sent!' });
+		res.json({ message: httpMessages.success_otp });
 	} catch (err) {
 		console.error('Send OTP signup error:', err);
 		res.status(500).json({ message: 'Failed to send OTP' });
@@ -39,16 +44,18 @@ router.post('/send-otp-signup', async (req, res) => {
 
 // ─── Send OTP for LOGIN ──────────────────────────────────────────────
 router.post('/send-otp-login', async (req, res) => {
-	const { email, phone } = req.body;
 	try {
+		const { phone, email } = req.body;
+		if (!phone || !email) {
+			return res.status(400).json({ message: httpMessages.err_missing_fields });
+		}
+
 		const user = await User.findOne({ email, phone });
 		if (!user) {
-			return res.status(400).json({
-				message: 'Email and phone number do not match any user.'
-			});
+			return res.status(400).json({ message: httpMessages.err_user_not_exist });
 		}
 		await verifyService.verifications.create({ to: phone, channel: 'sms' });
-		res.json({ message: 'OTP sent!' });
+		res.json({ message: httpMessages.success_otp });
 	} catch (err) {
 		console.error('Send OTP login error:', err);
 		res.status(500).json({ message: 'Failed to send OTP' });
@@ -57,19 +64,23 @@ router.post('/send-otp-login', async (req, res) => {
 
 // ─── Verify OTP for SIGNUP ──────────────────────────────────────────
 router.post('/verify-otp-signup', async (req, res) => {
-	const { phone, code, firstName, lastName, email, role } = req.body;
 	try {
+		const { phone, code, firstName, lastName, email, role } = req.body;
+		if (!phone || !code || !firstName || !lastName || !email || !role) {
+			return res.status(400).json({ message: httpMessages.err_missing_fields });
+		}
+
 		const check = await verifyService.verificationChecks.create({
 			to: phone,
 			code
 		});
 		if (check.status !== 'approved') {
-			return res.status(400).json({ message: 'Invalid OTP' });
+			return res.status(400).json({ message: httpMessages.err_invalid_otp });
 		}
 		if (await User.findOne({ phone })) {
 			return res
 				.status(400)
-				.json({ message: 'User already exists – please log in.' });
+				.json({ message: httpMessages.err_user_exist });
 		}
     // Defining default permissions for role requested.
     let permissions = []
@@ -94,7 +105,7 @@ router.post('/verify-otp-signup', async (req, res) => {
 		);
 
 		res.json({
-			message: 'Signup successful!',
+			message: httpMessages.success_signup,
 			token: token,
 			redirectTo: '/dashboard'
 		});
@@ -106,24 +117,29 @@ router.post('/verify-otp-signup', async (req, res) => {
 
 // ─── Verify OTP for LOGIN ────────────────────────────────────────────
 router.post('/verify-otp-login', async (req, res) => {
-	const { phone, code } = req.body;
 	try {
+		const { phone } = req.body;
+		if (!phone) {
+			return res.status(400).json({ message: httpMessages.err_missing_fields });
+		}
+
 		const check = await verifyService.verificationChecks.create({
 			to: phone,
 			code
 		});
 		if (check.status !== 'approved') {
-			return res.status(400).json({ message: 'Invalid OTP' });
+			return res.status(400).json({ message: httpMessages.err_invalid_otp });
 		}
+
 		const user = await User.findOne({ phone });
 		if (!user) {
 			return res.status(400).json({
-				message: 'No account for this phone – please sign up.'
+				message: httpMessages.err_phone_not_found
 			});
 		}
 		if (user.approvalStatus !== 'Approved') {
 			return res.status(403).json({
-				message: 'Account not approved yet. Please contact your admin.'
+				message: httpMessages.err_unapproved_account
 			});
 		}
 		const token = generateAuthToken(
@@ -133,7 +149,7 @@ router.post('/verify-otp-login', async (req, res) => {
 		);
 
 		res.json({
-			message: 'Login successful!',
+			message: httpMessages.success_login,
 			token: token,
 			permissions: user.permissions,
 			redirectTo: '/dashboard'
@@ -171,7 +187,7 @@ router.put('/users/:id/approve', auth, async (req, res) => {
 		const { status } = req.body;
 
 		if (!['Approved', 'Rejected'].includes(status))
-			return res.status(400).json({ message: 'Invalid status update.' });
+			return res.status(400).json({ message: httpMessages.err_invalid_status });
 
 		const user = await User.findById(
 			req.params.id,
@@ -180,7 +196,7 @@ router.put('/users/:id/approve', auth, async (req, res) => {
 		// Check if user to approve exists and if that user's role is less than or
 		// equal to requesters role
 		if (!user)
-			return res.status(404).json({ message: 'User not found.' });
+			return res.status(404).json({ message: httpMessages.err_user_not_exist });
 		if (roleToNumberMap[user.role] > roleToNumberMap[req.decodedAuthToken.role])
 			return res.status(403).json({ message: httpMessages.err_invalid_role});
 
@@ -199,16 +215,19 @@ router.put('/users/:id/approve', auth, async (req, res) => {
 router.post('/preapprove', auth, async (req, res) => {
 	try {
 		// Check if user has approval perms and that new user isn't a role above
-		// the creating user.
+		// the creating user. Also check for missing fields.
 		if (!hasPermission(req.permissions, 'approve_user', 'All'))
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
+
 		const { firstName, lastName, email, phone, role } = req.body;
+		if (!phone || !code || !firstName || !lastName || !email || !role)
+			return res.status(400).json({ message: httpMessages.err_missing_fields });
 		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
 			return res.status(403).json({ message: httpMessages.err_invalid_role});
 		if (await User.findOne({ phone })) {
 			return res
 				.status(400)
-				.json({ message: 'User already exists with this phone' });
+				.json({ message: httpMessages.err_user_exist_phone });
 		}
 		const newUser = new User({
 			firstName,
@@ -219,7 +238,7 @@ router.post('/preapprove', auth, async (req, res) => {
 			approvalStatus: 'Approved'
 		});
 		await newUser.save();
-		res.status(201).json({ message: 'User registered successfully!' });
+		res.status(201).json({ message: httpMessages.success_preapprove });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
@@ -240,9 +259,8 @@ router.get('/users/:employeeId', auth, async (req, res) => {
 
 		const user = await User.findOne({ employeeId: req.params.employeeId });
 		if (!user) {
-			return res.status(404).json({ message: 'User not found' });
+			return res.status(404).json({ message: httpMessages.err_user_not_exist });
 		}
-		console.log('User found:', user);
 
 		res.json(user);
 	} catch (err) {
@@ -264,6 +282,8 @@ router.put('/users/:employeeId', auth, async (req, res) => {
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 
 		const { firstName, lastName, email, phone, role } = req.body;
+		if (!phone || !code || !firstName || !lastName || !email || !role)
+			return res.status(400).json({ message: httpMessages.err_missing_fields });
 		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
 			return res.status(403).json({ message: httpMessages.err_invalid_role});
 
@@ -273,11 +293,11 @@ router.put('/users/:employeeId', auth, async (req, res) => {
 			{ new: true }
 		);
 		if (!updatedUser) {
-			return res.status(404).json({ message: 'User not found' });
+			return res.status(404).json({ message: httpMessages.err_user_not_exist });
 		}
 
 		res.json({
-			message: 'Profile updated successfully',
+			message: httpMessages.success_updated_user,
 			user: updatedUser
 		});
 	} catch (err) {
@@ -300,7 +320,7 @@ router.get('/users/by-id/:id', auth, async (req, res) => {
 
 		const user = await User.findById(req.params.id);
 		if (!user) {
-			return res.status(404).json({ message: 'User not found' });
+			return res.status(404).json({ message: httpMessages.err_user_not_exist });
 		}
 		console.log('User found:', user);
 
@@ -333,11 +353,11 @@ router.put('/users/by-id/:id', auth, async (req, res) => {
 			{ new: true }
 		);
 		if (!updatedUser) {
-			return res.status(404).json({ message: 'User not found' });
+			return res.status(404).json({ message: httpMessages.err_user_not_exist });
 		}
 
 		res.json({
-			message: 'Profile updated successfully',
+			message: httpMessages.success_updated_user,
 			user: updatedUser
 		});
 	} catch (err) {
