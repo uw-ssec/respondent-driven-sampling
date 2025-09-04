@@ -1,27 +1,116 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 
 import {
 	Navigate,
+	Outlet,
 	Route,
 	BrowserRouter as Router,
 	Routes
 } from 'react-router-dom';
 
-import SurveyComponent from '@/components/survey/SurveyComponent';
-import NewUser from '@/pages/AdminDashboard/NewUser';
-import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
-import QrPage from '@/pages/CompletedSurvey/QrPage';
-import LandingPage from '@/pages/LandingPage/LandingPage';
-import Login from '@/pages/Login/Login';
-import PastEntries from '@/pages/PastEntries/PastEntries';
-import SurveyDetails from '@/pages/PastEntries/SurveyDetails';
-import AdminEditProfile from '@/pages/Profile/AdminEditProfile';
-import ViewProfile from '@/pages/Profile/ViewProfile';
-import ApplyReferral from '@/pages/QRCodeScan&Referral/ApplyReferral';
-import Signup from '@/pages/Signup/Signup';
-import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
-
 import { deleteAuthToken, hasAuthToken } from './utils/authTokenHandler';
+
+// Lazy load components
+const Login = lazy(() => import('@/pages/Login/Login'));
+const Signup = lazy(() => import('@/pages/Signup/Signup'));
+const LandingPage = lazy(() => import('@/pages/LandingPage/LandingPage'));
+const SurveyComponent = lazy(
+	() => import('@/components/survey/SurveyComponent')
+);
+const AdminDashboard = lazy(
+	() => import('@/pages/AdminDashboard/StaffDashboard')
+);
+const AdminEditProfile = lazy(() => import('@/pages/Profile/AdminEditProfile'));
+const NewUser = lazy(() => import('@/pages/AdminDashboard/NewUser'));
+const SurveyEntryDashboard = lazy(
+	() => import('@/pages/SurveyEntryDashboard/SurveyEntryDashboard')
+);
+const QrPage = lazy(() => import('@/pages/CompletedSurvey/QrPage'));
+const PastEntries = lazy(() => import('@/pages/PastEntries/PastEntries'));
+const SurveyDetails = lazy(() => import('@/pages/PastEntries/SurveyDetails'));
+const ApplyReferral = lazy(
+	() => import('@/pages/QRCodeScan&Referral/ApplyReferral')
+);
+const ViewProfile = lazy(() => import('@/pages/Profile/ViewProfile'));
+
+const privateRoutes = [
+	{
+		path: '/dashboard',
+		component: LandingPage,
+		title: 'Dashboard'
+	},
+	{
+		path: '/survey',
+		component: SurveyComponent,
+		title: 'Survey'
+	},
+	{
+		path: '/admin-dashboard',
+		component: AdminDashboard,
+		title: 'Admin Dashboard'
+	},
+	{
+		path: '/admin-edit-profile/:id',
+		component: AdminEditProfile,
+		title: 'Edit Profile'
+	},
+	{
+		path: '/add-new-user',
+		component: NewUser,
+		title: 'Add New User'
+	},
+	{
+		path: '/survey-entries',
+		component: SurveyEntryDashboard,
+		title: 'Survey Entries'
+	},
+	{
+		path: '/qrcode',
+		component: QrPage,
+		title: 'QR Code'
+	},
+	{
+		path: '/past-entries',
+		component: PastEntries,
+		title: 'Past Entries'
+	},
+	{
+		path: '/survey/:id',
+		component: SurveyDetails,
+		title: 'Survey Details'
+	},
+	{
+		path: '/apply-referral',
+		component: ApplyReferral,
+		title: 'Apply Referral'
+	},
+	{
+		path: '/view-profile',
+		component: ViewProfile,
+		title: 'View Profile'
+	}
+];
+
+// PrivateRoute component
+const PrivateRoute = ({
+	isAuthenticated,
+	onLogout
+}: {
+	isAuthenticated: boolean;
+	onLogout: () => void;
+}) => {
+	if (!isAuthenticated) {
+		return <Navigate to="/login" replace />;
+	}
+	return <Outlet context={{ onLogout }} />;
+};
+
+// Loading component
+const LoadingSpinner = () => (
+	<div className="loading-container">
+		<div>Loading...</div>
+	</div>
+);
 
 function App() {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(hasAuthToken());
@@ -37,124 +126,39 @@ function App() {
 
 	return (
 		<Router>
-			<Routes>
-				<Route path="/" element={<Navigate replace to="/login" />} />
-				<Route
-					path="/login"
-					element={<Login onLogin={handleLogin} />}
-				/>
-				<Route path="/signup" element={<Signup />} />
-				<Route
-					path="/dashboard"
-					element={
-						isLoggedIn ? (
-							<LandingPage onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/survey"
-					element={
-						isLoggedIn ? (
-							<SurveyComponent onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/admin-dashboard"
-					element={
-						isLoggedIn ? (
-							<AdminDashboard onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/admin-edit-profile/:id"
-					element={
-						isLoggedIn ? (
-							<AdminEditProfile onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/add-new-user"
-					element={
-						isLoggedIn ? (
-							<NewUser onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/survey-entries"
-					element={
-						isLoggedIn ? (
-							<SurveyEntryDashboard onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/qrcode"
-					element={
-						isLoggedIn ? (
-							<QrPage onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/past-entries"
-					element={
-						isLoggedIn ? (
-							<PastEntries onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/survey/:id"
-					element={
-						isLoggedIn ? (
-							<SurveyDetails onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/apply-referral"
-					element={
-						isLoggedIn ? (
-							<ApplyReferral onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/view-profile"
-					element={
-						isLoggedIn ? (
-							<ViewProfile onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-			</Routes>
+			<Suspense fallback={<LoadingSpinner />}>
+				<Routes>
+					{/* Default route */}
+					<Route
+						path="/"
+						element={<Navigate replace to="/login" />}
+					/>
+
+					<Route
+						path="/login"
+						element={<Login onLogin={handleLogin} />}
+					/>
+					<Route path="/signup" element={<Signup />} />
+
+					{/* Protected routes */}
+					<Route
+						element={
+							<PrivateRoute
+								isAuthenticated={isLoggedIn}
+								onLogout={handleLogout}
+							/>
+						}
+					>
+						{privateRoutes.map(({ path, component: Component }) => (
+							<Route
+								key={path}
+								path={path}
+								element={<Component onLogout={handleLogout} />}
+							/>
+						))}
+					</Route>
+				</Routes>
+			</Suspense>
 		</Router>
 	);
 }
