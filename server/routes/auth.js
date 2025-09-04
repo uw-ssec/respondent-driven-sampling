@@ -197,11 +197,14 @@ router.put('/users/:id/approve', auth, async (req, res) => {
 
 // ─── For Admin to PreAuthorize  ───────────────────────────────────────
 router.post('/preapprove', auth, async (req, res) => {
-	if (req.decodedAuthToken.role != 'Admin') {
-		return res.sendStatus(403);
-	}
 	try {
+		// Check if user has approval perms and that new user isn't a role above
+		// the creating user.
+		if (!hasPermission(req.permissions, 'approve_user', 'All'))
+			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 		const { firstName, lastName, email, phone, role } = req.body;
+		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
+			return res.status(403).json({ message: httpMessages.err_invalid_role});
 		if (await User.findOne({ phone })) {
 			return res
 				.status(400)
@@ -227,18 +230,19 @@ router.post('/preapprove', auth, async (req, res) => {
 
 // ─── View Profile   ───────────────────────────────────────
 router.get('/users/:employeeId', auth, async (req, res) => {
-	if (
-		!['Admin', 'Manager'].includes(req.decodedAuthToken.role) &&
-		req.decodedAuthToken.employeeId != req.params.employeeId
-	) {
-		return res.sendStatus(403);
-	}
 	try {
+		// Check if the user has view all profiles perms or if the 
+		// user is viewing their own profile with view self profile perms.
+		if ((req.decodedAuthToken.employeeId != req.params.employeeId || // Not viewing self
+			!hasPermission(req.permissions, 'view_profile', 'Self')) &&  // Doesn't have self view perms
+			!hasPermission(req.permissions, 'view_profile', 'All'))      // Doesn't have global view perms
+			return res.status(403).json({ message: httpMessages.err_invalid_perms});
+
 		const user = await User.findOne({ employeeId: req.params.employeeId });
-		console.log('User found:', user);
 		if (!user) {
 			return res.status(404).json({ message: 'User not found' });
 		}
+		console.log('User found:', user);
 
 		res.json(user);
 	} catch (err) {
@@ -251,21 +255,23 @@ router.get('/users/:employeeId', auth, async (req, res) => {
 
 // ─── Edit User Profile  ───────────────────────────────────────
 router.put('/users/:employeeId', auth, async (req, res) => {
-	if (
-		req.decodedAuthToken.role != 'Admin' &&
-		req.decodedAuthToken.employeeId != req.params.employeeId
-	) {
-		return res.sendStatus(403);
-	}
 	try {
+		// Check if the user has edit profile perms or if the user is
+		// editing their own profile and has permission to edit their profile.
+		if ((req.decodedAuthToken.employeeId != req.params.employeeId || // Not editing self
+			!hasPermission(req.permissions, 'edit_profile', 'Self')) &&  // Doesn't have self edit perms
+			!hasPermission(req.permissions, 'edit_profile', 'All'))      // Doesn't have global edit perms
+			return res.status(403).json({ message: httpMessages.err_invalid_perms});
+
 		const { firstName, lastName, email, phone, role } = req.body;
+		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
+			return res.status(403).json({ message: httpMessages.err_invalid_role});
 
 		const updatedUser = await User.findOneAndUpdate(
 			{ employeeId: req.params.employeeId },
 			{ firstName, lastName, email, phone, role },
 			{ new: true }
 		);
-
 		if (!updatedUser) {
 			return res.status(404).json({ message: 'User not found' });
 		}
@@ -284,15 +290,19 @@ router.put('/users/:employeeId', auth, async (req, res) => {
 
 // ─── View Profile by _id ───────────────────────────────────────
 router.get('/users/by-id/:id', auth, async (req, res) => {
-	if (req.decodedAuthToken.role != 'Admin') {
-		return res.sendStatus(403);
-	}
 	try {
+		// Check if the user has view all profiles perms or if the 
+		// user is viewing their own profile with view self profile perms.
+		if ((req.requestorID != req.params.id || 					    // Not viewing self
+			!hasPermission(req.permissions, 'view_profile', 'Self')) && // Doesn't have self view perms
+			!hasPermission(req.permissions, 'view_profile', 'All'))     // Doesn't have global view perms
+			return res.status(403).json({ message: httpMessages.err_invalid_perms});
+
 		const user = await User.findById(req.params.id);
-		console.log('User found:', user);
 		if (!user) {
 			return res.status(404).json({ message: 'User not found' });
 		}
+		console.log('User found:', user);
 
 		res.json(user);
 	} catch (err) {
@@ -305,18 +315,23 @@ router.get('/users/by-id/:id', auth, async (req, res) => {
 
 // ─── Edit User Profile by _id ───────────────────────────────────────
 router.put('/users/by-id/:id', auth, async (req, res) => {
-	if (req.decodedAuthToken.role != 'Admin') {
-		return res.sendStatus(403);
-	}
 	try {
+		// Check if the user has edit profile perms or if the user is
+		// editing their own profile and has permission to edit their profile.
+		if ((req.requestorID != req.params.id || 					    // Not editing self
+			!hasPermission(req.permissions, 'edit_profile', 'Self')) && // Doesn't have self edit perms
+			!hasPermission(req.permissions, 'edit_profile', 'All'))     // Doesn't have global edit perms
+			return res.status(403).json({ message: httpMessages.err_invalid_perms});
+
 		const { firstName, lastName, email, phone, role } = req.body;
+		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
+			return res.status(403).json({ message: httpMessages.err_invalid_role});
 
 		const updatedUser = await User.findByIdAndUpdate(
 			req.params.id,
 			{ firstName, lastName, email, phone, role },
 			{ new: true }
 		);
-
 		if (!updatedUser) {
 			return res.status(404).json({ message: 'User not found' });
 		}

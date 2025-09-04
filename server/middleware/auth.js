@@ -36,8 +36,9 @@ async function auth(req, res, next) {
 					'User account not approved yet. Please contact your admin.'
 			});
 		}
-		// Add permission list to request
+		// Add permission list to request and user id
 		req.permissions = user.permissions;
+		req.requestorID = user.id;
 		next();
 	} catch (err) {
 		return res.status(401).json({ message: `Invalid Token: ${err.name}` });
