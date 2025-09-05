@@ -118,7 +118,7 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 			const data = await response.json();
 
 			if (response.ok) {
-				navigate('/survey', { state: { referralCode } });
+				navigate(`/survey?ref=${referralCode}`);
 			} else if (response.status == 401) {
 				// Token Error, either expired or invalid for some other reason.
 				// Log user out so they can relogin to generate a new valid token
