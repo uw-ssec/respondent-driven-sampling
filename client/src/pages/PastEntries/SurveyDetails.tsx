@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import Header from '@/pages/Header/Header';
 
@@ -11,6 +11,7 @@ import { Survey } from '@/types/Survey';
 
 export default function SurveyDetails({ onLogout }: LogoutProps) {
 	const { id } = useParams();
+	const navigate = useNavigate();
 	const [survey, setSurvey] = useState<Survey>();
 	const [loading, setLoading] = useState(true);
 
@@ -170,6 +171,15 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 								.join('\n\n')}
 					</pre>
 				</div>
+				{/* Edit Pre-screen Questions Button */}
+				<button
+					className="edit-button"
+					onClick={() =>
+						navigate(`/survey/${id}/edit`)
+					}
+				>
+					Edit Prescreen Responses
+				</button>
 			</div>
 		</div>
 	);
