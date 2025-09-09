@@ -5,6 +5,11 @@ import { Survey } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
+import {
+	getAuthToken,
+	getEmployeeId,
+	getFirstName
+} from '@/utils/authTokenHandler';
 import { useGeolocated } from 'react-geolocated';
 
 import { LogoutProps } from '@/types/AuthProps';
@@ -37,15 +42,15 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
     userDecisionTimeout: 5000
   });
 
-  // Persist survey objectId in localStorage
+  // Persist survey objectId in localStorage at init
   localStorage.setItem('objectId', '');
 
   // 1) Load employee info from localStorage
   useEffect(() => {
-    const storedId = localStorage.getItem('employeeId');
-    const storedName = localStorage.getItem('firstName');
-    if (storedId) setEmployeeId(storedId);
-    if (storedName) setEmployeeName(storedName);
+    const storedEmployeeId = getEmployeeId();
+    const storedFirstName = getFirstName();
+    if (storedEmployeeId) setEmployeeId(storedEmployeeId);
+    if (storedFirstName) setEmployeeName(storedFirstName);
   }, []);
 
   // 2) Fetch survey data if id is present
@@ -99,7 +104,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
     if (codeFromState) {
       setReferredByCode(codeFromState);
       validateReferralCode(codeFromState);
-      return; // Skip reading from URL if we have it in state
+      return;
     }
 
     const codeInUrl = searchParams.get('ref');
@@ -109,12 +114,20 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
     }
   }, [location.state, searchParams]);
 
-  // Function to validate referral code
+  // Function to validate referral code (with token + logout handling)
   async function validateReferralCode(code: string) {
     try {
-      const res = await fetch(`/api/surveys/validate-ref/${code}`);
-      if (!res.ok) {
-        const errData = await res.json();
+      const token = getAuthToken();
+      const response = await fetch(`/api/surveys/validate-ref/${code}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          onLogout();
+          navigate('/login');
+          return;
+        }
+        const errData = await response.json();
         alert(errData.message || 'Invalid referral code. Please check again.');
         setReferredByCode(null);
         setIsReferralValid(false);
@@ -172,6 +185,52 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 						}
 					]
 				},
+				// Consent Page
+				{
+					name: 'consent_page',
+					title: 'Consent Confirmation',
+					elements: [
+						{
+							type: 'html',
+							name: 'consent-instructions',
+							html: '<div><strong>Please ask the respondent if they are above the age of 18. The survey will end if they are not at least 18 years old.</strong></div>'
+						},
+						{
+							type: 'radiogroup',
+							name: 'age_for_consent',
+							title: 'Is the respondent at least 18?',
+							choices: ['Yes', 'No'],
+							isRequired: true
+						},
+						{
+							type: 'html',
+							name: 'consent-note',
+							html: `<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>
+        <p>Participation in research is voluntary. The decision to participate, or not participate, is entirely up to you. You have the right to decline to participate in, or withdraw from, this study at any point without penalty or loss of benefits to which you already receive or to which you are entitled.</p>
+        <p>This study has been explained to me and I understand. I volunteer to take part in this research. I have had the opportunity to ask questions. If I have questions later about the research, or if I have been harmed by participating in this study, I can contact one of the researchers listed on the first page of this consent form. If I have questions about my rights as a research subject, I can call the Human Subjects Division at (206) 543-0098. I will receive a copy of this consent form.</p>
+        <p><strong>Let the respondent know that the survey will end here if they do not give consent.</strong></p>`,
+							visibleIf: "{age_for_consent} = 'Yes'"
+						},
+						{
+							type: 'radiogroup',
+							name: 'consent_given',
+							title: 'Did the subject orally consent to participate?',
+							choices: ['Yes', 'No'],
+							isRequired: true,
+							visibleIf: "{age_for_consent} = 'Yes'"
+						}
+					],
+					triggers: [
+						{
+							type: 'complete',
+							expression: "{age_for_consent} = 'No'"
+						},
+						{
+							type: 'complete',
+							expression: "{consent_given} = 'No'"
+						}
+					]
+				},
 				// Pre-Screening Respondent
 				{
 					name: 'pre-screen-2',
@@ -219,51 +278,6 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 							title: 'Can we message the respondent regarding survey results?',
 							choices: ['Yes', 'No'],
 							isRequired: true
-						}
-					]
-				},
-				{
-					name: 'consent_page',
-					title: 'Consent Confirmation',
-					elements: [
-						{
-							type: 'html',
-							name: 'consent-instructions',
-							html: '<div><strong>Please ask the respondent if they are above the age of 18. The survey will end if they are not at least 18 years old.</strong></div>'
-						},
-						{
-							type: 'radiogroup',
-							name: 'age_for_consent',
-							title: 'Is the respondent at least 18?',
-							choices: ['Yes', 'No'],
-							isRequired: true
-						},
-						{
-							type: 'html',
-							name: 'consent-note',
-							html: `<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>
-        <p>Participation in research is voluntary. The decision to participate, or not participate, is entirely up to you. You have the right to decline to participate in, or withdraw from, this study at any point without penalty or loss of benefits to which you already receive or to which you are entitled.</p>
-        <p>This study has been explained to me and I understand. I volunteer to take part in this research. I have had the opportunity to ask questions. If I have questions later about the research, or if I have been harmed by participating in this study, I can contact one of the researchers listed on the first page of this consent form. If I have questions about my rights as a research subject, I can call the Human Subjects Division at (206) 543-0098. I will receive a copy of this consent form.</p>
-        <p><strong>Let the respondent know that the survey will end here if they do not give consent.</strong></p>`,
-							visibleIf: "{age_for_consent} = 'Yes'"
-						},
-						{
-							type: 'radiogroup',
-							name: 'consent_given',
-							title: 'Did the subject orally consent to participate?',
-							choices: ['Yes', 'No'],
-							isRequired: true,
-							visibleIf: "{age_for_consent} = 'Yes'"
-						}
-					],
-					triggers: [
-						{
-							type: 'complete',
-							expression: "{age_for_consent} = 'No'"
-						},
-						{
-							type: 'complete',
-							expression: "{consent_given} = 'No'"
 						}
 					]
 				},
@@ -1083,152 +1097,163 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		[]
 	);
 
-	useEffect(() => {
-		const pushHistoryState = (pageNo: number) => {
-			const currentState = window.history.state;
-			if (!currentState || currentState.pageNo !== pageNo) {
-				window.history.pushState({ pageNo }, '', window.location.pathname);
-			}
-		};
+  // 5) Initialize survey, add autosave + submit handlers
+  useEffect(() => {
+    const pushHistoryState = (pageNo: number) => {
+      const currentState = window.history.state;
+      if (!currentState || currentState.pageNo !== pageNo) {
+        window.history.pushState({ pageNo }, '', window.location.pathname);
+      }
+    };
 
-		const initSurvey = async () => {
-			const survey = new Model(surveyJson);
+    const initSurvey = async () => {
+      const survey = new Model(surveyJson);
 
-			if (id) {
-				try {
-					const role = localStorage.getItem('role') || '';
-					const empId = localStorage.getItem('employeeId') || '';
-					const res = await fetch(`/api/surveys/${id}`, {
-						headers: {
-							'x-user-role': role,
-							'x-employee-id': empId
-						}
-					});
-					if (res.ok) {
-						const savedSurvey = await res.json();
-						if (savedSurvey.responses) {
-							survey.data = savedSurvey.responses;
-						}
-						localStorage.setItem('objectId', savedSurvey._id);
-					}
-				} catch (err) {
-					console.error('Failed to load in-progress survey', err);
-				}
-			}
+      if (id) {
+        try {
+          const role = localStorage.getItem('role') || '';
+          const empId = localStorage.getItem('employeeId') || '';
+          const res = await fetch(`/api/surveys/${id}`, {
+            headers: {
+              'x-user-role': role,
+              'x-employee-id': empId
+            }
+          });
+          if (res.ok) {
+            const savedSurvey = await res.json();
+            if (savedSurvey.responses) {
+              survey.data = savedSurvey.responses;
+            }
+            localStorage.setItem('objectId', savedSurvey._id);
+          }
+        } catch (err) {
+          console.error('Failed to load in-progress survey', err);
+        }
+      }
 
-			surveyRef.current = survey;
-			pushHistoryState(survey.currentPageNo);
+      surveyRef.current = survey;
+      pushHistoryState(survey.currentPageNo);
 
-			survey.onCurrentPageChanged.add(async sender => {
-				const currentPageNo = sender.currentPageNo;
-				pushHistoryState(currentPageNo);
+      // Autosave on page change
+      survey.onCurrentPageChanged.add(async sender => {
+        const surveyData = {
+          employeeId: employeeId || 'TEST-ID',
+          employeeName: employeeName || 'Test User',
+          responses: sender.data || {},
+          referredByCode: isReferralValid ? referredByCode : null,
+          coords: coords || { latitude: 0, longitude: 0 },
+          objectId: localStorage.getItem('objectId')
+        };
 
-				const surveyData = {
-					employeeId: employeeId || 'TEST-ID',
-					employeeName: employeeName || 'Test User',
-					responses: sender.data || {},
-					referredByCode: isReferralValid ? referredByCode : null,
-					coords: coords || { latitude: 0, longitude: 0 },
-					objectId: localStorage.getItem('objectId')
-				};
+        try {
+          const response = await fetch('/api/surveys/autosave', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(surveyData)
+          });
+          if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('objectId', data.objectId);
+          }
+        } catch (error) {
+          console.error('Autosave failed:', error);
+        }
+      });
 
-				try {
-					const response = await fetch('/api/surveys/autosave', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(surveyData)
-					});
-					if (response.ok) {
-						const data = await response.json();
-						localStorage.setItem('objectId', data.objectId);
-					}
-				} catch (error) {
-					console.error('Request failed:', error);
-				}
-			});
+      // Submit on complete
+      survey.onComplete.add(async sender => {
+        const surveyData = {
+          employeeId: employeeId || 'TEST-ID',
+          employeeName: employeeName || 'Test User',
+          responses: sender.data || {},
+          referredByCode: isReferralValid ? referredByCode : null,
+          coords: coords || { latitude: 0, longitude: 0 },
+          objectId: localStorage.getItem('objectId')
+        };
 
-			survey.onComplete.add(async sender => {
-				const surveyData = {
-					employeeId: employeeId || 'TEST-ID',
-					employeeName: employeeName || 'Test User',
-					responses: sender.data || {},
-					referredByCode: isReferralValid ? referredByCode : null,
-					coords: coords || { latitude: 0, longitude: 0 },
-					objectId: localStorage.getItem('objectId')
-				};
+        try {
+          const token = getAuthToken();
+          const response = await fetch('/api/surveys/submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(surveyData)
+          });
+          if (response.ok) {
+            const data = await response.json();
+            navigate('/qrcode', { state: { referralCodes: data.referralCodes } });
+          } else if (response.status === 401) {
+            onLogout();
+            navigate('/login');
+            return;
+          } else {
+            console.error('Error saving survey:', await response.text());
+          }
+        } catch (error) {
+          console.error('Submit failed:', error);
+        }
+      });
+    };
 
-				try {
-					const response = await fetch('/api/surveys/submit', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(surveyData)
-					});
-					if (response.ok) {
-						const data = await response.json();
-						navigate('/qrcode', { state: { referralCodes: data.referralCodes } });
-					}
-				} catch (error) {
-					console.error('Request failed:', error);
-				}
-			});
-		};
+    initSurvey();
+  }, [id, employeeId, employeeName, isReferralValid, referredByCode, coords, navigate, surveyJson]);
 
-		initSurvey();
-	}, [id, employeeId, employeeName, isReferralValid, referredByCode, coords, navigate, surveyJson]);
+  // Handle browser back/forward for survey pages
+  useEffect(() => {
+    const handlePopState = (event: { state: { pageNo: any } }) => {
+      const survey = surveyRef.current;
+      if (!survey) return;
+      const currentPageNo = survey.currentPageNo;
+      const targetPageNo = event.state?.pageNo;
+      if (typeof targetPageNo !== 'number') return;
+      if (targetPageNo < currentPageNo) survey.prevPage();
+      else if (targetPageNo > currentPageNo) survey.nextPage();
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
-	useEffect(() => {
-		const handlePopState = (event: { state: { pageNo: any } }) => {
-			const survey = surveyRef.current;
-			if (!survey) return;
-			const currentPageNo = survey.currentPageNo;
-			const targetPageNo = event.state?.pageNo;
-			if (typeof targetPageNo !== 'number') return;
-			if (targetPageNo < currentPageNo) survey.prevPage();
-			else if (targetPageNo > currentPageNo) survey.nextPage();
-		};
-		window.addEventListener('popstate', handlePopState);
-		return () => window.removeEventListener('popstate', handlePopState);
-	}, []);
+  if (loading) return <p>Loading survey...</p>;
+  if (id && !surveyData) return <p>Survey not found.</p>;
 
-	if (loading) return <p>Loading survey...</p>;
-	if (id && !surveyData) return <p>Survey not found.</p>;
-
-	return (
-		<>
-			<Header onLogout={onLogout} />
-			<div style={{ padding: '20px' }}>
-				{surveyRef.current && <Survey model={surveyRef.current} />}
-				<div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '12px' }}>
-					<div
-						onClick={() => {
-							if (surveyRef.current && surveyRef.current.currentPageNo > 0) {
-								surveyRef.current.prevPage();
-							}
-						}}
-						style={{ cursor: 'pointer' }}
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36px" height="36px">
-							<circle cx="12" cy="12" r="10" fill="#3E236E" />
-							<path d="M14 7l-5 5 5 5" stroke="white" strokeWidth="2" fill="none" />
-						</svg>
-					</div>
-					<div
-						onClick={() => {
-							if (surveyRef.current && !surveyRef.current.isLastPage) {
-								surveyRef.current.nextPage();
-							}
-						}}
-						style={{ cursor: 'pointer' }}
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36px" height="36px">
-							<circle cx="12" cy="12" r="10" fill="#3E236E" />
-							<path d="M10 7l5 5-5 5" stroke="white" strokeWidth="2" fill="none" />
-						</svg>
-					</div>
-				</div>
-			</div>
-		</>
-	);
+  return (
+    <>
+      <Header onLogout={onLogout} />
+      <div style={{ padding: '20px' }}>
+        {surveyRef.current && <Survey model={surveyRef.current} />}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '12px' }}>
+          <div
+            onClick={() => {
+              if (surveyRef.current && surveyRef.current.currentPageNo > 0) {
+                surveyRef.current.prevPage();
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36px" height="36px">
+              <circle cx="12" cy="12" r="10" fill="#3E236E" />
+              <path d="M14 7l-5 5 5 5" stroke="white" strokeWidth="2" fill="none" />
+            </svg>
+          </div>
+          <div
+            onClick={() => {
+              if (surveyRef.current && !surveyRef.current.isLastPage) {
+                surveyRef.current.nextPage();
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36px" height="36px">
+              <circle cx="12" cy="12" r="10" fill="#3E236E" />
+              <path d="M10 7l5 5-5 5" stroke="white" strokeWidth="2" fill="none" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default SurveyComponent;

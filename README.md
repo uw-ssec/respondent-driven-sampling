@@ -2,8 +2,10 @@
 
 The RDS App is a secure, accessible, and open-source web application that streamlines data collection for homelessness research using **Respondent-Driven Sampling (RDS)**. Developed in collaboration with the University of Washington iSchool and the King County Regional Homelessness Authority (KCRHA), this app enables volunteers and administrators to collect accurate survey data, track referrals, and generate population estimates more effectively than traditional Point-In-Time (PIT) counts.
 
-> 📍 **Live Deployment:** [Link to App](https://rdspitapp-b5aqd7czezfggta2.westus-01.azurewebsites.net/login)
-> 🧠 **Research-Driven:** Based on field-tested RDS methodologies  
+> 📍 **Live Deployment:** [Link to App](https://rds-main-g6e3dpefdabmcmca.westus-01.azurewebsites.net/login)
+
+> 🧠 **Research-Driven:** Based on field-tested RDS methodologies
+
 > 🔐 **Secure & Compliant:** Built with HIPAA and HUD compliance in mind
 
 ## 📄 Project Documentation
@@ -16,14 +18,14 @@ This document outlines critical decisions, technical diagrams, and recommendatio
 
 ## Tech Stack
 
-| Layer        | Technology |
-|--------------|------------|
-| Frontend     | React, HTML/CSS, JavaScript |
-| Backend      | Node.js, Express.js |
-| Database     | MongoDB |
-| Auth         | Twilio |
-| Hosting      | Azure Web Service |
-| QR Scanning  | Html5QrcodeScanner, QRCodeCanvas |
+| Layer       | Technology                       |
+| ----------- | -------------------------------- |
+| Frontend    | React, HTML/CSS, JavaScript      |
+| Backend     | Node.js, Express.js              |
+| Database    | MongoDB                          |
+| Auth        | Twilio                           |
+| Hosting     | Azure Web Service                |
+| QR Scanning | Html5QrcodeScanner, QRCodeCanvas |
 
 ## Directory
 
@@ -116,13 +118,13 @@ server/                   # Backend code
 │   ├── database.test.js
 │   └── server.test.js
 ├── models/               # Mongoose schemas
-│   └── __tests__/                 # Models tests 
+│   └── __tests__/                 # Models tests
 │       ├── Survey.test.js
 │       └── Users.test.js
 │   ├── Survey.js                         # Survey entries with responses and geolocation
 │   └── Users.js                          # User accounts, roles, and hashed passwords
 ├── routes/               # API routes
-│   ├── __tests__/                 # Routes tests 
+│   ├── __tests__/                 # Routes tests
 │   │   ├── auth.test.js
 │   │   ├── pages.test.js
 │   │   └── surveys.test.js
@@ -130,7 +132,7 @@ server/                   # Backend code
 │   ├── pages.js                          # Future page-level routing logic
 │   └── surveys.js                        # Routes to submit, validate, and fetch surveys
 ├── utils/
-│   ├── __tests__/                 # Utils tests                 
+│   ├── __tests__/                 # Utils tests
 │   │   └── generateReferralCode.test.js
 │   └── generateReferralCode.js           # Utility to generate unique referral codes
 ├── database.js                           # Mongoose DB connection init
@@ -145,56 +147,65 @@ server/                   # Backend code
 ### 🔧 Local Development
 
 1. **Clone Repo**
+
 ```bash
 git clone <repository>
 cd <repository>
 ```
 
 2. **Set Environment Variables**
-Copy paste `.env.example` as `.env` in `client` and `server` folders, and paste the neccessary environment values. 
+   Copy paste `.env.example` as `.env` in the `server` directory, and paste the neccessary environment values.
 
-2. **Backend Setup**
+3. **Install Packages**
+
 ```bash
-cd server
 npm install
-node index.js
 ```
 
-3. **Frontend Setup**
+4. **Start Backend Server**
+
 ```bash
-cd ../client
-npm install
 npm start
 ```
 
-4. **Visit App**
+5. **Start Frontend Dev Server** (In seperate terminal)
+
 ```bash
-localhost:3000
+cd client
+npm run dev
 ```
 
+6. **Visit App** at http://localhost:3000.
+
 ## Future Directions
+
 The items listed below are features our team has identified out of scope for the duration of our project. These items are still considered high importance for the project as a whole, and are highly recommended as a jumping off point for teams taking over the project in the future.
 
 **App Features**
+
 - Auto-populate location using GPS location coordinates
 - Widget for staff to comment on survey responses
 - Integration with Homeless Management Information System (HMIS) database system
 - Volunteer scheduling dashboard for administrators
-- Automated SMS gift card distribution 
+- Automated SMS gift card distribution
 - Resume unfinished survey feature
 - Admin ability to edit survey questions
 - Volunteer ability to edit survey responses
 - Survey analytics dashboard
 
 **Testing**
+
 - Dynamic Application Security Testing (DAST)
 
 **User Experience**
 -Step-by-step user training guide
+
 - Setup wizard
 
 ## Contributors
+
 Thanks to the following people for their work on this project.
+
 - Ihsan Kahveci
 - June Yang
 - Emily Porter

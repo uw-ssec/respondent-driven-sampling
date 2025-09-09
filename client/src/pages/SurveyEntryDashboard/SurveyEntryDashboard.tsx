@@ -6,11 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/pages/Header/Header';
 import '@/styles/SurveyDashboard.css';
 
-import filter from '@/assets/filter.png';
-import trash from '@/assets/trash.png';
+import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
 
 import { LogoutProps } from '@/types/AuthProps';
 import { Survey } from '@/types/Survey';
+import filter from '@/assets/filter.png';
+import trash from '@/assets/trash.png';
 
 export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();
@@ -56,21 +57,29 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 	useEffect(() => {
 		(async () => {
 			try {
-				const role = localStorage.getItem('role') || '';
-				const employeeId = localStorage.getItem('employeeId') || '';
-				const res = await fetch('/api/surveys/all', {
+				const role = getRole();
+				const employeeId = getEmployeeId();
+
+				const token = getAuthToken();
+				const response = await fetch('/api/surveys/all', {
 					headers: {
 						'x-user-role': role,
-						'x-employee-id': employeeId
+						'x-employee-id': employeeId,
+						Authorization: `Bearer ${token}`
 					}
 				});
-				if (res.ok) {
-					const data = await res.json();
-					setSurveys(data);
-				} else {
-					console.error('Failed to fetch surveys.');
-				}
-			} catch (e) {
+        if (response.ok) {
+          const data = await response.json();
+          setSurveys(data);
+        } else if (response.status === 401) {
+          // Token expired, log out user
+          onLogout();
+          navigate('/login');
+          return;
+          } else {
+            console.error('Failed to fetch surveys.');
+          }
+        } catch (e) {
 				console.error('Error fetching surveys:', e);
 			} finally {
 				setLoading(false);

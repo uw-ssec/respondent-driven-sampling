@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/LandingPage.css';
 
+import { getFirstName, getRole } from '@/utils/authTokenHandler';
+
 import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
-
-// Description: landing page shown after user logs in
 
 export default function LandingPage({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();
@@ -16,8 +16,8 @@ export default function LandingPage({ onLogout }: LogoutProps) {
 
 	// useEffect to retrieve firstName and role from localStorage
 	useEffect(() => {
-		const storedFirstName = localStorage.getItem('firstName');
-		const storedRole = localStorage.getItem('role');
+		const storedFirstName = getFirstName();
+		const storedRole = getRole();
 
 		if (storedFirstName) {
 			setFirstName(storedFirstName);
@@ -31,7 +31,6 @@ export default function LandingPage({ onLogout }: LogoutProps) {
 	// Function to handle logout
 	const handleLogout = () => {
 		onLogout();
-		localStorage.removeItem('role');
 		navigate('/login');
 	};
 
