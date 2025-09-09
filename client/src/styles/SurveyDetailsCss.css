@@ -9,7 +9,8 @@
 }
 
 /* General styles for headings and paragraphs */
-.survey-info, .referral-info {
+.survey-info,
+.referral-info {
     margin-bottom: 20px;
     padding: 15px;
     background: white;
@@ -47,4 +48,17 @@ h3 {
     box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
     white-space: pre-wrap;
     word-wrap: break-word;
+}
+
+/* Edit Pre-Screen Responses Button */
+.edit-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #3e236e;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    margin-top: 10px;
 }

@@ -181,6 +181,15 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 								.join('\n\n')}
 					</pre>
 				</div>
+				{/* Edit Pre-screen Questions Button */}
+				<button
+					className="edit-button"
+					onClick={() =>
+						navigate(`/survey/${id}/edit`)
+					}
+				>
+					Edit Prescreen Responses
+				</button>
 			</div>
 		</div>
 	);
