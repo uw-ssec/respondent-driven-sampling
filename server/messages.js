@@ -1,5 +1,7 @@
 module.exports = {
-    err_missing_fields: "Missing required fields",
+    // ─── Error Messages ──────────────────────────────────────────
+    err_missing_fields: "Bad Request. Missing required fields",
+    err_invalid_fields: "Bad Request. Invalid fields",
     err_invalid_perms: "Access denied. Invalid user permissions",
     err_invalid_role: "Access denied. Insufficient user role",
     err_missing_token: "Access denied. No token provided",
@@ -18,6 +20,7 @@ module.exports = {
     err_invalid_code: "Invalid referral code.",
     err_used_code: "This referral code has already been used.",
     err_invalid_status: "Invalid status update.",
+    // ─── Success Messages ──────────────────────────────────────────
     success_delete: "Survey deleted successfully!",
     success_autosave: "Survey autosaved successfully!",
     success_submit: "Survey submitted successfully!",
@@ -26,5 +29,6 @@ module.exports = {
     success_login: "Login successful!",
     success_preapprove: "User registered successfully!",
     success_updated_user: "Profile updated successfully",
+    // ─── Info Messages ──────────────────────────────────────────
     info_autosave_root: "This survey is a root, cannot be autosaved.",
 }

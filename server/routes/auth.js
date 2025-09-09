@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/Users');
+const { User } = require('../models/Users');
 const { generateAuthToken } = require('../utils/authTokenHandler');
 const { auth } = require('../middleware/auth');
-const {generateEmployeeId, roleToNumberMap, hasPermission} = require('../utils/userUtils');
+const {generateEmployeeId, roleToNumberMap, hasPermission, validPermList } = require('../utils/userUtils');
 const httpMessages = require('../messages');
 
 const twilio = require('twilio');
@@ -17,7 +17,7 @@ const verifySid = process.env.TWILIO_VERIFY_SID;
 const client = twilio(accountSid, authToken);
 const verifyService = client.verify.v2.services(verifySid);
 
-// ─── Send OTP for SIGNUP ─────────────────────────────────────────────
+// ─── Send OTP for SIGNUP ────────────────────────────────────────────
 router.post('/send-otp-signup', async (req, res) => {
 	try {
 		const { phone, email } = req.body;
@@ -42,7 +42,7 @@ router.post('/send-otp-signup', async (req, res) => {
 	}
 });
 
-// ─── Send OTP for LOGIN ──────────────────────────────────────────────
+// ─── Send OTP for LOGIN ─────────────────────────────────────────────
 router.post('/send-otp-login', async (req, res) => {
 	try {
 		const { phone, email } = req.body;
@@ -115,7 +115,7 @@ router.post('/verify-otp-signup', async (req, res) => {
 	}
 });
 
-// ─── Verify OTP for LOGIN ────────────────────────────────────────────
+// ─── Verify OTP for LOGIN ───────────────────────────────────────────
 router.post('/verify-otp-login', async (req, res) => {
 	try {
 		const { phone, code } = req.body;
@@ -211,7 +211,7 @@ router.put('/users/:id/approve', auth, async (req, res) => {
 	}
 });
 
-// ─── For Admin to PreAuthorize  ───────────────────────────────────────
+// ─── For Admin to PreAuthorize  ─────────────────────────────────────
 router.post('/preapprove', auth, async (req, res) => {
 	try {
 		// Check if user has approval perms and that new user isn't a role above
@@ -220,7 +220,7 @@ router.post('/preapprove', auth, async (req, res) => {
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 
 		const { firstName, lastName, email, phone, role } = req.body;
-		if (!phone || !code || !firstName || !lastName || !email || !role)
+		if (!phone || !firstName || !lastName || !email || !role)
 			return res.status(400).json({ message: httpMessages.err_missing_fields });
 		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
 			return res.status(403).json({ message: httpMessages.err_invalid_role});
@@ -247,7 +247,7 @@ router.post('/preapprove', auth, async (req, res) => {
 	}
 });
 
-// ─── View Profile   ───────────────────────────────────────
+// ─── View Profile   ─────────────────────────────────────────────────
 router.get('/users/:employeeId', auth, async (req, res) => {
 	try {
 		// Check if the user has view all profiles perms or if the 
@@ -271,7 +271,7 @@ router.get('/users/:employeeId', auth, async (req, res) => {
 	}
 });
 
-// ─── Edit User Profile  ───────────────────────────────────────
+// ─── Edit User Profile  ─────────────────────────────────────────────
 router.put('/users/:employeeId', auth, async (req, res) => {
 	try {
 		// Check if the user has edit profile perms or if the user is
@@ -282,7 +282,7 @@ router.put('/users/:employeeId', auth, async (req, res) => {
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 
 		const { firstName, lastName, email, phone, role } = req.body;
-		if (!phone || !code || !firstName || !lastName || !email || !role)
+		if (!phone || !firstName || !lastName || !email || !role)
 			return res.status(400).json({ message: httpMessages.err_missing_fields });
 		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
 			return res.status(403).json({ message: httpMessages.err_invalid_role});
@@ -308,7 +308,7 @@ router.put('/users/:employeeId', auth, async (req, res) => {
 	}
 });
 
-// ─── View Profile by _id ───────────────────────────────────────
+// ─── View Profile by _id ────────────────────────────────────────────
 router.get('/users/by-id/:id', auth, async (req, res) => {
 	try {
 		// Check if the user has view all profiles perms or if the 
@@ -343,19 +343,33 @@ router.put('/users/by-id/:id', auth, async (req, res) => {
 			!hasPermission(req.permissions, 'edit_profile', 'All'))     // Doesn't have global edit perms
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 
-		const { firstName, lastName, email, phone, role } = req.body;
+		const { firstName, lastName, email, phone, role, permissions } = req.body;
+		if ( !email || !phone || !role)
+			return res.status(400).json({ message: httpMessages.err_missing_fields });
 		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
 			return res.status(403).json({ message: httpMessages.err_invalid_role});
+		
+		const user = await User.findById(req.params.id);
+		if (!user) {
+			return res.status(404).json({ message: httpMessages.err_user_not_exist });
+		}
+
+		if (permissions) {
+			// There is no change_perms self permission, so don't check.
+			if (!hasPermission(req.permissions, 'change_perms', 'All'))
+				return res.status(403).json({ message: httpMessages.err_invalid_perms});
+			if (!validPermList(permissions))
+				return res.status(400).json({ message: httpMessages.err_invalid_fields});
+			user.perms = permissions;
+			user.save();
+		}
 
 		const updatedUser = await User.findByIdAndUpdate(
 			req.params.id,
 			{ firstName, lastName, email, phone, role },
 			{ new: true }
 		);
-		if (!updatedUser) {
-			return res.status(404).json({ message: httpMessages.err_user_not_exist });
-		}
-
+		
 		res.json({
 			message: httpMessages.success_updated_user,
 			user: updatedUser
@@ -367,5 +381,4 @@ router.put('/users/by-id/:id', auth, async (req, res) => {
 		});
 	}
 });
-
 module.exports = router;

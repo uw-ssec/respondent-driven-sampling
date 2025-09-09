@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config({ path: './.env' });
-const User = require('../models/Users');
+const { User } = require('../models/Users');
 const { verifyAuthToken } = require('../utils/authTokenHandler');
 const httpMessages = require('../messages');
 

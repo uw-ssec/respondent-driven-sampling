@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const permission_types = ['view_survey', 'delete_survey', 'change_perms', 'view_profile', 'edit_profile', 'approve_user']
+const limiter_types = ['Self', 'All']
+
 // Schema type for permissions of users.
 // Includes a limiter which defines how broadly the permission can be used.
 // Some combinations of limiters and perm type will not be used,
@@ -7,12 +10,12 @@ const mongoose = require('mongoose');
 const permissionSchema = new mongoose.Schema({
   type: { 
     type: String,
-    enum: ['view_survey', 'delete_survey', 'change_perms', 'view_profile', 'edit_profile', 'approve_user'],
+    enum: permission_types,
     required: true 
   },
   limiter: { 
     type: String,
-    enum: ['Self', 'All'],
+    enum: limiter_types,
     required: true
   }
 });
@@ -54,4 +57,8 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
-module.exports = User;
+module.exports = {
+  User,
+  permission_types,
+  limiter_types
+}

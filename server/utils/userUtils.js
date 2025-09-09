@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('../models/Users');
+const {User, permission_types, limiter_types } = require('../models/Users');
 
 
 
@@ -46,8 +46,25 @@ function hasPermission(permissionList, permissionType, limiter) {
   return found;
 }
 
+/**
+ * Determines if a given permission list is valid.
+ * @param {*} permissionList 
+ */
+function validPermList(permissionList) {
+  let valid = true;
+  permissionList.forEach(perm => {
+    if (!perm.type || !perm.limiter ||
+      !permission_types.includes(perm.type) ||
+      !limiter_types.includes(perm.limiter)) {
+        valid = false;
+      }
+  })
+  return valid;
+}
+
 module.exports = {
   generateEmployeeId,
   roleToNumberMap,
-  hasPermission
+  hasPermission,
+  validPermList
 }
