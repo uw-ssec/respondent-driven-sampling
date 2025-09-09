@@ -118,7 +118,7 @@ router.post('/verify-otp-signup', async (req, res) => {
 // ─── Verify OTP for LOGIN ────────────────────────────────────────────
 router.post('/verify-otp-login', async (req, res) => {
 	try {
-		const { phone } = req.body;
+		const { phone, code } = req.body;
 		if (!phone) {
 			return res.status(400).json({ message: httpMessages.err_missing_fields });
 		}
