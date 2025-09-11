@@ -170,8 +170,9 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 							['employeeName', 'Employee Name'],
 							['responses.location', 'Location'],
 							['referredByCode', 'Referred By Code'],
-							['lastUpdated', 'Last Updated'],
-							['responses.phone_number', 'Last 4 Phone Number']
+							['responses.first_two_letters_fname', 'First 2 of First'],
+							['responses.first_two_letters_lname', 'First 2 of Last'],
+							['responses.year_born', 'Year of Birth']
 						].map(([key, label]) => (
 							<div key={key} className="header-item" onClick={() => handleSort(key)}>
 								{label} <span className="sort-icons">↑↓</span>
@@ -195,14 +196,14 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 									<div className="header-item">{s.responses?.location || 'N/A'}</div>
 									<div className="header-item">{s.referredByCode || 'N/A'}</div>
 									<div className="header-item">
-										{s.lastUpdated
-											? new Date(s.lastUpdated).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })
-											: 'N/A'}
+									{s.responses?.first_two_letters_fname || "N/A"}
 									</div>
 									<div className="header-item">
-										{s.responses?.phone_number ? s.responses.phone_number.slice(-4) : 'N/A'}
+									{s.responses?.first_two_letters_lname || "N/A"}
 									</div>
 									<div className="header-item">
+									{s.responses?.year_born || "N/A"}
+									</div>
 										<button onClick={() => navigate(`/survey/${s._id}`)} className="view-details-btn">
 											View Details
 										</button>
