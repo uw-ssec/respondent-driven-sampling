@@ -7,14 +7,13 @@ const mongoose = require('mongoose');
 // The referral code is used to track which survey referred this one.
 // The `usedBySurvey` field references the survey that used this referral code.
 const referralCodeSchema = new mongoose.Schema({
-	code: { type: String, required: true },
-	usedBySurvey: {
+	code: { type: String, required: true }, // A code that will be distributed to participants that will create child surveys
+	usedBySurvey: {  // Object ID of child survey that used this referral code
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Survey',
 		default: null
 	},
-	usedAt: { type: Date, default: null }, 
-  inProgress: {type: Boolean, required: false, default: false}
+	usedAt: { type: Date, default: null } // Date that this survey was used at
 });
 
 // Main schema for the survey.
@@ -22,21 +21,21 @@ const referralCodeSchema = new mongoose.Schema({
 // The `employeeId` and `employeeName` fields are required.
 // The `responses` field is an object that contains the survey responses.
 const surveySchema = new mongoose.Schema({
-  employeeId: { type: String, required: true },
-  employeeName: { type: String, required: true },
-  responses: { type: Object, required: true },
-  createdAt: { type: Date, default: Date.now },
+  employeeId: { type: String, required: true }, // Employee ID of employee who administered survey
+  employeeName: { type: String, required: true }, // Employee name of employee who administered survey
+  responses: { type: Object, required: true }, // Survey questions and responses
+  createdAt: { type: Date, default: Date.now }, // The time the survey was created at 
   lastUpdated: { type: Date, default: Date.now }, // Date this survey was last edited
-  inProgress: {type: Boolean, required: false}, 
+  inProgress: {type: Boolean, required: false}, // A boolean indicating whether or not the survey is still in progress 
 
 
-	// 2 referral codes stored here
+	// 2 referral codes that are distributed at the end of the survey are stored here
 	referralCodes: [referralCodeSchema],
 
-	// The code that referred this new survey
+	// The code that referred this new survey; null indicates it is a "root" survey
 	referredByCode: { type: String, default: null },
 
-	//geolocation
+	// Geolocation of where survey was administered 
 	coords: { type: Object, required: false }
 });
 

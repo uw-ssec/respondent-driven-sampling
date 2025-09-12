@@ -6,8 +6,6 @@ const helmet = require("helmet");
 const compression = require("compression");
 const nocache = require("nocache");
 const connectDB = require("./database");
-const cron = require("node-cron"); // https://www.geeksforgeeks.org/node-js/how-to-run-cron-jobs-in-node-js/
-const deleteStaleSurvey = require("./utils/deleteStaleSurvey.js");
 
 // Import routes
 const authRoutes = require("./routes/auth");
@@ -227,12 +225,6 @@ app.use((err, req, res, next) => {
     process.exit(1);
   }
 })();
-
-// Schedule cleaning up stale surveys once a day
-cron.schedule("0 0 * * *", function() {
-//cron.schedule("*/20 * * * * *", function() { // Every 20 seconds
-    deleteStaleSurvey();
-});
 
 // // Set the port
 // const PORT = process.env.PORT || 1234;
