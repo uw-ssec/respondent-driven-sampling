@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// List of types of permissions and limiters possible.
 const permission_types = ['view_survey', 'delete_survey', 'change_perms', 'view_profile', 'edit_profile', 'approve_user']
 const limiter_types = ['Self', 'All']
 
@@ -43,7 +44,7 @@ const userSchema = new mongoose.Schema({
   },
   // List of permissions the user has, each permission must be unique by type.
   // This means there cannot be two 'view_survey' permission types for one user.
-  // However this is not enforced by the schema by just by convention. We could
+  // However this is not enforced by the schema, instead just by convention. We could
   // add a custom validator to enforce this if needed.
   permissions: {
     type: [permissionSchema],

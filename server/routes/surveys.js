@@ -57,11 +57,11 @@ router.get('/validate-ref/:code', [auth], async (req, res) => {
 	}
 });
 
-// GET /api/surveys/all - Fetch all surveys (Admins get all, others get their own)
-// This route fetches all surveys from the database
-// It checks the user's role and employee ID from headers
-// If the user is an Admin, they can see all surveys
-// If the user is not an Admin, they can only see their own surveys
+// GET /api/surveys/all - Fetch all surveys (Changes dependent on perms)
+// This route fetches all surveys a user can see from the database
+// If the user has view_surveys All permission then it will return all surveys
+// If the user has view_surveys Self permission then it will return only surveys
+// owned by the usr
 // It returns the surveys in descending order of creation date
 router.get('/all', [auth], async (req, res) => {
 	try {
