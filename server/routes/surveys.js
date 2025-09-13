@@ -284,6 +284,8 @@ router.get('/:id', [auth], async (req, res) => {
 
 // DELETE /api/surveys/:id - Delete a specific survey
 // This route deletes a specific survey by its ID
+
+// TODO: Make it so that half of the survey is saved and that the other half is removed
 router.delete('/:id', [auth], async (req, res) => {
 	try {
 		const userEmployeeId = req.decodedAuthToken.employeeId;
@@ -299,19 +301,24 @@ router.delete('/:id', [auth], async (req, res) => {
 			survey.employeeId !== userEmployeeId )					    // Not viewing self
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 
-		Survey.findByIdAndDelete(id)
-			.then(deletedSurvey => {
-				if (deletedSurvey) {
-					return res.status(201).json({
-						message: httpMessages.success_delete
-					});
-				} else {
-					return res.status(404).json({ message: httpMessages.err_survey_not_found });
-				}
-			})
-			.catch(error => {
-				console.error('Error deleting survey:', error);
-		});
+        const responses = survey.responses; // Whole response object of survey being deleted
+        
+        await Survey.updateOne(
+            { _id: id },
+            { $set: { responses: [] } }
+        );        
+        await Survey.updateOne(
+            { _id: id },
+            { 
+                $set: { responses: {
+                    age_group: responses.age_group,
+                    gender_id : responses.gender_id,
+                    ethnicity : responses.ethnicity,
+                    racial_id : responses.racial_id
+                }}
+            }
+        );
+        return res.status(200).json({ message: "Survey responses successfully deleted!" });
 
 	} catch (error) {
 		console.error('Error deleting survey:', error);
