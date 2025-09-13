@@ -284,4 +284,50 @@ router.get('/:id', [auth], async (req, res) => {
 	}
 });
 
+// PUT /api/surveys/:id - edits/updates responses of a specific survey
+router.put('/:id', [auth], async (req, res) => {
+	try {
+		const userRole = req.decodedAuthToken.role;
+		const userEmployeeId = req.decodedAuthToken.employeeId;
+
+		const { responses } = req.body;
+
+		if (!responses) {
+			return res.status(400).json({ message: 'Missing required fields' });
+		}
+
+		const survey = await Survey.findById(req.params.id);
+		if (!survey) {
+			return res.status(404).json({ message: 'Survey not found' });
+		}
+
+		// Don't allow changes to be made to in progress surveys through this endpoint.
+		// Instead they should use the autosave endpoint.
+		if (survey.inProgress) {
+			return res.status(400).json({ message: 'Bad Request. Survey in progress' });
+		}
+
+		// Check if they are an admin or it is their survey
+		if (userRole != 'Admin' && survey.employeeId != userEmployeeId) {
+			return res.status(403).json({
+				message: 'Forbidden: You do not have access to this survey'
+			});
+		}
+
+		// Update responses
+		survey.responses = responses;
+		await survey.save();
+
+		// Return success message
+		return res.status(200).json({
+			message: 'Survey updated successfully!'
+		});
+	} catch (error) {
+		console.error('Error fetching survey:', error);
+		res.status(500).json({
+			message: 'Server error: Unable to fetch survey'
+		});
+	}
+})
+
 module.exports = router;

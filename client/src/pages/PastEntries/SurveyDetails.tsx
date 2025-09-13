@@ -24,13 +24,14 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 		year_born: 'Year born',
 		month_born: 'Month born',
 		location: 'Location',
-		interpreter: 'Using interpreter?',
+		interpreter: 'Interpreter used',
 		language: 'Language (if using interpreter)',
 		phone_number: 'Phone number',
 		email: 'Email',
 		email_consent: 'Consent to email',
-		age_for_consent: 'Age 18 or over?',
-		consent_given: 'Oral consent given?',
+		phone_consent: 'Consent to text',
+		age_for_consent: 'Age 18 or over',
+		consent_given: 'Oral consent given',
 		homeless_people_count:
 			'Number of people experiencing homelessness you know',
 		people_you_know: 'People you know experiencing homelessness',
@@ -38,9 +39,11 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 		homeless_duration_since_housing: 'Homeless Duration Since Housing',
 		homeless_occurrences_past_3_years: 'Homeless Occurrences Past 3 Years',
 		months_homeless: 'Months Homeless',
-		age: 'Age',
+		age_group: 'Age group',
+		gender_id: 'Gender',
 		hispanic_latino: 'Hispanic/Latino',
-		veteran: 'Veteran',
+		racial_id: 'Racial identity',
+		veteran_status: 'Veteran status (self or family)',
 		fleeing_dv: 'Fleeing Domestic Violence',
 		disability: 'Disability',
 		mental_illness: 'Mental Illness',
@@ -147,7 +150,7 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 				{/* Survey Responses */}
 				<div className="responses-section">
 					<h3>Survey Responses</h3>
-					<pre>
+					<div className="responses-list">
 						{survey.responses &&
 							Object.entries(survey.responses)
 								.map(([question, answer]) => {
@@ -174,12 +177,24 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 												})
 												.join('\n\n')
 										);
+										// Normal (non-array) question fields
 									} else {
-										return `${label}: ${answer}`;
+										if (Array.isArray(answer)) {
+											return (
+												<p key={question} className="response-item">
+													<strong>{label}:</strong> {answer.join(', ')}
+												</p>
+											);
+										}
 									}
+									return (
+										<p key={question} className="response-item">
+											<strong>{label}:</strong> {String(answer)}
+										</p>
+									);
 								})
-								.join('\n\n')}
-					</pre>
+						}
+					</div>
 				</div>
 				{/* Edit Pre-screen Questions Button */}
 				<button

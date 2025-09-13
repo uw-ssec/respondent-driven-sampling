@@ -10,7 +10,8 @@
 
 /* General styles for headings and paragraphs */
 .survey-info,
-.referral-info {
+.referral-info,
+.responses-section {
     margin-bottom: 20px;
     padding: 15px;
     background: white;
@@ -22,6 +23,7 @@
 h3 {
     color: #3E236E;
     margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 /* Styles for the referral code input */

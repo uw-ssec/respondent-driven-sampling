@@ -17,9 +17,23 @@
                     "name": "location",
                     "title": "Please select location:",
                     "choices": [
-                        "Location X",
-                        "Location Y",
-                        "Location Z"
+                        "Arcadia Young Adult Shelter",
+                        "Aurora Commons",
+                        "Bellevue Library",
+                        "Compass Day Center",
+                        "Family Phone Line",
+                        "Federal Way Day Center - CCS",
+                        "Georgetown Food Bank St. Vincent de Paul",
+                        "Highline United Methodist Church",
+                        "Issaquah Community Hall",
+                        "Kirkland Library",
+                        "Maple Valley Food Bank",
+                        "Overlake Christian Church",
+                        "Ronald United Methodist Church",
+                        "Seattle Veteran Center",
+                        "Snoqualmie Valley - YMCA",
+                        "Together Center",
+                        "Vashon Island Food Bank"
                     ],
                     "isRequired": true
                 },

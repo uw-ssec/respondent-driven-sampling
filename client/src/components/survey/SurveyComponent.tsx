@@ -115,7 +115,25 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 							type: 'dropdown',
 							name: 'location',
 							title: 'Please select location:',
-							choices: ['Location X', 'Location Y', 'Location Z'],
+							choices: [
+								'Arcadia Young Adult Shelter',
+								'Aurora Commons',
+								'Bellevue Library',
+								'Compass Day Center',
+								'Family Phone Line',
+								'Federal Way Day Center - CCS',
+								'Georgetown Food Bank St. Vincent de Paul',
+								'Highline United Methodist Church',
+								'Issaquah Community Hall',
+								'Kirkland Library',
+								'Maple Valley Food Bank',
+								'Overlake Christian Church',
+								'Ronald United Methodist Church',
+								'Seattle Veteran Center',
+								'Snoqualmie Valley - YMCA',
+								'Together Center',
+								'Vashon Island Food Bank'
+							],
 							isRequired: true
 						},
 						{
@@ -588,7 +606,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 						},
 						{
 							type: 'dropdown',
-							name: 'ethnicity',
+							name: 'hispanic_latino',
 							title: 'Are you Hispanic/Latina/e/o?',
 							isRequired: true,
 							choices: [
@@ -929,7 +947,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 						},
 						{
 							type: 'dropdown',
-							name: 'last_stable_loc', 
+							name: 'last_stable_loc',
 							title: 'Where did you live the last time you had stable housing such as an apartment or a house?',
 							choices: [
 								{ value: 'king', text: 'King County' },
@@ -940,10 +958,9 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 								'Do not know'
 							]
 						},
-						// Note: (Unincorporated) may confuse users
 						{
 							type: 'dropdown',
-							name: 'last_stable_loc_king', 
+							name: 'last_stable_loc_king',
 							title: 'Please specify:',
 							visibleIf: "{last_stable_loc} = 'king'",
 							choices: [
@@ -1021,7 +1038,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 						},
 						{
 							type: 'dropdown',
-							name: 'last_stable_loc_wa', 
+							name: 'last_stable_loc_wa',
 							title: 'Please specify:',
 							visibleIf: "{last_stable_loc} = 'wa'",
 							choices: [
@@ -1259,16 +1276,29 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		const survey = new Model(surveyJson);
 		surveyRef.current = survey;
 
+		// Keep values for invisible/hidden questions (due to survey logic/conditionals)
+		survey.clearInvisibleValues = "none";
+
 		pushHistoryState(survey.currentPageNo);
 
+		// When survey page changes, update browser history
 		survey.onCurrentPageChanged.add(sender => {
 			const currentPageNo = sender.currentPageNo;
 			pushHistoryState(currentPageNo);
 		});
 
 		survey.onComplete.add(async sender => {
+			// handles all responses, including to unanswered questions
+			const finalResponses: Record<string, any> = {};
+			survey.getAllQuestions().forEach(q => {
+				// Do not set the values of html-type elements (e.g. text, instructions) to 'N/A'
+				if (q.getType() !== 'html') {
+					finalResponses[q.name] = sender.data[q.name] ?? "N/A";
+				}
+			});
+
 			const surveyData = {
-				responses: sender.data || {},
+				responses: finalResponses || {},
 				referredByCode: isReferralValid ? referredByCode : null,
 				coords: coords || { latitude: 0, longitude: 0 }
 			};
