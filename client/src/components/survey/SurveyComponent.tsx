@@ -1080,7 +1080,8 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				responses: sender.data || {},
 				referredByCode: isReferralValid ? referredByCode : null,
 				coords: coords || { latitude: 0, longitude: 0 }, 
-				objectId: localStorage.getItem('objectId')
+				objectId: localStorage.getItem('objectId'), 
+				inProgress: false // Set to false because survey is being submitted
 			};
 
 			console.log('Survey Submitted:', surveyData);
@@ -1088,7 +1089,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			try {
 				console.log('Survey Data Being Sent:', surveyData); // Should we be printing survey data?
 				const token = getAuthToken();
-				const response = await fetch(`/api/surveys/save/${false}`, {
+				const response = await fetch(`/api/surveys/save`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',

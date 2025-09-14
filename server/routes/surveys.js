@@ -91,13 +91,12 @@ router.get('/all', [auth], async (req, res) => {
 // This route handles saving a survey instance to the database. 
 // The "inProgress" parameter will indicate whether or not 
 // the survey being saved is in progress or not in progress
-router.post('/save/:inProgress', [auth], async (req, res) => {
+router.post('/save', [auth], async (req, res) => {
 	try {
         // Set survey values from request
 		const employeeId = req.decodedAuthToken.employeeId;
 		const employeeName = req.decodedAuthToken.firstName;
-		const { responses, referredByCode, coords, objectId} = req.body;
-        const inProgress = req.params.inProgress; // This will determine whether or not the survey is done or in progress
+		const { responses, referredByCode, coords, objectId, inProgress} = req.body;
         const lastUpdated = new Date();
         if (!employeeId || !employeeName || !responses) {
             return res.status(400).json({ message: "Missing required fields" });
