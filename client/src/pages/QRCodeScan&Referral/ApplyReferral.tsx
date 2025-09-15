@@ -7,6 +7,8 @@ import Header from '@/pages/Header/Header';
 
 import '@/styles/ApplyReferral.css';
 
+import { getAuthToken } from '@/utils/authTokenHandler';
+
 import { LogoutProps } from '@/types/AuthProps';
 
 export default function ApplyReferral({ onLogout }: LogoutProps) {
@@ -106,12 +108,24 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 		setLoading(true);
 
 		try {
+			const token = getAuthToken();
 			const response = await fetch(
-				`/api/surveys/validate-ref/${referralCode}`
+				`/api/surveys/validate-ref/${referralCode}`,
+				{
+					headers: { Authorization: `Bearer ${token}` }
+				}
 			);
 			const data = await response.json();
 
-			if (!response.ok) {
+			if (response.ok) {
+				navigate('/survey', { state: { referralCode } });
+			} else if (response.status == 401) {
+				// Token Error, either expired or invalid for some other reason.
+				// Log user out so they can relogin to generate a new valid token
+				onLogout();
+				navigate('/login');
+				return;
+			} else {
 				alert(
 					data.message ||
 					'Invalid or already used referral code. Please try again.'

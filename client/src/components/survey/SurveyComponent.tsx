@@ -6,6 +6,11 @@ import { Survey } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
+import {
+	getAuthToken,
+	getEmployeeId,
+	getFirstName
+} from '@/utils/authTokenHandler';
 import { useGeolocated } from 'react-geolocated';
 
 import { LogoutProps } from '@/types/AuthProps';
@@ -47,19 +52,21 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 	});
 
 	useEffect(() => {
-		// 1) Load employeeId and employeeName from localStorage
-		const storedId = localStorage.getItem('employeeId');
-		const storedName = localStorage.getItem('firstName');
+		// 1) Load from localStorage
+		const storedEmployeeId = getEmployeeId();
+		const storedFirstName = getFirstName();
+		if (storedEmployeeId) setEmployeeId(storedEmployeeId);
+		if (storedFirstName) setEmployeeName(storedFirstName);
 
-		if (storedId && storedId !== employeeId) {
-			setEmployeeId(storedId);
+		// 2) Check if referral is passed via location.state
+		const codeFromState = location.state?.referralCode;
+		if (codeFromState) {
+			setReferredByCode(codeFromState);
+			validateReferralCode(codeFromState);
+			return; // Skip reading from URL if we have it in state
 		}
 
-		if (storedName && storedName !== employeeName) {
-			setEmployeeName(storedName);
-		}
-
-		// 2) Sync referral code from URL query param into Zustand store
+		// 3) Otherwise, check the URL query param "?ref=XXXX"
 		const codeInUrl = searchParams.get('ref');
 		if (codeInUrl && codeInUrl !== referredByCode) {
 			setReferredByCode(codeInUrl);
@@ -75,9 +82,19 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 	async function validateReferralCode(code: string) {
 		try {
-			const res = await fetch(`/api/surveys/validate-ref/${code}`);
-			if (!res.ok) {
-				const errData = await res.json();
+			const token = getAuthToken();
+			const response = await fetch(`/api/surveys/validate-ref/${code}`, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			if (!response.ok) {
+				if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log out user so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
+				}
+				const errData = await response.json();
 				alert(
 					errData.message ||
 					'Invalid referral code. Please check again.'
@@ -144,6 +161,52 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 						}
 					]
 				},
+				// Consent Page
+				{
+					name: 'consent_page',
+					title: 'Consent Confirmation',
+					elements: [
+						{
+							type: 'html',
+							name: 'consent-instructions',
+							html: '<div><strong>Please ask the respondent if they are above the age of 18. The survey will end if they are not at least 18 years old.</strong></div>'
+						},
+						{
+							type: 'radiogroup',
+							name: 'age_for_consent',
+							title: 'Is the respondent at least 18?',
+							choices: ['Yes', 'No'],
+							isRequired: true
+						},
+						{
+							type: 'html',
+							name: 'consent-note',
+							html: `<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>
+        <p>Participation in research is voluntary. The decision to participate, or not participate, is entirely up to you. You have the right to decline to participate in, or withdraw from, this study at any point without penalty or loss of benefits to which you already receive or to which you are entitled.</p>
+        <p>This study has been explained to me and I understand. I volunteer to take part in this research. I have had the opportunity to ask questions. If I have questions later about the research, or if I have been harmed by participating in this study, I can contact one of the researchers listed on the first page of this consent form. If I have questions about my rights as a research subject, I can call the Human Subjects Division at (206) 543-0098. I will receive a copy of this consent form.</p>
+        <p><strong>Let the respondent know that the survey will end here if they do not give consent.</strong></p>`,
+							visibleIf: "{age_for_consent} = 'Yes'"
+						},
+						{
+							type: 'radiogroup',
+							name: 'consent_given',
+							title: 'Did the subject orally consent to participate?',
+							choices: ['Yes', 'No'],
+							isRequired: true,
+							visibleIf: "{age_for_consent} = 'Yes'"
+						}
+					],
+					triggers: [
+						{
+							type: 'complete',
+							expression: "{age_for_consent} = 'No'"
+						},
+						{
+							type: 'complete',
+							expression: "{consent_given} = 'No'"
+						}
+					]
+				},
 				// Pre-Screening Respondent
 				{
 					name: 'pre-screen-2',
@@ -191,51 +254,6 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 							title: 'Can we message the respondent regarding survey results?',
 							choices: ['Yes', 'No'],
 							isRequired: true
-						}
-					]
-				},
-				{
-					name: 'consent_page',
-					title: 'Consent Confirmation',
-					elements: [
-						{
-							type: 'html',
-							name: 'consent-instructions',
-							html: '<div><strong>Please ask the respondent if they are above the age of 18. The survey will end if they are not at least 18 years old.</strong></div>'
-						},
-						{
-							type: 'radiogroup',
-							name: 'age_for_consent',
-							title: 'Is the respondent at least 18?',
-							choices: ['Yes', 'No'],
-							isRequired: true
-						},
-						{
-							type: 'html',
-							name: 'consent-note',
-							html: `<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>
-        <p>Participation in research is voluntary. The decision to participate, or not participate, is entirely up to you. You have the right to decline to participate in, or withdraw from, this study at any point without penalty or loss of benefits to which you already receive or to which you are entitled.</p>
-        <p>This study has been explained to me and I understand. I volunteer to take part in this research. I have had the opportunity to ask questions. If I have questions later about the research, or if I have been harmed by participating in this study, I can contact one of the researchers listed on the first page of this consent form. If I have questions about my rights as a research subject, I can call the Human Subjects Division at (206) 543-0098. I will receive a copy of this consent form.</p>
-        <p><strong>Let the respondent know that the survey will end here if they do not give consent.</strong></p>`,
-							visibleIf: "{age_for_consent} = 'Yes'"
-						},
-						{
-							type: 'radiogroup',
-							name: 'consent_given',
-							title: 'Did the subject orally consent to participate?',
-							choices: ['Yes', 'No'],
-							isRequired: true,
-							visibleIf: "{age_for_consent} = 'Yes'"
-						}
-					],
-					triggers: [
-						{
-							type: 'complete',
-							expression: "{age_for_consent} = 'No'"
-						},
-						{
-							type: 'complete',
-							expression: "{consent_given} = 'No'"
 						}
 					]
 				},
@@ -1080,8 +1098,6 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 		survey.onComplete.add(async sender => {
 			const surveyData = {
-				employeeId: employeeId || 'TEST-ID',
-				employeeName: employeeName || 'Test User',
 				responses: sender.data || {},
 				referredByCode: isReferralValid ? referredByCode : null,
 				coords: coords || { latitude: 0, longitude: 0 }
@@ -1090,10 +1106,14 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			console.log('Survey Submitted:', surveyData);
 
 			try {
-				console.log('Survey Data Being Sent:', surveyData);
+				console.log('Survey Data Being Sent:', surveyData); // Should we be printing survey data?
+				const token = getAuthToken();
 				const response = await fetch('/api/surveys/submit', {
 					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`
+					},
 					body: JSON.stringify(surveyData)
 				});
 
@@ -1104,6 +1124,12 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 					navigate('/qrcode', {
 						state: { referralCodes: data.referralCodes }
 					});
+				} else if (response.status == 401) {
+					// Token Error, either expired or invalid for some other reason.
+					// Log user out so they can relogin to generate a new valid token
+					onLogout();
+					navigate('/login');
+					return;
 				} else {
 					console.error(
 						'Error saving survey:',

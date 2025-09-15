@@ -22,19 +22,18 @@ import Signup from '@/pages/Signup/Signup';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
 import SurveyEdit from '@/pages/PastEntries/SurveyEdit';
 
+import { deleteAuthToken, hasAuthToken } from './utils/authTokenHandler';
+
 function App() {
-	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
-		localStorage.getItem('isLoggedIn') === 'true'
-	);
+	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(hasAuthToken());
 
 	const handleLogin = () => {
 		setIsLoggedIn(true);
-		localStorage.setItem('isLoggedIn', 'true');
 	};
 
 	const handleLogout = () => {
 		setIsLoggedIn(false);
-		localStorage.clear();
+		deleteAuthToken();
 	};
 
 	return (
