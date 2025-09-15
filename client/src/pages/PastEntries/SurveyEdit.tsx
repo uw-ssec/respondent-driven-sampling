@@ -1,39 +1,58 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
 import "survey-core/defaultV2.min.css";
 
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import prescreenJson from '@/components/survey/prescreen.json';
 import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
 
-import prescreenJson from '@/components/survey/prescreen.json';
-
+/*
+SurveyEdit allows editing of a completed survey’s prescreen responses.
+It fetches the survey data from the backend using the survey ID from the URL.
+Then it loads prescreen survey JSON template (from prescreen.json) into a SurveyJS model.
+Prefills the survey model with existing survey responses, cleaning out "N/A" placeholders.
+On submit:
+  - If consent is revoked (consent_given = 'No'), the survey responses are (mostly) deleted from the backend.
+  - If consent is retained, prescreen responses are updated and saved via PUT.
+*/
 export default function SurveyEdit() {
     const { id } = useParams();
     const navigate = useNavigate();
 
     const [surveyModel, setSurveyModel] = useState<Model | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const role = getRole();
-        const employeeId = getEmployeeId();
-        const token = getAuthToken();
+        const fetchSurvey = async () => {
+            try {
+                const role = getRole();
+                const employeeId = getEmployeeId();
+                const token = getAuthToken();
 
-        fetch(`/api/surveys/${id}`, {
-            headers: {
-                "x-user-role": role,
-                "x-employee-id": employeeId,
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then(res => res.json())
-            .then(data => {
+                const res = await fetch(`/api/surveys/${id}`, {
+                    headers: {
+                        "x-user-role": role,
+                        "x-employee-id": employeeId,
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) {
+                    if (res.status == 404) alert("Survey not found.");
+                    else if (res.status == 403) alert("You do not have permission to view this survey.");
+                    else alert("Failed to load survey due to server error.");
+                    return;
+                }
+
+                const data = await res.json();
                 const model = new Model(prescreenJson);
 
-                // Collect prescreen question names
+                // Extract all prescreen question names from the form JSON
                 const prescreenQuestions = model.getAllQuestions().map((q: any) => q.name);
 
-                // Clean out "N/A" placeholders (for only prescreen questions) so survey shows unanswered question fields as empty
+                // Replace "N/A" placeholders with null for prescreen questions
+                // Unanswered prescreen questions show as blank in the UI
                 const cleanedResponses = Object.fromEntries(
                     Object.entries(data.responses || {}).map(([key, value]) => [
                         key,
@@ -41,19 +60,15 @@ export default function SurveyEdit() {
                     ])
                 );
 
-                // Pre-fill the survey with cleaned existing responses
+                // Pre-fill survey model with cleaned existing responses
                 model.data = cleanedResponses;
 
+                // Handle completing survey edits: 
                 model.onComplete.add(async (sender) => {
                     const updatedPrescreen = sender.data;
-                    
-                    console.log("Updated prescreen: ", updatedPrescreen);
+                    const consent = updatedPrescreen.consent_given; // grabs answer to consent question
 
-                    const consent = updatedPrescreen.consent_given;
-
-                    // If consent is revoked, call DELETE survey from backend
-                    // INCOMPLETE - tested delete endpoint from Backend PR #56 and it wasn't working
-                    // ^ When testing, kept getting error 500
+                    // If consent is revoked, delete survey via DELETE API call
                     if (consent === 'No') {
                         try {
                             const res = await fetch(`/api/surveys/${id}`, {
@@ -67,6 +82,7 @@ export default function SurveyEdit() {
 
                             if (res.ok) {
                                 console.log("Survey deleted due to revoked consent.");
+                                alert("Survey deleted due to revoked consent.");
                                 navigate('/past-entries');
                             } else {
                                 const errorMessage = await res.json();
@@ -79,36 +95,32 @@ export default function SurveyEdit() {
                         return;
                     }
 
-                    // If consent is NOT revoked, proceed by replacing prescreen responses: 
+                    // If consent is NOT revoked, update prescreen responses: 
                     const prescreenNames = sender
                         .getAllQuestions()
-                        .filter((q: any) => q.getType() !== "html")
-                        .map((q: any) => q.name);
+                        .filter((q) => q.hasInput) // omit elements that don't have input (e.g. html text)
+                        .map((q) => q.name);
 
                     // Copy of all survey answers from db (prescreen + main survey)
                     const prevResponses = { ...(data.responses || {}) };
-                    console.log("Existing responses from DB (before):", prevResponses);
 
-                    // Delete original prescreen answers from copy
-                    for (const name of prescreenNames) {
-                        if (name in prevResponses) delete prevResponses[name];
-                    }
+                    // Delete original prescreen answers from copy (to overwrite them cleanly)
+                    prescreenNames.forEach((name) => delete prevResponses[name]);
 
                     // Merge OG non-prescreen + updated prescreen responses
                     const updatedResponses = {
                         ...updatedPrescreen,
                         ...prevResponses
                     };
-                    console.log("Final merged responses: ", updatedResponses);
 
-                    // Ensure unanswered prescreen responses are saved as "N/A" again
+                    // Refill unanswered prescreen responses with "N/A"
                     prescreenNames.forEach(name => {
                         if (!(name in updatedResponses) || updatedResponses[name] == null) {
                             updatedResponses[name] = "N/A";
                         }
                     });
 
-                    // Updates survey prescreen responses via PUT
+                    // Updates survey prescreen responses via PUT request
                     const res = await fetch(`/api/surveys/${id}`, {
                         method: "PUT",
                         headers: {
@@ -118,12 +130,12 @@ export default function SurveyEdit() {
                             Authorization: `Bearer ${token}`
                         },
                         body: JSON.stringify({
-                            _id: data._id,
                             responses: updatedResponses
                         }),
                     });
 
                     if (res.ok) {
+                        console.log("Succesfully updated survey!");
                         navigate(`/survey/${id}`);
                     } else {
                         console.error("Failed to update survey.");
@@ -131,10 +143,19 @@ export default function SurveyEdit() {
                 });
 
                 setSurveyModel(model);
-            });
+
+            } catch (err: any) {
+                alert(err.message || "Failed to load survey.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSurvey();
     }, [id, navigate]);
 
-    if (!surveyModel) return <div>Loading...</div>;
+    if (loading) return <div>Loading survey...</div>;
 
+    // Render survey editing UI with SurveyJS
     return <Survey model={surveyModel} />;
 }
