@@ -282,9 +282,7 @@ router.put('/users/:employeeId', auth, async (req, res) => {
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 
 		const { firstName, lastName, email, phone, role } = req.body;
-		if (!phone || !firstName || !lastName || !email || !role)
-			return res.status(400).json({ message: httpMessages.err_missing_fields });
-		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
+		if (role && roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
 			return res.status(403).json({ message: httpMessages.err_invalid_role});
 
 		const updatedUser = await User.findOneAndUpdate(
@@ -322,7 +320,6 @@ router.get('/users/by-id/:id', auth, async (req, res) => {
 		if (!user) {
 			return res.status(404).json({ message: httpMessages.err_user_not_exist });
 		}
-		console.log('User found:', user);
 
 		res.json(user);
 	} catch (err) {
