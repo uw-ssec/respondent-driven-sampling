@@ -2,6 +2,8 @@ const express = require('express');
 const Survey = require('../models/Survey');
 const { auth } = require('../middleware/auth');
 const generateReferralCode = require('../utils/generateReferralCode');
+const { hasPermission } = require('../utils/userUtils');
+const httpMessages = require('../messages');
 
 const router = express.Router();
 
@@ -280,6 +282,102 @@ router.get('/:id', [auth], async (req, res) => {
 		console.error('Error fetching survey:', error);
 		res.status(500).json({
 			message: 'Server error: Unable to fetch survey'
+		});
+	}
+});
+
+// PUT /api/surveys/:id - edits/updates responses of a specific survey
+router.put('/:id', [auth], async (req, res) => {
+	try {
+		const userRole = req.decodedAuthToken.role;
+		const userEmployeeId = req.decodedAuthToken.employeeId;
+
+		const { responses } = req.body;
+
+		if (!responses) {
+			return res.status(400).json({ message: 'Missing required fields' });
+		}
+
+		const survey = await Survey.findById(req.params.id);
+		if (!survey) {
+			return res.status(404).json({ message: 'Survey not found' });
+		}
+
+		// Don't allow changes to be made to in progress surveys through this endpoint.
+		// Instead they should use the autosave endpoint.
+		if (survey.inProgress) {
+			return res.status(400).json({ message: 'Bad Request. Survey in progress' });
+		}
+
+		// Check if they are an admin or it is their survey
+		if (userRole != 'Admin' && survey.employeeId != userEmployeeId) {
+			return res.status(403).json({
+				message: 'Forbidden: You do not have access to this survey'
+			});
+		}
+
+		// Update responses
+		survey.responses = responses;
+		await survey.save();
+
+		// Return success message
+		return res.status(200).json({
+			message: 'Survey updated successfully!'
+		});
+	} catch (error) {
+		console.error('Error fetching survey:', error);
+		res.status(500).json({
+			message: 'Server error: Unable to fetch survey'
+		});
+	}
+})
+
+// DELETE /api/surveys/:id - Delete a specific survey
+// This route deletes a specific survey by its ID
+router.delete('/:id', [auth], async (req, res) => {
+	try {
+		const userEmployeeId = req.decodedAuthToken.employeeId;
+		const id = req.params.id;
+		const survey = await Survey.findById(id);
+		if (!survey)
+			return res.status(404).json({ message: httpMessages.err_survey_not_found });
+
+		console.log("Decoded token employeeId:", userEmployeeId);
+		console.log("Survey employeeId:", survey.employeeId);
+		console.log("req.permissions:", req.permissions);
+
+		// Check if user has delete all perms or delete self perms and this
+		// survey was created by them.
+		if (!hasPermission(req.permissions, 'delete_survey', 'All') &&  // Doesn't have global delete perms
+			!hasPermission(req.permissions, 'delete_survey', 'Self') || // Doesn't have self delete perms
+			survey.employeeId !== userEmployeeId)					    // Not viewing self
+			return res.status(403).json({ message: httpMessages.err_invalid_perms });
+
+		const responses = survey.responses; // Whole response object of survey being deleted
+
+		await Survey.updateOne(
+			{ _id: id },
+			{ $set: { responses: [] } }
+		);
+		await Survey.updateOne(
+			{ _id: id },
+			{
+				$set: {
+					responses: {
+						age_group: responses.age_group,
+						gender_id: responses.gender_id,
+						hispanic_latino: responses.hispanic_latino, // formerly 'ethnicity', changed to hispanic_latino for clarity
+						racial_id: responses.racial_id
+					}
+				}
+			}
+		);
+		return res.status(200).json({ message: "Survey responses successfully deleted!" });
+
+	} catch (error) {
+		console.error('Error deleting survey:', error);
+		res.status(500).json({
+			message: 'Server error: Unable to  delete survey'
 		});
 	}
 });

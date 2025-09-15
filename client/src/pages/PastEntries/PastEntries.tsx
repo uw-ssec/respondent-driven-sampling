@@ -100,7 +100,7 @@ export default function PastEntries({ onLogout }: LogoutProps) {
 										onClick={() =>
 											navigate(`/survey/${survey._id}`)
 										}
-										className=""
+										className="view-details-btn"
 									>
 										View Details
 									</button>

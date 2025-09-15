@@ -1,4 +1,4 @@
-/* CSS for Past Entries Page */
+/* CSS for Past Entries Page. */
 .view-details-btn {
     padding: 8px 12px;
     background-color: #3E236E;
@@ -9,6 +9,7 @@
     font-size: 14px;
     transition: 0.3s;
     width: 8rem;
+    border-radius: 15px;
 }
 
 .view-details-btn:hover {

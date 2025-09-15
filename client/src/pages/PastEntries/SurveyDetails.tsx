@@ -24,23 +24,28 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 		year_born: 'Year born',
 		month_born: 'Month born',
 		location: 'Location',
-		interpreter: 'Using interpreter?',
+		interpreter: 'Interpreter used',
 		language: 'Language (if using interpreter)',
 		phone_number: 'Phone number',
 		email: 'Email',
 		email_consent: 'Consent to email',
-		age_for_consent: 'Age 18 or over?',
-		consent_given: 'Oral consent given?',
-		homeless_people_count:
-			'Number of people experiencing homelessness you know',
-		people_you_know: 'People you know experiencing homelessness',
-		sleeping_location_last_night: 'Sleeping Location Last Night',
+		phone_consent: 'Consent to text',
+		age_for_consent: 'Age 18 or over',
+		consent_given: 'Oral consent given',
+		non_family_network_size: 'Unhoused network size (excluding family)',
+		network_details: 'People you know experiencing homelessness details',
+		// there is name_pseudo, relationship, and sleeping_situation for each person under network details
+		sleeping_situation: 'Sleeping Location Last Night',
+		vehicle_amenities: 'Vehicle Amenities',
+		personal_amenities: 'Basic Personal Amenities',
 		homeless_duration_since_housing: 'Homeless Duration Since Housing',
 		homeless_occurrences_past_3_years: 'Homeless Occurrences Past 3 Years',
 		months_homeless: 'Months Homeless',
-		age: 'Age',
+		age_group: 'Age group',
+		gender_id: 'Gender',
 		hispanic_latino: 'Hispanic/Latino',
-		veteran: 'Veteran',
+		racial_id: 'Racial identity',
+		veteran_status: 'Veteran status (self or family)',
 		fleeing_dv: 'Fleeing Domestic Violence',
 		disability: 'Disability',
 		mental_illness: 'Mental Illness',
@@ -95,7 +100,9 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 	if (loading) return <p>Loading...</p>;
 	if (!survey) return <p>Survey not found.</p>;
 
-	console.log('survey from details', survey);
+	// Don't allow completed with revoked or no respondent consent to be edited
+	const consentGiven = (survey.responses as any)?.consent_given;
+	const isEditable = consentGiven !== 'No' && consentGiven !== undefined;
 
 	// Function to handle logout
 	return (
@@ -147,40 +154,67 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 				{/* Survey Responses */}
 				<div className="responses-section">
 					<h3>Survey Responses</h3>
-					<pre>
+					<div className="responses-list">
 						{survey.responses &&
 							Object.entries(survey.responses)
 								.map(([question, answer]) => {
 									const label =
 										labelMap[question] || question;
 
+									// Special case: array of people objects
 									if (
-										question === 'people_you_know' &&
+										(question === 'network_details' || question === 'household_members') &&
 										Array.isArray(answer)
 									) {
 										return (
-											`\n${label}:\n` +
-											answer
-												.map((person, index) => {
-													return (
-														`  Person ${index + 1}:\n` +
-														Object.entries(person)
-															.map(
-																([key, val]) =>
-																	`    ${key}: ${val}`
-															)
-															.join('\n')
-													);
-												})
-												.join('\n\n')
+											<div key={question} className="response-item">
+												<strong>{label}:</strong>
+												{answer.map((person, index) => (
+													<div key={index}>
+														<p>Person {index + 1}</p>
+														<ul>
+															{Object.entries(person).map(([key, val]) => (
+																<li key={key}>
+																	<strong>{key}:</strong> {String(val)}
+																</li>
+															))}
+														</ul>
+													</div>
+												))}
+											</div>
 										);
+										// Normal (non-array) question fields
 									} else {
-										return `${label}: ${answer}`;
+										if (Array.isArray(answer)) {
+											return (
+												<p key={question} className="response-item">
+													<strong>{label}:</strong> {answer.join(', ')}
+												</p>
+											);
+										}
 									}
+									return (
+										<p key={question} className="response-item">
+											<strong>{label}:</strong> {String(answer)}
+										</p>
+									);
 								})
-								.join('\n\n')}
-					</pre>
+						}
+					</div>
 				</div>
+				{/* Edit Pre-screen Questions Button */}
+				{isEditable ? (
+					<button
+						className="edit-button"
+						onClick={() => navigate(`/survey/${id}/edit`)}
+					>
+						Edit Prescreen Responses
+					</button>
+				) : (
+					<p className="editing-disabled-message">
+						Editing disabled: Consent not given or revoked.
+					</p>
+				)}
 			</div>
 		</div>
 	);

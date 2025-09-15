@@ -82,7 +82,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				const errData = await response.json();
 				alert(
 					errData.message ||
-						'Invalid referral code. Please check again.'
+					'Invalid referral code. Please check again.'
 				);
 				setReferredByCode(null);
 				setIsReferralValid(false);
@@ -115,7 +115,25 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 							type: 'dropdown',
 							name: 'location',
 							title: 'Please select location:',
-							choices: ['Location X', 'Location Y', 'Location Z'],
+							choices: [
+								'Arcadia Young Adult Shelter',
+								'Aurora Commons',
+								'Bellevue Library',
+								'Compass Day Center',
+								'Family Phone Line',
+								'Federal Way Day Center - CCS',
+								'Georgetown Food Bank St. Vincent de Paul',
+								'Highline United Methodist Church',
+								'Issaquah Community Hall',
+								'Kirkland Library',
+								'Maple Valley Food Bank',
+								'Overlake Christian Church',
+								'Ronald United Methodist Church',
+								'Seattle Veteran Center',
+								'Snoqualmie Valley - YMCA',
+								'Together Center',
+								'Vashon Island Food Bank'
+							],
 							isRequired: true
 						},
 						{
@@ -190,6 +208,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				{
 					name: 'pre-screen-2',
 					title: 'Pre-Screening Questions - Respondent',
+					visibleIf: "{consent_given} = 'Yes'",
 					elements: [
 						{
 							type: 'html',
@@ -587,7 +606,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 						},
 						{
 							type: 'dropdown',
-							name: 'ethnicity',
+							name: 'hispanic_latino',
 							title: 'Are you Hispanic/Latina/e/o?',
 							isRequired: true,
 							choices: [
@@ -927,9 +946,198 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 							]
 						},
 						{
-							type: 'text',
+							type: 'dropdown',
 							name: 'last_stable_loc',
-							title: 'Where did you live the last time you had stable housing such as an apartment or a house?'
+							title: 'Where did you live the last time you had stable housing such as an apartment or a house?',
+							choices: [
+								{ value: 'king', text: 'King County' },
+								{ value: 'wa', text: 'Washington State County (outside of King County)' },
+								{ value: 'us', text: 'United States (state outside of Washington State)' },
+								'Outside the United States',
+								'Choose not to answer',
+								'Do not know'
+							]
+						},
+						{
+							type: 'dropdown',
+							name: 'last_stable_loc_king',
+							title: 'Please specify:',
+							visibleIf: "{last_stable_loc} = 'king'",
+							choices: [
+								'Algona',
+								'Auburn',
+								'Bear Creek/Sammamish (Unincorporated)',
+								'Beaux Arts',
+								'Bellevue',
+								'Black Diamond',
+								'Bothell',
+								'Burien',
+								'Carnation',
+								'Clyde Hill',
+								'Covington',
+								'Data not collected', // ? user may be confused by this option
+								'Des Moines',
+								'Duvall',
+								'East Federal Way (Unincorporated)',
+								'East Renton (Unincorporated)',
+								'Enumclaw',
+								'Fairwood (Unincorporated)',
+								'Federal Way',
+								'Four Creeks/Tiger Mountain (Unincorporated)',
+								'Hunts Point',
+								'Issaquah',
+								'Kenmore',
+								'Kent',
+								'Kirkland',
+								'Lake Forest Park',
+								'Maple Valley',
+								'Medina',
+								'Mercer Island',
+								'Milton',
+								'Newcastle',
+								'Normandy Park',
+								'North Bend',
+								'North Highline (Unincorporated)',
+								'Pacific',
+								'Renton',
+								'Sammamish',
+								'Sea Tac',
+								'Seattle',
+								'Shoreline',
+								'Skykomish',
+								'Snoqualmie',
+								'Redmond',
+								'Snoqualmie Valley/Northeast',
+								'King County (Unincorporated)',
+								'Southeast King County (Unincorporated)',
+								'Tukwila',
+								'Vashon/Maury Island', // unincorporated area
+								'West Hill (Unincorporated)',
+								'Woodinville',
+								'Yarrow Point',
+								'Other / Unincorporated King County'
+							]
+						},
+						{
+							type: 'dropdown',
+							name: 'last_stable_loc_unincorporated',
+							title: 'Specify Other:',
+							showOtherItem: true,
+							visibleIf: "{last_stable_loc_king} = 'Other / Unincorporated King County'",
+							choices: [
+								'Bryn Mawr Skyway',
+								'White Center',
+								'South Park',
+								'Fairwood',
+								'East Renton Highlands',
+								'Cottage Lake',
+								'Fall City',
+								'Hobart',
+								'Union Hill'
+							]
+						},
+						{
+							type: 'dropdown',
+							name: 'last_stable_loc_wa',
+							title: 'Please specify:',
+							visibleIf: "{last_stable_loc} = 'wa'",
+							choices: [
+								'Adams',
+								'Asotin',
+								'Benton',
+								'Chelan',
+								'Clallam',
+								'Clark',
+								'Columbia',
+								'Cowlitz',
+								'Douglas',
+								'Ferry',
+								'Franklin',
+								'Garfield',
+								'Grant',
+								'Grays Harbor',
+								'Island',
+								'Jefferson',
+								'Kitsap',
+								'Kittititas',
+								'Klickitat',
+								'Lewis',
+								'Lincoln',
+								'Mason',
+								'Okanogan',
+								'Pacific',
+								'Pend Orellie',
+								'Pierce',
+								'San Juan (County)',
+								'Skagit',
+								'Skamania',
+								'Snohomish',
+								'Spokane',
+								'Stevens',
+								'Thurston',
+								'Wahkiakum',
+								'Walla Walla (County)',
+								'Whatcom',
+								'Whitman',
+								'Yakima (County)'
+							]
+						},
+						{
+							type: 'dropdown',
+							name: 'last_stable_loc_us',
+							title: 'Please specify which state:',
+							visibleIf: "{last_stable_loc} = 'us'",
+							choices: [
+								'Alabama',
+								'Alaska',
+								'Arizona',
+								'Arkansas',
+								'California',
+								'Colorado',
+								'Connecticut',
+								'Delaware',
+								'Florida',
+								'Georgia',
+								'Hawaii',
+								'Idaho',
+								'Illinois',
+								'Indiana',
+								'Iowa',
+								'Kansas',
+								'Kentucky',
+								'Louisiana',
+								'Maine',
+								'Maryland',
+								'Massachusetts',
+								'Michigan',
+								'Minnesota',
+								'Mississippi',
+								'Missouri',
+								'Montana',
+								'Nebraska',
+								'Nevada',
+								'New Hampshire',
+								'New Jersey',
+								'New Mexico',
+								'New York',
+								'North Carolina',
+								'North Dakota',
+								'Ohio',
+								'Oklahoma',
+								'Oregon',
+								'Pennsylvania',
+								'Rhode Island',
+								'South Carolina',
+								'South Dakota',
+								'Tennessee',
+								'Texas',
+								'Utah',
+								'Vermont',
+								'Virginia',
+								'West Virginia',
+								'Wisconsin',
+								'Wyoming'
+							]
 						},
 						{
 							type: 'dropdown',
@@ -1068,16 +1276,29 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		const survey = new Model(surveyJson);
 		surveyRef.current = survey;
 
+		// Keep values for invisible/hidden questions (due to survey logic/conditionals)
+		survey.clearInvisibleValues = "none";
+
 		pushHistoryState(survey.currentPageNo);
 
+		// When survey page changes, update browser history
 		survey.onCurrentPageChanged.add(sender => {
 			const currentPageNo = sender.currentPageNo;
 			pushHistoryState(currentPageNo);
 		});
 
 		survey.onComplete.add(async sender => {
+			// handles all responses, including to unanswered questions
+			const finalResponses: Record<string, any> = {};
+			survey.getAllQuestions().forEach(q => {
+				// Do not set the values of html-type elements (e.g. text, instructions) to 'N/A'
+				if (q.getType() !== 'html') {
+					finalResponses[q.name] = sender.data[q.name] ?? "N/A";
+				}
+			});
+
 			const surveyData = {
-				responses: sender.data || {},
+				responses: finalResponses || {},
 				referredByCode: isReferralValid ? referredByCode : null,
 				coords: coords || { latitude: 0, longitude: 0 }
 			};
