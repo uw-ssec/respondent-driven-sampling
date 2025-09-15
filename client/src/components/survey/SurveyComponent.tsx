@@ -29,6 +29,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 	const [employeeName, setEmployeeName] = useState('');
 	const [referredByCode, setReferredByCode] = useState<string | null>(null);
 	const [isReferralValid, setIsReferralValid] = useState(true);
+	const [isOnline, setIsOnline] = useState(navigator.onLine);
 
 	const [searchParams] = useSearchParams();
 	const location = useLocation();
@@ -64,6 +65,20 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			validateReferralCode(codeInUrl);
 		}
 	}, [location.state, searchParams]);
+
+	// online/offline mode
+	useEffect(() => {
+		const handleOnline = () => setIsOnline(true);
+		const handleOffline = () => setIsOnline(false);
+	  
+		window.addEventListener('online', handleOnline);
+		window.addEventListener('offline', handleOffline);
+	  
+		return () => {
+		  window.removeEventListener('online', handleOnline);
+		  window.removeEventListener('offline', handleOffline);
+		};
+	  }, []);
 
 	async function validateReferralCode(code: string) {
 		try {
@@ -1155,6 +1170,21 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 	return (
 		<>
 			<Header onLogout={onLogout} />
+			{!isOnline && ( //offline mode banner
+			<div style={{
+				position: 'fixed',
+				top: 0,
+				left: 0,
+				right: 0,
+				backgroundColor: 'purple',
+				color: 'white',
+				padding: '12px',
+				textAlign: 'center',
+				zIndex: 1000
+			}}>
+				You are offline. Your answers will be saved locally until you reconnect.
+			</div>
+			)}
 			<div style={{ padding: '20px' }}>
 				{surveyRef.current && <Survey model={surveyRef.current} />}
 
