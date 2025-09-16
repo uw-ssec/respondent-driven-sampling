@@ -6,6 +6,8 @@ import { Survey } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
+// Global Zustand store managing state of survey components
+import { useSurveyStore } from '@/stores/useSurveyStore';
 import {
 	getAuthToken,
 	getEmployeeId,
@@ -15,9 +17,6 @@ import { useGeolocated } from 'react-geolocated';
 
 import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
-
-// Global Zustand store managing state of survey components
-import { useSurveyStore } from "@/stores/useSurveyStore";
 
 // This component is responsible for rendering the survey and handling its logic
 // It uses the SurveyJS library to create and manage the survey
@@ -39,7 +38,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		employeeName,
 		setEmployeeName,
 		referredByCode,
-		setReferredByCode,
+		setReferredByCode
 	} = useSurveyStore();
 
 	const [isReferralValid, setIsReferralValid] = useState(true);
@@ -58,6 +57,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		if (storedEmployeeId) setEmployeeId(storedEmployeeId);
 		if (storedFirstName) setEmployeeName(storedFirstName);
 
+<<<<<<< HEAD
 		// 2) Check if referral is passed via location.state
 		const codeFromState = location.state?.referralCode;
 		if (codeFromState) {
@@ -67,6 +67,17 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		}
 
 		// 3) Otherwise, check the URL query param "?ref=XXXX"
+=======
+		if (storedEmployeeId && storedEmployeeId !== employeeId) {
+			setEmployeeId(storedEmployeeId);
+		}
+
+		if (storedFirstName && storedFirstName !== employeeName) {
+			setEmployeeName(storedFirstName);
+		}
+
+		// 2) Sync referral code from URL query param into Zustand store
+>>>>>>> 4c098247a8943dd166cc6c9e358900ad5678538e
 		const codeInUrl = searchParams.get('ref');
 		if (codeInUrl && codeInUrl !== referredByCode) {
 			setReferredByCode(codeInUrl);
@@ -97,7 +108,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				const errData = await response.json();
 				alert(
 					errData.message ||
-					'Invalid referral code. Please check again.'
+						'Invalid referral code. Please check again.'
 				);
 				setReferredByCode(null);
 				setIsReferralValid(false);
@@ -111,10 +122,10 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		}
 	}
 
-	console.log("Employee name: " + employeeName);
-	console.log("Employee ID: " + employeeId);
-	console.log("referredByCode: " + referredByCode);
-	console.log("Is the referral code valid? A: " + isReferralValid);
+	console.log('Employee name: ' + employeeName);
+	console.log('Employee ID: ' + employeeId);
+	console.log('referredByCode: ' + referredByCode);
+	console.log('Is the referral code valid? A: ' + isReferralValid);
 
 	const surveyJson = useMemo(
 		() => ({
