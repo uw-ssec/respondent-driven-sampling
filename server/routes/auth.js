@@ -52,7 +52,7 @@ router.post('/send-otp-login', async (req, res) => {
 
 		const user = await User.findOne({ email, phone });
 		if (!user) {
-			return res.status(400).json({ message: httpMessages.err_user_not_exist });
+			return res.status(404).json({ message: httpMessages.err_user_not_exist });
 		}
 		await verifyService.verifications.create({ to: phone, channel: 'sms' });
 		res.json({ message: httpMessages.success_otp });
