@@ -122,11 +122,6 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		}
 	}
 
-	console.log('Employee name: ' + employeeName);
-	console.log('Employee ID: ' + employeeId);
-	console.log('referredByCode: ' + referredByCode);
-	console.log('Is the referral code valid? A: ' + isReferralValid);
-
 	const surveyJson = useMemo(
 		() => ({
 			title: 'Homelessness Experience Survey',
