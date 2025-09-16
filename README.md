@@ -69,7 +69,7 @@ client/                   # Client-facing React application
 │   │   ├── Profile/
 │   │   │   ├── AdminEditProfile.tsx      # Edit profile functionalities
 │   │   │   └── ViewProfile.tsx
-│   │   ├── QRCodeScan&Referral/
+│   │   ├── QRCodeScanAndReferral/
 │   │   │   └── ApplyReferral.tsx         # Functionality to apply a referral code
 │   │   ├── Signup/
 │   │   │   └── Signup.tsx                # Sign up functionality
