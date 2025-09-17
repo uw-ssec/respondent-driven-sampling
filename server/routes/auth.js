@@ -219,7 +219,9 @@ router.post('/preapprove', auth, async (req, res) => {
 
 		// Gets default permissions for given role.
 		const permissions = getDefaultPermissions(role);
+		const employeeId = await generateEmployeeId();
 		const newUser = new User({
+			employeeId,
 			firstName,
 			lastName,
 			email,
