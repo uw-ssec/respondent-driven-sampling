@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const {User, permission_types, limiter_types } = require('../models/Users');
+const {User, permission_types, limiter_values } = require('../models/Users');
 
 
 
@@ -63,7 +63,7 @@ function validPermList(permissionList) {
   permissionList.forEach(perm => {
     if (!perm.type || !perm.limiter ||
       !permsTypes.includes(perm.type) ||
-      !limiter_types.includes(perm.limiter)) {
+      !limiter_values.includes(perm.limiter)) {
         valid = false;
       } else {
         // Remove the already seen permission type so if we see it again we will
@@ -75,9 +75,31 @@ function validPermList(permissionList) {
   return valid;
 }
 
+/**
+ * Determines the deafult permissions for a given role. If role is invalid then returns an empty list.
+ * @param {string} role The role to determine permissions for.
+ * @returns {Array<Permission>} Array of permissions for given role, empty if invalid role.
+ */
+function getDefaultPermissions(role) {
+  let permissions = []
+    switch (role) {
+      case 'Volunteer':
+        permissions = [{type: 'view_survey', limiter: 'Self'}, {type: 'delete_survey', limiter: 'Self'}, {type: 'view_profile', limiter: 'Self'}, {type: 'edit_profile', limiter: 'Self'}]
+        break;
+      case 'Manager':
+        permissions = [{type: 'view_survey', limiter: 'All'}, {type: 'delete_survey', limiter: 'Self'}, {type: 'change_perms', limiter: 'All'}, {type: 'view_profile', limiter: 'All'}, {type: 'edit_profile', limiter: 'Self'}, {type: 'approve_user', limiter: 'All'}];
+        break;
+      case 'Admin':
+        permissions = [{type: 'view_survey', limiter: 'All'}, {type: 'delete_survey', limiter: 'All'}, {type: 'change_perms', limiter: 'All'}, {type: 'view_profile', limiter: 'All'}, {type: 'edit_profile', limiter: 'All'}, {type: 'approve_user', limiter: 'All'}];
+        break;
+    }
+    return permissions
+}
+
 module.exports = {
   generateEmployeeId,
   roleToNumberMap,
   hasPermission,
-  validPermList
+  validPermList,
+  getDefaultPermissions
 }

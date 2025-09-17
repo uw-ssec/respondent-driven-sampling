@@ -41,7 +41,7 @@ async function auth(req, res, next) {
 		req.requestorID = user.id;
 		next();
 	} catch (err) {
-		return res.status(401).json({ message: `Invalid Token: ${err.name}` });
+		return res.status(401).json({ message: `Access Denied. Invalid Token: ${err.name}` });
 	}
 }
 

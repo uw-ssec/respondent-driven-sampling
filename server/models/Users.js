@@ -1,8 +1,17 @@
 const mongoose = require('mongoose');
 
-// List of types of permissions and limiters possible.
-const permission_types = ['view_survey', 'delete_survey', 'change_perms', 'view_profile', 'edit_profile', 'approve_user']
-const limiter_types = ['Self', 'All']
+/**
+ * Types of permission possible. Look in the database doc to see what each permission is used for.
+ */
+const permission_types = ['view_survey', 'delete_survey', 'change_perms', 'view_profile', 'edit_profile', 'approve_user'];
+/**
+ * Types of limiters a permission can have.
+ */
+const limiter_values = ['Self', 'All'];
+/**
+ * Possible values a role can take on.
+ */
+const role_values = ['Volunteer', 'Manager', 'Admin'];
 
 // Schema type for permissions of users.
 // Includes a limiter which defines how broadly the permission can be used.
@@ -16,7 +25,7 @@ const permissionSchema = new mongoose.Schema({
   },
   limiter: { 
     type: String,
-    enum: limiter_types,
+    enum: limiter_values,
     required: true
   }
 });
@@ -39,7 +48,7 @@ const userSchema = new mongoose.Schema({
   phone:      { type: String, required: true },
   role: {
     type: String,
-    enum: ['Volunteer', 'Manager', 'Admin'],
+    enum: role_values,
     required: true
   },
   // List of permissions the user has, each permission must be unique by type.
@@ -61,5 +70,6 @@ const User = mongoose.model('User', userSchema);
 module.exports = {
   User,
   permission_types,
-  limiter_types
+  limiter_values,
+  role_values
 }

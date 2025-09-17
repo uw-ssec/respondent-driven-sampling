@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models/Users');
+const { User, role_values } = require('../models/Users');
 const { generateAuthToken } = require('../utils/authTokenHandler');
 const { auth } = require('../middleware/auth');
-const {generateEmployeeId, roleToNumberMap, hasPermission, validPermList } = require('../utils/userUtils');
+const {generateEmployeeId, roleToNumberMap, hasPermission, validPermList, getDefaultPermissions } = require('../utils/userUtils');
 const httpMessages = require('../messages');
 
 const twilio = require('twilio');
@@ -66,35 +66,23 @@ router.post('/send-otp-login', async (req, res) => {
 router.post('/verify-otp-signup', async (req, res) => {
 	try {
 		const { phone, code, firstName, lastName, email, role } = req.body;
-		if (!phone || !code || !firstName || !lastName || !email || !role) {
+		if (!phone || !code || !firstName || !lastName || !email || !role)
 			return res.status(400).json({ message: httpMessages.err_missing_fields });
-		}
 
 		const check = await verifyService.verificationChecks.create({
 			to: phone,
 			code
 		});
-		if (check.status !== 'approved') {
+		if (check.status !== 'approved')
 			return res.status(400).json({ message: httpMessages.err_invalid_otp });
-		}
-		if (await User.findOne({ phone })) {
-			return res
-				.status(400)
-				.json({ message: httpMessages.err_user_exist });
-		}
-    // Defining default permissions for role requested.
-    let permissions = []
-    switch (role) {
-      case 'Volunteer':
-        permissions = [{type: 'view_survey', limiter: 'Self'}, {type: 'delete_survey', limiter: 'Self'}, {type: 'view_profile', limiter: 'Self'}, {type: 'edit_profile', limiter: 'Self'}]
-        break;
-      case 'Manager':
-        permissions = [{type: 'view_survey', limiter: 'All'}, {type: 'delete_survey', limiter: 'Self'}, {type: 'change_perms', limiter: 'All'}, {type: 'view_profile', limiter: 'All'}, {type: 'edit_profile', limiter: 'Self'}, {type: 'approve_user', limiter: 'All'}];
-        break;
-      case 'Admin':
-        permissions = [{type: 'view_survey', limiter: 'All'}, {type: 'delete_survey', limiter: 'All'}, {type: 'change_perms', limiter: 'All'}, {type: 'view_profile', limiter: 'All'}, {type: 'edit_profile', limiter: 'All'}, {type: 'approve_user', limiter: 'All'}];
-        break;
-    }
+		if (await User.findOne({ phone }))
+			return res.status(400).json({ message: httpMessages.err_user_exist_login });
+
+    	// Gets default permissions for role, checks if no permissions were given
+		// meaning the given role is invalid.
+		const permissions = getDefaultPermissions(role);
+		if (permissions == [])
+			return res.status(400).json({ message: httpMessages.err_invalid_fields });
 		const employeeId = await generateEmployeeId();
 		const newUser = new User({ employeeId, firstName, lastName, email, phone, role, permissions });
 		await newUser.save();
@@ -119,7 +107,7 @@ router.post('/verify-otp-signup', async (req, res) => {
 router.post('/verify-otp-login', async (req, res) => {
 	try {
 		const { phone, code } = req.body;
-		if (!phone) {
+		if (!phone || !code) {
 			return res.status(400).json({ message: httpMessages.err_missing_fields });
 		}
 
@@ -133,7 +121,7 @@ router.post('/verify-otp-login', async (req, res) => {
 
 		const user = await User.findOne({ phone });
 		if (!user) {
-			return res.status(400).json({
+			return res.status(404).json({
 				message: httpMessages.err_phone_not_found
 			});
 		}
@@ -222,19 +210,22 @@ router.post('/preapprove', auth, async (req, res) => {
 		const { firstName, lastName, email, phone, role } = req.body;
 		if (!phone || !firstName || !lastName || !email || !role)
 			return res.status(400).json({ message: httpMessages.err_missing_fields });
+		if (!role_values.includes(role))
+			return res.status(400).json({ message: httpMessages.err_invalid_fields });
 		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
 			return res.status(403).json({ message: httpMessages.err_invalid_role});
-		if (await User.findOne({ phone })) {
-			return res
-				.status(400)
-				.json({ message: httpMessages.err_user_exist_phone });
-		}
+		if (await User.findOne({ phone }))
+			return res.status(400).json({ message: httpMessages.err_user_exist_phone });
+
+		// Gets default permissions for given role.
+		const permissions = getDefaultPermissions(role);
 		const newUser = new User({
 			firstName,
 			lastName,
 			email,
 			phone,
 			role,
+			permissions,
 			approvalStatus: 'Approved'
 		});
 		await newUser.save();
@@ -282,6 +273,8 @@ router.put('/users/:employeeId', auth, async (req, res) => {
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 
 		const { firstName, lastName, email, phone, role } = req.body;
+		if (role && !role_values.includes(role))
+			return res.status(400).json({ message: httpMessages.err_invalid_fields});
 		if (role && roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
 			return res.status(403).json({ message: httpMessages.err_invalid_role});
 
@@ -341,9 +334,9 @@ router.put('/users/by-id/:id', auth, async (req, res) => {
 			return res.status(403).json({ message: httpMessages.err_invalid_perms});
 
 		const { firstName, lastName, email, phone, role, permissions } = req.body;
-		if ( !email || !phone || !role)
-			return res.status(400).json({ message: httpMessages.err_missing_fields });
-		if (roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
+		if (role && !role_values.includes(role))
+			return res.status(400).json({ message: httpMessages.err_invalid_fields});
+		if (role && roleToNumberMap[role] > roleToNumberMap[req.decodedAuthToken.role])
 			return res.status(403).json({ message: httpMessages.err_invalid_role});
 		
 		const user = await User.findById(req.params.id);
@@ -352,8 +345,10 @@ router.put('/users/by-id/:id', auth, async (req, res) => {
 		}
 
 		if (permissions) {
-			// There is no change_perms self permission, so don't check.
-			if (!hasPermission(req.permissions, 'change_perms', 'All'))
+			// There is no change_perms self permission, so don't check and don't
+			// allow anyone to change their own perms.
+			if (!hasPermission(req.permissions, 'change_perms', 'All') ||
+				req.requestorID == req.params.id)
 				return res.status(403).json({ message: httpMessages.err_invalid_perms});
 			if (!validPermList(permissions))
 				return res.status(400).json({ message: httpMessages.err_invalid_fields});
