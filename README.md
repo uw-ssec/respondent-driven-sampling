@@ -2,19 +2,11 @@
 
 The RDS App is a secure, accessible, and open-source web application that streamlines data collection for homelessness research using **Respondent-Driven Sampling (RDS)**. Developed in collaboration with the University of Washington iSchool and the King County Regional Homelessness Authority (KCRHA), this app enables volunteers and administrators to collect accurate survey data, track referrals, and generate population estimates more effectively than traditional Point-In-Time (PIT) counts.
 
-> 📍 **Live Deployment:** [Link to App](https://rds-main-g6e3dpefdabmcmca.westus-01.azurewebsites.net/login)
+<!-- > **Live Deployment:** [Link to App](https://rds-main-g6e3dpefdabmcmca.westus-01.azurewebsites.net/login) -->
 
-> 🧠 **Research-Driven:** Based on field-tested RDS methodologies
+> **Research-Driven:** Based on field-tested RDS methodologies
 
-> 🔐 **Secure & Compliant:** Built with HIPAA and HUD compliance in mind
-
-## 📄 Project Documentation
-
-For a full overview of system architecture, development process, API design, testing protocols, and stakeholder insights, please refer to our full project documentation:
-
-👉 [RDS App Capstone Documentation](https://docs.google.com/document/d/11gVmNGchNJOIPVri7CZD19c34Q7veDuBgXCw-ZixZR4/edit?usp=sharing)
-
-This document outlines critical decisions, technical diagrams, and recommendations for future developers and collaborators.
+> **Secure & Compliant:** Built with HIPAA and HUD compliance in mind
 
 ## Tech Stack
 
@@ -204,23 +196,4 @@ The items listed below are features our team has identified out of scope for the
 
 ## Contributors
 
-Thanks to the following people for their work on this project.
-
-- Ihsan Kahveci
-- June Yang
-- Emily Porter
-- Zack Almquist
-- Elizabeth Deng
-- KelliAnn Ramirez
-- Jasmine Vuong
-- Hannah Lam
-- Ella Weinberg
-- Arushi Agarwal
-- Devanshi Desai
-- Aryan Palave
-- Kaden Kapadia
-- Hrudhai Umashankar
-- Liya Finley Hutchison
-- Hana Amos
-- Zack Crouse
-- Kristen L Gustafson
+Thanks to the following people for their work on this project: Ihsan Kahveci, June Yang, Emily Porter, Zack Almquist, Elizabeth Deng, KelliAnn Ramirez, Jasmine Vuong, Hannah Lam, Ella Weinberg, Arushi Agarwal, Devanshi Desai, Aryan Palave, Kaden Kapadia, Hrudhai Umashankar, Liya Finley Hutchison, Hana Amos, Zack Crouse, Kristen L Gustafson.
