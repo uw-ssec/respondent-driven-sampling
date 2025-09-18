@@ -13,6 +13,7 @@ import { Survey } from '@/types/Survey';
 
 export default function SurveyDetails({ onLogout }: LogoutProps) {
 	const { id } = useParams();
+	const navigate = useNavigate();
 	const [survey, setSurvey] = useState<Survey>();
 	const [loading, setLoading] = useState(true);
 	const navigate = useNavigate();
@@ -181,6 +182,15 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 								.join('\n\n')}
 					</pre>
 				</div>
+				{/* Edit Pre-screen Questions Button */}
+				<button
+					className="edit-button"
+					onClick={() =>
+						navigate(`/survey/${id}/edit`)
+					}
+				>
+					Edit Prescreen Responses
+				</button>
 			</div>
 		</div>
 	);

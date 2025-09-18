@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Model } from 'survey-core';
 import { Survey } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
+// Global Zustand store managing state of survey components
+import { useSurveyStore } from '@/stores/useSurveyStore';
 import {
 	getAuthToken,
 	getEmployeeId,
@@ -20,20 +22,26 @@ import Header from '@/pages/Header/Header';
 // It uses the SurveyJS library to create and manage the survey
 // It also handles referral code validation and geolocation
 // It uses React Router for navigation and URL parameter handling
-// It uses localStorage to persist data across sessions
+// It uses Zustand (with persist) & localstorage to manage and persist data across sessions
 // It uses the useEffect hook to manage side effects, such as fetching data and updating state
 // It uses the useState hook to manage component state
 // It uses the useGeolocated hook to get the user's geolocation
 const SurveyComponent = ({ onLogout }: LogoutProps) => {
-	const [employeeId, setEmployeeId] = useState('');
-	const [employeeName, setEmployeeName] = useState('');
-	const [referredByCode, setReferredByCode] = useState<string | null>(null);
-	const [isReferralValid, setIsReferralValid] = useState(true);
-
 	const [searchParams] = useSearchParams();
-	const location = useLocation();
 	const navigate = useNavigate();
 	const surveyRef = useRef<Model | null>(null);
+
+	// Pulls state values and update functions from Zustand store
+	const {
+		employeeId,
+		setEmployeeId,
+		employeeName,
+		setEmployeeName,
+		referredByCode,
+		setReferredByCode
+	} = useSurveyStore();
+
+	const [isReferralValid, setIsReferralValid] = useState(true);
 
 	const { coords } = useGeolocated({
 		positionOptions: {
@@ -49,6 +57,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		if (storedEmployeeId) setEmployeeId(storedEmployeeId);
 		if (storedFirstName) setEmployeeName(storedFirstName);
 
+<<<<<<< HEAD
 		// 2) Check if referral is passed via location.state
 		const codeFromState = location.state?.referralCode;
 		if (codeFromState) {
@@ -58,12 +67,29 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		}
 
 		// 3) Otherwise, check the URL query param "?ref=XXXX"
-		const codeInUrl = searchParams.get('ref');
-		if (codeInUrl) {
-			setReferredByCode(codeInUrl);
-			validateReferralCode(codeInUrl);
+=======
+		if (storedEmployeeId && storedEmployeeId !== employeeId) {
+			setEmployeeId(storedEmployeeId);
 		}
-	}, [location.state, searchParams]);
+
+		if (storedFirstName && storedFirstName !== employeeName) {
+			setEmployeeName(storedFirstName);
+		}
+
+		// 2) Sync referral code from URL query param into Zustand store
+>>>>>>> 4c098247a8943dd166cc6c9e358900ad5678538e
+		const codeInUrl = searchParams.get('ref');
+		if (codeInUrl && codeInUrl !== referredByCode) {
+			setReferredByCode(codeInUrl);
+		}
+
+		// Validate referral code
+		if (referredByCode) {
+			validateReferralCode(referredByCode);
+		} else {
+			setIsReferralValid(false);
+		}
+	}, [employeeId, employeeName, searchParams, referredByCode]);
 
 	async function validateReferralCode(code: string) {
 		try {
@@ -86,6 +112,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				);
 				setReferredByCode(null);
 				setIsReferralValid(false);
+				navigate('/apply-referral');
 			} else {
 				setIsReferralValid(true);
 			}
@@ -1060,7 +1087,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				window.history.pushState(
 					{ pageNo },
 					'',
-					window.location.pathname
+					window.location.pathname + window.location.search
 				);
 			}
 		};
