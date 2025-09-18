@@ -1,8 +1,8 @@
-/** @type {import('prettier').Config} */
-module.exports = {
+import { type Config } from 'prettier';
+
+const config: Config = {
 	endOfLine: 'lf',
 	semi: true,
-	useTabs: false,
 	singleQuote: true,
 	arrowParens: 'avoid',
 	tabWidth: 4,
@@ -23,10 +23,11 @@ module.exports = {
 		'^@/hooks/(.*)$',
 		'^@/components/(.*)$',
 		'^@/styles/(.*)$',
-		'^@/pages/(.*)$',
+		'^@/pages/(	.*)$',
 		'',
 		'^[./]'
 	],
 	importOrderParserPlugins: ['typescript', 'jsx', 'decorators-legacy'],
 	importOrderTypeScriptVersion: '5.0.0'
 };
+export default config;
