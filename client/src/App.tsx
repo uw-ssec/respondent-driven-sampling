@@ -43,6 +43,15 @@ function App() {
 					path="/login"
 					element={<Login onLogin={handleLogin} />}
 				/>
+				<Route path="/survey/:id/survey"
+					element={
+						isLoggedIn ? (
+						<SurveyComponent onLogout={handleLogout} />
+						) : (
+						<Navigate replace to="/login" />
+						)
+					}
+				/>
 				<Route path="/signup" element={<Signup />} />
 				<Route
 					path="/dashboard"
