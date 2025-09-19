@@ -4,6 +4,10 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const surveyRoutes = require('../surveys');
 const Survey = require('../../models/Survey');
+const User = require('../../models/Users');
+const { generateAuthToken } = require('../../utils/authTokenHandler');
+
+// TODO: Need to change these tests so that they mock create tokens before using endpoints that need them
 
 // Mock the generateReferralCode utility
 jest.mock('../../utils/generateReferralCode', () => {
@@ -65,6 +69,7 @@ describe('Survey Routes', () => {
     await testSurvey.save();
   });
 
+  // validate
   describe('GET /api/surveys/validate-ref/:code', () => {
     test('should validate an existing unused referral code', async () => {
       const res = await request(app)
@@ -92,8 +97,116 @@ describe('Survey Routes', () => {
     });
   });
 
-  describe('POST /api/surveys/submit', () => {
-    test('should submit a new survey with generated referral codes', async () => {
+  // all
+  describe('GET /api/surveys/all', () => {
+    test('add user to fake db', async () => {
+      // Create a new user
+      const user = await new User({
+        employeeUd: "EMP1234",
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'existing@example.com',
+        phone: '1234567890',
+        role: 'Admin'
+      }).save();
+
+      const updatedUser = await User.findOne({ employeeId: user.employeeId });
+      expect(updatedUser.firstName).toBe("John");
+    });
+
+    test('should return all surveys for admin users', async () => {
+      // Create a new user
+      const user = await new User({
+        employeeUd: "EMP1234",
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'existing1@example.com',
+        phone: '1234567890',
+        role: 'Admin'
+      }).save();
+
+      const updatedUser = await User.findOne({ employeeId: user.employeeId });
+      expect(updatedUser.firstName).toBe("John");
+
+      // Create a token to send when calling api endpoint - FILL IN INFORMATION WITH A REAL EMPLOYEE FROM DB
+      const token = generateAuthToken(
+        "John",
+        "Admin",
+        "EMP1234"
+      );
+
+      // Await
+      const res = await request(app)
+        .get('/api/surveys/all')
+        .set('X-User-Role', 'Admin')
+        .set('x-employee-id', 'EMP1234')
+        .set('Authorization', `Bearer ${token}`);
+
+        //Authorization: `Bearer ${token}`
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(2); // Our test data has 2 surveys
+    });
+
+    test('should return only user\'s surveys for non-admin users', async () => {
+      const res = await request(app)
+        .get('/api/surveys/all')
+        .set('X-User-Role', 'Volunteer')
+        .set('X-Employee-ID', 'EMP1234');
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(1);
+      expect(res.body[0].employeeId).toBe('EMP1234');
+    });
+  });
+
+  // get/:id
+  describe('GET /api/surveys/:id', () => {
+    test('should return a specific survey for admin users', async () => {
+      const res = await request(app)
+        .get(`/api/surveys/${testSurvey._id}`)
+        .set('X-User-Role', 'Admin');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.employeeId).toBe(testSurvey.employeeId);
+      expect(res.body.employeeName).toBe(testSurvey.employeeName);
+    });
+
+    test('should return a specific survey for the owning user', async () => {
+      const res = await request(app)
+        .get(`/api/surveys/${testSurvey._id}`)
+        .set('X-User-Role', 'Volunteer')
+        .set('X-Employee-ID', 'EMP1234');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.employeeId).toBe(testSurvey.employeeId);
+    });
+
+    test('should forbid access to other users\' surveys', async () => {
+      const res = await request(app)
+        .get(`/api/surveys/${testSurvey._id}`)
+        .set('X-User-Role', 'Volunteer')
+        .set('X-Employee-ID', 'EMP5678');
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body.message).toMatch(/Forbidden/);
+    });
+
+    test('should return 404 for non-existent survey', async () => {
+      const nonExistentId = new mongoose.Types.ObjectId();
+      const res = await request(app)
+        .get(`/api/surveys/${nonExistentId}`)
+        .set('X-User-Role', 'Admin');
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body.message).toBe('Survey not found');
+    });
+  });
+
+  // Test for save endpoint
+  describe('POST /api/surveys/save/:inProgress', () => {
+    test('Should submit a new survey with generated referral codes', async () => {
       const newSurvey = {
         employeeId: 'EMP5678',
         employeeName: 'Jane Doe',
@@ -104,11 +217,11 @@ describe('Survey Routes', () => {
       };
 
       const res = await request(app)
-        .post('/api/surveys/submit')
+        .post(`/api/surveys/submit/${false}`)
         .send(newSurvey);
 
       expect(res.statusCode).toBe(201);
-      expect(res.body.message).toBe('Survey submitted successfully!');
+      expect(res.body.message).toBe('Survey saved successfully!');
       expect(res.body.newSurveyId).toBeDefined();
       expect(res.body.referralCodes).toHaveLength(3);
       expect(res.body.referralCodes[0]).toBe('TESTCODE1');
@@ -157,69 +270,4 @@ describe('Survey Routes', () => {
     });
   });
 
-  describe('GET /api/surveys/all', () => {
-    test('should return all surveys for admin users', async () => {
-      const res = await request(app)
-        .get('/api/surveys/all')
-        .set('X-User-Role', 'Admin');
-
-      expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(2); // Our test data has 2 surveys
-    });
-
-    test('should return only user\'s surveys for non-admin users', async () => {
-      const res = await request(app)
-        .get('/api/surveys/all')
-        .set('X-User-Role', 'Volunteer')
-        .set('X-Employee-ID', 'EMP1234');
-
-      expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0].employeeId).toBe('EMP1234');
-    });
-  });
-
-  describe('GET /api/surveys/:id', () => {
-    test('should return a specific survey for admin users', async () => {
-      const res = await request(app)
-        .get(`/api/surveys/${testSurvey._id}`)
-        .set('X-User-Role', 'Admin');
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.employeeId).toBe(testSurvey.employeeId);
-      expect(res.body.employeeName).toBe(testSurvey.employeeName);
-    });
-
-    test('should return a specific survey for the owning user', async () => {
-      const res = await request(app)
-        .get(`/api/surveys/${testSurvey._id}`)
-        .set('X-User-Role', 'Volunteer')
-        .set('X-Employee-ID', 'EMP1234');
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.employeeId).toBe(testSurvey.employeeId);
-    });
-
-    test('should forbid access to other users\' surveys', async () => {
-      const res = await request(app)
-        .get(`/api/surveys/${testSurvey._id}`)
-        .set('X-User-Role', 'Volunteer')
-        .set('X-Employee-ID', 'EMP5678');
-
-      expect(res.statusCode).toBe(403);
-      expect(res.body.message).toMatch(/Forbidden/);
-    });
-
-    test('should return 404 for non-existent survey', async () => {
-      const nonExistentId = new mongoose.Types.ObjectId();
-      const res = await request(app)
-        .get(`/api/surveys/${nonExistentId}`)
-        .set('X-User-Role', 'Admin');
-
-      expect(res.statusCode).toBe(404);
-      expect(res.body.message).toBe('Survey not found');
-    });
-  });
 }); 

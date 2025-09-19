@@ -141,7 +141,8 @@ app.use("/api/pages", securityWrapper(pageRoutes));
 app.use("/api/surveys", securityWrapper(surveyRoutes));
 
 // Serve static files with security headers
-const clientBuildPath = path.join(__dirname, "./dist");
+// const clientBuildPath = path.join(__dirname, '../client/dist'); // RUN LOCALLY
+const clientBuildPath = path.join(__dirname, "./dist"); // FOR GITHUB BUILD
 app.use(
   express.static(clientBuildPath, {
     setHeaders: (res) => {

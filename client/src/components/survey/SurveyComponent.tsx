@@ -25,13 +25,14 @@ import Header from '@/pages/Header/Header';
 // It uses the useState hook to manage component state
 // It uses the useGeolocated hook to get the user's geolocation
 const SurveyComponent = ({ onLogout }: LogoutProps) => {
-	const [employeeId, setEmployeeId] = useState('');
-	const [employeeName, setEmployeeName] = useState('');
-	const [referredByCode, setReferredByCode] = useState<string | null>(null);
+	const location = useLocation();
+	const [employeeId, setEmployeeId] = useState(localStorage.getItem('employeeId'));
+	const [employeeName, setEmployeeName] = useState(localStorage.getItem('firstName'));
+	const [referredByCode, setReferredByCode] = useState<string | null>(location.state?.referralCode);
 	const [isReferralValid, setIsReferralValid] = useState(true);
+	localStorage.setItem('objectId', ''); // Set object id to empty in local storage; helps clean state for new surveys
 
 	const [searchParams] = useSearchParams();
-	const location = useLocation();
 	const navigate = useNavigate();
 	const surveyRef = useRef<Model | null>(null);
 
@@ -1070,7 +1071,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 		pushHistoryState(survey.currentPageNo);
 
-		survey.onCurrentPageChanged.add(sender => {
+		survey.onCurrentPageChanged.add(async sender => {
 			const currentPageNo = sender.currentPageNo;
 			pushHistoryState(currentPageNo);
 		});
@@ -1079,7 +1080,9 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			const surveyData = {
 				responses: sender.data || {},
 				referredByCode: isReferralValid ? referredByCode : null,
-				coords: coords || { latitude: 0, longitude: 0 }
+				coords: coords || { latitude: 0, longitude: 0 }, 
+				objectId: localStorage.getItem('objectId'), 
+				inProgress: false // Set to false because survey is being submitted
 			};
 
 			console.log('Survey Submitted:', surveyData);
@@ -1087,7 +1090,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			try {
 				console.log('Survey Data Being Sent:', surveyData); // Should we be printing survey data?
 				const token = getAuthToken();
-				const response = await fetch('/api/surveys/submit', {
+				const response = await fetch(`/api/surveys/save`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
