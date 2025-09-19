@@ -1,0 +1,27 @@
+{
+	"endOfLine": "lf",
+	"semi": true,
+	"singleQuote": true,
+	"arrowParens": "avoid",
+	"tabWidth": 4,
+	"trailingComma": "none",
+	"useTabs": true,
+	"plugins": ["@ianvs/prettier-plugin-sort-imports"],
+	"importOrder": [
+		"<THIRD_PARTY_MODULES>",
+		"",
+		"^(node:.*|fs|path|crypto|util|events|stream|http|https|url|querystring|os|process)$",
+		"",
+		"^@/(.*)$",
+		"^@/types/(.*)$",
+		"^@/utils/(.*)$",
+		"^@/config/(.*)$",
+		"^@/middleware/(.*)$",
+		"^@/routes/(.*)$",
+		"^@/services/(.*)$",
+		"",
+		"^[./]"
+	],
+	"importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
+	"importOrderTypeScriptVersion": "5.0.0"
+}

@@ -2,7 +2,7 @@
     "compilerOptions": {
         "target": "ES2022",
         "module": "ESNext",
-        "moduleResolution": "Node",
+        "moduleResolution": "bundler",
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
@@ -13,11 +13,10 @@
         "noEmit": false,
         "declaration": true,
         "outDir": "./build",
-        "rootDir": "./src",
-        "baseUrl": "./",
+        "baseUrl": "src",
         "paths": {
             "@/*": [
-                "src/*"
+                "*"
             ]
         },
         "types": [
@@ -29,10 +28,11 @@
         ]
     },
     "include": [
-        "src/**/*"
+        "src/"
     ],
     "exclude": [
         "node_modules",
+        "build",
         "dist",
         "**/*.test.ts",
         "**/*.test.js"

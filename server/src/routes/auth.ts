@@ -1,17 +1,18 @@
+import User from '@/models/users';
 import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import twilio from 'twilio';
-import { auth } from '../middleware/auth.js';
-import User from '../models/Users.js';
+
 import {
 	AuthenticatedRequest,
 	LoginRequest,
 	OTPRequest,
 	SignupRequest,
 	VerifyOTPRequest
-} from '../types/auth.js';
-import { generateAuthToken } from '../utils/authTokenHandler.js';
+} from '@/types/auth';
+import { generateAuthToken } from '@/utils/authTokenHandler.js';
+import { auth } from '@/middleware/auth';
 
 const router = express.Router();
 

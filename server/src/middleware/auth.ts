@@ -1,9 +1,10 @@
+import User from '@/models/users';
 import dotenv from 'dotenv';
-import { NextFunction, Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/Users.js';
-import { AuthenticatedRequest } from '../types/auth.js';
-import { verifyAuthToken } from '../utils/authTokenHandler.js';
+
+import { AuthenticatedRequest } from '@/types/auth';
+import { verifyAuthToken } from '@/utils/authTokenHandler';
 
 dotenv.config({ path: './.env' });
 
@@ -16,7 +17,14 @@ export async function auth(
 	next: NextFunction
 ): Promise<void> {
 	const authHeader = req.headers['authorization'];
-	const token = authHeader && authHeader.split(' ')[1];
+
+	if (!authHeader) {
+		res.status(401).json({ message: 'Access denied. No token provided' });
+		return;
+	}
+
+	const parts = authHeader.split(' ');
+	const token = parts.length === 2 ? parts[1] : authHeader;
 
 	if (!token) {
 		res.status(401).json({ message: 'Access denied. No token provided' });

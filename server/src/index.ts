@@ -7,11 +7,11 @@ import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import nocache from 'nocache';
-import connectDB from './database.js';
-// Import routes
-import authRoutes from './routes/auth.js';
-import pageRoutes from './routes/pages.js';
-import surveyRoutes from './routes/surveys.js';
+
+import connectDB from '@/database';
+import authRoutes from '@/routes/auth';
+import pageRoutes from '@/routes/pages';
+import surveyRoutes from '@/routes/surveys';
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);

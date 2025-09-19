@@ -1,5 +1,5 @@
+import { IReferralCode, ISurvey } from '@/types/models';
 import mongoose, { Model, Schema } from 'mongoose';
-import { IReferralCode, ISurvey } from '../types/models.js';
 
 // Schema for a single referral code associated with a survey.
 // Each survey can have multiple referral codes.
