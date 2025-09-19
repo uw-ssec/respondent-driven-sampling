@@ -32,11 +32,12 @@ jobs:
           rm -rf server/dist
           cp -r client/dist server/dist
 
-      # Install server dependencies
-      - name: Install server dependencies
+      # Install server dependencies and build TypeScript
+      - name: Build TypeScript server
         run: |
           cd server
           npm install
+          npm run build
 
       # Deploy to Azure App Service using Azure/webapps-deploy action
       - name: Deploy to Azure Web App
