@@ -1,22 +1,17 @@
-import User from '@/models/users';
-import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 import twilio from 'twilio';
 
+import { auth } from '@/middleware/auth';
+import User from '@/models/users';
 import {
 	AuthenticatedRequest,
 	LoginRequest,
 	OTPRequest,
-	SignupRequest,
-	VerifyOTPRequest
+	SignupRequest
 } from '@/types/auth';
 import { generateAuthToken } from '@/utils/authTokenHandler.js';
-import { auth } from '@/middleware/auth';
 
 const router = express.Router();
-
-dotenv.config({ path: './.env' });
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID as string;
 const authToken = process.env.TWILIO_AUTH_TOKEN as string;

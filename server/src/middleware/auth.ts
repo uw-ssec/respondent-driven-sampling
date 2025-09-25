@@ -1,12 +1,10 @@
-import User from '@/models/users';
-import dotenv from 'dotenv';
-import express, { NextFunction, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+import { NextFunction, Response } from 'express';
 
+import User from '@/models/users';
 import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
 
-dotenv.config({ path: './.env' });
+//dotenv.config({ path: './.env' });
 
 // Middleware for verifying token signature and storing token info in response
 // If this call passes to the next handler, it means the user is atleast a volunteer

@@ -6,7 +6,7 @@
 	"scripts": {
 		"build": "tsc",
 		"start": "node build/index.js",
-		"dev": "tsx --watch src/index.ts",
+		"dev": "tsx --env-file=.env --watch src/index.ts",
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
