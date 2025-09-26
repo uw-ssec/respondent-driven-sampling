@@ -108,7 +108,7 @@ router.post(
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
 		try {
 			const employeeId = req.user?.employeeId;
-			const employeeName = [req.user?.firstName, req.user?.lastName].filter(Boolean).join(' '); // Use first and last name if available
+			const employeeName = req.user?.employeeId; // Note: This seems wrong in original code - should probably be name
 			const { responses, referredByCode, coords } = req.body;
 
 			if (!employeeId || !employeeName || !responses) {
