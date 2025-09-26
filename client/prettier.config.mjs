@@ -1,6 +1,7 @@
-import { type Config } from 'prettier';
-
-const config: Config = {
+/**
+ * @type {import('prettier').Config}
+ */
+const config = {
 	endOfLine: 'lf',
 	semi: true,
 	singleQuote: true,
@@ -9,7 +10,7 @@ const config: Config = {
 	trailingComma: 'none',
 	useTabs: true,
 	// Since prettier 3.0, manually specifying plugins is required
-	plugins: [require.resolve('@ianvs/prettier-plugin-sort-imports')],
+	plugins: ['@ianvs/prettier-plugin-sort-imports'],
 	importOrder: [
 		'^(react/(.*)$)|^(react$)',
 		'',
@@ -30,4 +31,5 @@ const config: Config = {
 	importOrderParserPlugins: ['typescript', 'jsx', 'decorators-legacy'],
 	importOrderTypeScriptVersion: '5.0.0'
 };
+
 export default config;

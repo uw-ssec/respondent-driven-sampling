@@ -1,13 +1,5 @@
 import { useState } from 'react';
 
-import {
-	Navigate,
-	Route,
-	BrowserRouter as Router,
-	Routes
-} from 'react-router-dom';
-
-import SurveyComponent from '@/components/survey/SurveyComponent';
 import NewUser from '@/pages/AdminDashboard/NewUser';
 import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
 import QrPage from '@/pages/CompletedSurvey/QrPage';
@@ -20,6 +12,14 @@ import ViewProfile from '@/pages/Profile/ViewProfile';
 import ApplyReferral from '@/pages/QRCodeScan&Referral/ApplyReferral';
 import Signup from '@/pages/Signup/Signup';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
+import {
+	Navigate,
+	Route,
+	BrowserRouter as Router,
+	Routes
+} from 'react-router-dom';
+
+import SurveyComponent from '@/components/survey/SurveyComponent';
 
 import { deleteAuthToken, hasAuthToken } from './utils/authTokenHandler';
 
