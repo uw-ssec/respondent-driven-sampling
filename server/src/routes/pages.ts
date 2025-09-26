@@ -7,7 +7,7 @@ const router = express.Router();
 // Dashboard Page
 // This route handles the dashboard page
 // It responds with a welcome message
-router.get('/dashboard', (req: Request, res: Response) => {
+router.get('/dashboard', (_req: Request, res: Response) => {
 	res.json({ message: 'Welcome to the dashboard!' });
 });
 
@@ -15,7 +15,7 @@ router.get('/dashboard', (req: Request, res: Response) => {
 // This route handles the survey page
 // It responds with a message indicating the survey page is loaded
 // It is useful for users to fill out surveys
-router.get('/survey', (req: Request, res: Response) => {
+router.get('/survey', (_req: Request, res: Response) => {
 	res.json({ message: 'Survey page loaded!' });
 });
 
@@ -23,7 +23,7 @@ router.get('/survey', (req: Request, res: Response) => {
 // This route handles the signup page
 // It responds with a message indicating the signup page is loaded
 // It is useful for new users to register
-router.get('/signup', (req: Request, res: Response) => {
+router.get('/signup', (_req: Request, res: Response) => {
 	res.json({ message: 'Signup page loaded!' });
 });
 
@@ -31,7 +31,7 @@ router.get('/signup', (req: Request, res: Response) => {
 // This route handles the login page
 // It responds with a message indicating the login page is loaded
 // It is useful for existing users to log in
-router.get('/login', (req: Request, res: Response) => {
+router.get('/login', (_req: Request, res: Response) => {
 	res.json({ message: 'Login page loaded!' });
 });
 

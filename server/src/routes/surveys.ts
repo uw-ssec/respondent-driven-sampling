@@ -1,9 +1,9 @@
-import Survey from '@/models/survey';
-import express, { Request, Response } from 'express';
+import express, { Response } from 'express';
 
+import { auth } from '@/middleware/auth';
+import Survey from '@/models/survey';
 import { AuthenticatedRequest } from '@/types/auth';
 import generateReferralCode from '@/utils/generateReferralCode';
-import { auth } from '@/middleware/auth';
 
 const router = express.Router();
 

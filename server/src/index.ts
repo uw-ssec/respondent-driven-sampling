@@ -76,7 +76,7 @@ app.use(nocache());
 app.use(compression());
 
 // 11. Custom middleware to force security headers on every response
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((_req: Request, res: Response, next: NextFunction) => {
 	// Ensuring these headers are explicitly set on every response
 	res.setHeader(
 		'Content-Security-Policy',
@@ -190,7 +190,7 @@ app.get('*', (req: Request, res: Response) => {
 });
 
 // Error handler with security headers
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 	// Set security headers
 	res.setHeader(
 		'Content-Security-Policy',
