@@ -12,6 +12,7 @@ import ViewProfile from '@/pages/Profile/ViewProfile';
 import ApplyReferral from '@/pages/QRCodeScan&Referral/ApplyReferral';
 import Signup from '@/pages/Signup/Signup';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
+import SurveyEdit from '@/pages/PastEntries/SurveyEdit';
 import {
 	Navigate,
 	Route,
@@ -129,6 +130,16 @@ function App() {
 					element={
 						isLoggedIn ? (
 							<SurveyDetails onLogout={handleLogout} />
+						) : (
+							<Navigate replace to="/login" />
+						)
+					}
+				/>
+				<Route
+					path="/survey/:id/edit"
+					element={
+						isLoggedIn ? (
+							<SurveyEdit />
 						) : (
 							<Navigate replace to="/login" />
 						)
