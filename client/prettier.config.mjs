@@ -1,15 +1,16 @@
-/** @type {import('prettier').Config} */
-module.exports = {
+/**
+ * @type {import('prettier').Config}
+ */
+const config = {
 	endOfLine: 'lf',
 	semi: true,
-	useTabs: false,
 	singleQuote: true,
 	arrowParens: 'avoid',
 	tabWidth: 4,
 	trailingComma: 'none',
 	useTabs: true,
 	// Since prettier 3.0, manually specifying plugins is required
-	plugins: [require.resolve('@ianvs/prettier-plugin-sort-imports')],
+	plugins: ['@ianvs/prettier-plugin-sort-imports'],
 	importOrder: [
 		'^(react/(.*)$)|^(react$)',
 		'',
@@ -23,10 +24,12 @@ module.exports = {
 		'^@/hooks/(.*)$',
 		'^@/components/(.*)$',
 		'^@/styles/(.*)$',
-		'^@/pages/(.*)$',
+		'^@/pages/(	.*)$',
 		'',
 		'^[./]'
 	],
 	importOrderParserPlugins: ['typescript', 'jsx', 'decorators-legacy'],
 	importOrderTypeScriptVersion: '5.0.0'
 };
+
+export default config;
