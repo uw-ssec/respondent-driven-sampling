@@ -1,5 +1,5 @@
 import mongoose, { Model, Schema } from 'mongoose';
-import { IUser } from '../types/models.js';
+import { IUser } from '../types/models';
 
 // User schema definition
 // This schema defines the structure of the user data in the MongoDB database.
