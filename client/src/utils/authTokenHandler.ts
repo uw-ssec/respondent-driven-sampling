@@ -27,7 +27,7 @@ function getDecodedAuthToken(): JwtPayload | null {
 export function hasAuthToken(): boolean {
 	// If the token exists we will assume we are logged in, even if the token is expired.
 	// We can relogin on a failed API call if expired.
-	return getAuthToken() == null;
+	return getAuthToken() != null;
 }
 
 export function getRole(): string {
