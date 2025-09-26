@@ -13,7 +13,6 @@ import { Survey } from '@/types/Survey';
 
 export default function SurveyDetails({ onLogout }: LogoutProps) {
 	const { id } = useParams();
-	const navigate = useNavigate();
 	const [survey, setSurvey] = useState<Survey>();
 	const [loading, setLoading] = useState(true);
 	const navigate = useNavigate();

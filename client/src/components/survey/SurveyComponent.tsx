@@ -57,17 +57,6 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		if (storedEmployeeId) setEmployeeId(storedEmployeeId);
 		if (storedFirstName) setEmployeeName(storedFirstName);
 
-<<<<<<< HEAD
-		// 2) Check if referral is passed via location.state
-		const codeFromState = location.state?.referralCode;
-		if (codeFromState) {
-			setReferredByCode(codeFromState);
-			validateReferralCode(codeFromState);
-			return; // Skip reading from URL if we have it in state
-		}
-
-		// 3) Otherwise, check the URL query param "?ref=XXXX"
-=======
 		if (storedEmployeeId && storedEmployeeId !== employeeId) {
 			setEmployeeId(storedEmployeeId);
 		}
@@ -77,7 +66,6 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		}
 
 		// 2) Sync referral code from URL query param into Zustand store
->>>>>>> 4c098247a8943dd166cc6c9e358900ad5678538e
 		const codeInUrl = searchParams.get('ref');
 		if (codeInUrl && codeInUrl !== referredByCode) {
 			setReferredByCode(codeInUrl);

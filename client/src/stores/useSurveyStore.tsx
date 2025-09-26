@@ -14,11 +14,11 @@ export const useSurveyStore = create<SurveyState>()(
     persist(
         (set) => ({
             employeeId: '',
-            setEmployeeId: (id) => set({ employeeId: id }),
+            setEmployeeId: (id : string) => set({ employeeId: id }),
             employeeName: '',
-            setEmployeeName: (name) => set({ employeeName: name }),
+            setEmployeeName: (name : string) => set({ employeeName: name }),
             referredByCode: null,
-            setReferredByCode: (code) => set({ referredByCode: code })
+            setReferredByCode: (code : string | null) => set({ referredByCode: code })
         }),
         { name: "survey-storage" }
     )
