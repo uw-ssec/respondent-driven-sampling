@@ -33,7 +33,7 @@ jobs:
           cp -r client/dist server/dist
 
       # Install server dependencies
-      - name: Build TypeScript server
+      - name: Install server dependencies
         run: |
           cd server
           npm install
