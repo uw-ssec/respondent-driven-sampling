@@ -9,7 +9,7 @@ import {
 	OTPRequest,
 	SignupRequest
 } from '@/types/auth';
-import { generateAuthToken } from '@/utils/authTokenHandler.js';
+import { generateAuthToken } from '@/utils/authTokenHandler';
 
 const router = express.Router();
 
