@@ -75,7 +75,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				}
 				const errData = await response.json();
 				alert(
-					errData.message ||
+					errData.message ??
 						'Invalid referral code. Please check again.'
 				);
 				setReferredByCode(null);
@@ -1072,9 +1072,9 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 		survey.onComplete.add(async sender => {
 			const surveyData = {
-				responses: sender.data || {},
+				responses: sender.data ?? {},
 				referredByCode: referredByCode && isReferralValid ? referredByCode : null,
-				coords: coords || { latitude: 0, longitude: 0 }
+				coords: coords ?? { latitude: 0, longitude: 0 }
 			};
 
 			console.log('Survey Submitted:', surveyData);

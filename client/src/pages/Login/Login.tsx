@@ -3,11 +3,10 @@ import { useEffect, useState } from 'react';
 
 import '@/styles/login.css';
 
-import { saveAuthToken } from '@/utils/authTokenHandler';
+import { saveAuthToken, initializeSurveyStore } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 
 import { LoginProps } from '../../types/AuthProps';
-import { initializeSurveyStore } from '@/utils/authTokenHandler';
 
 //Description: Login using email or phone number and OTP verification
 export default function Login({ onLogin }: LoginProps) {
