@@ -78,5 +78,3 @@ repos:
       hooks:
           - id: check-dependabot
           - id: check-github-workflows
-          - id: check-package-json
-            files: ^(client|server)/package\.json$
