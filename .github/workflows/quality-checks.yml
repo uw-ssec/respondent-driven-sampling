@@ -1,0 +1,39 @@
+name: Code Quality Checks
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    lint-and-type-check:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                workspace: [client, server]
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+                  cache: "npm"
+                  cache-dependency-path: "${{ matrix.workspace }}/package-lock.json"
+
+            - name: Install dependencies
+              run: |
+                  cd ${{ matrix.workspace }}
+                  npm ci
+
+            - name: Run ESLint
+              run: |
+                  cd ${{ matrix.workspace }}
+                  npm run lint
+
+            - name: Run TypeScript check
+              run: |
+                  cd ${{ matrix.workspace }}
+                  npm run build
