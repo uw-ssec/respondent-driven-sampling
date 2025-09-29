@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import prescreenJson from '@/components/survey/prescreen.json';
+import { getEmployeeId, getRole } from "@/utils/authTokenHandler";
 
 export default function SurveyEdit() {
     const { id } = useParams();
@@ -14,8 +15,8 @@ export default function SurveyEdit() {
     const [surveyModel, setSurveyModel] = useState<Model | null>(null);
 
     useEffect(() => {
-        const role = localStorage.getItem("role") || "";
-        const employeeId = localStorage.getItem("employeeId") || "";
+        const employeeId = getEmployeeId();
+        const role = getRole();
 
         fetch(`/api/surveys/${id}`, {
             headers: {
