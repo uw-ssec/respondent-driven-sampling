@@ -1,0 +1,39 @@
+name: Pre-commit Checks
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+
+jobs:
+    pre-commit:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.x"
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+
+            - name: Install client dependencies
+              run: |
+                  cd client
+                  npm ci
+
+            - name: Install server dependencies
+              run: |
+                  cd server
+                  npm ci
+
+            - name: Install and run pre-commit
+              run: |
+                  pip install pre-commit
+                  pre-commit run --all-files
