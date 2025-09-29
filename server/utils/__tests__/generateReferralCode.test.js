@@ -24,4 +24,4 @@ describe('generateReferralCode', () => {
     // If all codes are unique, the size of the Set should be 100
     expect(codes.size).toBe(100);
   });
-}); 
+});

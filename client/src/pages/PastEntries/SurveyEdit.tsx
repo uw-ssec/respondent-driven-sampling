@@ -51,7 +51,7 @@ export default function SurveyEdit() {
                         return;
                     }
 
-                    // If consent is not revoked, proceed as normal: 
+                    // If consent is not revoked, proceed as normal:
 
                     const prescreenNames = sender
                         .getAllQuestions()

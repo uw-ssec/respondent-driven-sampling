@@ -31,10 +31,10 @@ describe('authTokenHandler', () => {
 			const firstName = 'John';
 			const role = 'Admin';
 			const employeeId = 'EMP1234';
-			
+
 			const token = generateAuthToken(firstName, role, employeeId);
 			const decoded = jwt.verify(token, TEST_SECRET) as any;
-			
+
 			expect(decoded.firstName).toBe(firstName);
 			expect(decoded.role).toBe(role);
 			expect(decoded.employeeId).toBe(employeeId);
@@ -43,10 +43,10 @@ describe('authTokenHandler', () => {
 		it('should set token expiration to 12 hours', () => {
 			const token = generateAuthToken('John', 'Admin', 'EMP1234');
 			const decoded = jwt.verify(token, TEST_SECRET) as any;
-			
+
 			expect(decoded.exp).toBeDefined();
 			expect(decoded.iat).toBeDefined();
-			
+
 			// Check that expiration is approximately 12 hours from issue time
 			const expirationTime = decoded.exp - decoded.iat;
 			expect(expirationTime).toBe(12 * 60 * 60); // 12 hours in seconds
@@ -57,7 +57,7 @@ describe('authTokenHandler', () => {
 		it('should verify a valid token', () => {
 			const token = generateAuthToken('John', 'Admin', 'EMP1234');
 			const decoded = verifyAuthToken(token);
-			
+
 			expect(decoded).toBeDefined();
 			expect(decoded.firstName).toBe('John');
 			expect(decoded.role).toBe('Admin');
@@ -66,7 +66,7 @@ describe('authTokenHandler', () => {
 
 		it('should throw error for invalid token', () => {
 			const invalidToken = 'invalid.token.here';
-			
+
 			expect(() => {
 				verifyAuthToken(invalidToken);
 			}).toThrow();
@@ -78,7 +78,7 @@ describe('authTokenHandler', () => {
 				'wrong-secret',
 				{ expiresIn: '12h' }
 			);
-			
+
 			expect(() => {
 				verifyAuthToken(token);
 			}).toThrow();
@@ -90,7 +90,7 @@ describe('authTokenHandler', () => {
 				TEST_SECRET,
 				{ expiresIn: '-1s' } // Already expired
 			);
-			
+
 			expect(() => {
 				verifyAuthToken(expiredToken);
 			}).toThrow();
