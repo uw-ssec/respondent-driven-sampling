@@ -1,0 +1,76 @@
+name: Code Quality Checks
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    pre-commit:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  # Fetch full history for pre-commit
+                  fetch-depth: 0
+
+            - name: Setup Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.x"
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+                  cache: "npm"
+
+            - name: Install Node.js dependencies
+              run: |
+                  cd client && npm ci
+                  cd ../server && npm ci
+
+            - name: Install pre-commit
+              run: pip install pre-commit
+
+            - name: Cache pre-commit hooks
+              uses: actions/cache@v3
+              with:
+                  path: ~/.cache/pre-commit
+                  key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+            - name: Run pre-commit on all files
+              run: pre-commit run --all-files
+
+    lint-and-type-check:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                workspace: [client, server]
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+                  cache: "npm"
+                  cache-dependency-path: "${{ matrix.workspace }}/package-lock.json"
+
+            - name: Install dependencies
+              run: |
+                  cd ${{ matrix.workspace }}
+                  npm ci
+
+            - name: Run ESLint
+              run: |
+                  cd ${{ matrix.workspace }}
+                  npm run lint
+
+            - name: Run TypeScript check
+              run: |
+                  cd ${{ matrix.workspace }}
+                  npm run build

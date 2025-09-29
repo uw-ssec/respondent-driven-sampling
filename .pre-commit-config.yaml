@@ -1,43 +1,82 @@
 ci:
-  autoupdate_commit_msg: "chore: update pre-commit hooks"
-  autofix_commit_msg: "style: pre-commit fixes"
+    autoupdate_commit_msg: 'chore: update pre-commit hooks'
+    autofix_commit_msg: 'style: pre-commit fixes'
 
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: "v4.6.0"
-    hooks:
-      - id: check-added-large-files
-      - id: check-case-conflict
-      - id: check-merge-conflict
-      - id: check-symlinks
-      - id: check-yaml
-      - id: debug-statements
-      - id: end-of-file-fixer
-      - id: mixed-line-ending
-      - id: trailing-whitespace
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: 'v4.6.0'
+      hooks:
+          - id: check-added-large-files
+          - id: check-case-conflict
+          - id: check-merge-conflict
+          - id: check-symlinks
+          - id: check-yaml
+          - id: check-json
+          - id: debug-statements
+          - id: end-of-file-fixer
+          - id: mixed-line-ending
+          - id: trailing-whitespace
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: "v3.1.0"
-    hooks:
-      - id: prettier
-        types_or: [yaml, markdown, html, css, scss, javascript, json]
-        args: [--prose-wrap=always]
+    - repo: https://github.com/pre-commit/mirrors-prettier
+      rev: 'v3.1.0'
+      hooks:
+          - id: prettier
+            types_or: [yaml, markdown, html, css, scss, javascript, typescript, tsx, json]
+            args: [--prose-wrap=always]
+            exclude: ^(client/dist/|server/build/|.*\.min\.(js|css))
 
-  - repo: https://github.com/codespell-project/codespell
-    rev: "v2.3.0"
-    hooks:
-      - id: codespell
+    - repo: https://github.com/pre-commit/mirrors-eslint
+      rev: 'v9.11.1'
+      hooks:
+          - id: eslint
+            files: \.(js|jsx|ts|tsx)$
+            args: [--fix]
+            additional_dependencies:
+                - eslint@^8.57.0
+                - '@typescript-eslint/eslint-plugin@^6.0.0'
+                - '@typescript-eslint/parser@^6.0.0'
+                - eslint-plugin-react@^7.33.0
+                - eslint-plugin-react-hooks@^4.6.0
 
-  - repo: local
-    hooks:
-      - id: disallow-caps
-        name: Disallow improper capitalization
-        language: pygrep
-        entry: Github
-        exclude: .pre-commit-config.yaml
+    - repo: https://github.com/codespell-project/codespell
+      rev: 'v2.3.0'
+      hooks:
+          - id: codespell
+            exclude: ^(client/dist/|server/build/|.*\.min\.(js|css))
 
-  - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: "0.28.4"
-    hooks:
-      - id: check-dependabot
-      - id: check-github-workflows
+    - repo: local
+      hooks:
+          - id: disallow-caps
+            name: Disallow improper capitalization
+            language: pygrep
+            entry: Github
+            exclude: .pre-commit-config.yaml
+
+          - id: typescript-check-client
+            name: TypeScript Check (Client)
+            entry: bash -c 'cd client && npm run build'
+            language: system
+            files: ^client/.*\.(ts|tsx)$
+            pass_filenames: false
+
+          - id: typescript-check-server
+            name: TypeScript Check (Server)
+            entry: bash -c 'cd server && npm run build'
+            language: system
+            files: ^server/.*\.ts$
+            pass_filenames: false
+
+          - id: package-json-lint
+            name: Package.json validation
+            entry: bash -c 'for f in client/package.json server/package.json; do [ -f "$f" ] && echo "Checking $f" && python3 -m json.tool "$f" > /dev/null; done'
+            language: system
+            files: package\.json$
+            pass_filenames: false
+
+    - repo: https://github.com/python-jsonschema/check-jsonschema
+      rev: '0.28.4'
+      hooks:
+          - id: check-dependabot
+          - id: check-github-workflows
+          - id: check-package-json
+            files: ^(client|server)/package\.json$

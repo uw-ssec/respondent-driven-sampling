@@ -1,5 +1,6 @@
 {
 	"private": true,
+	"type": "module",
 	"dependencies": {
 		"@types/jest": "^30.0.0",
 		"@types/node": "^24.0.3",
@@ -20,10 +21,19 @@
 		"web-vitals": "^4.2.4"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.36.0",
 		"@ianvs/prettier-plugin-sort-imports": "^4.4.2",
+		"@typescript-eslint/eslint-plugin": "^8.45.0",
+		"@typescript-eslint/parser": "^8.45.0",
 		"@vitejs/plugin-basic-ssl": "^2.1.0",
 		"@vitejs/plugin-react": "^4.6.0",
+		"eslint": "^9.36.0",
 		"eslint-config-prettier": "^9.1.0",
+		"eslint-import-resolver-typescript": "^4.4.4",
+		"eslint-plugin-react": "^7.37.5",
+		"eslint-plugin-react-hooks": "^5.2.0",
+		"eslint-plugin-react-refresh": "^0.4.22",
+		"globals": "^16.4.0",
 		"prettier": "^3.2.4",
 		"vite": "^7.0.0",
 		"vite-plugin-checker": "^0.9.3"
@@ -31,7 +41,9 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"lint": "eslint . --ext js,jsx,ts,tsx",
+		"lint:fix": "eslint . --ext js,jsx,ts,tsx --fix"
 	},
 	"eslintConfig": {
 		"extends": [
