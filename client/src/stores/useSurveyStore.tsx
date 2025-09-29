@@ -1,25 +1,32 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, combine } from 'zustand/middleware';
 
-interface SurveyState {
+type SurveyState = {
     employeeId: string;
-    setEmployeeId: (id: string) => void;
     employeeName: string;
-    setEmployeeName: (name: string) => void;
     referredByCode: string | null;
-    setReferredByCode: (code: string | null) => void;
-}
+};
 
-export const useSurveyStore = create<SurveyState>()(
+type SurveyActions = {
+    setEmployeeId: (id: string) => void;
+    setEmployeeName: (name: string) => void;
+    setReferredByCode: (code: string | null) => void;
+};
+
+export const useSurveyStore = create(
     persist(
-        (set) => ({
-            employeeId: '',
-            setEmployeeId: (id : string) => set({ employeeId: id }),
-            employeeName: '',
-            setEmployeeName: (name : string) => set({ employeeName: name }),
-            referredByCode: null,
-            setReferredByCode: (code : string | null) => set({ referredByCode: code })
-        }),
-        { name: "survey-storage" }
+        combine<SurveyState, SurveyActions>(
+            {
+                employeeId: '',
+                employeeName: '',
+                referredByCode: null
+            },
+            (set) => ({
+                setEmployeeId: (employeeId : string) => set({ employeeId }),
+                setEmployeeName: (employeeName : string) => set({ employeeName }),
+                setReferredByCode: (referredByCode : string | null) => set({ referredByCode })
+            })
+        ),
+        { name: 'survey-storage' }
     )
 );
