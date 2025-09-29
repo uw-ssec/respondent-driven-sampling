@@ -22,7 +22,9 @@ import {
 
 import SurveyComponent from '@/components/survey/SurveyComponent';
 
-import { deleteAuthToken, hasAuthToken } from './utils/authTokenHandler';
+import { hasAuthToken } from './utils/authTokenHandler';
+import { useSurveyStore } from './stores/useSurveyStore';
+import { useAuthStore } from './stores/useAuthStore';
 
 function App() {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(hasAuthToken());
@@ -33,7 +35,8 @@ function App() {
 
 	const handleLogout = () => {
 		setIsLoggedIn(false);
-		deleteAuthToken();
+		useAuthStore.getState().clearSession();
+		useSurveyStore.getState().clearSession();
 	};
 
 	return (

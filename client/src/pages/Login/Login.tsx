@@ -7,6 +7,7 @@ import { saveAuthToken } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 
 import { LoginProps } from '../../types/AuthProps';
+import { initializeSurveyStore } from '@/utils/authTokenHandler';
 
 //Description: Login using email or phone number and OTP verification
 export default function Login({ onLogin }: LoginProps) {
@@ -86,6 +87,7 @@ export default function Login({ onLogin }: LoginProps) {
 				// Successful login and store user data
 				onLogin();
 				saveAuthToken(data.token);
+				initializeSurveyStore();
 				navigate(data.redirectTo);
 			} else {
 				setErrorMessage(data.message);

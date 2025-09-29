@@ -8,11 +8,7 @@ import 'survey-core/defaultV2.min.css';
 
 // Global Zustand store managing state of survey components
 import { useSurveyStore } from '@/stores/useSurveyStore';
-import {
-	getAuthToken,
-	getEmployeeId,
-	getFirstName
-} from '@/utils/authTokenHandler';
+import { getAuthToken } from '@/utils/authTokenHandler';
 import { useGeolocated } from 'react-geolocated';
 
 import { LogoutProps } from '@/types/AuthProps';
@@ -34,9 +30,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 	// Pulls state values and update functions from Zustand store
 	const {
 		employeeId,
-		setEmployeeId,
 		employeeName,
-		setEmployeeName,
 		referredByCode,
 		setReferredByCode
 	} = useSurveyStore();
@@ -51,21 +45,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 	});
 
 	useEffect(() => {
-		// 1) Load from localStorage
-		const storedEmployeeId = getEmployeeId();
-		const storedFirstName = getFirstName();
-		if (storedEmployeeId) setEmployeeId(storedEmployeeId);
-		if (storedFirstName) setEmployeeName(storedFirstName);
-
-		if (storedEmployeeId && storedEmployeeId !== employeeId) {
-			setEmployeeId(storedEmployeeId);
-		}
-
-		if (storedFirstName && storedFirstName !== employeeName) {
-			setEmployeeName(storedFirstName);
-		}
-
-		// 2) Sync referral code from URL query param into Zustand store
+		// 1) Sync referral code from URL query param into Zustand store
 		const codeInUrl = searchParams.get('ref');
 		if (codeInUrl && codeInUrl !== referredByCode) {
 			setReferredByCode(codeInUrl);
@@ -1093,7 +1073,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		survey.onComplete.add(async sender => {
 			const surveyData = {
 				responses: sender.data || {},
-				referredByCode: isReferralValid ? referredByCode : null,
+				referredByCode: referredByCode && isReferralValid ? referredByCode : null,
 				coords: coords || { latitude: 0, longitude: 0 }
 			};
 
