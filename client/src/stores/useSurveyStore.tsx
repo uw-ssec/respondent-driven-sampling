@@ -27,7 +27,7 @@ export const useSurveyStore = create(
                 setEmployeeName: (employeeName : string) => set({ employeeName }),
                 setReferredByCode: (referredByCode : string | null) => set({ referredByCode }),
                 clearSession: () => {
-                    set({ employeeId: '', employeeName: '', referredByCode: null });
+                    set({ employeeId: '', employeeName: '', referredByCode: null }); 
                     useSurveyStore.persist.clearStorage()
                 }
             })

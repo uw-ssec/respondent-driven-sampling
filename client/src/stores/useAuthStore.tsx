@@ -16,7 +16,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       token: null,
       setToken: (token : string | null) => set({ token }),
       clearSession: () => {
-        set({ token: null });
+        set({ token: null }); 
         useAuthStore.persist.clearStorage()
     }
     }),

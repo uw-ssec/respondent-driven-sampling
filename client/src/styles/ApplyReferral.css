@@ -92,7 +92,7 @@ p {
 
 /* Cancel button hover effect */
 .cancel-btn:hover {
-    background-color: #969696;
+    background-color: #969696; 
     color: white; /* White text on hover */
 }
 

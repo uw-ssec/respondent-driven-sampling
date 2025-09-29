@@ -5,11 +5,11 @@
   align-items: center;
   padding: 15px 20px;
   background-color: white;
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
+  position: sticky;  
+  top: 0;        
+  left: 0;      
+  right: 0;   
+  z-index: 1000;  
   border-bottom: 2px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -108,7 +108,7 @@ body {
   .nav-icons {
     gap: 15px;
   }
-
+  
   .logo h1 {
     font-size: 1.5rem;
   }

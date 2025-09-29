@@ -8,7 +8,7 @@
     margin: 0;
     background: linear-gradient(to bottom right, #f0f2f5, #e0e6ed);
   }
-
+  
   .signup-container {
     background: #ffffff;
     border-radius: 24px;
@@ -18,29 +18,29 @@
     max-width: 450px;
     text-align: center;
   }
-
+  
   .signup-container h2 {
     font-size: 28px;
     color: #3E236E;
     font-family: 'Montserrat', sans-serif;
     margin-bottom: 2rem;
   }
-
+  
   .name-row {
     display: flex;
     gap: 0.75rem;
     margin-bottom: 1.25rem;
   }
-
+  
   .name-row .input-icon-wrapper {
     position: relative;
     flex: 1;
   }
-
+  
   .name-row input {
     padding-left: 40px;
   }
-
+  
   .input-icon {
     position: absolute;
     top: 50%;
@@ -49,12 +49,12 @@
     font-size: 18px;
     color: #3E236E;
   }
-
+  
   .input-group {
     margin-bottom: 1.25rem;
     position: relative;
   }
-
+  
   .input-group input,
   .input-group select,
   .signup-container input,
@@ -72,7 +72,7 @@
     text-align: left;
     margin-bottom: 1rem;
   }
-
+  
   .input-group .input-icon {
     position: absolute;
     top: 50%;
@@ -81,12 +81,12 @@
     font-size: 18px;
     color: #3E236E;
   }
-
+  
   /* Phone number with flag */
   .phone-input-container {
     margin-bottom: 1rem;
   }
-
+  
   .phone-input-container .react-tel-input {
     width: 100% !important;
     border: 2px solid #3E236E !important;
@@ -95,7 +95,7 @@
     height: 50px !important;
     padding-left: 48px !important;
   }
-
+  
   .phone-input-container .react-tel-input .form-control {
     border: none !important;
     font-size: 16px !important;
@@ -103,11 +103,11 @@
     padding-left: 58px !important;
     height: 50px !important;
   }
-
+  
   .phone-input-container .react-tel-input .flag-dropdown {
     border-right: 2px solid #3E236E !important;
   }
-
+  
   .signup-container select {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="%233E236E"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>');
     background-repeat: no-repeat;
@@ -115,7 +115,7 @@
     background-size: 16px;
     color: #3E236E;
   }
-
+  
   .signup-container button {
     width: 100%;
     background-color: #3E236E;
@@ -128,29 +128,29 @@
     font-family: 'Montserrat', sans-serif;
     transition: background-color 0.3s;
   }
-
+  
   .signup-container button:hover {
     background-color: #2a1750;
   }
-
+  
   .switch-auth {
     margin-top: 1.25rem;
     font-size: 14px;
     color: #3E236E;
   }
-
+  
   .switch-auth span {
     cursor: pointer;
     text-decoration: underline;
     font-weight: 500;
   }
-
+  
   .error-message {
     color: red;
     margin-top: 10px;
     font-size: 14px;
   }
-
+  
   .resend-otp button {
     background: transparent;
     border: none;
@@ -159,4 +159,4 @@
     font-weight: 500;
     font-family: 'Montserrat', sans-serif;
   }
-
+  

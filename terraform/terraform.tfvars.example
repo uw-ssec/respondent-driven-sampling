@@ -22,4 +22,4 @@ node_env = "production"
 # Environment Variables
 twilio_account_sid  = "your-twilio-account-sid"
 twilio_auth_token   = "your-twilio-auth-token"
-twilio_verify_sid   = "your-twilio-verify-service-sid"
+twilio_verify_sid   = "your-twilio-verify-service-sid" 

@@ -45,8 +45,8 @@ export default function LandingPage({ onLogout }: LogoutProps) {
 				<div className="actions-box">
 					<h2>Your Actions:</h2>
 
-					{/*<button
-                        className="action-button new-survey"
+					{/*<button 
+                        className="action-button new-survey" 
                         onClick={() => navigate('/survey')}
                     >
                         New Survey

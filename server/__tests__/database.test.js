@@ -33,9 +33,9 @@ describe('Database Connection', () => {
 
   test('should connect to MongoDB successfully', async () => {
     mongoose.connect.mockResolvedValueOnce();
-
+    
     await connectDB();
-
+    
     expect(mongoose.connect).toHaveBeenCalledTimes(1);
     expect(mongoose.connect).toHaveBeenCalledWith(
       expect.stringContaining('mongodb+srv://'),
@@ -50,16 +50,16 @@ describe('Database Connection', () => {
   test('should handle connection error', async () => {
     const mockError = new Error('Connection failed');
     mongoose.connect.mockRejectedValueOnce(mockError);
-
+    
     // Mock process.exit to prevent test from exiting
     const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {});
-
+    
     await connectDB();
-
+    
     expect(mongoose.connect).toHaveBeenCalledTimes(1);
     expect(consoleOutput.join(' ')).toContain('MongoDB connection failed:');
     expect(mockExit).toHaveBeenCalledWith(1);
-
+    
     mockExit.mockRestore();
   });
-});
+}); 

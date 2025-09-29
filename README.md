@@ -1,12 +1,6 @@
 ## Overview
 
-The RDS App is a secure, accessible, and open-source web application that
-streamlines data collection for homelessness research using **Respondent-Driven
-Sampling (RDS)**. Developed in collaboration with the University of Washington
-iSchool and the King County Regional Homelessness Authority (KCRHA), this app
-enables volunteers and administrators to collect accurate survey data, track
-referrals, and generate population estimates more effectively than traditional
-Point-In-Time (PIT) counts.
+The RDS App is a secure, accessible, and open-source web application that streamlines data collection for homelessness research using **Respondent-Driven Sampling (RDS)**. Developed in collaboration with the University of Washington iSchool and the King County Regional Homelessness Authority (KCRHA), this app enables volunteers and administrators to collect accurate survey data, track referrals, and generate population estimates more effectively than traditional Point-In-Time (PIT) counts.
 
 <!-- > **Live Deployment:** [Link to App](https://rds-main-g6e3dpefdabmcmca.westus-01.azurewebsites.net/login) -->
 
@@ -151,8 +145,8 @@ git clone <repository>
 cd <repository>
 ```
 
-2. **Set Environment Variables** Copy paste `.env.example` as `.env` in the
-   `server` directory, and paste the neccessary environment values.
+2. **Set Environment Variables**
+   Copy paste `.env.example` as `.env` in the `server` directory, and paste the neccessary environment values.
 
 3. **Install Packages**
 
@@ -177,10 +171,7 @@ npm run dev
 
 ## Future Directions
 
-The items listed below are features our team has identified out of scope for the
-duration of our project. These items are still considered high importance for
-the project as a whole, and are highly recommended as a jumping off point for
-teams taking over the project in the future.
+The items listed below are features our team has identified out of scope for the duration of our project. These items are still considered high importance for the project as a whole, and are highly recommended as a jumping off point for teams taking over the project in the future.
 
 **App Features**
 
@@ -198,14 +189,11 @@ teams taking over the project in the future.
 
 - Dynamic Application Security Testing (DAST)
 
-**User Experience** -Step-by-step user training guide
+**User Experience**
+-Step-by-step user training guide
 
 - Setup wizard
 
 ## Contributors
 
-Thanks to the following people for their work on this project: Ihsan Kahveci,
-June Yang, Emily Porter, Zack Almquist, Elizabeth Deng, KelliAnn Ramirez,
-Jasmine Vuong, Hannah Lam, Ella Weinberg, Arushi Agarwal, Devanshi Desai, Aryan
-Palave, Kaden Kapadia, Hrudhai Umashankar, Liya Finley Hutchison, Hana Amos,
-Zack Crouse, Kristen L Gustafson.
+Thanks to the following people for their work on this project: Ihsan Kahveci, June Yang, Emily Porter, Zack Almquist, Elizabeth Deng, KelliAnn Ramirez, Jasmine Vuong, Hannah Lam, Ella Weinberg, Arushi Agarwal, Devanshi Desai, Aryan Palave, Kaden Kapadia, Hrudhai Umashankar, Liya Finley Hutchison, Hana Amos, Zack Crouse, Kristen L Gustafson.
