@@ -18,39 +18,51 @@ router.get(
 		try {
 			const { code } = req.params;
 
-			// This is the referral code being validated
+			// 1. Check that the code is not already associated with an in-progress survey
+			// (i.e., the code was used to start a survey but that survey is not yet completed)
+			// If so, return that the survey is in progress and cannot be used again
+			const inProgressSurvey = await Survey.findOne({
+				referredByCode: code
+			});
+
+			// Check if completed property is defined on inProgressSurvey
+			if (inProgressSurvey && inProgressSurvey.completed !== true) {
+				res.status(400).json({
+					message:
+						'This survey is already in progress. Please continue.',
+					survey: inProgressSurvey
+				});
+				return;
+			}
+
+			// 2: Check that the code was created by an existing survey, because the code needs to actually have been distributed
 			const surveyWithCode = await Survey.findOne({
 				'referralCodes.code': code
 			});
 
 			if (!surveyWithCode) {
 				res.status(400).json({
-					message: 'Invalid referral code. Please check again.'
+					message:
+						'Referral code not found. Invalid referral code. Please check again.'
 				});
 				return;
 			}
 
+			// 3: Check to see if this survey was already used and finished by a survey
 			const referralObj = surveyWithCode.referralCodes.find(
 				rc => rc.code === code
 			);
 
-			if (!referralObj) {
-				console.log('not found ' + code);
-				res.status(400).json({ message: 'Referral code not found.' });
-				return;
-			}
-
-			if (referralObj.usedBySurvey) {
-				console.log('already used ' + code);
+			if (referralObj?.usedBySurvey) {
 				res.status(400).json({
 					message: 'This referral code has already been used.'
 				});
 				return;
 			}
 
-			console.log('valid code' + code);
-			res.json({
+			res.status(200).json({
 				message: 'Valid referral code.',
+				// Send back the survey that created this code in case the front end wants to show info about the referrer
 				surveyId: surveyWithCode._id
 			});
 		} catch (error) {
