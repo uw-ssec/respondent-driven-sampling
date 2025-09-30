@@ -204,6 +204,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 									<div className="header-item">
 									{s.responses?.year_born || "N/A"}
 									</div>
+									<div className="header-item">
 										<button onClick={() => navigate(`/survey/${s._id}`)} className="view-details-btn">
 											View Details
 										</button>

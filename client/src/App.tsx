@@ -1,13 +1,5 @@
 import { useState } from 'react';
 
-import {
-	Navigate,
-	Route,
-	BrowserRouter as Router,
-	Routes
-} from 'react-router-dom';
-
-import SurveyComponent from '@/components/survey/SurveyComponent';
 import NewUser from '@/pages/AdminDashboard/NewUser';
 import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
 import QrPage from '@/pages/CompletedSurvey/QrPage';
@@ -20,8 +12,19 @@ import ViewProfile from '@/pages/Profile/ViewProfile';
 import ApplyReferral from '@/pages/QRCodeScan&Referral/ApplyReferral';
 import Signup from '@/pages/Signup/Signup';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
+import SurveyEdit from '@/pages/PastEntries/SurveyEdit';
+import {
+	Navigate,
+	Route,
+	BrowserRouter as Router,
+	Routes
+} from 'react-router-dom';
 
-import { deleteAuthToken, hasAuthToken } from './utils/authTokenHandler';
+import SurveyComponent from '@/pages/Survey/SurveyComponent';
+
+import { hasAuthToken } from './utils/authTokenHandler';
+import { useSurveyStore } from './stores/useSurveyStore';
+import { useAuthStore } from './stores/useAuthStore';
 
 function App() {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(hasAuthToken());
@@ -32,7 +35,9 @@ function App() {
 
 	const handleLogout = () => {
 		setIsLoggedIn(false);
-		deleteAuthToken();
+		// Clear auth and survey storage upon logout
+		useAuthStore.getState().clearSession();
+		useSurveyStore.getState().clearSession();
 	};
 
 	return (
@@ -138,6 +143,16 @@ function App() {
 					element={
 						isLoggedIn ? (
 							<SurveyDetails onLogout={handleLogout} />
+						) : (
+							<Navigate replace to="/login" />
+						)
+					}
+				/>
+				<Route
+					path="/survey/:id/edit"
+					element={
+						isLoggedIn ? (
+							<SurveyEdit />
 						) : (
 							<Navigate replace to="/login" />
 						)

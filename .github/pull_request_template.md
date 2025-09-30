@@ -11,10 +11,9 @@
 
 ## ✅ Checklist
 
-- [ ] I ran `pre-commit run --all-files` and all checks pass
-- [ ] Tests added/updated where needed
-- [ ] Docs added/updated if applicable
-- [ ] I have linked the issue this PR closes (if any)
+-   [ ] Tests added/updated where needed
+-   [ ] Docs added/updated if applicable
+-   [ ] I have linked the issue this PR closes (if any)
 
 ## 🔗 Related Issues
 
@@ -22,14 +21,14 @@ Resolves #\<issue-number>
 
 ## 💡 Type of change
 
-| Type            | Checked? |
-|-----------------|----------|
-| 🐞 Bug fix      | [ ] |
-| ✨ New feature   | [ ] |
-| 📝 Documentation | [ ] |
-| ♻️ Refactor      | [ ] |
-| 🛠️ Build/CI      | [ ] |
-| Other (explain) | [ ] |
+| Type             | Checked? |
+| ---------------- | -------- |
+| 🐞 Bug fix       | [ ]      |
+| ✨ New feature   | [ ]      |
+| 📝 Documentation | [ ]      |
+| ♻️ Refactor      | [ ]      |
+| 🛠️ Build/CI      | [ ]      |
+| Other (explain)  | [ ]      |
 
 ## 🧪 How to test
 
