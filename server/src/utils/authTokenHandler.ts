@@ -1,6 +1,13 @@
 import jwt from 'jsonwebtoken';
 
-const tokenSecret = process.env.AUTH_SECRET as string;
+// Get the token secret dynamically to support testing environment
+function getTokenSecret(): string {
+	const secret = process.env.AUTH_SECRET;
+	if (!secret) {
+		throw new Error('AUTH_SECRET environment variable is not set');
+	}
+	return secret;
+}
 
 // Generates the JSON Web Token to be used by the client, a client having a valid JWT
 // means that they should be atleast a volunteer in role and must have been approved
@@ -16,12 +23,12 @@ export function generateAuthToken(
 			role: role,
 			employeeId: employeeId
 		},
-		tokenSecret,
+		getTokenSecret(),
 		{ expiresIn: '12h' }
 	);
 }
 
 // Verifies the JSON Web Token and returns the decoded payload
 export function verifyAuthToken(token: string): any {
-	return jwt.verify(token, tokenSecret);
+	return jwt.verify(token, getTokenSecret());
 }

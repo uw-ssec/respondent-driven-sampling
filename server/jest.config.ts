@@ -3,9 +3,12 @@ export default {
 	extensionsToTreatAsEsm: ['.ts'],
 	testEnvironment: 'node',
 	transform: {
-		'^.+\\.ts$': ['ts-jest', {
-			useESM: true
-		}]
+		'^.+\\.ts$': [
+			'ts-jest',
+			{
+				useESM: true
+			}
+		]
 	},
 	moduleFileExtensions: ['ts', 'js', 'json'],
 	testMatch: [
@@ -25,5 +28,8 @@ export default {
 	coverageReporters: ['text', 'lcov', 'html'],
 	roots: ['<rootDir>/src'],
 	modulePathIgnorePatterns: ['<rootDir>/build/'],
-	testTimeout: 30000
+	testTimeout: 30000,
+	moduleNameMapper: {
+		'^@/(.*)$': '<rootDir>/src/$1'
+	}
 };

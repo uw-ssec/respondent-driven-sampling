@@ -216,6 +216,9 @@ describe('User Model Test', () => {
 		const user = new User(validUserData);
 		const savedUser = await user.save();
 
+		// Add a small delay to ensure updatedAt is different from createdAt
+		await new Promise(resolve => setTimeout(resolve, 10));
+
 		savedUser.firstName = 'UpdatedName';
 		savedUser.approvalStatus = 'Approved';
 		const updatedUser = await savedUser.save();
