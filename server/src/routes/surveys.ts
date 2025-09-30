@@ -3,6 +3,7 @@ import express, { Response } from 'express';
 import { auth } from '@/middleware/auth';
 import Survey from '@/models/survey';
 import { AuthenticatedRequest } from '@/types/auth';
+import { ISurvey } from '@/types/models';
 import generateReferralCode from '@/utils/generateReferralCode';
 
 const router = express.Router();
@@ -109,6 +110,87 @@ router.get(
 	}
 );
 
+// POST /api/surveys/save/:completed - Submitting a new survey
+// This route handles saving a survey instance to the database.
+// The "completed" parameter will indicate whether or not
+// the survey being saved is completed or not completed
+router.post(
+	'/save',
+	[auth],
+	async (req: AuthenticatedRequest, res: Response) => {
+		try {
+			// Set survey values from request
+			const employeeId = req.user?.employeeId;
+			const employeeName = req.user?.firstName;
+			const { responses, referredByCode, coords, objectId, completed } =
+				req.body;
+			const lastUpdated = new Date();
+			// TODO: Integrate zod validation here
+			if (!employeeId || !employeeName || !responses) {
+				return res
+					.status(400)
+					.json({ message: 'Missing required fields' });
+			}
+
+			if (objectId) {
+				if (!completed) {
+					// Survey exists, so it must be an update
+					await updateSurvey(objectId, responses);
+					// Return success message, object id, and new referral codes
+					return res.status(201).json({
+						message: 'Survey updated successfully!',
+						objectId: objectId
+					});
+				} else {
+					// If the survey is being marked as completed, we need to update it and also generate referral codes if they don't exist
+					await updateSurvey(objectId, responses, completed);
+					// Fetch the updated survey to get referral codes
+					const updatedSurvey = await Survey.findById(objectId);
+					return res.status(201).json({
+						message: 'Survey completed successfully!',
+						objectId: objectId,
+						referralCodes: [
+							updatedSurvey?.referralCodes[0].code,
+							updatedSurvey?.referralCodes[1].code,
+							updatedSurvey?.referralCodes[2].code
+						]
+					});
+				}
+			} else {
+				// If no objectId is provided, we proceed to create a new survey
+				// This handles the case where a new survey is being created
+				// even if it is not a root survey (i.e., it has a referredByCode)
+				// but does not have an objectId yet because it is new
+				// We will create a new survey instance in this case
+				const newSurvey = await createNewSurvey(
+					employeeId,
+					employeeName,
+					responses,
+					referredByCode,
+					coords,
+					lastUpdated,
+					completed
+				);
+				return res.status(201).json({
+					message: 'Survey saved successfully!',
+					objectId: newSurvey._id, // Object Id is returned so that the client has a way to uniquely identify root surveys - since this object id is the only unique identifier in the database
+					referralCodes: [
+						newSurvey.referralCodes[0].code,
+						newSurvey.referralCodes[1].code,
+						newSurvey.referralCodes[2].code
+					]
+				});
+			}
+		} catch (error) {
+			console.error('Error saving survey:', error);
+			res.status(500).json({
+				message: 'Server error: Could not save survey'
+			});
+		}
+	}
+);
+
+// NOTE: The /submit route is kept for backward compatibility with the front end. This can be removed after the front end is updated to use /save instead.
 // POST /api/surveys/submit - Submitting a new survey
 // This route handles the submission of a new survey
 // It checks for required fields in the request body
@@ -120,7 +202,7 @@ router.post(
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
 		try {
 			const employeeId = req.user?.employeeId;
-			const employeeName = req.user?.employeeId; // Note: This seems wrong in original code - should probably be name
+			const employeeName = req.user?.employeeId; // NOTE: This seems wrong in original code - should probably be name
 			const { responses, referredByCode, coords } = req.body;
 
 			if (!employeeId || !employeeName || !responses) {
@@ -204,99 +286,6 @@ router.post(
 	}
 );
 
-// ─── DRAFT CODE  ───────────────────────────────────────
-
-// POST /api/surveys/autosave - Autosaves a new survey
-// This route handles the  temporary submission of a new survey
-// It checks for required fields in the request body
-// It creates a new survey document in the database
-
-// TODO: Add path for possibility that the survey is a root; currently, this endpoint just ignores it. Waiting to add once front end provides functionality
-router.post(
-	'/autosave',
-	[auth],
-	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		try {
-			const employeeId = req.user?.employeeId;
-			const employeeName = req.user?.employeeId; // Note: This seems wrong in original code
-			const { responses, referredByCode, coords } = req.body;
-
-			console.log('These are responses!');
-			console.log(responses);
-
-			if (!employeeId || !employeeName || !responses) {
-				res.status(400).json({ message: 'Missing required fields' });
-				return;
-			}
-
-			const surveyWithCode = await Survey.findOne({
-				referredByCode: referredByCode
-			});
-			console.log('Survey with code?');
-			console.log(surveyWithCode);
-
-			// If root
-			if (
-				referredByCode == null ||
-				(surveyWithCode && !surveyWithCode.inProgress)
-			) {
-				res.status(201).json({
-					message: 'This survey is a root, cannot be autosaved.'
-				});
-				return;
-			}
-			//---------------------------------------------------------------------------------------------------------------
-			// 1 See if there is a survey with this refferal code already in progress or if a new one needs to be created
-			if (!surveyWithCode) {
-				// Create and submit new survey
-				const inProgress = true;
-				const lastUpdated = new Date();
-
-				// 2 Create the new Survey document
-				const newSurvey = new Survey({
-					employeeId,
-					employeeName,
-					responses,
-					referredByCode: referredByCode || null,
-					coords,
-					inProgress,
-					lastUpdated
-				});
-
-				// 3️ Save the new survey to the database
-				await newSurvey.save();
-			} else {
-				// Update survey only if there is one in progress
-				// 2 Update survey responses and last updated
-				//console.log("Im getting to update right now");
-				if (surveyWithCode.inProgress == true) {
-					//console.log("I passed this test!");
-
-					await Survey.updateOne(
-						{ referredByCode: referredByCode },
-						{
-							$set: { responses: responses },
-							$currentDate: { lastUpdated: true }
-						}
-					);
-				}
-			}
-
-			//https://www.mongodb.com/docs/manual/tutorial/update-documents/ - update docs
-
-			// Return success message + new referral codes
-			res.status(201).json({
-				message: 'Survey autosaved successfully!'
-			});
-		} catch (error) {
-			console.error('Error saving survey:', error);
-			res.status(500).json({
-				message: 'Server error: Could not save survey'
-			});
-		}
-	}
-);
-
 // GET /api/surveys/:id - Fetch a specific survey
 // This route fetches a specific survey by its ID
 // It checks the user's role and employee ID from headers
@@ -339,5 +328,104 @@ router.get(
 		}
 	}
 );
+
+/**
+ * Helper function: create a new survey and insert into database, this automatically
+ * links the new survey to its parent
+ * @param {String} employeeId employeeId linked to this survey object
+ * @param {String} employeeName employee name to be saved with new survey
+ * @param {Object} responses responses to be saved with new survey
+ * @param {String} referredByCode the code this survey was referred by if not null
+ * @param {Object} coords coords where the new survey was completed, default value is 0,0
+ * @param {boolean} inProgress indicates whether or not this new survey is in progress
+ * @param {String} lastUpdated indicates when the new survey was last updated
+ * @returns a new survey object
+ */
+async function createNewSurvey(
+	employeeId: string,
+	employeeName: string,
+	responses: object,
+	referredByCode: string | null,
+	coords: object,
+	lastUpdated: Date,
+	completed: boolean
+): Promise<ISurvey> {
+	// Create new survey object
+	const newSurvey = new Survey({
+		employeeId,
+		employeeName,
+		responses,
+		referredByCode: referredByCode ?? null,
+		coords,
+		lastUpdated,
+		completed
+	});
+
+	// TODO: Should we only create referral codes if the survey is completed?
+	// Currently, referral codes are created even if the survey is just in progress
+	// Create new referral codes
+	newSurvey.referralCodes.push({
+		code: generateReferralCode(),
+		usedBySurvey: null,
+		usedAt: null
+	});
+	newSurvey.referralCodes.push({
+		code: generateReferralCode(),
+		usedBySurvey: null,
+		usedAt: null
+	});
+	newSurvey.referralCodes.push({
+		code: generateReferralCode(),
+		usedBySurvey: null,
+		usedAt: null
+	});
+
+	await newSurvey.save(); // insert in database
+
+	// If referred by code, link this new child to its parent by marking the referral code as used in the parent
+	if (referredByCode) {
+		const parentSurvey = await Survey.findOne({
+			'referralCodes.code': referredByCode
+		}); // find parent to newly created child survey
+		if (parentSurvey) {
+			const referralObj = parentSurvey.referralCodes.find(
+				rc => rc.code === referredByCode
+			);
+			// Update referral code array in parent with child's information
+			if (referralObj) {
+				referralObj.usedAt = new Date();
+				referralObj.usedBySurvey = newSurvey._id as any;
+			}
+			await parentSurvey.save();
+		}
+	}
+
+	return newSurvey;
+}
+
+/**
+ * Helper function: Updates the response and inProgress fields of an exisitng survey given its MongoDB object ID
+ * @param {String} objectId unique id of survey that will be updated
+ * @param {Object} responses new respones object to be saved in survey
+ * @returns promise returned by server upon being updated
+ */
+
+async function updateSurvey(
+	objectId: string,
+	responses: object,
+	completed?: boolean
+) {
+	// Update the survey in the databse that has the given objectId
+	return await Survey.updateOne(
+		{ _id: objectId },
+		{
+			$set: {
+				responses: responses,
+				completed: completed ?? false
+			},
+			$currentDate: { lastUpdated: true }
+		}
+	);
+}
 
 export default router;
