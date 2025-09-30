@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { QRCodeCanvas } from 'qrcode.react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useSurveyStore } from '@/stores/useSurveyStore';
 
 import { LogoutProps } from '@/types/AuthProps';
 import Header from '@/pages/Header/Header';
@@ -14,6 +15,12 @@ export default function QrPage({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [referralCodes, setReferralCodes] = useState([]);
+
+	// Clear referred-by-code from Zustand store now that we are done with the survey
+	const { setReferredByCode } = useSurveyStore();
+	useEffect(() => {
+		setReferredByCode(null);
+	}, [setReferredByCode]);
 
 	// Extract referral codes
 	useEffect(() => {
