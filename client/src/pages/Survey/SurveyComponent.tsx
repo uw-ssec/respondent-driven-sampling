@@ -1071,9 +1071,10 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		});
 
 		survey.onComplete.add(async sender => {
+
 			const surveyData = {
 				responses: sender.data ?? {},
-				referredByCode: referredByCode && isReferralValid ? referredByCode : null,
+				referredByCode: referredByCode ?? null,
 				coords: coords ?? { latitude: 0, longitude: 0 }
 			};
 
@@ -1121,7 +1122,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		referredByCode,
 		coords,
 		navigate,
-		surveyJson
+		surveyJson,
 	]);
 
 	// BACK BUTTON BEHAVIOR

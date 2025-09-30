@@ -5,7 +5,7 @@ import "survey-core/defaultV2.min.css";
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-import prescreenJson from '@/components/survey/prescreen.json';
+import prescreenJson from '@/pages/PastEntries/prescreen.json';
 import { getEmployeeId, getRole } from "@/utils/authTokenHandler";
 
 export default function SurveyEdit() {

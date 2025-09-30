@@ -20,7 +20,7 @@ import {
 	Routes
 } from 'react-router-dom';
 
-import SurveyComponent from '@/components/survey/SurveyComponent';
+import SurveyComponent from '@/pages/Survey/SurveyComponent';
 
 import { hasAuthToken } from './utils/authTokenHandler';
 import { useSurveyStore } from './stores/useSurveyStore';
@@ -35,6 +35,7 @@ function App() {
 
 	const handleLogout = () => {
 		setIsLoggedIn(false);
+		// Clear auth and survey storage upon logout
 		useAuthStore.getState().clearSession();
 		useSurveyStore.getState().clearSession();
 	};
