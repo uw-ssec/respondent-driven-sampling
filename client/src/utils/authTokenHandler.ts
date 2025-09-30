@@ -1,5 +1,7 @@
 // This file provides helper functions to manage JWTs used in authentication.
 import { jwtDecode } from 'jwt-decode';
+import { useAuthStore } from '../stores/useAuthStore';
+import { useSurveyStore } from '../stores/useSurveyStore';
 
 interface JwtPayload {
 	firstName: string;
@@ -8,15 +10,15 @@ interface JwtPayload {
 }
 
 export function saveAuthToken(token: string): void {
-	localStorage.setItem('token', token);
+	useAuthStore.getState().setToken(token);
 }
 
 export function deleteAuthToken(): void {
-	localStorage.removeItem('token');
+	useAuthStore.getState().clearSession();
 }
 
 export function getAuthToken(): string | null {
-	return localStorage.getItem('token');
+	return useAuthStore.getState().token;
 }
 
 function getDecodedAuthToken(): JwtPayload | null {
@@ -27,7 +29,7 @@ function getDecodedAuthToken(): JwtPayload | null {
 export function hasAuthToken(): boolean {
 	// If the token exists we will assume we are logged in, even if the token is expired.
 	// We can relogin on a failed API call if expired.
-	return getAuthToken() == null;
+	return getAuthToken() != null;
 }
 
 export function getRole(): string {
@@ -48,4 +50,13 @@ export function getEmployeeId(): string {
 	if (decodedAuthToken == null || decodedAuthToken.employeeId == null)
 		return '';
 	return decodedAuthToken.employeeId;
+}
+
+export function initializeSurveyStore() {
+    const { setEmployeeId, setEmployeeName, setReferredByCode } = useSurveyStore.getState();
+    const employeeId = getEmployeeId();
+    const employeeName = getFirstName();
+    setEmployeeId(employeeId);
+    setEmployeeName(employeeName);
+	setReferredByCode(null);
 }

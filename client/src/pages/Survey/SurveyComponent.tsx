@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Model } from 'survey-core';
 import { Survey } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
-import {
-	getAuthToken,
-	getEmployeeId,
-	getFirstName
-} from '@/utils/authTokenHandler';
+// Global Zustand store managing state of survey components
+import { useSurveyStore } from '@/stores/useSurveyStore';
+import { getAuthToken } from '@/utils/authTokenHandler';
 import { useGeolocated } from 'react-geolocated';
 
 import { LogoutProps } from '@/types/AuthProps';
@@ -20,20 +18,24 @@ import Header from '@/pages/Header/Header';
 // It uses the SurveyJS library to create and manage the survey
 // It also handles referral code validation and geolocation
 // It uses React Router for navigation and URL parameter handling
-// It uses localStorage to persist data across sessions
+// It uses Zustand (with persist) & localstorage to manage and persist data across sessions
 // It uses the useEffect hook to manage side effects, such as fetching data and updating state
 // It uses the useState hook to manage component state
 // It uses the useGeolocated hook to get the user's geolocation
 const SurveyComponent = ({ onLogout }: LogoutProps) => {
-	const [employeeId, setEmployeeId] = useState('');
-	const [employeeName, setEmployeeName] = useState('');
-	const [referredByCode, setReferredByCode] = useState<string | null>(null);
-	const [isReferralValid, setIsReferralValid] = useState(true);
-
 	const [searchParams] = useSearchParams();
-	const location = useLocation();
 	const navigate = useNavigate();
 	const surveyRef = useRef<Model | null>(null);
+
+	// Pulls state values and update functions from Zustand store
+	const {
+		employeeId,
+		employeeName,
+		referredByCode,
+		setReferredByCode
+	} = useSurveyStore();
+
+	const [isReferralValid, setIsReferralValid] = useState(true);
 
 	const { coords } = useGeolocated({
 		positionOptions: {
@@ -43,27 +45,19 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 	});
 
 	useEffect(() => {
-		// 1) Load from localStorage
-		const storedEmployeeId = getEmployeeId();
-		const storedFirstName = getFirstName();
-		if (storedEmployeeId) setEmployeeId(storedEmployeeId);
-		if (storedFirstName) setEmployeeName(storedFirstName);
-
-		// 2) Check if referral is passed via location.state
-		const codeFromState = location.state?.referralCode;
-		if (codeFromState) {
-			setReferredByCode(codeFromState);
-			validateReferralCode(codeFromState);
-			return; // Skip reading from URL if we have it in state
-		}
-
-		// 3) Otherwise, check the URL query param "?ref=XXXX"
+		// 1) Sync referral code from URL query param into Zustand store
 		const codeInUrl = searchParams.get('ref');
-		if (codeInUrl) {
+		if (codeInUrl && codeInUrl !== referredByCode) {
 			setReferredByCode(codeInUrl);
-			validateReferralCode(codeInUrl);
 		}
-	}, [location.state, searchParams]);
+
+		// Validate referral code
+		if (referredByCode) {
+			validateReferralCode(referredByCode);
+		} else {
+			setIsReferralValid(false);
+		}
+	}, [employeeId, employeeName, searchParams, referredByCode]);
 
 	async function validateReferralCode(code: string) {
 		try {
@@ -81,11 +75,12 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				}
 				const errData = await response.json();
 				alert(
-					errData.message ||
+					errData.message ??
 						'Invalid referral code. Please check again.'
 				);
 				setReferredByCode(null);
 				setIsReferralValid(false);
+				navigate('/apply-referral');
 			} else {
 				setIsReferralValid(true);
 			}
@@ -1060,7 +1055,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				window.history.pushState(
 					{ pageNo },
 					'',
-					window.location.pathname
+					window.location.pathname + window.location.search
 				);
 			}
 		};
@@ -1076,10 +1071,11 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		});
 
 		survey.onComplete.add(async sender => {
+
 			const surveyData = {
-				responses: sender.data || {},
-				referredByCode: isReferralValid ? referredByCode : null,
-				coords: coords || { latitude: 0, longitude: 0 }
+				responses: sender.data ?? {},
+				referredByCode: referredByCode ?? null,
+				coords: coords ?? { latitude: 0, longitude: 0 }
 			};
 
 			console.log('Survey Submitted:', surveyData);
@@ -1126,7 +1122,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		referredByCode,
 		coords,
 		navigate,
-		surveyJson
+		surveyJson,
 	]);
 
 	// BACK BUTTON BEHAVIOR

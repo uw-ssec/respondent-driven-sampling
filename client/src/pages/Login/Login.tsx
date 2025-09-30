@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import '@/styles/login.css';
 
-import { saveAuthToken } from '@/utils/authTokenHandler';
+import { saveAuthToken, initializeSurveyStore } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 
 import { LoginProps } from '../../types/AuthProps';
@@ -86,6 +86,7 @@ export default function Login({ onLogin }: LoginProps) {
 				// Successful login and store user data
 				onLogin();
 				saveAuthToken(data.token);
+				initializeSurveyStore();
 				navigate(data.redirectTo);
 			} else {
 				setErrorMessage(data.message);
