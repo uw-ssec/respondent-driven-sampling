@@ -1,5 +1,6 @@
-import { IReferralCode, ISurvey } from '@/types/models';
 import mongoose, { Model, Schema } from 'mongoose';
+
+import { IReferralCode, ISurvey } from '@/types/models';
 
 // Schema for a single referral code associated with a survey.
 // Each survey can have multiple referral codes.
@@ -24,17 +25,11 @@ const surveySchema = new Schema<ISurvey>({
 	employeeName: { type: String, required: true },
 	responses: { type: Object, required: true },
 	createdAt: { type: Date, default: Date.now },
-	lastUpdated: { type: Date, default: Date.now }, // Date the survey was last edited
-	inProgress: { type: Boolean, required: false }, // TODO: Edit later to required: True - currently this is fixing a bug but should look at this later
-
-	// 2 referral codes stored here
+	lastUpdated: { type: Date, default: Date.now },
 	referralCodes: [referralCodeSchema],
-
-	// The code that referred this new survey
 	referredByCode: { type: String, default: null },
-
-	//geolocation
-	coords: { type: Object, required: false }
+	coords: { type: Object, required: false },
+	completed: { type: Boolean, required: false }
 });
 
 // Create the model for the survey using the defined schema.
