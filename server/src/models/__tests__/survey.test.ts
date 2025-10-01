@@ -52,7 +52,7 @@ describe('Survey Model Test', () => {
 		expect(savedSurvey.referralCodes).toEqual([]);
 		expect(savedSurvey.referredByCode).toBeNull();
 		expect(savedSurvey.coords).toBeUndefined();
-		expect(savedSurvey.inProgress).toBeUndefined();
+		expect(savedSurvey.completed).toBeUndefined();
 	});
 
 	it('should require employeeId field', async () => {
@@ -149,15 +149,15 @@ describe('Survey Model Test', () => {
 		});
 	});
 
-	it('should save with inProgress flag', async () => {
+	it('should save with completed flag', async () => {
 		const surveyData = {
 			...validSurveyData,
-			inProgress: true
+			completed: true
 		};
 		const survey = new Survey(surveyData);
 		const savedSurvey = await survey.save();
 
-		expect(savedSurvey.inProgress).toBe(true);
+		expect(savedSurvey.completed).toBe(true);
 	});
 
 	it('should update lastUpdated when modified', async () => {

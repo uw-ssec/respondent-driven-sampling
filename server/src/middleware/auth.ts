@@ -36,7 +36,8 @@ export async function auth(
 		req.user = {
 			id: decodedAuthToken.id || decodedAuthToken.employeeId,
 			employeeId: decodedAuthToken.employeeId,
-			role: decodedAuthToken.role
+			role: decodedAuthToken.role,
+			firstName: decodedAuthToken.firstName
 		};
 
 		// Checking if the user's account is approved
