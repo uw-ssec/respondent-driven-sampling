@@ -32,7 +32,7 @@ repos:
       hooks:
           - id: eslint
             files: \.(js|jsx|ts|tsx)$
-            args: [--fix]
+            #args: [--fix]
             additional_dependencies:
                 - eslint@^8.57.0
                 - '@typescript-eslint/eslint-plugin@^6.0.0'
