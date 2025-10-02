@@ -17,34 +17,11 @@ repos:
           - id: mixed-line-ending
           - id: trailing-whitespace
 
-    # - repo: https://github.com/pre-commit/mirrors-prettier
-    #   rev: 'v3.1.0'
-    #   hooks:
-    #       - id: prettier
-    #         types_or: [yaml, markdown, html, css, scss, javascript, ts, tsx, json]
-    #         args: [--prose-wrap=always]
-    #         exclude: ^(client/dist/|server/build/|.*\.min\.(js|css))
-    #         additional_dependencies:
-    #             - '@ianvs/prettier-plugin-sort-imports@^4.6.2'
-
-    - repo: https://github.com/pre-commit/mirrors-eslint
-      rev: 'v9.11.1'
-      hooks:
-          - id: eslint
-            files: \.(js|jsx|ts|tsx)$
-            #args: [--fix]
-            additional_dependencies:
-                - eslint@^8.57.0
-                - '@typescript-eslint/eslint-plugin@^6.0.0'
-                - '@typescript-eslint/parser@^6.0.0'
-                - eslint-plugin-react@^7.33.0
-                - eslint-plugin-react-hooks@^4.6.0
-
     - repo: https://github.com/codespell-project/codespell
       rev: 'v2.3.0'
       hooks:
           - id: codespell
-            exclude: ^(client/dist/|server/build/|.*\.min\.(js|css))
+            exclude: ^(client/dist/|server/build/|.*\.min\.(js|css)|.*/__tests__/.*|node_modules/.*)
 
     - repo: local
       hooks:
@@ -73,6 +50,20 @@ repos:
             entry: bash -c 'for f in client/package.json server/package.json; do [ -f "$f" ] && echo "Checking $f" && python3 -m json.tool "$f" > /dev/null; done'
             language: system
             files: package\.json$
+            pass_filenames: false
+
+          - id: eslint-client
+            name: ESLint (Client)
+            entry: bash -c 'cd client && npm run lint'
+            language: system
+            files: ^client/.*\.(js|jsx|ts|tsx)$
+            pass_filenames: false
+
+          - id: eslint-server
+            name: ESLint (Server)
+            entry: bash -c 'cd server && npm run lint'
+            language: system
+            files: ^server/.*\.(js|ts)$
             pass_filenames: false
 
     - repo: https://github.com/python-jsonschema/check-jsonschema
