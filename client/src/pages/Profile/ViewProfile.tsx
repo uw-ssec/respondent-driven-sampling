@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 
 import '@/styles/profile.css';
 
+import Header from '@/pages/Header/Header';
 import { getAuthToken, getEmployeeId } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 
 import { LogoutProps } from '@/types/AuthProps';
 import { User } from '@/types/User';
-import Header from '@/pages/Header/Header';
 
 export default function ViewProfile({ onLogout }: LogoutProps) {
 	const [user, setUser] = useState<User | null>(null);
@@ -77,7 +77,7 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 				navigate('/login');
 				return;
 			} else {
-				setMessage(data.message || 'Failed to update profile.');
+				setMessage(data.message ?? 'Failed to update profile.');
 			}
 		} catch (error) {
 			console.error('Error updating profile:', error);
@@ -108,7 +108,7 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 				<div className="edit-profile-card">
 					<h2 className="profile-name">
 						Profile for{' '}
-						{`${user?.firstName || 'User'} ${user?.lastName || ''}`}
+						{`${user?.firstName ?? 'User'} ${user?.lastName ?? ''}`}
 					</h2>
 
 					{error ? (
@@ -122,7 +122,7 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 								<label>Email</label>
 								<input
 									type="email"
-									value={user?.email || ''}
+									value={user?.email ?? ''}
 									onChange={e =>
 										handleChange('email', e.target.value)
 									}
@@ -133,7 +133,7 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 								<label>Phone Number</label>
 								<input
 									type="text"
-									value={user?.phone || ''}
+									value={user?.phone ?? ''}
 									onChange={e =>
 										handleChange('phone', e.target.value)
 									}
@@ -144,7 +144,7 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 								<label>Role</label>
 								<input
 									type="text"
-									value={user?.role || ''}
+									value={user?.role ?? ''}
 									disabled
 								/>
 							</div>
@@ -153,7 +153,7 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 								<label>Employee ID</label>
 								<input
 									type="text"
-									value={user?.employeeId || ''}
+									value={user?.employeeId ?? ''}
 									disabled
 								/>
 							</div>

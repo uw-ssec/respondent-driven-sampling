@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 
+import Header from '@/pages/Header/Header';
 import { getAuthToken, getRole } from '@/utils/authTokenHandler';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { LogoutProps } from '@/types/AuthProps';
 import { User } from '@/types/User';
-import Header from '@/pages/Header/Header';
 
 export default function AdminEditProfile({ onLogout }: LogoutProps) {
 	const { id } = useParams();
@@ -79,7 +79,7 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 				navigate('/login');
 				return;
 			} else {
-				setMessage(data.message || 'Failed to update profile.');
+				setMessage(data.message ?? 'Failed to update profile.');
 			}
 		} catch (error) {
 			console.error('Error updating profile:', error);
@@ -110,7 +110,7 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 				<div className="edit-profile-card">
 					<h2 className="profile-name">
 						Profile for{' '}
-						{`${user?.firstName || 'User'} ${user?.lastName || ''}`}
+						{`${user?.firstName ?? 'User'} ${user?.lastName ?? ''}`}
 					</h2>
 
 					{error ? (
@@ -124,7 +124,7 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 								<label>Email</label>
 								<input
 									type="email"
-									value={user?.email || ''}
+									value={user?.email ?? ''}
 									onChange={e =>
 										handleChange('email', e.target.value)
 									}
@@ -135,7 +135,7 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 								<label>Phone Number</label>
 								<input
 									type="text"
-									value={user?.phone || ''}
+									value={user?.phone ?? ''}
 									onChange={e =>
 										handleChange('phone', e.target.value)
 									}
@@ -145,7 +145,7 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 							<div className="input-group">
 								<label>Role</label>
 								<select
-									value={user?.role || ''}
+									value={user?.role ?? ''}
 									onChange={e =>
 										handleChange('role', e.target.value)
 									}
@@ -162,7 +162,7 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 								<label>Employee ID</label>
 								<input
 									type="text"
-									value={user?.employeeId || ''}
+									value={user?.employeeId ?? ''}
 									disabled
 								/>
 							</div>

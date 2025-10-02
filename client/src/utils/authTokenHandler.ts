@@ -1,5 +1,6 @@
 // This file provides helper functions to manage JWTs used in authentication.
 import { jwtDecode } from 'jwt-decode';
+
 import { useAuthStore } from '../stores/useAuthStore';
 import { useSurveyStore } from '../stores/useSurveyStore';
 
@@ -34,29 +35,28 @@ export function hasAuthToken(): boolean {
 
 export function getRole(): string {
 	const decodedAuthToken = getDecodedAuthToken();
-	if (decodedAuthToken == null || decodedAuthToken.role == null) return '';
+	if (decodedAuthToken?.role == null) return '';
 	return decodedAuthToken.role;
 }
 
 export function getFirstName(): string {
 	const decodedAuthToken = getDecodedAuthToken();
-	if (decodedAuthToken == null || decodedAuthToken.firstName == null)
-		return '';
+	if (decodedAuthToken?.firstName == null) return '';
 	return decodedAuthToken.firstName;
 }
 
 export function getEmployeeId(): string {
 	const decodedAuthToken = getDecodedAuthToken();
-	if (decodedAuthToken == null || decodedAuthToken.employeeId == null)
-		return '';
+	if (decodedAuthToken?.employeeId == null) return '';
 	return decodedAuthToken.employeeId;
 }
 
 export function initializeSurveyStore() {
-    const { setEmployeeId, setEmployeeName, setReferredByCode } = useSurveyStore.getState();
-    const employeeId = getEmployeeId();
-    const employeeName = getFirstName();
-    setEmployeeId(employeeId);
-    setEmployeeName(employeeName);
+	const { setEmployeeId, setEmployeeName, setReferredByCode } =
+		useSurveyStore.getState();
+	const employeeId = getEmployeeId();
+	const employeeName = getFirstName();
+	setEmployeeId(employeeId);
+	setEmployeeName(employeeName);
 	setReferredByCode(null);
 }

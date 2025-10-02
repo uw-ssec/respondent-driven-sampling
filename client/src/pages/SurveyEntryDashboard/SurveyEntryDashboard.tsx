@@ -2,9 +2,8 @@
 // TODO: Remove @ts-nocheck when types are fixed.
 import { useEffect, useState } from 'react';
 
-import { useNavigate } from 'react-router-dom';
-
 import Header from '@/pages/Header/Header';
+import { useNavigate } from 'react-router-dom';
 
 import '@/styles/SurveyDashboard.css';
 
@@ -46,9 +45,9 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 			day: '2-digit' as const
 		};
 		const parts = new Intl.DateTimeFormat('en-US', opts).formatToParts(d);
-		const y = parts.find(p => p.type === 'year')?.value || '';
-		const m = parts.find(p => p.type === 'month')?.value || '';
-		const day = parts.find(p => p.type === 'day')?.value || '';
+		const y = parts.find(p => p.type === 'year')?.value ?? '';
+		const m = parts.find(p => p.type === 'month')?.value ?? '';
+		const day = parts.find(p => p.type === 'day')?.value ?? '';
 		return `${y}-${m}-${day}`;
 	};
 
@@ -113,8 +112,8 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 
 	const sortedSurveys = [...filteredSurveys].sort((a, b) => {
 		if (!sortConfig.key) return 0;
-		const aSorted = (a[sortConfig.key] || '').toString().toLowerCase();
-		const bSorted = (b[sortConfig.key] || '').toString().toLowerCase();
+		const aSorted = (a[sortConfig.key] ?? '').toString().toLowerCase();
+		const bSorted = (b[sortConfig.key] ?? '').toString().toLowerCase();
 		return sortConfig.direction === 'asc'
 			? aSorted.localeCompare(bSorted)
 			: bSorted.localeCompare(aSorted);
@@ -122,7 +121,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 
 	const searchedSurveys = sortedSurveys.filter(s => {
 		const search =
-			`${s.employeeId} ${s.employeeName} ${s.responses?.location || ''} ${s.referredByCode || ''}`.toLowerCase();
+			`${s.employeeId} ${s.employeeName} ${s.responses?.location ?? ''} ${s.referredByCode ?? ''}`.toLowerCase();
 		return search.includes(searchTerm.toLowerCase());
 	});
 
@@ -211,10 +210,10 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 										{s.employeeName}
 									</div>
 									<div className="header-item">
-										{s.responses?.location || 'N/A'}
+										{s.responses?.location ?? 'N/A'}
 									</div>
 									<div className="header-item">
-										{s.referredByCode || 'N/A'}
+										{s.referredByCode ?? 'N/A'}
 									</div>
 									<div className="header-item">
 										<button

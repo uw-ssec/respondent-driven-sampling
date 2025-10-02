@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 
+import Header from '@/pages/Header/Header';
+import { useSurveyStore } from '@/stores/useSurveyStore';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useSurveyStore } from '@/stores/useSurveyStore';
 
 import { LogoutProps } from '@/types/AuthProps';
-import Header from '@/pages/Header/Header';
 
 import '@/styles/complete.css';
 
@@ -24,7 +24,7 @@ export default function QrPage({ onLogout }: LogoutProps) {
 
 	// Extract referral codes
 	useEffect(() => {
-		if (location.state && location.state.referralCodes) {
+		if (location.state?.referralCodes) {
 			setReferralCodes(location.state.referralCodes);
 		}
 	}, [location.state]);
