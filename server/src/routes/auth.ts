@@ -278,7 +278,7 @@ router.get(
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
 		if (
-			!['Admin', 'Manager'].includes(req.user?.role || '') &&
+			!['Admin', 'Manager'].includes(req.user?.role ?? '') &&
 			req.user?.employeeId !== req.params.employeeId
 		) {
 			res.sendStatus(403);

@@ -213,7 +213,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 		console.log('Starting DB connection...');
 		await connectDB();
 		console.log('DB connected successfully');
-		const PORT = parseInt(process.env.PORT || '1234', 10);
+		const PORT = parseInt(process.env.PORT ?? '1234', 10);
 		app.listen(PORT, '0.0.0.0', () => {
 			console.log(
 				`Server running with security headers at http://localhost:${PORT}`

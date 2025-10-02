@@ -146,7 +146,7 @@ cd <repository>
 ```
 
 2. **Set Environment Variables**
-   Copy paste `.env.example` as `.env` in the `server` directory, and paste the neccessary environment values.
+   Copy paste `.env.example` as `.env` in the `server` directory, and paste the necessary environment values.
 
 3. **Install Packages**
 
@@ -160,7 +160,7 @@ npm install
 npm start
 ```
 
-5. **Start Frontend Dev Server** (In seperate terminal)
+5. **Start Frontend Dev Server** (In separate terminal)
 
 ```bash
 cd client
@@ -175,24 +175,24 @@ The items listed below are features our team has identified out of scope for the
 
 **App Features**
 
-- Auto-populate location using GPS location coordinates
-- Widget for staff to comment on survey responses
-- Integration with Homeless Management Information System (HMIS) database system
-- Volunteer scheduling dashboard for administrators
-- Automated SMS gift card distribution
-- Resume unfinished survey feature
-- Admin ability to edit survey questions
-- Volunteer ability to edit survey responses
-- Survey analytics dashboard
+-   Auto-populate location using GPS location coordinates
+-   Widget for staff to comment on survey responses
+-   Integration with Homeless Management Information System (HMIS) database system
+-   Volunteer scheduling dashboard for administrators
+-   Automated SMS gift card distribution
+-   Resume unfinished survey feature
+-   Admin ability to edit survey questions
+-   Volunteer ability to edit survey responses
+-   Survey analytics dashboard
 
 **Testing**
 
-- Dynamic Application Security Testing (DAST)
+-   Dynamic Application Security Testing (DAST)
 
 **User Experience**
 -Step-by-step user training guide
 
-- Setup wizard
+-   Setup wizard
 
 ## Contributors
 

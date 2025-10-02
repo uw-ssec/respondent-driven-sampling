@@ -2,11 +2,11 @@ import { useState } from 'react';
 
 import '@/styles/profile.css';
 
+import Header from '@/pages/Header/Header';
 import { getAuthToken } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 
 import { LogoutProps } from '@/types/AuthProps';
-import Header from '@/pages/Header/Header';
 
 export default function NewUser({ onLogout }: LogoutProps) {
 	const [firstName, setFirstName] = useState('');
@@ -48,7 +48,7 @@ export default function NewUser({ onLogout }: LogoutProps) {
 				onLogout();
 				navigate('/login');
 			} else {
-				setMessage(data.message || 'Failed to register user.');
+				setMessage(data.message ?? 'Failed to register user.');
 			}
 		} catch (error) {
 			console.error('Error creating user:', error);

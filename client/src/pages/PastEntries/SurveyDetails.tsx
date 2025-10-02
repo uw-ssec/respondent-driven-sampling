@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { useNavigate, useParams } from 'react-router-dom';
-
 import Header from '@/pages/Header/Header';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import '@/styles/SurveyDetailsCss.css';
 
@@ -125,7 +124,7 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 					<h3>Referral Information</h3>
 					<p>
 						<strong>Referred By Code:</strong>{' '}
-						{survey.referredByCode ? survey.referredByCode : 'N/A'}
+						{survey.referredByCode ?? 'N/A'}
 					</p>
 
 					<p>
@@ -184,9 +183,7 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 				{/* Edit Pre-screen Questions Button */}
 				<button
 					className="edit-button"
-					onClick={() =>
-						navigate(`/survey/${id}/edit`)
-					}
+					onClick={() => navigate(`/survey/${id}/edit`)}
 				>
 					Edit Prescreen Responses
 				</button>
