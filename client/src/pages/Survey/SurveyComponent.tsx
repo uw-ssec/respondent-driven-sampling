@@ -134,12 +134,11 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 					setReferredByCode(errData.survey.referredByCode);
 					return;
 				} else {
+					navigate('/apply-referral');
 					alert(
 						errData.message ??
 							'Invalid referral code. Please check again.'
 					);
-					setReferredByCode(null);
-					navigate('/apply-referral');
 				}
 			}
 		} catch (error) {
