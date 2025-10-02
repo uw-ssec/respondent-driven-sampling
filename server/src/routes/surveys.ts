@@ -215,7 +215,7 @@ router.post(
 				employeeId,
 				employeeName,
 				responses,
-				referredByCode: referredByCode || null,
+				referredByCode: referredByCode ?? null,
 				coords
 			});
 

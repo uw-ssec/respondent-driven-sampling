@@ -34,7 +34,7 @@ export async function auth(
 
 		// Add the decoded token to the request object
 		req.user = {
-			id: decodedAuthToken.id || decodedAuthToken.employeeId,
+			id: decodedAuthToken.id ?? decodedAuthToken.employeeId,
 			employeeId: decodedAuthToken.employeeId,
 			role: decodedAuthToken.role,
 			firstName: decodedAuthToken.firstName
