@@ -9,7 +9,7 @@ import PastEntries from '@/pages/PastEntries/PastEntries';
 import SurveyDetails from '@/pages/PastEntries/SurveyDetails';
 import AdminEditProfile from '@/pages/Profile/AdminEditProfile';
 import ViewProfile from '@/pages/Profile/ViewProfile';
-import ApplyReferral from '@/pages/QRCodeScan&Referral/ApplyReferral';
+import ApplyReferral from '@/pages/QRCodeScanAndReferral/ApplyReferral';
 import Signup from '@/pages/Signup/Signup';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
 import SurveyEdit from '@/pages/PastEntries/SurveyEdit';
