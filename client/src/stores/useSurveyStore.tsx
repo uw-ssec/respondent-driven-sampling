@@ -13,7 +13,8 @@ type SurveyActions = {
     setEmployeeName: (name: string) => void;
     setReferredByCode: (code: string | null) => void;
     setObjectId: (id: string | null) => void;
-    clearSession: () => void;
+    clearSession: () => void; // Clear all survey data (for logout)
+    clearSurvey: () => void; // Clear survey-specific data (for navigating away from survey)
 };
 
 export const useSurveyStore = create(
@@ -22,8 +23,8 @@ export const useSurveyStore = create(
             {
                 employeeId: '',
                 employeeName: '',
-                referredByCode: null,
-                objectId: null
+                referredByCode: null,   
+                objectId: null,
             },
             (set) => ({
                 setEmployeeId: (employeeId : string) => set({ employeeId }),
@@ -33,6 +34,9 @@ export const useSurveyStore = create(
                 clearSession: () => {
                     set({ employeeId: '', employeeName: '', referredByCode: null, objectId: null }); 
                     useSurveyStore.persist.clearStorage()
+                },
+                clearSurvey: () => {
+                    set({ referredByCode: null, objectId: null }); 
                 }
             })
         ),
