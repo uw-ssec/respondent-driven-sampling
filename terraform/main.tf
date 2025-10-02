@@ -88,7 +88,7 @@ resource "azurerm_linux_web_app" "rds_web_app" {
     "NODE_ENV"                     = var.node_env
     "PORT"                         = "8080"
     "SCM_DO_BUILD_DURING_DEPLOYMENT" = "true"
-    
+
     # Environment Variables
     "MONGO_URI"                   = azurerm_cosmosdb_account.rds_cosmos_db.primary_mongodb_connection_string
     "TWILIO_ACCOUNT_SID"          = var.twilio_account_sid
@@ -106,4 +106,4 @@ output "app_service_url" {
 output "cosmos_db_connection_string" {
   value     = azurerm_cosmosdb_account.rds_cosmos_db.primary_mongodb_connection_string
   sensitive = true
-} 
+}

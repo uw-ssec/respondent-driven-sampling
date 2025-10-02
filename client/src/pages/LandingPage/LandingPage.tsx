@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/LandingPage.css';
 
+import Header from '@/pages/Header/Header';
 import { getFirstName, getRole } from '@/utils/authTokenHandler';
 
 import { LogoutProps } from '@/types/AuthProps';
-import Header from '@/pages/Header/Header';
 
 export default function LandingPage({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();
@@ -45,14 +45,14 @@ export default function LandingPage({ onLogout }: LogoutProps) {
 				<div className="actions-box">
 					<h2>Your Actions:</h2>
 
-					{/*<button 
-                        className="action-button new-survey" 
+					{/*<button
+                        className="action-button new-survey"
                         onClick={() => navigate('/survey')}
                     >
                         New Survey
                     </button>*/}
 
-					{/* Actions availible to volunteers */}
+					{/* Actions available to volunteers */}
 					{role === 'Volunteer' && (
 						<div>
 							<button
