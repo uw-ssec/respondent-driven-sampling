@@ -128,11 +128,8 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 				}
 				const errData = await response.json();
 
-				console.log(errData);
-
 				// If a survey object is returned, invalid because we already have a survey in progress, redirect to that survey
 				if (errData.survey) {
-					console.log('Survey object returned', errData.survey);
 					setObjectId(errData.survey._id);
 					setReferredByCode(errData.survey.referredByCode);
 					return;
