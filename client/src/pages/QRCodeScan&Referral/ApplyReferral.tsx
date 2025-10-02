@@ -9,6 +9,8 @@ import '@/styles/ApplyReferral.css';
 
 import { getAuthToken } from '@/utils/authTokenHandler';
 
+import { useSurveyStore } from '@/stores/useSurveyStore';
+
 import { LogoutProps } from '@/types/AuthProps';
 
 export default function ApplyReferral({ onLogout }: LogoutProps) {
@@ -18,6 +20,7 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 	const [isScanning, setIsScanning] = useState(false); // Track scanning state
 	const scannerRef = useRef<Html5Qrcode | null>(null);
 	const readerRef = useRef<HTMLDivElement | null>(null);
+	const { clearSurvey, setObjectId } = useSurveyStore();
 
 	// Effect to initialize the QR scanner
 	// This effect runs when the component mounts and when isScanning changes
@@ -117,8 +120,13 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 			);
 			const data = await response.json();
 
+			// Before redirecting, clear any previous survey-specific data
+			clearSurvey();
+
 			if (response.ok) {
+				// Valid with no survey in progress, redirect to survey with initial referral code
 				navigate(`/survey?ref=${referralCode}`);
+				return;
 			} else if (response.status == 401) {
 				// Token Error, either expired or invalid for some other reason.
 				// Log user out so they can relogin to generate a new valid token
@@ -126,6 +134,15 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 				navigate('/login');
 				return;
 			} else {
+				// Invalid because we already have a survey in progress, redirect to that survey
+				if (data.survey) {
+					alert('This survey is already in progress. Please continue.');
+					setObjectId(data.survey._id); // Add survey ID to Zustand store
+					navigate(`/survey/${data.survey._id}/survey?ref=${data.survey.referredByCode}`);
+					return;
+				}
+
+				// Otherwise, invalid for some other reason, return error
 				alert(
 					data.message ||
 						'Invalid or already used referral code. Please try again.'
@@ -133,7 +150,6 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 				setLoading(false);
 				return;
 			}
-			navigate(`/survey?ref=${referralCode}`);
 
 		} catch (error) {
 			console.error('Error validating referral code:', error);
@@ -180,7 +196,7 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 				</button>
 
 				<div
-					onClick={() => navigate('/survey')}
+					onClick={() => {clearSurvey(); navigate('/survey')}} // Clear any previous survey data before generating new survey
 					className="new-seed-btn"
 				>
 					No referral code? Start new seed
