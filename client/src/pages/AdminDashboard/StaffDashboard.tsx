@@ -4,13 +4,13 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/StaffDashboard.css';
 
+import Header from '@/pages/Header/Header';
 import { getAuthToken } from '@/utils/authTokenHandler';
 
 import { LogoutProps } from '@/types/AuthProps';
 import filter from '@/assets/filter.png';
 import editPencil from '@/assets/pencil.png';
 import trash from '@/assets/trash.png';
-import Header from '@/pages/Header/Header';
 
 // Description: Dashboard for administrators to view, approve/reject, search, and sort application users.
 
@@ -70,7 +70,7 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 						id: user._id,
 						name: `${user.firstName} ${user.lastName}`,
 						position: user.role,
-						approvalStatus: user.approvalStatus || 'Pending'
+						approvalStatus: user.approvalStatus ?? 'Pending'
 					})
 				);
 				setStaffMembers(formatted);

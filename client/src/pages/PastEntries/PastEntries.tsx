@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { useNavigate } from 'react-router-dom';
-
 import Header from '@/pages/Header/Header';
+import { useNavigate } from 'react-router-dom';
 
 import '@/styles/PastEntriesCss.css';
 import '@/styles/StaffDashboard.css';
@@ -91,9 +90,7 @@ export default function PastEntries({ onLogout }: LogoutProps) {
 									).toLocaleString()}
 								</div>
 								<div className="header-item">
-									{survey.referredByCode
-										? survey.referredByCode
-										: 'N/A'}
+									{survey.referredByCode ?? 'N/A'}
 								</div>
 								<div className="header-item">
 									<button

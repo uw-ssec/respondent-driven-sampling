@@ -2,7 +2,7 @@ import { ReferralCode } from '@/types/ReferralCode';
 
 export interface Survey {
 	referralCodes: ReferralCode[];
-	responses: Object;
+	responses: object;
 	_id: string;
 	employeeId: string;
 	employeeName: string;

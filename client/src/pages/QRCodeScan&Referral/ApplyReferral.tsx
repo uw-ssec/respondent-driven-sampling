@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
+import Header from '@/pages/Header/Header';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useNavigate } from 'react-router-dom';
-
-import Header from '@/pages/Header/Header';
 
 import '@/styles/ApplyReferral.css';
 
@@ -127,14 +126,13 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 				return;
 			} else {
 				alert(
-					data.message ||
+					data.message ??
 						'Invalid or already used referral code. Please try again.'
 				);
 				setLoading(false);
 				return;
 			}
 			navigate(`/survey?ref=${referralCode}`);
-
 		} catch (error) {
 			console.error('Error validating referral code:', error);
 			alert('Server error. Please try again.');

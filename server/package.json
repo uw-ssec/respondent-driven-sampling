@@ -11,8 +11,8 @@
 		"test:watch": "jest --watch",
 		"test:coverage": "jest --coverage",
 		"clean": "rimraf build",
-		"lint": "eslint . --ext js,ts",
-		"lint:fix": "eslint . --ext js,ts --fix"
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix"
 	},
 	"keywords": [],
 	"author": "",
