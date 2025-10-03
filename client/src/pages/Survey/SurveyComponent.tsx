@@ -1,5 +1,5 @@
 import { useEffect, useRef, useMemo, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Model } from 'survey-core';
 import { Survey } from 'survey-react-ui';
 
@@ -22,11 +22,9 @@ import Header from '@/pages/Header/Header';
 // It uses the useState hook to manage component state
 // It uses the useGeolocated hook to get the user's geolocation
 const SurveyComponent = ({ onLogout }: LogoutProps) => {
-  const { id } = useParams();
   const [searchParams] = useSearchParams();
   const codeInUrl = searchParams.get('ref');
 
-  const [surveyData, setSurveyData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -34,10 +32,11 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 
 	// Pulls state values and update functions from Zustand store
 	const {
-		referredByCode,
-		objectId,
-		setReferredByCode,
+		getObjectId,
 		setObjectId,
+		getReferredByCode,
+		setReferredByCode,
+		setSurveyData,
 	} = useSurveyStore();
 
 	const { coords } = useGeolocated({
@@ -47,107 +46,65 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		userDecisionTimeout: 5000
 	});
 
-	// If objectId is already in URL, set it in Zustand store
-	// This is relevant for explicit redirects to an existing survey
-	useEffect(() => {
-		if (id && id !== objectId) {
-			setObjectId(id);
-		}
-	}, [id, objectId, setObjectId]);
-
 	// If referral code is in URL, set it in Zustand store -- this is used for
-	// initial survey load. If no referral code, this is a root survey
+	// initial survey load. If no referral code, this is a root survey and an empty survey is created.
 	useEffect(() => {
-		if (codeInUrl && codeInUrl !== referredByCode) {
-			setReferredByCode(codeInUrl);
-			validateReferralCode(codeInUrl);
-		}
-	}, [referredByCode, codeInUrl]);
-
-	// Initialize survey (either with existing objectId from URL/Zustand or an entirely new one)
-	useEffect(() => {
-		// update event values on state change
-		if (surveyRef.current) {
-			surveyRef.current.onCurrentPageChanged.clear()
-			surveyRef.current.onComplete.clear()
-			attachSurveyEvents(surveyRef.current);
-			return;
-		}
 		const init = async () => {
+
 			setLoading(true);
-			
-			// Load existing survey by id -- this will be set either from URL
-			// or will be pre-loaded into Zustand store during apply-referral
-			if (objectId) {
-				try {
-					const res = await fetch(`/api/surveys/${objectId}`, {
-						headers: { Authorization: `Bearer ${getAuthToken()}` }
-					});
-					if (res.ok) {
-						// Update our survey data in client
-						const data = await res.json();
-						setSurveyData(data);
-						if (!surveyRef.current) {
-							surveyRef.current = new Model(surveyJson);
-							attachSurveyEvents(surveyRef.current);
-						}
-						surveyRef.current.data = data.responses;
-					} else {
-						console.error('Survey not found');
-					}
-				} catch (err) {
-					console.error('Error fetching survey', err);
-				} finally {
-					setLoading(false);
+
+			// Initialize survey with empty data
+			surveyRef.current = new Model(surveyJson);
+			surveyRef.current.data = {};
+			setSurveyData(surveyRef.current.data);
+
+			// Use referral code if provided
+			if (codeInUrl && codeInUrl !== getReferredByCode()) {
+				// Check for any pre-existing survey data linked to the referral code
+				const surveyData = await fetchSurveyByReferralCode(codeInUrl);
+				if (surveyData) {
+					// in progress survey found, populate survey with existing data
+					surveyRef.current.data = surveyData.responses;
+					setSurveyData(surveyData);
+					setObjectId(surveyData._id);
+					setReferredByCode(codeInUrl);
 				}
-			// No id -- create a new survey
-			} else {
-				// Create placeholder for new survey
-				surveyRef.current = new Model(surveyJson);
-				attachSurveyEvents(surveyRef.current);
 			}
+
+			// Attach survey events to the survey
+			attachSurveyEventHandlers(surveyRef.current);
 			setLoading(false);
 		};
-
 		init();
-	}, [objectId, referredByCode, coords, navigate, codeInUrl]);
+	}, [codeInUrl]);
 
-	async function validateReferralCode(code: string) {
-		try {
-			const token = getAuthToken();
-			const response = await fetch(`/api/surveys/validate-ref/${code}`, {
-				headers: { Authorization: `Bearer ${token}` }
-			});
-			if (!response.ok) {
-				if (response.status == 401) {
-					// Token Error, either expired or invalid for some other reason.
-					// Log out user so they can relogin to generate a new valid token
-					onLogout();
-					navigate('/login');
-					return;
-				}
-				const errData = await response.json();
+	const fetchSurveyByReferralCode = async (code: string) => {
+		
+		const response = await fetch(`/api/surveys/validate-ref/${code}`, {
+			headers: { Authorization: `Bearer ${getAuthToken()}` }
+		});
+		const data = await response.json();
 
-				// If a survey object is returned, invalid because we already have a survey in progress, redirect to that survey
-				if (errData.survey) {
-					setObjectId(errData.survey._id);
-					setReferredByCode(errData.survey.referredByCode);
-					return;
-				} else {
-					navigate('/apply-referral');
-					alert(
-						errData.message ??
-							'Invalid referral code. Please check again.'
-					);
-				}
-			}
-		} catch (error) {
-			console.error('Error validating referral code:', error);
+		// TODO: update once backend for referral codes is upgraded
+		if (response.ok) {
+			return {};
+		} else if (data.survey) {
+			return data.survey;
+		} else if (response.status == 401) {
+			onLogout();
+			navigate('/login');
+		} else {
+			alert(data.message);
+			navigate('/apply-referral');
 		}
 	}
 
-	const attachSurveyEvents = (survey: Model | null) => {
+	const attachSurveyEventHandlers = (survey: Model | null) => {
 		if (!survey) return;
+
+		// Clear any existing handlers to prevent duplicates
+		survey.onCurrentPageChanged.clear();
+		survey.onComplete.clear();
 
 		const pushHistoryState = (pageNo: number) => {
 			const currentState = window.history.state;
@@ -160,17 +117,20 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 			}
 		};
 
-		pushHistoryState(survey.currentPageNo);
+		const getSurveyData = (data: any) => {
+			return {
+				responses: data ?? {},
+				referredByCode: getReferredByCode() ?? null,
+				coords: coords ?? { latitude: 0, longitude: 0 },
+				objectId: getObjectId() ?? null,
+			}
+		}
 
 		survey.onCurrentPageChanged.add(async sender => {
 			pushHistoryState(sender.currentPageNo);
-			const surveyData = {
-				responses: sender.data ?? {},
-				referredByCode: referredByCode ?? null,
-				coords: coords ?? { latitude: 0, longitude: 0 },
-				objectId: objectId ?? null,
-				completed: false
-			}
+			
+			const surveyData = { ...getSurveyData(sender.data), completed: false }
+			setSurveyData(surveyData);
 
 			try {
 				const response = await fetch('/api/surveys/save', {
@@ -184,7 +144,8 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 								
 				if (response.ok) {
 					const data = await response.json();
-					if (objectId == null) {
+					// set objectId in our surveyData if it is not already set
+					if (getObjectId() == null) {
 						setObjectId(data.objectId);
 					}
 				}
@@ -197,13 +158,8 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		});
 
 		survey.onComplete.add(async sender => {
-			const surveyData = {
-				responses: sender.data ?? {},
-				referredByCode: referredByCode ?? null,
-				coords: coords ?? { latitude: 0, longitude: 0 },
-				objectId: objectId ?? null,
-				completed: true
-			};
+			const surveyData = { ...getSurveyData(sender.data), completed: true }
+			setSurveyData(surveyData);
 
 			try {
 				const token = getAuthToken();
@@ -1212,7 +1168,7 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 	);
 
   if (loading) return <p>Loading survey...</p>;
-  if (objectId && !surveyData && !surveyRef.current) return <p>Survey not found.</p>;
+  if (!surveyRef.current) return <p>Survey not found.</p>;
 
   return (
     <>
