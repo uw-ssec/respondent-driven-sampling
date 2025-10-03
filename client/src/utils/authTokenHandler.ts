@@ -53,10 +53,11 @@ export function getEmployeeId(): string {
 }
 
 export function initializeSurveyStore() {
-    const { setEmployeeId, setEmployeeName, setReferredByCode } = useSurveyStore.getState();
+    const { setEmployeeId, setEmployeeName, setReferredByCode, setObjectId } = useSurveyStore.getState();
     const employeeId = getEmployeeId();
     const employeeName = getFirstName();
     setEmployeeId(employeeId);
     setEmployeeName(employeeName);
 	setReferredByCode(null);
+	setObjectId(null);
 }

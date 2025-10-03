@@ -8,11 +8,13 @@ import Header from '@/pages/Header/Header';
 import '@/styles/ApplyReferral.css';
 
 import { LogoutProps } from '@/types/AuthProps';
+import { useSurveyStore } from '@/stores/useSurveyStore';
 
 export default function ApplyReferral({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();
 	const [referralCode, setReferralCode] = useState('');
 	const [loading, setLoading] = useState(false);
+	const { clearSurvey } = useSurveyStore();
 	const [isScanning, setIsScanning] = useState(false); // Track scanning state
 	const scannerRef = useRef<Html5Qrcode | null>(null);
 	const readerRef = useRef<HTMLDivElement | null>(null);
@@ -105,28 +107,10 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 
 		setLoading(true);
 
-		try {
-			const response = await fetch(
-				`/api/surveys/validate-ref/${referralCode}`
-			);
-			const data = await response.json();
+		// Clear any existing survey data from previous attempts
+		clearSurvey();
 
-			if (!response.ok) {
-				alert(
-					data.message ||
-					'Invalid or already used referral code. Please try again.'
-				);
-				setLoading(false);
-				return;
-			}
-			navigate(`/survey?ref=${referralCode}`);
-
-		} catch (error) {
-			console.error('Error validating referral code:', error);
-			alert('Server error. Please try again.');
-		} finally {
-			setLoading(false);
-		}
+		navigate(`/survey?ref=${referralCode}`);
 	};
 
 	// Function to handle cancel button click
@@ -166,7 +150,7 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 				</button>
 
 				<div
-					onClick={() => navigate('/survey')}
+					onClick={() => {navigate('/survey'); clearSurvey()}}
 					className="new-seed-btn"
 				>
 					No referral code? Start new seed

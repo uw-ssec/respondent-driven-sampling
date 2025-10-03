@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Model } from 'survey-core';
 import { Survey } from 'survey-react-ui';
@@ -23,19 +22,22 @@ import Header from '@/pages/Header/Header';
 // It uses the useState hook to manage component state
 // It uses the useGeolocated hook to get the user's geolocation
 const SurveyComponent = ({ onLogout }: LogoutProps) => {
-	const [searchParams] = useSearchParams();
-	const navigate = useNavigate();
-	const surveyRef = useRef<Model | null>(null);
+  const [searchParams] = useSearchParams();
+  const codeInUrl = searchParams.get('ref');
+
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+  const surveyRef = useRef<Model | null>(null);
 
 	// Pulls state values and update functions from Zustand store
 	const {
-		employeeId,
-		employeeName,
-		referredByCode,
-		setReferredByCode
+		getObjectId,
+		setObjectId,
+		getReferredByCode,
+		setReferredByCode,
+		setSurveyData,
 	} = useSurveyStore();
-
-	const [isReferralValid, setIsReferralValid] = useState(true);
 
 	const { coords } = useGeolocated({
 		positionOptions: {
@@ -44,51 +46,169 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		userDecisionTimeout: 5000
 	});
 
+	// If referral code is in URL, set it in Zustand store -- this is used for
+	// initial survey load. If no referral code, this is a root survey and an empty survey is created.
 	useEffect(() => {
-		// 1) Sync referral code from URL query param into Zustand store
-		const codeInUrl = searchParams.get('ref');
-		if (codeInUrl && codeInUrl !== referredByCode) {
-			setReferredByCode(codeInUrl);
-		}
+		const init = async () => {
 
-		// Validate referral code
-		if (referredByCode) {
-			validateReferralCode(referredByCode);
+			setLoading(true);
+
+			// Initialize survey with empty data
+			surveyRef.current = new Model(surveyJson);
+			surveyRef.current.data = {};
+			setSurveyData(surveyRef.current.data);
+
+			// Use referral code if provided
+			if (codeInUrl && codeInUrl !== getReferredByCode()) {
+				// Check for any pre-existing survey data linked to the referral code
+				const surveyData = await fetchSurveyByReferralCode(codeInUrl);
+				if (surveyData) {
+					// in progress survey found, populate survey with existing data
+					surveyRef.current.data = surveyData.responses;
+					setSurveyData(surveyData);
+					setObjectId(surveyData._id);
+					setReferredByCode(codeInUrl);
+				}
+			}
+
+			// Attach survey events to the survey
+			attachSurveyEventHandlers(surveyRef.current);
+			setLoading(false);
+		};
+		init();
+	}, [codeInUrl]);
+
+	const fetchSurveyByReferralCode = async (code: string) => {
+		
+		const response = await fetch(`/api/surveys/validate-ref/${code}`, {
+			headers: { Authorization: `Bearer ${getAuthToken()}` }
+		});
+		const data = await response.json();
+
+		// TODO: update once backend for referral codes is upgraded
+		if (response.ok) {
+			return {};
+		} else if (data.survey) {
+			return data.survey;
+		} else if (response.status == 401) {
+			onLogout();
+			navigate('/login');
 		} else {
-			setIsReferralValid(false);
+			alert(data.message);
+			navigate('/apply-referral');
 		}
-	}, [employeeId, employeeName, searchParams, referredByCode]);
+	}
 
-	async function validateReferralCode(code: string) {
-		try {
-			const token = getAuthToken();
-			const response = await fetch(`/api/surveys/validate-ref/${code}`, {
-				headers: { Authorization: `Bearer ${token}` }
-			});
-			if (!response.ok) {
-				if (response.status == 401) {
+	const attachSurveyEventHandlers = (survey: Model | null) => {
+		if (!survey) return;
+
+		// Clear any existing handlers to prevent duplicates
+		survey.onCurrentPageChanged.clear();
+		survey.onComplete.clear();
+
+		const pushHistoryState = (pageNo: number) => {
+			const currentState = window.history.state;
+			if (!currentState || currentState.pageNo !== pageNo) {
+				window.history.pushState(
+					{ pageNo },
+					'',
+					window.location.pathname + window.location.search
+				);
+			}
+		};
+
+		const getSurveyData = (data: any) => {
+			return {
+				responses: data ?? {},
+				referredByCode: getReferredByCode() ?? null,
+				coords: coords ?? { latitude: 0, longitude: 0 },
+				objectId: getObjectId() ?? null,
+			}
+		}
+
+		survey.onCurrentPageChanged.add(async sender => {
+			pushHistoryState(sender.currentPageNo);
+			
+			const surveyData = { ...getSurveyData(sender.data), completed: false }
+			setSurveyData(surveyData);
+
+			try {
+				const response = await fetch('/api/surveys/save', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${getAuthToken()}`
+					},
+					body: JSON.stringify(surveyData)
+				});
+								
+				if (response.ok) {
+					const data = await response.json();
+					// set objectId in our surveyData if it is not already set
+					if (getObjectId() == null) {
+						setObjectId(data.objectId);
+					}
+				}
+				else {
+					console.error('Autosave failed:', await response.text());
+				}
+			} catch (error) {
+			console.error('Autosave failed:', error);
+			}
+		});
+
+		survey.onComplete.add(async sender => {
+			const surveyData = { ...getSurveyData(sender.data), completed: true }
+			setSurveyData(surveyData);
+
+			try {
+				const token = getAuthToken();
+				const response = await fetch('/api/surveys/save', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`
+					},
+					body: JSON.stringify(surveyData)
+				});
+
+				if (response.ok) {
+					const data = await response.json();
+					navigate('/qrcode', {
+						state: { referralCodes: data.referralCodes }
+					});
+				} else if (response.status == 401) {
 					// Token Error, either expired or invalid for some other reason.
-					// Log out user so they can relogin to generate a new valid token
+					// Log user out so they can relogin to generate a new valid token
 					onLogout();
 					navigate('/login');
 					return;
+				} else {
+					console.error(
+						'Error saving survey:',
+						await response.text()
+					);
 				}
-				const errData = await response.json();
-				alert(
-					errData.message ??
-						'Invalid referral code. Please check again.'
-				);
-				setReferredByCode(null);
-				setIsReferralValid(false);
-				navigate('/apply-referral');
-			} else {
-				setIsReferralValid(true);
+			} catch (error) {
+				console.error('Request failed:', error);
 			}
-		} catch (error) {
-			console.error('Error validating referral code:', error);
-			setIsReferralValid(false);
-		}
-	}
+		});
+	};
+
+  // Handle browser back/forward for survey pages
+  useEffect(() => {
+    const handlePopState = (event: { state: { pageNo: any } }) => {
+      const survey = surveyRef.current;
+      if (!survey) return;
+      const currentPageNo = survey.currentPageNo;
+      const targetPageNo = event.state?.pageNo;
+      if (typeof targetPageNo !== 'number') return;
+      if (targetPageNo < currentPageNo) survey.prevPage();
+      else if (targetPageNo > currentPageNo) survey.nextPage();
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
 	const surveyJson = useMemo(
 		() => ({
@@ -1047,177 +1167,45 @@ const SurveyComponent = ({ onLogout }: LogoutProps) => {
 		[]
 	);
 
-	// INITIALIZE SURVEY + EVENTS
-	useEffect(() => {
-		const pushHistoryState = (pageNo: number) => {
-			const currentState = window.history.state;
-			if (!currentState || currentState.pageNo !== pageNo) {
-				window.history.pushState(
-					{ pageNo },
-					'',
-					window.location.pathname + window.location.search
-				);
-			}
-		};
+  if (loading) return <p>Loading survey...</p>;
+  if (!surveyRef.current) return <p>Survey not found.</p>;
 
-		const survey = new Model(surveyJson);
-		surveyRef.current = survey;
-
-		pushHistoryState(survey.currentPageNo);
-
-		survey.onCurrentPageChanged.add(sender => {
-			const currentPageNo = sender.currentPageNo;
-			pushHistoryState(currentPageNo);
-		});
-
-		survey.onComplete.add(async sender => {
-
-			const surveyData = {
-				responses: sender.data ?? {},
-				referredByCode: referredByCode ?? null,
-				coords: coords ?? { latitude: 0, longitude: 0 }
-			};
-
-			console.log('Survey Submitted:', surveyData);
-
-			try {
-				console.log('Survey Data Being Sent:', surveyData); // Should we be printing survey data?
-				const token = getAuthToken();
-				const response = await fetch('/api/surveys/submit', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${token}`
-					},
-					body: JSON.stringify(surveyData)
-				});
-
-				if (response.ok) {
-					const data = await response.json();
-					console.log('Survey saved successfully!', data);
-
-					navigate('/qrcode', {
-						state: { referralCodes: data.referralCodes }
-					});
-				} else if (response.status == 401) {
-					// Token Error, either expired or invalid for some other reason.
-					// Log user out so they can relogin to generate a new valid token
-					onLogout();
-					navigate('/login');
-					return;
-				} else {
-					console.error(
-						'Error saving survey:',
-						await response.text()
-					);
-				}
-			} catch (error) {
-				console.error('Request failed:', error);
-			}
-		});
-	}, [
-		employeeId,
-		employeeName,
-		isReferralValid,
-		referredByCode,
-		coords,
-		navigate,
-		surveyJson,
-	]);
-
-	// BACK BUTTON BEHAVIOR
-	useEffect(() => {
-		const handlePopState = (event: { state: { pageNo: any } }) => {
-			const survey = surveyRef.current;
-			if (!survey) return;
-
-			const currentPageNo = survey.currentPageNo;
-			const targetPageNo = event.state?.pageNo;
-
-			if (typeof targetPageNo !== 'number') return; // prevent invalid jumps
-
-			if (targetPageNo < currentPageNo) {
-				survey.prevPage();
-			} else if (targetPageNo > currentPageNo) {
-				survey.nextPage();
-			}
-		};
-
-		window.addEventListener('popstate', handlePopState);
-		return () => window.removeEventListener('popstate', handlePopState);
-	}, []);
-
-	// RENDER COMPONENT
-	return (
-		<>
-			<Header onLogout={onLogout} />
-			<div style={{ padding: '20px' }}>
-				{surveyRef.current && <Survey model={surveyRef.current} />}
-
-				<div
-					style={{
-						display: 'flex',
-						justifyContent: 'center',
-						gap: '24px',
-						marginTop: '12px'
-					}}
-				>
-					<div
-						onClick={() => {
-							if (
-								surveyRef.current &&
-								surveyRef.current.currentPageNo > 0
-							) {
-								surveyRef.current.prevPage();
-							}
-						}}
-						style={{ cursor: 'pointer' }}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							width="36px"
-							height="36px"
-						>
-							<circle cx="12" cy="12" r="10" fill="#3E236E" />
-							<path
-								d="M14 7l-5 5 5 5"
-								stroke="white"
-								strokeWidth="2"
-								fill="none"
-							/>
-						</svg>
-					</div>
-					<div
-						onClick={() => {
-							if (
-								surveyRef.current &&
-								!surveyRef.current.isLastPage
-							) {
-								surveyRef.current.nextPage();
-							}
-						}}
-						style={{ cursor: 'pointer' }}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							width="36px"
-							height="36px"
-						>
-							<circle cx="12" cy="12" r="10" fill="#3E236E" />
-							<path
-								d="M10 7l5 5-5 5"
-								stroke="white"
-								strokeWidth="2"
-								fill="none"
-							/>
-						</svg>
-					</div>
-				</div>
-			</div>
-		</>
-	);
+  return (
+    <>
+      <Header onLogout={onLogout} />
+      <div style={{ padding: '20px' }}>
+        {surveyRef.current && <Survey model={surveyRef.current} />}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '12px' }}>
+          <div
+            onClick={() => {
+              if (surveyRef.current && surveyRef.current.currentPageNo > 0) {
+                surveyRef.current.prevPage();
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36px" height="36px">
+              <circle cx="12" cy="12" r="10" fill="#3E236E" />
+              <path d="M14 7l-5 5 5 5" stroke="white" strokeWidth="2" fill="none" />
+            </svg>
+          </div>
+          <div
+            onClick={() => {
+              if (surveyRef.current && !surveyRef.current.isLastPage) {
+                surveyRef.current.nextPage();
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36px" height="36px">
+              <circle cx="12" cy="12" r="10" fill="#3E236E" />
+              <path d="M10 7l5 5-5 5" stroke="white" strokeWidth="2" fill="none" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default SurveyComponent;

@@ -1,11 +1,9 @@
 // @ts-nocheck
 // TODO: Remove @ts-nocheck when types are fixed.
 import { useEffect, useState } from 'react';
-
 import { useNavigate } from 'react-router-dom';
 
 import Header from '@/pages/Header/Header';
-
 import '@/styles/SurveyDashboard.css';
 
 import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
@@ -26,10 +24,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 	const [filterMode, setFilterMode] = useState('byDate');
 	const [tempFilterMode, setTempFilterMode] = useState('byDate');
 	const [showFilterPopup, setShowFilterPopup] = useState(false);
-	const [sortConfig, setSortConfig] = useState<{
-		key: string | null;
-		direction: string;
-	}>({
+	const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: string }>({
 		key: null,
 		direction: 'asc'
 	});
@@ -41,9 +36,9 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 		if (isNaN(d.getTime())) return '';
 		const opts: Intl.DateTimeFormatOptions = {
 			timeZone: 'America/Los_Angeles',
-			year: 'numeric' as const,
-			month: '2-digit' as const,
-			day: '2-digit' as const
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit'
 		};
 		const parts = new Intl.DateTimeFormat('en-US', opts).formatToParts(d);
 		const y = parts.find(p => p.type === 'year')?.value || '';
@@ -58,6 +53,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 		return d.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
 	};
 
+	// Fetch surveys on mount
 	useEffect(() => {
 		(async () => {
 			try {
@@ -72,18 +68,18 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 						Authorization: `Bearer ${token}`
 					}
 				});
-				if (response.ok) {
-					setSurveys(await response.json());
-				} else if (response.status == 401) {
-					// Token Error, either expired or invalid for some other reason.
-					// Log user out so they can relogin to generate a new valid token
-					onLogout();
-					navigate('/login');
-					return;
-				} else {
-					console.error('Failed to fetch surveys.');
-				}
-			} catch (e) {
+        if (response.ok) {
+          const data = await response.json();
+          setSurveys(data);
+        } else if (response.status === 401) {
+          // Token expired, log out user
+          onLogout();
+          navigate('/login');
+          return;
+          } else {
+            console.error('Failed to fetch surveys.');
+          }
+        } catch (e) {
 				console.error('Error fetching surveys:', e);
 			} finally {
 				setLoading(false);
@@ -99,8 +95,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 	const handleSort = (key: string | null) => {
 		setSortConfig(prev => ({
 			key,
-			direction:
-				prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+			direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
 		}));
 	};
 
@@ -121,18 +116,14 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 	});
 
 	const searchedSurveys = sortedSurveys.filter(s => {
-		const search =
-			`${s.employeeId} ${s.employeeName} ${s.responses?.location || ''} ${s.referredByCode || ''}`.toLowerCase();
+		const search = `${s.employeeId} ${s.employeeName} ${s.responses?.location || ''} ${s.referredByCode || ''}`.toLowerCase();
 		return search.includes(searchTerm.toLowerCase());
 	});
 
 	const last = currentPage * itemsPerPage;
 	const first = last - itemsPerPage;
 	const currentSurveys = searchedSurveys.slice(first, last);
-	const totalPages = Math.max(
-		1,
-		Math.ceil(searchedSurveys.length / itemsPerPage)
-	);
+	const totalPages = Math.max(1, Math.ceil(searchedSurveys.length / itemsPerPage));
 
 	return (
 		<div>
@@ -168,9 +159,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 							className="search-input"
 							placeholder="Search Employee ID, Name, Location..."
 							value={searchTerm}
-							onChange={employee =>
-								setSearchTerm(employee.target.value)
-							}
+							onChange={employee => setSearchTerm(employee.target.value)}
 						/>
 					</div>
 
@@ -180,17 +169,17 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 							['employeeId', 'Employee ID'],
 							['employeeName', 'Employee Name'],
 							['responses.location', 'Location'],
-							['referredByCode', 'Referred By Code']
+							['referredByCode', 'Referred By Code'],
+							['responses.first_two_letters_fname', 'First 2 of First'],
+							['responses.first_two_letters_lname', 'First 2 of Last'],
+							['responses.year_born', 'Year of Birth']
 						].map(([key, label]) => (
-							<div
-								key={key}
-								className="header-item"
-								onClick={() => handleSort(key)}
-							>
+							<div key={key} className="header-item" onClick={() => handleSort(key)}>
 								{label} <span className="sort-icons">↑↓</span>
 							</div>
 						))}
 						<div className="header-item">Survey Responses</div>
+						<div className="header-item">Progress</div>
 					</div>
 
 					{loading ? (
@@ -201,54 +190,45 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 						<>
 							{currentSurveys.map((s, i) => (
 								<div className="list-row" key={i}>
+									<div className="header-item">{toPacificDateTimeString(s.createdAt)}</div>
+									<div className="header-item">{s.employeeId}</div>
+									<div className="header-item">{s.employeeName}</div>
+									<div className="header-item">{s.responses?.location || 'N/A'}</div>
+									<div className="header-item">{s.referredByCode || 'N/A'}</div>
 									<div className="header-item">
-										{toPacificDateTimeString(s.createdAt)}
+									{s.responses?.first_two_letters_fname || "N/A"}
 									</div>
 									<div className="header-item">
-										{s.employeeId}
+									{s.responses?.first_two_letters_lname || "N/A"}
 									</div>
 									<div className="header-item">
-										{s.employeeName}
+									{s.responses?.year_born || "N/A"}
 									</div>
 									<div className="header-item">
-										{s.responses?.location || 'N/A'}
-									</div>
-									<div className="header-item">
-										{s.referredByCode || 'N/A'}
-									</div>
-									<div className="header-item">
-										<button
-											onClick={() =>
-												navigate(`/survey/${s._id}`)
-											}
-											className="view-details-btn"
-										>
+										<button onClick={() => navigate(`/survey/${s._id}`)} className="view-details-btn">
 											View Details
 										</button>
 									</div>
+									<div className="header-item">
+										{s.lastUpdated ? (
+											<span className="submitted-text">Submitted</span>
+										) : (
+											<button
+												className="view-details-btn"
+												onClick={() => navigate(`/survey/${s._id}/survey`)}
+											>
+												Continue
+											</button>
+										)}
+									</div>
 								</div>
 							))}
-							{currentSurveys.length < itemsPerPage &&
-								Array.from({
-									length: itemsPerPage - currentSurveys.length
-								}).map((_, valuePage) => (
-									<div
-										className="list-row"
-										key={`empty-${valuePage}`}
-									/>
-								))}
 						</>
 					)}
 
 					<div className="staff-footer">
 						<div className="pagination-controls">
-							<button
-								className="arrow-button"
-								onClick={() =>
-									setCurrentPage(p => Math.max(p - 1, 1))
-								}
-								disabled={currentPage === 1}
-							>
+							<button className="arrow-button" onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>
 								&larr;
 							</button>
 							<span className="pagination-info">
@@ -256,11 +236,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 							</span>
 							<button
 								className="arrow-button"
-								onClick={() =>
-									setCurrentPage(p =>
-										Math.min(p + 1, totalPages)
-									)
-								}
+								onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
 								disabled={currentPage >= totalPages}
 							>
 								&rarr;
@@ -280,9 +256,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 										name="filterOption"
 										value="viewAll"
 										checked={tempFilterMode === 'viewAll'}
-										onChange={() =>
-											setTempFilterMode('viewAll')
-										}
+										onChange={() => setTempFilterMode('viewAll')}
 									/>
 									View all surveys
 								</label>
@@ -292,9 +266,7 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 										name="filterOption"
 										value="byDate"
 										checked={tempFilterMode === 'byDate'}
-										onChange={() =>
-											setTempFilterMode('byDate')
-										}
+										onChange={() => setTempFilterMode('byDate')}
 									/>
 									View by date
 								</label>
@@ -302,16 +274,10 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 									<input
 										type="date"
 										className="date-picker-input"
-										value={toPacificDateOnlyString(
-											tempSelectedDate
-										)}
+										value={toPacificDateOnlyString(tempSelectedDate)}
 										onChange={e => {
-											const [y, m, d] = e.target.value
-												.split('-')
-												.map(Number);
-											setTempSelectedDate(
-												new Date(y, m - 1, d)
-											);
+											const [y, m, d] = e.target.value.split('-').map(Number);
+											setTempSelectedDate(new Date(y, m - 1, d));
 										}}
 									/>
 								)}
