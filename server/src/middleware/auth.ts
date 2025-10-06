@@ -66,7 +66,7 @@ export async function auth(
 		}
 
 		// Add role authorization to the request
-		req.authorization = authorizeUser(req);
+		req.authorization = authorizeUser(req, user.id, user.permissions);
 
 		next();
 	} catch (err: any) {
