@@ -19,6 +19,8 @@
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
+		"@casl/ability": "^6.7.3",
+		"@casl/mongoose": "^8.0.3",
 		"bcryptjs": "^3.0.1",
 		"compression": "^1.8.0",
 		"cors": "^2.8.5",
