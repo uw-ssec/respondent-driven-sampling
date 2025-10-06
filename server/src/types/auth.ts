@@ -1,6 +1,6 @@
+import { MongoAbility } from '@casl/ability';
 import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
-import { MongoAbility } from '@casl/ability';
 
 export interface AuthenticatedRequest extends Request {
 	user?: {
@@ -9,6 +9,7 @@ export interface AuthenticatedRequest extends Request {
 		role: string;
 		firstName: string;
 	};
+	// REVIEW: Do we need <any> here?
 	authorization?: MongoAbility<any>;
 }
 

@@ -5,8 +5,6 @@ import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
 import authorizeUser from '@/utils/roleBasedAccess';
 
-//dotenv.config({ path: './.env' });
-
 // Middleware for verifying token signature and storing token info in response
 // If this call passes to the next handler, it means the user is atleast a volunteer
 // and has been approved by an admin.
@@ -35,7 +33,8 @@ export async function auth(
 
 		// Add the decoded token to the request object
 		req.user = {
-			id: decodedAuthToken.id || decodedAuthToken.employeeId,
+			// REVIEW: Why do we need "id" here? Where are we using it?
+			id: decodedAuthToken.id ?? decodedAuthToken.employeeId,
 			employeeId: decodedAuthToken.employeeId,
 			role: decodedAuthToken.role,
 			firstName: decodedAuthToken.firstName
