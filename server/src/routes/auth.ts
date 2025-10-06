@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import twilio from 'twilio';
 
-import { Types } from 'mongoose';
+import { ACTIONS } from '@/utils/roleBasedAccess';
 import { accessibleBy } from '@casl/mongoose';
 import { subject } from '@casl/ability';
 import { auth } from '@/middleware/auth';
@@ -118,7 +118,6 @@ router.post(
 				newUser.firstName,
 				newUser.role,
 				newUser.employeeId,
-				newUser._id as Types.ObjectId
 			);
 
 			res.json({
@@ -167,7 +166,6 @@ router.post(
 				user.firstName,
 				user.role,
 				user.employeeId,
-				user._id as Types.ObjectId
 			);
 
 			res.json({
@@ -212,7 +210,7 @@ router.put(
 	'/users/:id/approve',
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (!req.authorization?.can('approve', subject('User', { _id: req.params.id }), 'approvalStatus')) {
+		if (!req.authorization?.can(ACTIONS.CUSTOM.APPROVE, subject('User', { _id: req.params.id }), 'approvalStatus')) {
 			res.sendStatus(403);
 			return;
 		}
@@ -246,7 +244,7 @@ router.post(
 	'/preapprove',
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (!req.authorization?.can('preapprove', 'User')) {
+		if (!req.authorization?.can(ACTIONS.CUSTOM.PREAPPROVE, 'User')) {
 			res.sendStatus(403);
 			return;
 		}
@@ -282,7 +280,7 @@ router.get(
 	'/users/:employeeId',
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (!req.authorization?.can('read', subject('User', { employeeId: req.params.employeeId }))) {
+		if (!req.authorization?.can(ACTIONS.CASL.READ, subject('User', { employeeId: req.params.employeeId }))) {
 			res.sendStatus(403);
 			return;
 		}
@@ -311,7 +309,7 @@ router.put(
 	'/users/:employeeId',
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (!req.authorization?.can('update', subject('User', { employeeId: req.params.employeeId }))) {
+		if (!req.authorization?.can(ACTIONS.CASL.UPDATE, subject('User', { employeeId: req.params.employeeId }))) {
 			res.sendStatus(403);
 			return;
 		}
@@ -347,7 +345,7 @@ router.get(
 	'/users/by-id/:id',
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (!req.authorization?.can('read', subject('User', { _id: req.params.id }))) {
+		if (!req.authorization?.can(ACTIONS.CASL.READ, subject('User', { _id: req.params.id }))) {
 			res.sendStatus(403);
 			return;
 		}
@@ -374,7 +372,7 @@ router.put(
 	'/users/by-id/:id',
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (!req.authorization?.can('update', subject('User', { _id: req.params.id }))) {
+		if (!req.authorization?.can(ACTIONS.CASL.UPDATE, subject('User', { _id: req.params.id }))) {
 			res.sendStatus(403);
 			return;
 		}
