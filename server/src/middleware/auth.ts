@@ -3,6 +3,7 @@ import { NextFunction, Response } from 'express';
 import User from '@/models/users';
 import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
+import authorizeUser from '@/utils/roleBasedAccess';
 
 //dotenv.config({ path: './.env' });
 
@@ -63,6 +64,9 @@ export async function auth(
 			});
 			return;
 		}
+
+		// Add role authorization to the request
+		req.authorization = authorizeUser(req);
 
 		next();
 	} catch (err: any) {
