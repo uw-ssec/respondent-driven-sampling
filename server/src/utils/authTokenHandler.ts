@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
 
 // Get the token secret dynamically to support testing environment
 function getTokenSecret(): string {
@@ -15,13 +16,15 @@ function getTokenSecret(): string {
 export function generateAuthToken(
 	firstName: string,
 	role: string,
-	employeeId: string
+	employeeId: string,
+	id: Types.ObjectId
 ): string {
 	return jwt.sign(
 		{
 			firstName: firstName,
 			role: role,
-			employeeId: employeeId
+			employeeId: employeeId,
+			id
 		},
 		getTokenSecret(),
 		{ expiresIn: '12h' }
