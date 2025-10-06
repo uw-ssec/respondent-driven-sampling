@@ -15,13 +15,13 @@ function getTokenSecret(): string {
 export function generateAuthToken(
 	firstName: string,
 	role: string,
-	employeeId: string,
+	employeeId: string
 ): string {
 	return jwt.sign(
 		{
 			firstName: firstName,
 			role: role,
-			employeeId: employeeId,
+			employeeId: employeeId
 		},
 		getTokenSecret(),
 		{ expiresIn: '12h' }
