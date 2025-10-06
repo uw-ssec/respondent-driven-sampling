@@ -1,25 +1,44 @@
 import { AbilityBuilder, createMongoAbility, MongoAbility } from '@casl/ability'
 import { AuthenticatedRequest } from '@/types/auth';
+import { IPermission } from '@/types/models';
 
 // See CASL documentation: https://casl.js.org/v6/en/guide/intro
 
 // Native CASL actions -- CRUD + master action "manage"
-const ACTIONS = { 
+export const ACTIONS = { 
     // Native actions can be used as Mongo query filters with `accessibleBy` function
     // Note: 'manage' includes ALL actions (native or custom)
     CASL: { CREATE: 'create', READ: 'read', UPDATE: 'update', DELETE: 'delete', MANAGE: 'manage' },
     // Custom actions can be used to describe more granular actions instead of just CRUD
-    CUSTOM: { APPROVE: 'approve' }
+    CUSTOM: { APPROVE: 'approve', PREAPPROVE: 'preapprove' }
 }
 
-// Other constants
-const UPDATEABLE_USER_FIELDS = ['firstName', 'lastName', 'email', 'phone'];
+// Allowed resources
+export const RESOURCES = {
+    USER: 'User',
+    SURVEY: 'Survey'
+}
+
+// Allowed scopes
+export const SCOPES = {
+    ALL: 'all',
+    SELF: 'self'
+}
+
+export const ACTION_ENUM = [...Object.values(ACTIONS.CASL), ...Object.values(ACTIONS.CUSTOM)];
+export const RESOURCE_ENUM = Object.values(RESOURCES);
+export const SCOPE_ENUM = Object.values(SCOPES);
 
 // Assigns authorization by role and action
-export default function authorizeUser(req: AuthenticatedRequest): MongoAbility<any> {
+export default function authorizeUser(
+    req: AuthenticatedRequest, 
+    userId: string,
+    permissions: IPermission[] = []
+): MongoAbility<any> {
 	const { can, cannot, build } = new AbilityBuilder(createMongoAbility);
-	const ctx = { id: req.user?.id || '', employeeId: req.user?.employeeId || '' }; // pass in id and employeeId for context
+	const ctx = { id: userId || '', employeeId: req.user?.employeeId || '' }; // pass in id and employeeId for context
 
+    // Assign default rules by role
     switch (req.user?.role) {
         case 'Admin':
             adminRules(can);
@@ -32,36 +51,55 @@ export default function authorizeUser(req: AuthenticatedRequest): MongoAbility<a
             break;
     }
 
-    // Universal rules
-	cannot(ACTIONS.CUSTOM.APPROVE, 'User', { _id: ctx.id });
+    // Universal rules that can be overridden by custom rules should go here
+
+    // Assign custom rules by user-specific permissions
+    customRules(can, ctx, permissions);
+
+    // Universal rules (cannot be overridden by custom rules)
+	cannot(ACTIONS.CUSTOM.APPROVE, RESOURCES.USER, { _id: ctx.id });
 
 	return build();
 }
 
 function adminRules(can: any) {
     // No restrictions
-    can(ACTIONS.CASL.MANAGE, 'User');
-    can(ACTIONS.CASL.MANAGE, 'Survey');
+    can(ACTIONS.CASL.MANAGE, RESOURCES.USER);
+    can(ACTIONS.CASL.MANAGE, RESOURCES.SURVEY);
 }
 
 function managerRules(can: any, ctx: { id: string; employeeId: string }) {
     // User actions
-    can(ACTIONS.CASL.READ, 'User');
-    can(ACTIONS.CASL.MANAGE, 'User', UPDATEABLE_USER_FIELDS, { employeeId: ctx.employeeId });
-    can(ACTIONS.CASL.MANAGE, 'User', UPDATEABLE_USER_FIELDS, { _id: ctx.id });
-    can(ACTIONS.CUSTOM.APPROVE, 'User');
+    can(ACTIONS.CASL.READ, RESOURCES.USER);
+    can(ACTIONS.CASL.MANAGE, RESOURCES.USER, { employeeId: ctx.employeeId });
+    can(ACTIONS.CASL.MANAGE, RESOURCES.USER, { _id: ctx.id });
+    can(ACTIONS.CUSTOM.APPROVE, RESOURCES.USER);
+    can(ACTIONS.CUSTOM.PREAPPROVE, RESOURCES.USER);
     
     // Survey actions
-    can(ACTIONS.CASL.READ, 'Survey');
-    can(ACTIONS.CASL.CREATE, 'Survey');
-    can(ACTIONS.CASL.DELETE, 'Survey', { employeeId: ctx.employeeId });
+    can(ACTIONS.CASL.READ, RESOURCES.SURVEY);
+    can(ACTIONS.CASL.CREATE, RESOURCES.SURVEY);
+    can(ACTIONS.CASL.DELETE, RESOURCES.SURVEY, { employeeId: ctx.employeeId });
 }
 
 function volunteerRules(can: any, ctx: { id: string; employeeId: string }) {
     // User actions
-    can(ACTIONS.CASL.MANAGE, 'User', UPDATEABLE_USER_FIELDS, { employeeId: ctx.employeeId });
-    can(ACTIONS.CASL.MANAGE, 'User', UPDATEABLE_USER_FIELDS, { _id: ctx.id });
+    can(ACTIONS.CASL.READ, RESOURCES.USER, { _id: ctx.id });
+    can(ACTIONS.CASL.READ, RESOURCES.USER, { employeeId: ctx.employeeId });
+    can(ACTIONS.CASL.UPDATE, RESOURCES.USER, { employeeId: ctx.employeeId });
+    can(ACTIONS.CASL.UPDATE, RESOURCES.USER, { _id: ctx.id });
 
     // Survey actions
-    can(ACTIONS.CASL.MANAGE, 'Survey', { employeeId: ctx.employeeId });
+    can(ACTIONS.CASL.MANAGE, RESOURCES.SURVEY, { employeeId: ctx.employeeId });
+}
+
+function customRules(can: any, ctx: { id: string; employeeId: string }, permissions: IPermission[]) {
+    permissions.forEach(permission => {
+        if (permission.scope === SCOPES.SELF) {
+            can(permission.action, permission.resource, { _id: ctx.id });
+            can(permission.action, permission.resource, { employeeId: ctx.employeeId });
+        } else {
+            can(permission.action, permission.resource);
+        }
+    });
 }

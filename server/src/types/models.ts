@@ -1,4 +1,5 @@
 import { Document, Types } from 'mongoose';
+import { ACTION_ENUM, RESOURCE_ENUM, SCOPE_ENUM } from '@/utils/roleBasedAccess';
 
 export interface IReferralCode {
 	// QR code that will be distributed to participants, and will be used to create child surveys
@@ -43,4 +44,15 @@ export interface IUser extends Document {
 	approvalStatus: 'Pending' | 'Approved' | 'Rejected';
 	createdAt: Date;
 	updatedAt: Date;
+	permissions: IPermission[];
+}
+
+type Action = (typeof ACTION_ENUM)[number];
+type Resource = (typeof RESOURCE_ENUM)[number];
+type Scope = (typeof SCOPE_ENUM)[number];
+
+export interface IPermission {
+	action: Action;
+	resource: Resource;
+	scope: Scope;
 }
