@@ -1,6 +1,6 @@
 // See CASL documentation: https://casl.js.org/v6/en/guide/intro
 
-import { MongoAbility, MongoQuery } from "@casl/ability";
+import { ForcedSubject, MongoAbility, MongoQuery } from "@casl/ability";
 
 // Native CASL actions -- CRUD + master action "manage"
 export const ACTIONS = {
@@ -46,7 +46,8 @@ export const CONDITION_QUERIES: Record<Condition, (ctx: Context) => MongoQuery> 
 };
 
 export type Query = ReturnType<typeof CONDITION_QUERIES[Condition]> | {} // @typescript-eslint/no-empty-object-type
-export type Ability = MongoAbility<[Action, Subject], Query>;
+// here, ForcedSubject is a type used when checking auth in our routes (i.e. building a dummy subject intead of just passing in a string)
+export type Ability = MongoAbility<[Action, Subject | ForcedSubject<Subject>], Query>;
 
 // Enums for the actions, subjects, and scopes, etc
 // Used in User model schema declaration
