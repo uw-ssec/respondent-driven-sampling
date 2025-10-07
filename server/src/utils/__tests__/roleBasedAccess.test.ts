@@ -1,5 +1,5 @@
 // server/src/utils/__tests__/roleBasedAccess.test.ts
-import authorizeUser from '@/utils/roleBasedAccess';
+import defineAbilitiesForUser from '@/utils/roleBasedAccess';
 import { AuthenticatedRequest } from '@/types/auth';
 import { subject } from '@casl/ability';
 import { describe, expect, test } from '@jest/globals';
@@ -28,7 +28,7 @@ const self = {
 describe('CASL authorization', () => {
 	describe('Admin', () => {
 		test('Admin can approve other users', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Admin', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -37,7 +37,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Admin cannot approve self', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Admin', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -46,7 +46,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Admin can read any user', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Admin', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -55,7 +55,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Admin can update any user', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Admin', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -64,7 +64,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Admin can create any user', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Admin', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -73,7 +73,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Admin can delete any user', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Admin', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -82,7 +82,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Admin can manage any survey', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Admin', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -91,7 +91,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Admin can delete any survey', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Admin', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -102,7 +102,7 @@ describe('CASL authorization', () => {
 
 	describe('Manager', () => {
 		test('Manager can approve other users', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Manager', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -111,7 +111,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Manager cannot approve self', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Manager', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -120,7 +120,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Manager can read any user', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Manager', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -129,7 +129,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Manager can update own profile allowed fields', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Manager', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -146,7 +146,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Manager can view any survey but only delete their own survey', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Manager', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
@@ -160,14 +160,12 @@ describe('CASL authorization', () => {
 
 	describe('Volunteer', () => {
 		test('Volunteer can manage only own User limited fields', () => {
-			const id = '64f000000000000000000021';
-			const employeeId = 'EMP0021';
-			const ability = authorizeUser(
-				makeReq({ role: 'Volunteer', id, employeeId }),
+			const ability = defineAbilitiesForUser(
+				makeReq({ role: 'Volunteer', id: self.id, employeeId: self.employeeId }),
 				self.id,
 				[]
 			);
-			const selfUser = subject('User', { _id: id, employeeId });
+			const selfUser = subject('User', { _id: self.id, employeeId: self.employeeId });
 
 			expect(ability.can('update', selfUser, 'firstName')).toBe(true);
 			expect(ability.can('update', selfUser, 'lastName')).toBe(true);
@@ -179,7 +177,7 @@ describe('CASL authorization', () => {
 		});
 
 		test('Volunteer cannot approve anyone', () => {
-			const ability = authorizeUser(
+			const ability = defineAbilitiesForUser(
 				makeReq({ role: 'Volunteer' }),
 				self.id,
 				[]
