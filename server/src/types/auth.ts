@@ -1,20 +1,17 @@
-import { MongoAbility } from '@casl/ability';
+import { Ability } from '@/utils/roleDefinitions';
 import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 
 export interface AuthenticatedRequest extends Request {
 	user?: {
-		id: string;
 		employeeId: string;
 		role: string;
 		firstName: string;
 	};
-	// REVIEW: Do we need <any> here?
-	authorization?: MongoAbility<any>;
+	authorization?: Ability;
 }
 
 export interface JWTPayload extends JwtPayload {
-	id: string;
 	employeeId: string;
 	role: string;
 }

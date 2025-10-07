@@ -3,7 +3,7 @@ import { NextFunction, Response } from 'express';
 import User from '@/models/users';
 import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
-import authorizeUser from '@/utils/roleBasedAccess';
+import defineAbilitiesForUser from '@/utils/roleBasedAccess';
 
 // Middleware for verifying token signature and storing token info in response
 // If this call passes to the next handler, it means the user is atleast a volunteer
@@ -33,8 +33,6 @@ export async function auth(
 
 		// Add the decoded token to the request object
 		req.user = {
-			// REVIEW: Why do we need "id" here? Where are we using it?
-			id: decodedAuthToken.id ?? decodedAuthToken.employeeId,
 			employeeId: decodedAuthToken.employeeId,
 			role: decodedAuthToken.role,
 			firstName: decodedAuthToken.firstName
@@ -65,7 +63,7 @@ export async function auth(
 		}
 
 		// Add role authorization to the request
-		req.authorization = authorizeUser(req, user.id, user.permissions);
+		req.authorization = defineAbilitiesForUser(req, user.id, user.permissions);
 
 		next();
 	} catch (err: any) {

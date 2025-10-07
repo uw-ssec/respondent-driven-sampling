@@ -1,23 +1,7 @@
 import mongoose, { Model, Schema } from 'mongoose';
 
-import { IPermission, IUser } from '@/types/models';
-import {
-	ACTION_ENUM,
-	RESOURCE_ENUM,
-	SCOPE_ENUM
-} from '@/utils/roleBasedAccess';
-
-// Permission schema definition
-// This schema defines the structure of the permission data assigned to a user for a single operation.
-// It includes fields for action, resource, and scope.
-// These permissions are used in addition to the default permissions for each role
-// REVIEW: Why is this Schema? Maybe an interface would work just fine.
-// REVIEW: Update property names to match CASL terminology? Action, subject, field, conditions?
-const permissionSchema = new Schema<IPermission>({
-	action: { type: String, enum: ACTION_ENUM, required: true },
-	resource: { type: String, enum: RESOURCE_ENUM, required: true },
-	scope: { type: String, enum: SCOPE_ENUM, required: true }
-});
+import { IUser } from '@/types/models';
+import { ACTION_ENUM, SUBJECT_ENUM, CONDITION_ENUM } from '@/utils/roleDefinitions';
 
 // User schema definition
 // This schema defines the structure of the user data in the MongoDB database.
@@ -46,7 +30,11 @@ const userSchema = new Schema<IUser>(
 			default: 'Pending'
 		},
 		permissions: {
-			type: [permissionSchema],
+			type: [{
+				action: { type: String, enum: ACTION_ENUM, required: true },
+				subject: { type: String, enum: SUBJECT_ENUM, required: true },
+				condition: { type: String, enum: CONDITION_ENUM, required: true }
+			}],
 			default: []
 		}
 	},

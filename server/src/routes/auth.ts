@@ -12,7 +12,7 @@ import {
 	SignupRequest
 } from '@/types/auth';
 import { generateAuthToken } from '@/utils/authTokenHandler';
-import { ACTIONS } from '@/utils/roleBasedAccess';
+import { ACTIONS, SUBJECTS } from '@/utils/roleDefinitions';
 
 const router = express.Router();
 
@@ -193,7 +193,7 @@ router.get(
 		}
 		try {
 			const users = await User.find(
-				accessibleBy(req.authorization).ofType('User'),
+				accessibleBy(req.authorization).ofType(SUBJECTS.USER),
 				'firstName lastName role approvalStatus'
 			);
 			res.json(users);
@@ -208,15 +208,12 @@ router.get(
 
 router.put(
 	'/users/:id/approve',
-	auth, // REVIEW: Why auth and not [auth]. What's the difference?
+	[auth],
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		// REVIEW: Should we replace 'User' with the const RESOURCES.USER?
-		// REVIEW: What is 'approvalStatus' here?
 		if (
 			!req.authorization?.can(
 				ACTIONS.CUSTOM.APPROVE,
-				subject('User', { _id: req.params.id }),
-				'approvalStatus'
+				subject(SUBJECTS.USER, { _id: req.params.id }),
 			)
 		) {
 			res.sendStatus(403);
@@ -252,7 +249,7 @@ router.post(
 	'/preapprove',
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (!req.authorization?.can(ACTIONS.CUSTOM.PREAPPROVE, 'User')) {
+		if (!req.authorization?.can(ACTIONS.CUSTOM.PREAPPROVE, SUBJECTS.USER)) {
 			res.sendStatus(403);
 			return;
 		}
@@ -291,7 +288,7 @@ router.get(
 		if (
 			!req.authorization?.can(
 				ACTIONS.CASL.READ,
-				subject('User', { employeeId: req.params.employeeId })
+				subject(SUBJECTS.USER, { employeeId: req.params.employeeId })
 			)
 		) {
 			res.sendStatus(403);
@@ -325,7 +322,7 @@ router.put(
 		if (
 			!req.authorization?.can(
 				ACTIONS.CASL.UPDATE,
-				subject('User', { employeeId: req.params.employeeId })
+				subject(SUBJECTS.USER, { employeeId: req.params.employeeId })
 			)
 		) {
 			res.sendStatus(403);
@@ -366,7 +363,7 @@ router.get(
 		if (
 			!req.authorization?.can(
 				ACTIONS.CASL.READ,
-				subject('User', { _id: req.params.id })
+				subject(SUBJECTS.USER, { _id: req.params.id })
 			)
 		) {
 			res.sendStatus(403);
@@ -398,7 +395,7 @@ router.put(
 		if (
 			!req.authorization?.can(
 				ACTIONS.CASL.UPDATE,
-				subject('User', { _id: req.params.id })
+				subject(SUBJECTS.USER, { _id: req.params.id })
 			)
 		) {
 			res.sendStatus(403);
