@@ -5,6 +5,8 @@ import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
 import defineAbilitiesForUser from '@/utils/roleBasedAccess';
 
+//dotenv.config({ path: './.env' });
+
 // Middleware for verifying token signature and storing token info in response
 // If this call passes to the next handler, it means the user is atleast a volunteer
 // and has been approved by an admin.
