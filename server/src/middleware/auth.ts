@@ -3,6 +3,7 @@ import { NextFunction, Response } from 'express';
 import User from '@/models/users';
 import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
+import defineAbilitiesForUser from '@/utils/roleBasedAccess';
 
 //dotenv.config({ path: './.env' });
 
@@ -34,7 +35,6 @@ export async function auth(
 
 		// Add the decoded token to the request object
 		req.user = {
-			id: decodedAuthToken.id || decodedAuthToken.employeeId,
 			employeeId: decodedAuthToken.employeeId,
 			role: decodedAuthToken.role,
 			firstName: decodedAuthToken.firstName
@@ -63,6 +63,9 @@ export async function auth(
 			});
 			return;
 		}
+
+		// Add role authorization to the request
+		req.authorization = defineAbilitiesForUser(req, user.id, user.permissions);
 
 		next();
 	} catch (err: any) {

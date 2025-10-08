@@ -1,3 +1,5 @@
+import { subject } from '@casl/ability';
+import { accessibleBy } from '@casl/mongoose';
 import express, { Request, Response } from 'express';
 import twilio from 'twilio';
 
@@ -10,6 +12,7 @@ import {
 	SignupRequest
 } from '@/types/auth';
 import { generateAuthToken } from '@/utils/authTokenHandler';
+import { ACTIONS, SUBJECTS } from '@/utils/roleDefinitions';
 
 const router = express.Router();
 
@@ -184,13 +187,13 @@ router.get(
 	'/users',
 	[auth],
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (req.user?.role !== 'Admin') {
+		if (!req.authorization) {
 			res.sendStatus(403);
 			return;
 		}
 		try {
 			const users = await User.find(
-				{},
+				accessibleBy(req.authorization).ofType(SUBJECTS.USER),
 				'firstName lastName role approvalStatus'
 			);
 			res.json(users);
@@ -205,9 +208,14 @@ router.get(
 
 router.put(
 	'/users/:id/approve',
-	auth,
+	[auth],
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (req.user?.role !== 'Admin') {
+		if (
+			!req.authorization?.can(
+				ACTIONS.CUSTOM.APPROVE,
+				subject(SUBJECTS.USER, { _id: req.params.id }),
+			)
+		) {
 			res.sendStatus(403);
 			return;
 		}
@@ -241,7 +249,7 @@ router.post(
 	'/preapprove',
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (req.user?.role !== 'Admin') {
+		if (!req.authorization?.can(ACTIONS.CUSTOM.PREAPPROVE, SUBJECTS.USER)) {
 			res.sendStatus(403);
 			return;
 		}
@@ -278,8 +286,10 @@ router.get(
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
 		if (
-			!['Admin', 'Manager'].includes(req.user?.role || '') &&
-			req.user?.employeeId !== req.params.employeeId
+			!req.authorization?.can(
+				ACTIONS.CASL.READ,
+				subject(SUBJECTS.USER, { employeeId: req.params.employeeId })
+			)
 		) {
 			res.sendStatus(403);
 			return;
@@ -310,8 +320,10 @@ router.put(
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
 		if (
-			req.user?.role !== 'Admin' &&
-			req.user?.employeeId !== req.params.employeeId
+			!req.authorization?.can(
+				ACTIONS.CASL.UPDATE,
+				subject(SUBJECTS.USER, { employeeId: req.params.employeeId })
+			)
 		) {
 			res.sendStatus(403);
 			return;
@@ -348,7 +360,12 @@ router.get(
 	'/users/by-id/:id',
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (req.user?.role !== 'Admin') {
+		if (
+			!req.authorization?.can(
+				ACTIONS.CASL.READ,
+				subject(SUBJECTS.USER, { _id: req.params.id })
+			)
+		) {
 			res.sendStatus(403);
 			return;
 		}
@@ -375,7 +392,12 @@ router.put(
 	'/users/by-id/:id',
 	auth,
 	async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-		if (req.user?.role !== 'Admin') {
+		if (
+			!req.authorization?.can(
+				ACTIONS.CASL.UPDATE,
+				subject(SUBJECTS.USER, { _id: req.params.id })
+			)
+		) {
 			res.sendStatus(403);
 			return;
 		}

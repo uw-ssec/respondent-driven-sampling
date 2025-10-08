@@ -1,4 +1,5 @@
 import { Document, Types } from 'mongoose';
+import { Action, Subject, Condition } from '@/utils/roleDefinitions';
 
 export interface IReferralCode {
 	// QR code that will be distributed to participants, and will be used to create child surveys
@@ -43,4 +44,11 @@ export interface IUser extends Document {
 	approvalStatus: 'Pending' | 'Approved' | 'Rejected';
 	createdAt: Date;
 	updatedAt: Date;
+	permissions: IPermission[];
+}
+
+export interface IPermission {
+	action: Action;
+	subject: Subject;
+	condition?: Condition;
 }
