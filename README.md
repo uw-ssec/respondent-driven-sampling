@@ -109,6 +109,26 @@ server/                   # Backend code
 ├── __tests__/                     # Backend tests
 │   ├── database.test.js
 │   └── server.test.js
+├── database/              # Database layer
+│   ├── connection/                # Mongoose connection for database
+│   │   ├── __tests__/
+│   │   │   └── mongoose.test.ts
+│   │   └── mongoose.ts
+│   ├── models/                    # Mongoose models for database
+│   │   ├── __tests__/
+│   │   ├── seed.model.ts
+│   │   ├── survey.model.ts
+│   │   └── user.model.ts
+│   ├── repositories/              # Data access layer (i.e. CRUD operations)
+│   │   ├── __tests__/
+│   │   ├── seed.repository.ts
+│   │   ├── survey.repository.ts
+│   │   └── user.repository.ts
+│   ├── types/                     # Database type definitions
+│   │   ├── seed.type.ts
+│   │   ├── survey.type.ts
+│   │   └── user.type.ts 
+│   └── index.ts                   # Database module exports
 ├── models/               # Mongoose schemas
 │   └── __tests__/                 # Models tests
 │       ├── Survey.test.js
