@@ -1,6 +1,6 @@
 import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import mongoose from 'mongoose';
-import connectDB from '../database';
+import { connectDB } from '../../index';
 
 // Mock mongoose
 jest.mock('mongoose');

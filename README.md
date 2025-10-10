@@ -109,6 +109,26 @@ server/                   # Backend code
 ├── __tests__/                     # Backend tests
 │   ├── database.test.js
 │   └── server.test.js
+├── database/              # Database layer
+│   ├── connection/                # Mongoose connection for database
+│   │   ├── __tests__/
+│   │   │   └── mongoose.test.ts
+│   │   └── mongoose.ts
+│   ├── models/                    # Mongoose models for database
+│   │   ├── __tests__/
+│   │   ├── seed.model.ts
+│   │   ├── survey.model.ts
+│   │   └── user.model.ts
+│   ├── controllers/               # Data access layer (i.e. CRUD operations)
+│   │   ├── __tests__/
+│   │   ├── seed.controller.ts
+│   │   ├── survey.controller.ts
+│   │   └── user.controller.ts
+│   ├── types/                     # Database type definitions
+│   │   ├── seed.type.ts
+│   │   ├── survey.type.ts
+│   │   └── user.type.ts 
+│   └── index.ts                   # Database module exports
 ├── models/               # Mongoose schemas
 │   └── __tests__/                 # Models tests
 │       ├── Survey.test.js
@@ -127,8 +147,7 @@ server/                   # Backend code
 │   ├── __tests__/                 # Utils tests
 │   │   └── generateReferralCode.test.js
 │   └── generateReferralCode.js           # Utility to generate unique referral codes
-├── database.js                           # Mongoose DB connection init
-├── index.js                              # Main entry point for Express backend
+├── index.ts                              # Main entry point for Express backend
 ├── .gitignore                            # Specifies files to ignore in Git
 ├── package.json                          # Backend dependencies and scripts
 └── package-lock.json                     # Lockfile for backend dependencies
