@@ -7,7 +7,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import nocache from 'nocache';
 
-import connectDB from '@/database';
+import { connectDB } from '@/database/index';
 import authRoutes from '@/routes/auth';
 import pageRoutes from '@/routes/pages';
 import surveyRoutes from '@/routes/surveys';
