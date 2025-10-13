@@ -8,9 +8,10 @@ import helmet from 'helmet';
 import nocache from 'nocache';
 
 import { connectDB } from '@/database/index';
-import authRoutes from '@/routes/auth';
-import pageRoutes from '@/routes/pages';
-import surveyRoutes from '@/routes/surveys';
+import authRoutes from '@/routes/v1/auth';
+import pageRoutes from '@/routes/v1/pages';
+import surveyRoutes from '@/routes/v1/surveys';
+import surveyRoutesV2 from '@/routes/v2/surveys';
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -139,6 +140,7 @@ const securityWrapper = (router: express.Router) => {
 app.use('/api/auth', securityWrapper(authRoutes));
 app.use('/api/pages', securityWrapper(pageRoutes));
 app.use('/api/surveys', securityWrapper(surveyRoutes));
+app.use('/api/v2/surveys', securityWrapper(surveyRoutesV2));
 
 // Serve static files with security headers
 const clientBuildPath = path.join(__dirname, '../dist');
