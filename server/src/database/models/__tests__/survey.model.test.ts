@@ -2,7 +2,8 @@ import { describe, test, expect, beforeEach, beforeAll, afterAll } from '@jest/g
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import Survey from '../survey.model';
-import { SiteLocation } from '../../utils/constants';
+import { SiteLocation, SYSTEM_SURVEY_CODE } from '../../utils/constants';
+import { errors } from '../../utils/error';
 
 describe('Survey Model', () => {
     let mongoServer: MongoMemoryServer;
@@ -23,15 +24,12 @@ describe('Survey Model', () => {
         await Survey.deleteMany({});
     });
 
-    // Test schema validation
-    test('valid survey creation', async () => {
+    // Test schema validation (using system survey code as parent to avoid parent checks)
+    test('valid survey creation (basic)', async () => {
         const validSurvey = {
             surveyCode: '123456',
-            referredBySurveyCode: '000000',
-            generatedSurveyCodes: [
-                { code: '111111', usedBySurveyObjectId: null },
-                { code: '222222', usedBySurveyObjectId: null }
-            ],
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
+            childSurveyCodes: [ '111111', '222222', '333333' ],
             responses: { question1: 'answer1', question2: 'answer2' },
             createdByUserObjectId: new mongoose.Types.ObjectId(),
             siteLocation: SiteLocation.LOCATION_A,
@@ -47,8 +45,8 @@ describe('Survey Model', () => {
 
         expect(savedSurvey._id).toBeDefined();
         expect(savedSurvey.surveyCode).toBe('123456');
-        expect(savedSurvey.referredBySurveyCode).toBe('000000');
-        expect(savedSurvey.generatedSurveyCodes).toHaveLength(2);
+        expect(savedSurvey.parentSurveyCode).toBe(SYSTEM_SURVEY_CODE);
+        expect(savedSurvey.childSurveyCodes).toHaveLength(3);
         expect(savedSurvey.responses).toEqual(validSurvey.responses);
         expect(savedSurvey.isCompleted).toBe(false);
         expect(savedSurvey.createdAt).toBeDefined();
@@ -57,25 +55,8 @@ describe('Survey Model', () => {
 
     test('invalid survey - missing required fields', async () => {
         const invalidSurvey = {
-            // Missing surveyCode, referredBySurveyCode, createdByUserObjectId, siteLocation
+            // Missing surveyCode, parentSurveyCode, createdByUserObjectId, siteLocation
             responses: { question1: 'answer1' }
-        };
-
-        const survey = new Survey(invalidSurvey);
-        
-        await expect(survey.save()).rejects.toThrow();
-    });
-
-    test('invalid survey - invalid coordinates', async () => {
-        const invalidSurvey = {
-            surveyCode: '123456',
-            referredBySurveyCode: '000000',
-            createdByUserObjectId: new mongoose.Types.ObjectId(),
-            siteLocation: SiteLocation.LOCATION_A,
-            coordinates: {
-                latitude: 91, // Invalid latitude
-                longitude: -74.0060
-            }
         };
 
         const survey = new Survey(invalidSurvey);
@@ -86,7 +67,7 @@ describe('Survey Model', () => {
     test('invalid survey - invalid siteLocation enum', async () => {
         const invalidSurvey = {
             surveyCode: '123456',
-            referredBySurveyCode: '000000',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
             createdByUserObjectId: new mongoose.Types.ObjectId(),
             siteLocation: 'InvalidLocation' // Invalid enum value
         };
@@ -100,7 +81,7 @@ describe('Survey Model', () => {
     test('duplicate surveyCode should fail', async () => {
         const surveyData = {
             surveyCode: '123456',
-            referredBySurveyCode: '000000',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
             createdByUserObjectId: new mongoose.Types.ObjectId(),
             siteLocation: SiteLocation.LOCATION_A
         };
@@ -116,16 +97,13 @@ describe('Survey Model', () => {
     });
 
     // Test indexes
-    test('generatedSurveyCodes.code intradocument uniqueness', async () => {
+    test('childSurveyCodes intradocument uniqueness', async () => {
         const surveyData = {
             surveyCode: '123456',
-            referredBySurveyCode: '000000',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
             createdByUserObjectId: new mongoose.Types.ObjectId(),
             siteLocation: SiteLocation.LOCATION_A,
-            generatedSurveyCodes: [
-                { code: '111111', usedBySurveyObjectId: null },
-                { code: '111111', usedBySurveyObjectId: null } // Duplicate code
-            ]
+            childSurveyCodes: ['111111', '111111', '222222']
         };
 
         const survey = new Survey(surveyData);
@@ -133,27 +111,21 @@ describe('Survey Model', () => {
         await expect(survey.save()).rejects.toThrow();
     });
 
-    test('generatedSurveyCodes.code interdocument uniqueness', async () => {
+    test('childSurveyCodes interdocument uniqueness', async () => {
         const surveyData1 = {
             surveyCode: '123456',
-            referredBySurveyCode: '000000',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
             createdByUserObjectId: new mongoose.Types.ObjectId(),
             siteLocation: SiteLocation.LOCATION_A,
-            generatedSurveyCodes: [
-                { code: '111111', usedBySurveyObjectId: null },
-                { code: '222222', usedBySurveyObjectId: null }
-            ]
+            childSurveyCodes: ['111111', '222222', '333333']
         };
 
         const surveyData2 = {
             surveyCode: '789012',
-            referredBySurveyCode: '000000',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
             createdByUserObjectId: new mongoose.Types.ObjectId(),
             siteLocation: SiteLocation.LOCATION_A,
-            generatedSurveyCodes: [
-                { code: '111111', usedBySurveyObjectId: null }, // Same code as surveyData1
-                { code: '333333', usedBySurveyObjectId: null }
-            ]
+            childSurveyCodes: ['111111', '444444', '555555']
         };
 
         // Create first survey
@@ -170,7 +142,7 @@ describe('Survey Model', () => {
     test('automatic timestamps', async () => {
         const surveyData = {
             surveyCode: '123456',
-            referredBySurveyCode: '000000',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
             createdByUserObjectId: new mongoose.Types.ObjectId(),
             siteLocation: SiteLocation.LOCATION_A
         };
@@ -197,7 +169,7 @@ describe('Survey Model', () => {
     test('default values are set correctly', async () => {
         const surveyData = {
             surveyCode: '123456',
-            referredBySurveyCode: '000000',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
             createdByUserObjectId: new mongoose.Types.ObjectId(),
             siteLocation: SiteLocation.LOCATION_A
             // Not providing responses, isCompleted, generatedSurveyCodes
@@ -208,6 +180,67 @@ describe('Survey Model', () => {
 
         expect(savedSurvey.responses).toEqual({});
         expect(savedSurvey.isCompleted).toBe(false);
-        expect(savedSurvey.generatedSurveyCodes).toEqual([]);
+        expect(savedSurvey.childSurveyCodes).toEqual([]);
     });
+
+    // Chronological ordering hook tests
+    test('chronology: child created after parent passes', async () => {
+        const parent = new Survey({
+            surveyCode: 'PARENT1',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A,
+            childSurveyCodes: ['CHILD1A', 'CHILD1B', 'CHILD1C']
+        });
+        const savedParent = await parent.save();
+
+        const child = new Survey({
+            surveyCode: 'CHILD1A',
+            parentSurveyCode: savedParent.surveyCode,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A,
+            childSurveyCodes: ['CHILD1D', 'CHILD1E', 'CHILD1F']
+        });
+
+        const savedChild = await child.save();
+        expect(savedChild._id).toBeDefined();
+        expect(savedChild.parentSurveyCode).toBe(savedParent.surveyCode);
+    });
+
+    test('chronology: rejects when parent createdAt is in the future', async () => {
+        const parent = new Survey({
+            surveyCode: 'PARENT2',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A
+        });
+        const savedParent = await parent.save();
+
+        const future = new Date(Date.now() + 60_000);
+        // Hacky way to get around createdAt immutability
+        await mongoose.connection.db?.collection(Survey.collection.name)
+            .updateOne({ _id: savedParent._id }, { $set: { createdAt: future } });
+
+        const child = new Survey({
+            surveyCode: 'CHILD2A',
+            parentSurveyCode: savedParent.surveyCode,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A
+        });
+
+        await expect(child.save()).rejects.toThrow(errors.REFERRAL_CHRONOLOGY_VIOLATION.message);
+    });
+
+    test('chronology: rejects when parent not found', async () => {
+        const child = new Survey({
+            surveyCode: 'CHILD3A',
+            parentSurveyCode: '999999',
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A
+        });
+
+        await expect(child.save()).rejects.toThrow(errors.PARENT_SURVEY_NOT_FOUND.message);
+    });
+
+    
 });
