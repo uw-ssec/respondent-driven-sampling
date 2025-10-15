@@ -4,6 +4,7 @@ import { Model } from "mongoose";
 import { accessibleBy } from "@casl/mongoose";
 import { AuthenticatedRequest } from "@/types/auth";
 import { ISurvey } from "@/database/models/survey.model";
+import { errors } from "./error";
 
 // Operation types
 type Operation = typeof _create | typeof _update | typeof _read; // TODO: add other operations when implemented
@@ -58,13 +59,16 @@ async function _update(
 
         // Could not find objectId in req params
         if (!objectId) {
-            return generateError(`${model.modelName} objectId is required for update`, 400);
+            const error = errors.OBJECT_ID_REQUIRED;
+            return generateError(error.message, error.status);
         }
 
         const result = await model.findByIdAndUpdate(objectId, data, { new: true });
+        
         // Could not find objectId in database
         if (!result) {
-            return generateError(`${model.modelName} not found`, 404);
+            const error = errors.OBJECT_ID_NOT_FOUND;
+            return generateError(error.message, error.status);
         }
 
         // Successfully updated object
@@ -74,6 +78,10 @@ async function _update(
             message: `${model.modelName} updated successfully`,
         }
     } catch (error: any) {
+        if (error.message.includes('immutable')) {
+            const immutableError = errors.IMMUTABLE_FIELD_VIOLATION;
+            return generateError(immutableError.message, immutableError.status);
+        }
         // Error updating object
         return generateError(error.message, 500);
     }
@@ -100,7 +108,8 @@ export function withValidation(
             return await fn(model, validatedData, req);
         } catch (error: any) {
             if (error instanceof z.ZodError) {
-                return generateError('Validation error', 400);
+                const error = errors.VALIDATION_ERROR;
+                return generateError(error.message, error.status);
             }
             throw error;
         }

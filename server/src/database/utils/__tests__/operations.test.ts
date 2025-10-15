@@ -8,8 +8,7 @@ import { SiteLocation, SYSTEM_SURVEY_CODE } from '../constants';
 import { Types } from 'mongoose';
 import { AuthenticatedRequest } from '@/types/auth';
 import { fail } from 'assert';
-
-mongoose.set('debug', true);
+import { errors } from '../error';
 
 describe('Database Operations (smoke + key paths)', () => {
   let mongoServer: MongoMemoryServer;
@@ -101,7 +100,7 @@ describe('Database Operations (smoke + key paths)', () => {
       const result = await update(req(body), updateSurveySchema);
 
       expect(result.status).toBe(400);
-      expect(result.message).toContain('objectId is required');
+      expect(result.message).toContain(errors.OBJECT_ID_REQUIRED.message);
     });
   });
 
@@ -156,7 +155,7 @@ describe('Database Operations (smoke + key paths)', () => {
     test('returns 400 on Zod validation failure', async () => {
       const result = await create(req({}), createSurveySchema);
       expect(result.status).toBe(400);
-      expect(result.message).toBe('Validation error');
+      expect(result.message).toBe(errors.VALIDATION_ERROR.message);
     });
   });
 });

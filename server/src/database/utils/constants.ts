@@ -3,6 +3,7 @@
 export enum SiteLocation {
     // TODO - get list of locations
     LOCATION_A = 'Location A',
+    LOCATION_B = 'Location B',
 }
 
 export const SYSTEM_SURVEY_CODE = '_SEED_';
