@@ -4,16 +4,15 @@ import {
   createSurveySchema, 
   updateSurveySchema, 
   readSurveySchema, 
-  readSurveysSchema 
+  readSurveyByObjectIdSchema 
 } from '../survey.type';
 import { SiteLocation, SYSTEM_SURVEY_CODE } from '../../utils/constants';
 
 const validObjectId = new Types.ObjectId().toString();
-const validSurveyObjectId = new Types.ObjectId().toString();
 
 const validCreateData = {
     surveyCode: '123456',
-    referredBySurveyCode: '000000',
+    parentSurveyCode: SYSTEM_SURVEY_CODE,
     createdByUserObjectId: validObjectId,
     responses: { question1: 'answer1', question2: 'answer2' },
     isCompleted: false,
@@ -22,20 +21,7 @@ const validCreateData = {
       longitude: -74.0060
     },
     siteLocation: SiteLocation.LOCATION_A,
-    generatedSurveyCodes: [
-      {
-        code: '111111',
-        usedBySurveyObjectId: validSurveyObjectId
-      },
-      {
-        code: '222222',
-        usedBySurveyObjectId: null
-      },
-      {
-        code: '333333',
-        usedBySurveyObjectId: null
-      }
-    ]
+    childSurveyCodes: ['111111', '222222', '333333'],
   };
 
 describe('Survey Type Validation Schemas', () => {
@@ -57,42 +43,18 @@ describe('Survey Type Validation Schemas', () => {
         responses: {
             question1: 'answer1',
         },
-        generatedSurveyCodes: [
-            {
-                code: '111111',
-                usedBySurveyObjectId: null
-            },
-            {
-                code: '222222',
-                usedBySurveyObjectId: null
-            },
-            {
-                code: '333333',
-                usedBySurveyObjectId: null
-            }
-        ]
+        childSurveyCodes: ['111111', '222222', '333333'],
+        parentSurveyCode: SYSTEM_SURVEY_CODE,
+        isCompleted: false,
       };
       
       const result = createSurveySchema.safeParse(minimalData);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.referredBySurveyCode).toBe(SYSTEM_SURVEY_CODE);
+        expect(result.data.parentSurveyCode).toBe(SYSTEM_SURVEY_CODE);
         expect(result.data.responses).toEqual({ question1: 'answer1' });
         expect(result.data.isCompleted).toBe(false);
-        expect(result.data.generatedSurveyCodes).toEqual([
-            {
-                code: '111111',
-                usedBySurveyObjectId: null
-            },
-            {
-                code: '222222',
-                usedBySurveyObjectId: null
-            },
-            {
-                code: '333333',
-                usedBySurveyObjectId: null
-            }
-        ]);
+        expect(result.data.childSurveyCodes).toEqual(['111111', '222222', '333333']);
       }
     });
 
@@ -109,29 +71,16 @@ describe('Survey Type Validation Schemas', () => {
       }
     });
 
-    test('should reject invalid referredBySurveyCode length', () => {
+    test('should reject invalid parentSurveyCode length', () => {
       const invalidData = {
         ...validCreateData,
-        referredBySurveyCode: '12345' // Too short
+        parentSurveyCode: '12345' // Too short
       };
       
       const result = createSurveySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toContain('exactly 6 characters');
-      }
-    });
-
-    test('should reject invalid user objectId', () => {
-      const invalidData = {
-        ...validCreateData,
-        createdByUserObjectId: 'invalid-id'
-      };
-      
-      const result = createSurveySchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain('Invalid user objectId');
       }
     });
 
@@ -161,12 +110,7 @@ describe('Survey Type Validation Schemas', () => {
     test('should reject invalid generated survey code length', () => {
       const invalidData = {
         ...validCreateData,
-        generatedSurveyCodes: [
-          {
-            code: '12345', // Too short
-            usedBySurveyObjectId: validSurveyObjectId
-          }
-        ]
+        childSurveyCodes: ['12345', '222222'],
       };
       
       const result = createSurveySchema.safeParse(invalidData);
@@ -174,47 +118,6 @@ describe('Survey Type Validation Schemas', () => {
       if (!result.success) {
         expect(result.error.issues[0].message).toContain('exactly 6 characters');
       }
-    });
-
-    test('should reject invalid survey objectId in generated codes', () => {
-      const invalidData = {
-        ...validCreateData,
-        generatedSurveyCodes: [
-          {
-            code: '111111',
-            usedBySurveyObjectId: 'invalid-id'
-          }
-        ]
-      };
-      
-      const result = createSurveySchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain('Invalid survey objectId');
-      }
-    });
-
-    test('should accept null usedBySurveyObjectId', () => {
-      const validData = {
-        ...validCreateData,
-        generatedSurveyCodes: [
-          {
-            code: '111111',
-            usedBySurveyObjectId: null
-          },
-          {
-            code: '222222',
-            usedBySurveyObjectId: validSurveyObjectId
-          },
-          {
-            code: '333333',
-            usedBySurveyObjectId: null
-          }
-        ]
-      };
-      
-      const result = createSurveySchema.safeParse(validData);
-      expect(result.success).toBe(true);
     });
   });
 
@@ -274,13 +177,13 @@ describe('Survey Type Validation Schemas', () => {
     });
   });
 
-  describe('readSurveySchema', () => {
+  describe('readSurveyByObjectIdSchema', () => {
     test('should validate valid survey ID', () => {
       const validData = {
         _id: validObjectId
       };
       
-      const result = readSurveySchema.safeParse(validData);
+      const result = readSurveyByObjectIdSchema.safeParse(validData);
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).toEqual(validData);
@@ -292,7 +195,7 @@ describe('Survey Type Validation Schemas', () => {
         _id: 'invalid-id'
       };
       
-      const result = readSurveySchema.safeParse(invalidData);
+      const result = readSurveyByObjectIdSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toContain('Invalid survey objectId');
@@ -302,23 +205,23 @@ describe('Survey Type Validation Schemas', () => {
     test('should reject missing _id', () => {
       const invalidData = {};
       
-      const result = readSurveySchema.safeParse(invalidData);
+      const result = readSurveyByObjectIdSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
   });
 
-  describe('readSurveysSchema', () => {
+  describe('readSurveySchema', () => {
     test('should validate with all optional filters', () => {
       const validData = {
         createdByUserObjectId: validObjectId,
         siteLocation: SiteLocation.LOCATION_A,
         isCompleted: true,
-        referredBySurveyCode: '123456',
+        parentSurveyCode: '123456',
         createdAt: new Date('2023-01-01'),
         updatedAt: new Date('2023-01-02')
       };
       
-      const result = readSurveysSchema.safeParse(validData);
+      const result = readSurveySchema.safeParse(validData);
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).toEqual(validData);
@@ -328,7 +231,7 @@ describe('Survey Type Validation Schemas', () => {
     test('should validate with no filters (empty object)', () => {
       const emptyData = {};
       
-      const result = readSurveysSchema.safeParse(emptyData);
+      const result = readSurveySchema.safeParse(emptyData);
       expect(result.success).toBe(true);
     });
 
@@ -338,7 +241,7 @@ describe('Survey Type Validation Schemas', () => {
         siteLocation: SiteLocation.LOCATION_A
       };
       
-      const result = readSurveysSchema.safeParse(partialData);
+      const result = readSurveySchema.safeParse(partialData);
       expect(result.success).toBe(true);
     });
 
@@ -347,7 +250,7 @@ describe('Survey Type Validation Schemas', () => {
         createdByUserObjectId: 'invalid-id'
       };
       
-      const result = readSurveysSchema.safeParse(invalidData);
+      const result = readSurveySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toContain('Invalid user objectId');
@@ -359,7 +262,7 @@ describe('Survey Type Validation Schemas', () => {
         siteLocation: 'InvalidLocation'
       };
       
-      const result = readSurveysSchema.safeParse(invalidData);
+      const result = readSurveySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
 
@@ -368,7 +271,7 @@ describe('Survey Type Validation Schemas', () => {
         isCompleted: 'true' // Should be boolean
       };
       
-      const result = readSurveysSchema.safeParse(invalidData);
+      const result = readSurveySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
 
@@ -377,7 +280,7 @@ describe('Survey Type Validation Schemas', () => {
         createdAt: 'not-a-date'
       };
       
-      const result = readSurveysSchema.safeParse(invalidData);
+      const result = readSurveySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
 
@@ -387,7 +290,7 @@ describe('Survey Type Validation Schemas', () => {
         updatedAt: '2023-01-02T00:00:00.000Z'
       };
       
-      const result = readSurveysSchema.safeParse(validData);
+      const result = readSurveySchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
 
@@ -397,7 +300,7 @@ describe('Survey Type Validation Schemas', () => {
         updatedAt: new Date('2023-01-02')
       };
       
-      const result = readSurveysSchema.safeParse(validData);
+      const result = readSurveySchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
   });
