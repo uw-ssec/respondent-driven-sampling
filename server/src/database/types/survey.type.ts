@@ -31,8 +31,8 @@ export const surveyZodSchema = z.object({
   
     siteLocation: z.enum(SiteLocation),
 
-    createdAt: z.coerce.date().optional(),
-    updatedAt: z.coerce.date().optional(),
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
 })
 // Refinements across all fields
 .refine((data) => data.parentSurveyCode !== data.surveyCode, {
@@ -40,8 +40,11 @@ export const surveyZodSchema = z.object({
 })
 
 
-// Create schema - all base fields included
-export const createSurveySchema = surveyZodSchema.meta({ model: Survey });
+// Create schema - all base fields included except for timestamps
+export const createSurveySchema = surveyZodSchema
+    .omit({ createdAt: true, updatedAt: true })
+    .strict()
+    .meta({ model: Survey });
 
 // Update schema - only updatable fields
 export const updateSurveySchema = surveyZodSchema.pick({
