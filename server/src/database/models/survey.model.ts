@@ -65,6 +65,14 @@ surveySchema.pre('save', async function(next) {
         // If the survey is a system survey, skip the chronological ordering check
         const parentCode = this.parentSurveyCode as string;
         if (parentCode === SYSTEM_SURVEY_CODE) {
+            // Check if the survey code exists in any other survey's childSurveyCodes
+            const existingSurveyWithCode = await Survey.findOne({
+                childSurveyCodes: { $in: [this.surveyCode] }
+            });
+
+            if (existingSurveyWithCode) {
+                return next(errors.SYSTEM_GENERATED_SURVEY_CODE_FOUND_IN_PREVIOUS_CHILD_CODES);
+            }
             return next();
         }
 
