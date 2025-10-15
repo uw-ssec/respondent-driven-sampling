@@ -1,10 +1,87 @@
-// TODO: Implement Survey mongoose model
-
 import mongoose, { InferSchemaType, Model, Schema, Types } from 'mongoose';
 import { SiteLocation, SYSTEM_SURVEY_CODE } from '../utils/constants';
 import { errors } from '../utils/error';
 
-// SCHEMA
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Survey:
+ *       type: object
+ *       required:
+ *         - surveyCode
+ *         - parentSurveyCode
+ *         - createdByUserObjectId
+ *         - siteLocation
+ *         - responses
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: MongoDB ObjectId
+ *           example: "507f1f77bcf86cd799439011"
+ *         surveyCode:
+ *           type: string
+ *           description: Unique 6-character survey code
+ *           minLength: 6
+ *           maxLength: 6
+ *           example: "ABC123"
+ *         parentSurveyCode:
+ *           type: string
+ *           description: 6-character code of the parent survey that referred this one
+ *           minLength: 6
+ *           maxLength: 6
+ *           example: "XYZ789"
+ *         childSurveyCodes:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Array of 6-character codes for surveys that can be referred from this one
+ *           minItems: 3
+ *           maxItems: 3
+ *           example: ["DEF456", "GHI789", "JKL012"]
+ *         responses:
+ *           type: object
+ *           description: Survey responses as key-value pairs
+ *           example: {"question1": "answer1", "question2": "answer2"}
+ *         createdByUserObjectId:
+ *           type: string
+ *           description: MongoDB ObjectId of the user who created this survey
+ *           example: "507f1f77bcf86cd799439011"
+ *         siteLocation:
+ *           type: string
+ *           enum: [Location A, Location B, Location C]
+ *           description: Physical location where the survey was conducted
+ *           example: "Location A"
+ *         coordinates:
+ *           type: object
+ *           description: GPS coordinates of the survey location
+ *           properties:
+ *             latitude:
+ *               type: number
+ *               minimum: -90
+ *               maximum: 90
+ *               example: 40.7128
+ *             longitude:
+ *               type: number
+ *               minimum: -180
+ *               maximum: 180
+ *               example: -74.0060
+ *         isCompleted:
+ *           type: boolean
+ *           description: Whether the survey has been completed
+ *           default: false
+ *           example: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Timestamp when the survey was created
+ *           example: "2023-12-01T10:30:00.000Z"
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Timestamp when the survey was last updated
+ *           example: "2023-12-01T10:30:00.000Z"
+ */
 
 const surveySchema = new Schema({
     surveyCode: { type: String, required: true, unique: true, immutable: true },
@@ -31,6 +108,51 @@ const surveySchema = new Schema({
 });
 
 // MIDDLEWARE
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     SurveyMiddleware:
+ *       description: Pre-save middleware hooks that enforce business rules
+ *       properties:
+ *         uniquenessValidation:
+ *           description: Ensures childSurveyCodes are unique within and across documents
+ *           type: object
+ *           properties:
+ *             intraDocument:
+ *               description: Checks for duplicate codes within the same survey
+ *               type: boolean
+ *             interDocument:
+ *               description: Checks for duplicate codes across all surveys
+ *               type: boolean
+ *         chronologicalValidation:
+ *           description: Ensures child surveys are created after parent surveys
+ *           type: object
+ *           properties:
+ *             systemSurveyBypass:
+ *               description: System surveys (_SEED_) bypass chronological checks
+ *               type: boolean
+ *             parentExists:
+ *               description: Verifies parent survey exists in database
+ *               type: boolean
+ *             timestampValidation:
+ *               description: Ensures child createdAt > parent createdAt
+ *               type: boolean
+ *             codeMatching:
+ *               description: Ensures child surveyCode is in parent's childSurveyCodes array
+ *               type: boolean
+ *         immutabilityValidation:
+ *           description: Prevents modification of immutable fields after creation
+ *           type: object
+ *           properties:
+ *             coordinates:
+ *               description: Prevents updates to coordinates after first set
+ *               type: boolean
+ *             childSurveyCodes:
+ *               description: Prevents updates to childSurveyCodes array
+ *               type: boolean
+ */
 
 // Pre-save hook to enforce uniqueness in generated survey codes (inter- and intra-document)
 surveySchema.pre('save', async function(next) {
@@ -121,6 +243,23 @@ surveySchema.pre('save', async function(next) {
 
 // MODEL
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ISurvey:
+ *       description: TypeScript interface for Survey documents
+ *       allOf:
+ *         - $ref: '#/components/schemas/Survey'
+ *         - type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *               description: MongoDB ObjectId as string
+ *             createdByUserObjectId:
+ *               type: string
+ *               description: MongoDB ObjectId as string
+ */
 export type ISurvey = InferSchemaType<typeof surveySchema>;
 const Survey: Model<ISurvey> = mongoose.model<ISurvey>('Survey', surveySchema);
 export default Survey;

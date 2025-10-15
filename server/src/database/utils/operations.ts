@@ -6,6 +6,27 @@ import { AuthenticatedRequest } from "@/types/auth";
 import { ISurvey } from "@/database/models/survey.model";
 import { errors } from "./error";
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     DatabaseOperations:
+ *       description: Generic database operations with validation and authorization
+ *       properties:
+ *         create:
+ *           description: Creates a new document with validation
+ *           type: object
+ *         read:
+ *           description: Reads documents with optional filtering and authorization
+ *           type: object
+ *         update:
+ *           description: Updates an existing document by ObjectId
+ *           type: object
+ *         withValidation:
+ *           description: Wrapper function that adds Zod validation to operations
+ *           type: object
+ */
+
 // Operation types
 type Operation = typeof _create | typeof _update | typeof _read; // TODO: add other operations when implemented
 type OperationResult = CreateResult | UpdateResult | ReadResult | Result;
@@ -86,6 +107,25 @@ async function _update(
         return generateError(error.message, 500);
     }
 }
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     WithValidation:
+ *       description: Wrapper function that adds Zod validation to database operations
+ *       type: object
+ *       properties:
+ *         validation:
+ *           description: Validates request data against Zod schema
+ *           type: boolean
+ *         errorHandling:
+ *           description: Handles validation errors and returns formatted error messages
+ *           type: boolean
+ *         modelExtraction:
+ *           description: Extracts Mongoose model from schema metadata
+ *           type: boolean
+ */
 
 /* withValidation
   * Wraps an operation function with validation

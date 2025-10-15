@@ -1,3 +1,55 @@
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ErrorCode:
+ *       description: Custom error class for structured error handling
+ *       type: object
+ *       properties:
+ *         code:
+ *           type: string
+ *           description: Unique error code identifier
+ *           example: "PARENT_SURVEY_NOT_FOUND"
+ *         message:
+ *           type: string
+ *           description: Human-readable error message
+ *           example: "Parent survey does not exist"
+ *         status:
+ *           type: integer
+ *           description: HTTP status code
+ *           example: 404
+ *         name:
+ *           type: string
+ *           description: Error class name
+ *           example: "ErrorCode"
+ *     SurveyErrors:
+ *       description: Collection of all survey-related error codes
+ *       type: object
+ *       properties:
+ *         PARENT_SURVEY_NOT_FOUND:
+ *           $ref: '#/components/schemas/ErrorCode'
+ *         SURVEY_CODE_NOT_FOUND_IN_PARENT_CODES:
+ *           $ref: '#/components/schemas/ErrorCode'
+ *         SYSTEM_GENERATED_SURVEY_CODE_FOUND_IN_PREVIOUS_CHILD_CODES:
+ *           $ref: '#/components/schemas/ErrorCode'
+ *         PARENT_SURVEY_MISSING_CREATED_AT:
+ *           $ref: '#/components/schemas/ErrorCode'
+ *         REFERRAL_CHRONOLOGY_VIOLATION:
+ *           $ref: '#/components/schemas/ErrorCode'
+ *         CHILD_SURVEY_CODES_NOT_UNIQUE:
+ *           $ref: '#/components/schemas/ErrorCode'
+ *         CHILD_SURVEY_CODES_NOT_UNIQUE_ACROSS_ALL_SURVEYS:
+ *           $ref: '#/components/schemas/ErrorCode'
+ *         OBJECT_ID_REQUIRED:
+ *           $ref: '#/components/schemas/ErrorCode'
+ *         OBJECT_ID_NOT_FOUND:
+ *           $ref: '#/components/schemas/ErrorCode'
+ *         VALIDATION_ERROR:
+ *           $ref: '#/components/schemas/ErrorCode'
+ *         IMMUTABLE_FIELD_VIOLATION:
+ *           $ref: '#/components/schemas/ErrorCode'
+ */
+
 export class ErrorCode extends Error {
     constructor(public code: string, message: string, public status = 400) {
       super(message);

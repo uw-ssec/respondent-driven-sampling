@@ -12,6 +12,7 @@ import authRoutes from '@/routes/v1/auth';
 import pageRoutes from '@/routes/v1/pages';
 import surveyRoutes from '@/routes/v1/surveys';
 import surveyRoutesV2 from '@/routes/v2/surveys';
+import { setupSwagger } from '@/config/swagger';
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -135,6 +136,9 @@ const securityWrapper = (router: express.Router) => {
 		router(req, res, next);
 	};
 };
+
+// Setup Swagger documentation
+setupSwagger(app);
 
 // Apply routes with security wrapper
 app.use('/api/auth', securityWrapper(authRoutes));
