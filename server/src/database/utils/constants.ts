@@ -5,7 +5,7 @@ export enum SiteLocation {
     LOCATION_A = 'Location A',
 }
 
-export const SYSTEM_SURVEY_CODE = '000000';
+export const SYSTEM_SURVEY_CODE = '_SEED_';
 export const GENERATED_SURVEY_CODES_LENGTH = 3;
 export const SURVEY_CODE_LENGTH = 6;
 
