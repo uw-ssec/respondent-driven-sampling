@@ -64,7 +64,7 @@ router.post(
 )
 
 router.put(
-	'/create',
+	'/',
 	[auth],
 	async (req: AuthenticatedRequest, res: Response) => {
         if (!req.authorization?.can(

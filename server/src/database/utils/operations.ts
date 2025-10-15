@@ -108,10 +108,16 @@ export function withValidation(
             return await fn(model, validatedData, req);
         } catch (error: any) {
             if (error instanceof z.ZodError) {
-                const error = errors.VALIDATION_ERROR;
-                return generateError(error.message, error.status);
+                const formattedErrors = error.issues.map((issue) => {
+                    const field = issue.path.join('.');
+                    return `${field}: ${issue.message}`;
+                }).join(', ');
+                
+                // Throw validation error
+                return generateError(`Invalid input: ${formattedErrors}`, 400);
             }
-            throw error;
+            // Else throw a generic server error
+            return generateError(error.message, 500);
         }
     }
 }
