@@ -7,19 +7,20 @@ import { errors } from '../utils/error';
 // SCHEMA
 
 const surveySchema = new Schema({
-    surveyCode: { type: String, required: true, unique: true },
-    parentSurveyCode: { type: String, required: true },
-    childSurveyCodes: [ { type: String, required: true } ],
-    responses: { type: Object, default: {}, required: true },
-    createdByUserObjectId: { type: Types.ObjectId, ref: 'User', required: true },
-    siteLocation: { type: String, enum: SiteLocation, required: true },
+    surveyCode: { type: String, required: true, unique: true, immutable: true },
+    parentSurveyCode: { type: String, required: true, immutable: true },
+    childSurveyCodes: [ { type: String, required: true } ], // immutable via pre-save hook
+    responses: { type: Object, default: {}, required: true }, // mutable
+    createdByUserObjectId: { type: Types.ObjectId, ref: 'User', required: true, immutable: true },
+    siteLocation: { type: String, enum: SiteLocation, required: true, immutable: true },
     coordinates: {
         latitude: { type: Number },
         longitude: { type: Number }
-    }, // optional
-    isCompleted: { type: Boolean, default: false }, // optional
+    }, // optional, immutable via pre-save hook
+    isCompleted: { type: Boolean, default: false }, // optional, mutable
 }, { 
     timestamps: true, // Automatically adds createdAt and updatedAt fields
+    strict: 'throw', 
     indexes: [ // Faster queries on these fields
         { fields: 'surveyCode', unique: true },
         { fields: 'parentSurveyCode' },
@@ -96,6 +97,18 @@ surveySchema.pre('save', async function(next) {
     } catch (err) {
         return next(err as Error);
     }
+});
+
+// Pre-save hook to enforce immutability on complex fields
+surveySchema.pre('save', async function(next) {
+    if (this.isNew) return next();
+
+    // The immutable flags in our schema can only handle top-level fields
+    // So we need to check each nested field or array field individually
+    if (this.coordinates && this.isModified('coordinates') || this.isModified('childSurveyCodes')) {
+        return next(errors.IMMUTABLE_FIELD_VIOLATION);
+    }
+    next();
 });
 
 // MODEL

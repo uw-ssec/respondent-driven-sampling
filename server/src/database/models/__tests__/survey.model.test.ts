@@ -242,5 +242,124 @@ describe('Survey Model', () => {
         await expect(child.save()).rejects.toThrow(errors.PARENT_SURVEY_NOT_FOUND.message);
     });
 
+    // Immutable field tests
+    test('immutable: cannot update surveyCode after creation', async () => {
+        const survey = new Survey({
+            surveyCode: 'ORIGINAL',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A,
+            responses: { question1: 'answer1' },
+            childSurveyCodes: ['111111', '222222', '333333']
+        });
+        const savedSurvey = await survey.save();
+
+        // Try to update immutable field
+        savedSurvey.surveyCode = 'NEWCODE';
+        await expect(savedSurvey.save()).rejects.toThrow('Path `surveyCode` is immutable');
+    });
+
+    test('immutable: cannot update parentSurveyCode after creation', async () => {
+        const survey = new Survey({
+            surveyCode: 'ORIGINAL2',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A,
+            responses: { question1: 'answer1' },
+            childSurveyCodes: ['444444', '555555', '666666']
+        });
+        const savedSurvey = await survey.save();
+
+        // Try to update immutable field
+        savedSurvey.parentSurveyCode = 'NEWPARENT';
+        await expect(savedSurvey.save()).rejects.toThrow('Path `parentSurveyCode` is immutable');
+    });
+
+    test('immutable: cannot update childSurveyCodes after creation', async () => {
+        const survey = new Survey({
+            surveyCode: 'ORIGINAL3',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A,
+            responses: { question1: 'answer1' },
+            childSurveyCodes: ['777777', '888888', '999999']
+        });
+        const savedSurvey = await survey.save();
+
+        // Try to update immutable field
+        savedSurvey.childSurveyCodes = ['NEW111', 'NEW222', 'NEW333'];
+        await expect(savedSurvey.save()).rejects.toThrow(errors.IMMUTABLE_FIELD_VIOLATION.message);
+    });
+
+    test('immutable: cannot update createdByUserObjectId after creation', async () => {
+        const survey = new Survey({
+            surveyCode: 'ORIGINAL4',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A,
+            responses: { question1: 'answer1' },
+            childSurveyCodes: ['AAA111', 'BBB222', 'CCC333']
+        });
+        const savedSurvey = await survey.save();
+
+        // Try to update immutable field
+        savedSurvey.createdByUserObjectId = new mongoose.Types.ObjectId() as any;
+        await expect(savedSurvey.save()).rejects.toThrow('Path `createdByUserObjectId` is immutable');
+    });
+
+    test('immutable: cannot update siteLocation after creation', async () => {
+        const survey = new Survey({
+            surveyCode: 'ORIGINAL5',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A,
+            responses: { question1: 'answer1' },
+            childSurveyCodes: ['DDD444', 'EEE555', 'FFF666']
+        });
+        const savedSurvey = await survey.save();
+
+        // Try to update immutable field
+        savedSurvey.siteLocation = SiteLocation.LOCATION_B; // Same value but still immutable
+        await expect(savedSurvey.save()).rejects.toThrow('Path `siteLocation` is immutable');
+    });
+
+    test('immutable: cannot update coordinates after creation', async () => {
+        const survey = new Survey({
+            surveyCode: 'ORIGINAL6',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A,
+            responses: { question1: 'answer1' },
+            childSurveyCodes: ['GGG777', 'HHH888', 'III999'],
+            coordinates: { latitude: 40.7128, longitude: -74.0060 }
+        });
+        const savedSurvey = await survey.save();
+
+        // Try to update immutable field
+        savedSurvey.coordinates = { latitude: 41.0000, longitude: -74.0060 };
+        await expect(savedSurvey.save()).rejects.toThrow(errors.IMMUTABLE_FIELD_VIOLATION.message);
+    });
+
+    test('mutable: can update responses and isCompleted after creation', async () => {
+        const survey = new Survey({
+            surveyCode: 'MUTABLE1',
+            parentSurveyCode: SYSTEM_SURVEY_CODE,
+            createdByUserObjectId: new mongoose.Types.ObjectId(),
+            siteLocation: SiteLocation.LOCATION_A,
+            responses: { question1: 'answer1' },
+            childSurveyCodes: ['JJJ000', 'KKK111', 'LLL222'],
+            isCompleted: false
+        });
+        const savedSurvey = await survey.save();
+
+        // Update mutable fields
+        savedSurvey.responses = { question1: 'newanswer', question2: 'answer2' };
+        savedSurvey.isCompleted = true;
+        const updatedSurvey = await savedSurvey.save();
+
+        expect(updatedSurvey.responses).toEqual({ question1: 'newanswer', question2: 'answer2' });
+        expect(updatedSurvey.isCompleted).toBe(true);
+    });
+
     
 });
