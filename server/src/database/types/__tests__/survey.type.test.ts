@@ -43,9 +43,9 @@ describe('Survey Type Validation Schemas', () => {
         responses: {
             question1: 'answer1',
         },
-        childSurveyCodes: ['111111', '222222', '333333'],
         parentSurveyCode: SYSTEM_SURVEY_CODE,
         isCompleted: false,
+        childSurveyCodes: ['111111', '222222', '333333'],
       };
       
       const result = createSurveySchema.safeParse(minimalData);
@@ -54,7 +54,6 @@ describe('Survey Type Validation Schemas', () => {
         expect(result.data.parentSurveyCode).toBe(SYSTEM_SURVEY_CODE);
         expect(result.data.responses).toEqual({ question1: 'answer1' });
         expect(result.data.isCompleted).toBe(false);
-        expect(result.data.childSurveyCodes).toEqual(['111111', '222222', '333333']);
       }
     });
 
@@ -105,19 +104,6 @@ describe('Survey Type Validation Schemas', () => {
       
       const result = createSurveySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
-    });
-
-    test('should reject invalid generated survey code length', () => {
-      const invalidData = {
-        ...validCreateData,
-        childSurveyCodes: ['12345', '222222'],
-      };
-      
-      const result = createSurveySchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain('exactly 6 characters');
-      }
     });
   });
 

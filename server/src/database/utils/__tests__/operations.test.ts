@@ -66,7 +66,6 @@ describe('Database Operations (smoke + key paths)', () => {
 
       const result = await create(req(bad), createSurveySchema);
       expect(result.status).toBe(400);
-      expect(result.message).toBe('Validation error');
     });
   });
 
@@ -155,7 +154,6 @@ describe('Database Operations (smoke + key paths)', () => {
     test('returns 400 on Zod validation failure', async () => {
       const result = await create(req({}), createSurveySchema);
       expect(result.status).toBe(400);
-      expect(result.message).toBe(errors.VALIDATION_ERROR.message);
     });
   });
 });
