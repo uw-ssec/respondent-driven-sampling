@@ -1,7 +1,7 @@
 // TODO: Implement Survey repository
 
 import { create, read, update } from "../utils/operations";
-import { createSurveySchema, updateSurveySchema, readSurveySchema, readSurveysSchema } from "../types/survey.type";
+import { createSurveySchema, updateSurveySchema, readSurveySchema, readSurveyByObjectIdSchema } from "../types/survey.type";
 import { Response } from "express";
 import generateReferralCode from "@/utils/generateReferralCode";
 import { AuthenticatedRequest } from "@/types/auth";
@@ -48,13 +48,13 @@ export async function updateSurvey(req: AuthenticatedRequest, res: Response) {
 export async function getSurvey(req: AuthenticatedRequest, res: Response) {
     // Insert any request manipulation here
 
-    const result = await read(req, readSurveySchema);
+    const result = await read(req, readSurveyByObjectIdSchema);
     res.status(result.status).json(result);
 }
 
 export async function getSurveys(req: AuthenticatedRequest, res: Response) {
     // Insert any request manipulation here
 
-    const result = await read(req, readSurveysSchema);
+    const result = await read(req, readSurveySchema);
     res.status(result.status).json(result);
 }
