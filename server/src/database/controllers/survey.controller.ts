@@ -5,16 +5,37 @@ import { createSurveySchema, updateSurveySchema, readSurveySchema, readSurveysSc
 import { Response } from "express";
 import generateReferralCode from "@/utils/generateReferralCode";
 import { AuthenticatedRequest } from "@/types/auth";
+import { errors } from "../utils/error";
 
 export async function createSurvey(req: AuthenticatedRequest, res: Response) {
-    // Generate 3 unique survey codes for the survey and add to request body
-    req.body.generatedSurveyCodes = Array.from({ length: 3 }, () => ({
-        code: generateReferralCode(),
-        usedBySurveyObjectId: null
-    }));
-
-    const result = await create(req, createSurveySchema);
-    res.status(result.status).json(result);
+    const maxRetries = 3;
+    let attempts = 0;
+    
+    while (attempts < maxRetries) {
+        // Generate new codes for each attempt
+        req.body.childSurveyCodes = Array.from({ length: 3 }, () => generateReferralCode());
+        
+        // Attempt to create the survey
+        const result = await create(req, createSurveySchema);
+        
+        // Successful!
+        if (result.status === 201) {
+            return res.status(result.status).json(result);
+        }
+        
+        // If it's a survey code uniqueness error that can be fixed by re-generating, retry
+        if (result.message?.includes(errors.CHILD_SURVEY_CODES_NOT_UNIQUE.message)) {
+            attempts++;
+            continue;
+        }
+        else {
+            // For other errors, return immediately
+            return res.status(result.status).json(result);
+        }
+    }
+    
+    // Failed to generate unique codes after retries
+    return res.status(500).json({ message: `Failed to generate unique codes after ${maxRetries} retries` });
 }
 
 export async function updateSurvey(req: AuthenticatedRequest, res: Response) {
