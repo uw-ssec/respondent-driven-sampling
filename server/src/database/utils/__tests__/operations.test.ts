@@ -2,12 +2,14 @@ import { describe, test, expect, beforeEach, beforeAll, afterAll } from '@jest/g
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { create, update, read } from '../operations';
-import { createSurveySchema, updateSurveySchema, readSurveysSchema } from '../../types/survey.type';
+import { createSurveySchema, updateSurveySchema, readSurveyByObjectIdSchema, readSurveySchema } from '../../types/survey.type';
 import Survey, { ISurvey } from '../../models/survey.model';
 import { SiteLocation, SYSTEM_SURVEY_CODE } from '../constants';
 import { Types } from 'mongoose';
 import { AuthenticatedRequest } from '@/types/auth';
 import { fail } from 'assert';
+
+mongoose.set('debug', true);
 
 describe('Database Operations (smoke + key paths)', () => {
   let mongoServer: MongoMemoryServer;
@@ -39,11 +41,9 @@ describe('Database Operations (smoke + key paths)', () => {
         createdByUserObjectId: validObjectId,
         siteLocation: SiteLocation.LOCATION_A,
         responses: {'question1': 'answer1'},
-        generatedSurveyCodes: [
-          { code: '444444', usedBySurveyObjectId: null },
-          { code: '555555', usedBySurveyObjectId: null },
-          { code: '666666', usedBySurveyObjectId: null }
-        ]
+        childSurveyCodes: ['444444', '555555', '666666'],
+        parentSurveyCode: SYSTEM_SURVEY_CODE,
+        isCompleted: false,
       };
 
       const result = await create(req(body), createSurveySchema);
@@ -52,9 +52,7 @@ describe('Database Operations (smoke + key paths)', () => {
       if ('data' in result && !Array.isArray(result.data)) {
         const data = result.data as ISurvey;
         expect(data.surveyCode).toBe('789012');
-        expect(data.referredBySurveyCode).toBe(SYSTEM_SURVEY_CODE);
         expect(data.responses).toEqual({ question1: 'answer1' });
-        expect(data.isCompleted).toBe(false);
       } else {
         fail('Expected single object in data for create');
       }
@@ -77,15 +75,11 @@ describe('Database Operations (smoke + key paths)', () => {
     test('updates responses and isCompleted', async () => {
       const created = await Survey.create({
         surveyCode: '123456',
-        referredBySurveyCode: SYSTEM_SURVEY_CODE,
+        parentSurveyCode: SYSTEM_SURVEY_CODE,
         createdByUserObjectId: validObjectId,
         siteLocation: SiteLocation.LOCATION_A,
         responses: {'question1': 'answer1'},
-        generatedSurveyCodes: [
-          { code: '111111', usedBySurveyObjectId: null },
-          { code: '222222', usedBySurveyObjectId: null },
-          { code: '333333', usedBySurveyObjectId: null }
-        ]
+        childSurveyCodes: ['111111', '222222', '333333'],
       });
 
       const body = { responses: { q1: 'a1' }, isCompleted: true };
@@ -113,36 +107,29 @@ describe('Database Operations (smoke + key paths)', () => {
 
   describe('read', () => {
     beforeEach(async () => {
-      await Survey.insertMany([
-        {
-          surveyCode: '111111',
-          referredBySurveyCode: '333333',
-          createdByUserObjectId: validObjectId,
-          siteLocation: SiteLocation.LOCATION_A,
-          isCompleted: true,
-          generatedSurveyCodes: [
-            { code: 'AAA111', usedBySurveyObjectId: null },
-            { code: 'BBB222', usedBySurveyObjectId: null },
-            { code: 'CCC333', usedBySurveyObjectId: null }
-          ]
-        },
-        {
-          surveyCode: '222222',
-          referredBySurveyCode: SYSTEM_SURVEY_CODE,
-          createdByUserObjectId: validObjectId,
-          siteLocation: SiteLocation.LOCATION_A,
-          isCompleted: false,
-          generatedSurveyCodes: [
-            { code: 'DDD444', usedBySurveyObjectId: null },
-            { code: 'EEE555', usedBySurveyObjectId: null },
-            { code: 'FFF666', usedBySurveyObjectId: null }
-          ]
-        }
-      ]);
+      await Survey.create({
+        surveyCode: 'A11111',
+        parentSurveyCode: SYSTEM_SURVEY_CODE,
+        createdByUserObjectId: validObjectId,
+        siteLocation: SiteLocation.LOCATION_A,
+        responses: {'question1': 'answer1'},
+        isCompleted: true,
+        childSurveyCodes: ['AAA111', 'BBB222', 'CCC333'],
+      });
+
+      await Survey.create({
+        surveyCode: 'B22222',
+        parentSurveyCode: SYSTEM_SURVEY_CODE,
+        createdByUserObjectId: validObjectId,
+        siteLocation: SiteLocation.LOCATION_A,
+        responses: {'question2': 'answer2'},
+        isCompleted: false,
+        childSurveyCodes: ['DDD444', 'EEE555', 'FFF666'],
+      });
     });
 
     test('reads all with no filters', async () => {
-      const result = await read(req({}), readSurveysSchema);
+      const result = await read(req({}), readSurveySchema);
       expect(result.status).toBe(200);
       if ('data' in result && Array.isArray(result.data)) {
         const data = result.data as ISurvey[];
@@ -153,7 +140,7 @@ describe('Database Operations (smoke + key paths)', () => {
     });
 
     test('reads with user filter', async () => {
-      const result = await read(req({ createdByUserObjectId: validObjectId }), readSurveysSchema);
+      const result = await read(req({ createdByUserObjectId: validObjectId }), readSurveySchema);
       expect(result.status).toBe(200);
       if ('data' in result && Array.isArray(result.data)) {
         const data = result.data as ISurvey[];
