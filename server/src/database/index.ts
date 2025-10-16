@@ -1,12 +1,16 @@
-// Connection setup
-export { default as connectDB } from './connection/mongoose';
+import mongoose from 'mongoose';
 
-// Type exports
-// export * from './types/user.type';
-// export * from './types/survey.type';
-// export * from './types/seed.type';
+const connectDB = async () => {
+	try {
+		await mongoose.connect(process.env.MONGO_URI as string, {
+			retryWrites: false,
+			ssl: true
+		});
+		console.log('Connected to Azure Cosmos DB (MongoDB API)');
+	} catch (error) {
+		console.error('MongoDB connection failed:', error);
+		process.exit(1);
+	}
+};
 
-// Repository exports
-// export * from './repositories/user.repository';
-// export * from './repositories/survey.repository';
-// export * from './repositories/seed.repository';
+export default connectDB;

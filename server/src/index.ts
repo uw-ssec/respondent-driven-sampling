@@ -7,16 +7,19 @@ import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import nocache from 'nocache';
 
-import { connectDB } from '@/database/index';
+import { setupSwagger } from '@/config/swagger';
+import connectDB from '@/database/index';
 import authRoutes from '@/routes/v1/auth';
 import pageRoutes from '@/routes/v1/pages';
 import surveyRoutes from '@/routes/v1/surveys';
 import surveyRoutesV2 from '@/routes/v2/surveys';
-import { setupSwagger } from '@/config/swagger';
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Connect to the database
+await connectDB();
 
 const app = express();
 
@@ -214,19 +217,9 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 	res.status(500).json({ message: 'Something went wrong!' });
 });
 
-(async () => {
-	try {
-		console.log('Starting DB connection...');
-		await connectDB();
-		console.log('DB connected successfully');
-		const PORT = parseInt(process.env.PORT || '1234', 10);
-		app.listen(PORT, '0.0.0.0', () => {
-			console.log(
-				`Server running with security headers at http://localhost:${PORT}`
-			);
-		});
-	} catch (error) {
-		console.error('Failed to connect to DB, server not started', error);
-		process.exit(1);
-	}
-})();
+const PORT = parseInt(process.env.PORT ?? '1234', 10);
+app.listen(PORT, '0.0.0.0', () => {
+	console.log(
+		`Server running with security headers at http://localhost:${PORT}`
+	);
+});

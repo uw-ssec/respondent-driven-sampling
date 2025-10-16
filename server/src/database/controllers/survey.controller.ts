@@ -1,8 +1,19 @@
-import { create, read, update } from "../utils/operations";
-import { createSurveySchema, updateSurveySchema, readSurveySchema, readSurveyByObjectIdSchema } from "../types/survey.type";
-import { Response } from "express";
-import { AuthenticatedRequest } from "@/types/auth";
-import { resolveParentSurveyCode, generateChildSurveyCodes, handleCollision } from "../utils/survey.utils";
+import { Response } from 'express';
+
+import { AuthenticatedRequest } from '@/types/auth';
+
+import {
+	createSurveySchema,
+	readSurveyByObjectIdSchema,
+	readSurveySchema,
+	updateSurveySchema
+} from '../types/survey.type';
+import { create, read, update } from '../utils/operations';
+import {
+	generateChildSurveyCodes,
+	handleCollision,
+	resolveParentSurveyCode
+} from '../utils/survey.utils';
 
 /**
  * @swagger
@@ -89,43 +100,46 @@ import { resolveParentSurveyCode, generateChildSurveyCodes, handleCollision } fr
  *         description: Server error or failed to generate unique codes after retries
  */
 export async function createSurvey(req: AuthenticatedRequest, res: Response) {
-    const maxRetries = 3;
-    let attempts = 0;
+	const maxRetries = 3;
+	let attempts = 0;
 
-    // Generate child survey codes
-    req.body.childSurveyCodes = generateChildSurveyCodes();
+	// Generate child survey codes
+	req.body.childSurveyCodes = generateChildSurveyCodes();
 
-    // Resolve parent survey code
-    const parentResolved = await resolveParentSurveyCode(req, res);
-    if (parentResolved !== null) { // If parent is not resolved, we get an error response
-        return res.status(parentResolved.status).json(parentResolved);
-    }
-    
-    while (attempts < maxRetries) {
-        // Attempt to create the survey
-        const result = await create(req, createSurveySchema);
-        
-        // Successful!
-        if (result.status === 201) {
-            return res.status(result.status).json(result);
-        }
+	// Resolve parent survey code
+	const parentResolved = await resolveParentSurveyCode(req, res);
+	if (parentResolved !== null) {
+		// If parent is not resolved, we get an error response
+		return res.status(parentResolved.status).json(parentResolved);
+	}
 
-        // If it's a survey code uniqueness error that can be fixed by re-generating, retry
-        const handledCollision = handleCollision(req, result.message);
-        if (handledCollision) {
-            attempts++;
-            continue;
-        }
-        else {
-            // For other errors, return immediately
-            return res.status(result.status).json(result);
-        }
-    }
-    
-    // Failed to generate unique codes after retries
-    return res.status(500).json({ message: `Failed to generate unique codes after ${maxRetries} retries` });
+	while (attempts < maxRetries) {
+		// Attempt to create the survey
+		const result = await create(req, createSurveySchema);
+
+		// Successful!
+		if (result.status === 201) {
+			return res.status(result.status).json(result);
+		}
+
+		// If it's a survey code uniqueness error that can be fixed by re-generating, retry
+		const handledCollision = handleCollision(req, result.message);
+		if (handledCollision) {
+			attempts++;
+			continue;
+		} else {
+			// For other errors, return immediately
+			return res.status(result.status).json(result);
+		}
+	}
+
+	// Failed to generate unique codes after retries
+	return res
+		.status(500)
+		.json({
+			message: `Failed to generate unique codes after ${maxRetries} retries`
+		});
 }
-
 
 /**
  * @swagger
@@ -168,10 +182,10 @@ export async function createSurvey(req: AuthenticatedRequest, res: Response) {
  *         description: Server error
  */
 export async function updateSurvey(req: AuthenticatedRequest, res: Response) {
-    // Insert any request manipulation here
+	// Insert any request manipulation here
 
-    const result = await update(req, updateSurveySchema);
-    res.status(result.status).json(result);
+	const result = await update(req, updateSurveySchema);
+	res.status(result.status).json(result);
 }
 
 /**
@@ -207,12 +221,13 @@ export async function updateSurvey(req: AuthenticatedRequest, res: Response) {
  *         description: Server error
  */
 export async function getSurvey(req: AuthenticatedRequest, res: Response) {
-    // Insert any request manipulation here
+	// Insert any request manipulation here
 
-    const result = await read(req, readSurveyByObjectIdSchema);
-    res.status(result.status).json(result);
+	const result = await read(req, readSurveyByObjectIdSchema);
+	res.status(result.status).json(result);
 }
 
+// REVIEW: Thoughts on moving the swagger docs to routes?
 /**
  * @swagger
  * /api/v2/surveys:
@@ -241,8 +256,8 @@ export async function getSurvey(req: AuthenticatedRequest, res: Response) {
  *         description: Server error
  */
 export async function getSurveys(req: AuthenticatedRequest, res: Response) {
-    // Insert any request manipulation here
+	// Insert any request manipulation here
 
-    const result = await read(req, readSurveySchema);
-    res.status(result.status).json(result);
+	const result = await read(req, readSurveySchema);
+	res.status(result.status).json(result);
 }
