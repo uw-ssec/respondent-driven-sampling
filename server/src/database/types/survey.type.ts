@@ -184,3 +184,9 @@ export const readSurveyByObjectIdSchema = z.object({
  */
 // Read schema - for filtering to fetch one or more surveys by any field(s)
 export const readSurveySchema = surveyZodSchema.partial().meta({ model: Survey });
+
+export const findParentByChildCodeSchema = z.object({
+    childSurveyCodes: z.object({
+        $in: z.array(z.string())
+    })
+}).meta({ model: Survey });

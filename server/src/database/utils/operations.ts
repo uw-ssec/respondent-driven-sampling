@@ -66,6 +66,26 @@ async function _create(
             message: `${model.modelName} created successfully`,
         } as CreateResult;
     } catch (error: any) {
+        // Handle MongoDB duplicate key errors
+        if (error.code === 11000) {
+            // Check which field caused the duplicate key error
+            if (error.keyPattern?.surveyCode) {
+                const error = errors.SURVEY_CODE_ALREADY_EXISTS;
+                return generateError(error.message, error.status);
+            }
+            if (error.keyPattern?.childSurveyCodes) {
+                const error = errors.CHILD_SURVEY_CODES_NOT_UNIQUE_ACROSS_ALL_SURVEYS;
+                return generateError(error.message, error.status);
+            }
+            // Generic duplicate key error
+            return generateError('Duplicate key error: A record with this value already exists', 409);
+        }
+        
+        // Handle other Mongoose errors
+        if (error.name === 'ErrorCode') {
+            return generateError(error.message, error.status);
+        }
+        
         return generateError(error.message, 500);
     }
 }

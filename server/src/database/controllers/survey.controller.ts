@@ -3,9 +3,8 @@
 import { create, read, update } from "../utils/operations";
 import { createSurveySchema, updateSurveySchema, readSurveySchema, readSurveyByObjectIdSchema } from "../types/survey.type";
 import { Response } from "express";
-import generateReferralCode from "@/utils/generateReferralCode";
 import { AuthenticatedRequest } from "@/types/auth";
-import { errors } from "../utils/error";
+import { resolveParentSurveyCode, handledCollision, generateChildSurveyCodes } from "../utils/survey.utils";
 
 /**
  * @swagger
@@ -94,11 +93,17 @@ import { errors } from "../utils/error";
 export async function createSurvey(req: AuthenticatedRequest, res: Response) {
     const maxRetries = 3;
     let attempts = 0;
+
+    // Generate child survey codes
+    req.body.childSurveyCodes = generateChildSurveyCodes();
+
+    // Resolve parent survey code
+    const parentResolved = await resolveParentSurveyCode(req, res);
+    if (parentResolved !== null) { // If parent is not resolved, we get an error response
+        return res.status(parentResolved.status).json(parentResolved);
+    }
     
     while (attempts < maxRetries) {
-        // Generate new codes for each attempt
-        req.body.childSurveyCodes = Array.from({ length: 3 }, () => generateReferralCode());
-        
         // Attempt to create the survey
         const result = await create(req, createSurveySchema);
         
@@ -106,9 +111,9 @@ export async function createSurvey(req: AuthenticatedRequest, res: Response) {
         if (result.status === 201) {
             return res.status(result.status).json(result);
         }
-        
+
         // If it's a survey code uniqueness error that can be fixed by re-generating, retry
-        if (result.message?.includes(errors.CHILD_SURVEY_CODES_NOT_UNIQUE.message)) {
+        if (handledCollision(req, result.message)) {
             attempts++;
             continue;
         }
@@ -121,6 +126,7 @@ export async function createSurvey(req: AuthenticatedRequest, res: Response) {
     // Failed to generate unique codes after retries
     return res.status(500).json({ message: `Failed to generate unique codes after ${maxRetries} retries` });
 }
+
 
 /**
  * @swagger
