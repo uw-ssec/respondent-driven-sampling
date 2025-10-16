@@ -1,5 +1,3 @@
-// TODO: Implement Survey repository
-
 import { create, read, update } from "../utils/operations";
 import { createSurveySchema, updateSurveySchema, readSurveySchema, readSurveyByObjectIdSchema } from "../types/survey.type";
 import { Response } from "express";

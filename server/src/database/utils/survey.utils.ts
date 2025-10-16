@@ -32,7 +32,6 @@ export async function resolveParentSurveyCode(req: AuthenticatedRequest, res: Re
         return null;
     }
     else {
-        res.status(400).json({ message: 'No survey code provided. Please provide a survey code or use the noParent query parameter.' });
         return errors.NO_SURVEY_CODE_PROVIDED;
     }
 }
