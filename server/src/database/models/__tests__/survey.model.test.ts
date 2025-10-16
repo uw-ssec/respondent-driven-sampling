@@ -96,21 +96,6 @@ describe('Survey Model', () => {
         await expect(survey2.save()).rejects.toThrow();
     });
 
-    // Test indexes
-    test('childSurveyCodes intradocument uniqueness', async () => {
-        const surveyData = {
-            surveyCode: '123456',
-            parentSurveyCode: SYSTEM_SURVEY_CODE,
-            createdByUserObjectId: new mongoose.Types.ObjectId(),
-            siteLocation: SiteLocation.LOCATION_A,
-            childSurveyCodes: ['111111', '111111', '222222']
-        };
-
-        const survey = new Survey(surveyData);
-        
-        await expect(survey.save()).rejects.toThrow();
-    });
-
     test('childSurveyCodes interdocument uniqueness', async () => {
         const surveyData1 = {
             surveyCode: '123456',

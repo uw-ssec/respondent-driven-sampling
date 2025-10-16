@@ -158,12 +158,6 @@ const surveySchema = new Schema({
 surveySchema.pre('save', async function(next) {
     if (this.isNew) { // Only check for new documents
         const codes = this.childSurveyCodes;
-
-        // Check for uniqueness within the document
-        const uniqueCodes = [...new Set(codes)];
-        if (uniqueCodes.length !== codes.length) {
-            return next(errors.CHILD_SURVEY_CODES_NOT_UNIQUE);
-        }
         
         // Check if any of these codes already exist in other documents
         const existingSurveys = await Survey.find({
