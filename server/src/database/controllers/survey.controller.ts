@@ -4,7 +4,7 @@ import { create, read, update } from "../utils/operations";
 import { createSurveySchema, updateSurveySchema, readSurveySchema, readSurveyByObjectIdSchema } from "../types/survey.type";
 import { Response } from "express";
 import { AuthenticatedRequest } from "@/types/auth";
-import { resolveParentSurveyCode, handledCollision, generateChildSurveyCodes } from "../utils/survey.utils";
+import { resolveParentSurveyCode, generateChildSurveyCodes, handleCollision } from "../utils/survey.utils";
 
 /**
  * @swagger
@@ -113,7 +113,8 @@ export async function createSurvey(req: AuthenticatedRequest, res: Response) {
         }
 
         // If it's a survey code uniqueness error that can be fixed by re-generating, retry
-        if (handledCollision(req, result.message)) {
+        const handledCollision = handleCollision(req, result.message);
+        if (handledCollision) {
             attempts++;
             continue;
         }

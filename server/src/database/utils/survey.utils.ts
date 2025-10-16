@@ -8,9 +8,13 @@ import { ErrorCode, errors } from './error';
 
 /**
  * Resolves the parent survey code for a new survey creation
+ * If a survey code is provided, finds the parent survey and sets it as the parent survey code
+ * If the parent survey is not found, returns 404 response
+ * If not survey code is provided but noParent query parameter is true, generates new survey code and sets parent to seed
+ * If no survey code is provided and noParent query parameter is not true, returns 400 response
  * @param req - The authenticated request
  * @param res - The response object
- * @returns Promise<boolean> - true if successful, false if error response was sent
+ * @returns Promise<ErrorCode | null> - null if successful, ErrorCode with appropriate status and message if not
  */
 export async function resolveParentSurveyCode(req: AuthenticatedRequest, res: Response): Promise<ErrorCode | null> {
     if (req.body.surveyCode) {
@@ -60,7 +64,7 @@ export async function getParentSurvey(req: AuthenticatedRequest): Promise<string
  * @param message - The error message from the operation
  * @returns boolean - true if collision was handled and retry should occur, false otherwise
  */
-export function handledCollision(req: AuthenticatedRequest, message: string | undefined): boolean {
+export function handleCollision(req: AuthenticatedRequest, message: string | undefined): boolean {
     // No message -- no known collision error, do not retry and return
     if (!message) {
         return false;
