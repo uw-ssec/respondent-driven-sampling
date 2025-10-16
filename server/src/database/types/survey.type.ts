@@ -36,7 +36,10 @@ export const surveyZodSchema = z.object({
         .length(SURVEY_CODE_LENGTH, `Referral survey code must be exactly ${SURVEY_CODE_LENGTH} characters`),
     
     childSurveyCodes: z.array(z.string().length(SURVEY_CODE_LENGTH, `Child survey code must be exactly ${SURVEY_CODE_LENGTH} characters`))
-        .length(GENERATED_SURVEY_CODES_LENGTH, `Must have exactly ${GENERATED_SURVEY_CODES_LENGTH} generated survey codes`),
+        .length(GENERATED_SURVEY_CODES_LENGTH, `Must have exactly ${GENERATED_SURVEY_CODES_LENGTH} generated survey codes`)
+        .refine((codes) => new Set(codes).size === codes.length, {
+            message: "Child survey codes must be unique within the array"
+        }),
   
     createdByUserObjectId: z.string()
         .refine(Types.ObjectId.isValid, "Invalid user objectId"),

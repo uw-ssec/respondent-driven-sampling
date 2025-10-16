@@ -70,6 +70,16 @@ describe('Survey Type Validation Schemas', () => {
       }
     });
 
+    test('should reject child survey code duplication', () => {
+      const invalidData = {
+        ...validCreateData,
+        childSurveyCodes: ['111111', '111111', '222222']
+      };
+      
+      const result = createSurveySchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+    });
+
     test('should reject invalid parentSurveyCode length', () => {
       const invalidData = {
         ...validCreateData,
