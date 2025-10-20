@@ -134,5 +134,10 @@ export const errors = {
 		'IMMUTABLE_FIELD_VIOLATION',
 		'Cannot modify immutable field after creation',
 		400
+	),
+	SURVEY_CODE_GENERATION_ERROR: new ErrorCode(
+		'SURVEY_CODE_GENERATION_ERROR',
+		'Could not generate valid survey code(s) after maximum retry attempts. Please try again.',
+		500
 	)
 };

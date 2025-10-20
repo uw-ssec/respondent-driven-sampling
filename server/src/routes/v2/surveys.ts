@@ -4,8 +4,8 @@ import express, { NextFunction, Response } from 'express';
 
 import Survey, { ISurvey } from '@/database/survey/mongoose/survey.model';
 import {
-	generateChildSurveyCodes,
-	generateReferralCode,
+	generateUniqueChildSurveyCodes,
+	generateUniqueReferralCode,
 	getParentSurveyCode
 } from '@/database/survey/survey.controller';
 import {
@@ -125,7 +125,7 @@ router.get(
 /**
  * @swagger
  * /api/v2/surveys/{objectId}:
- *   put:
+ *   patch:
  *     summary: Update survey
  *     description: Update a specific survey by its ObjectId
  *     tags: [Surveys]
@@ -207,8 +207,9 @@ router.post(
 		}
 		try {
 			const surveyData: ISurvey = req.body;
-			surveyData.childSurveyCodes = generateChildSurveyCodes();
-			// TODO: Natalie, please add pending code to validate child survey codes so that we don't have to retry here.
+
+			// Generate unique child survey codes for the new survey
+			surveyData.childSurveyCodes = generateUniqueChildSurveyCodes();
 
 			// Resolve parent survey code
 			if (surveyData.surveyCode) {
@@ -229,8 +230,7 @@ router.post(
 			} else if (req.query.new === 'true') {
 				// If `new` query parameter is true, generate new survey code and set parent to seed
 				surveyData.parentSurveyCode = SYSTEM_SURVEY_CODE;
-				surveyData.surveyCode = generateReferralCode();
-				// TODO: Natalie, please add pending code to handle collision if generated survey code already exists or breaks validation logic.
+				surveyData.surveyCode = generateUniqueReferralCode();
 			} else {
 				const err = errors.NO_SURVEY_CODE_PROVIDED;
 				return res.status(err.status).json({
