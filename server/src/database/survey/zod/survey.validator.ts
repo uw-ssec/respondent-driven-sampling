@@ -23,6 +23,7 @@ export const createSurveySchema = baseSurveySchema
 export const updateSurveySchema = baseSurveySchema
 	.pick({
 		// Updatable fields
+		// NOTE: Verify if we can specify which keys are updatable in responses object.
 		responses: true,
 		isCompleted: true
 	})

@@ -1,143 +1,80 @@
-import { accessibleBy } from '@casl/mongoose';
-import { Response } from 'express';
-
+import Survey from '@/database/survey/mongoose/survey.model';
+import { errors } from '@/database/utils/errors';
 import { AuthenticatedRequest } from '@/types/auth';
 
-import Survey from './mongoose/survey.model';
-import {
-	generateChildSurveyCodes,
-	handleCollision,
-	resolveParentSurveyCode
-} from './survey.utils';
-
-export async function createSurvey(req: AuthenticatedRequest, res: Response) {
-	const MAX_RETRIES = 3;
-	let attempts = 0;
-
-	// Generate child survey codes
-	req.body.childSurveyCodes = generateChildSurveyCodes();
-
-	// Resolve parent survey code
-	const parentResolved = await resolveParentSurveyCode(req);
-	if (parentResolved !== null) {
-		return res.status(parentResolved.status).json(parentResolved);
-	}
-
-	while (attempts < MAX_RETRIES) {
-		try {
-			// Attempt to create the survey
-			const result = await Survey.create(req.body);
-
-			// Successful!
-			return res
-				.status(201)
-				.json({
-					message: 'Survey created successfully',
-					data: result.toObject()
-				});
-		} catch (error: any) {
-			const handledCollision = handleCollision(req, error.message);
-
-			if (handledCollision) {
-				// If collision was handled, retry
-				attempts++;
-				continue;
-			} else {
-				// System error, don't retry
-				return res.status(500).json({ message: error.message });
-			}
-		}
-	}
-
-	// Failed to generate unique codes after retries
-	return res
-		.status(500)
-		.json({
-			message: `Failed to generate unique codes after ${MAX_RETRIES} retries`
-		});
+/**
+ * Finds the parent survey that contains the given survey code in its childSurveyCodes
+ * @param req - The authenticated request
+ * @returns Promise<string | null> - The parent survey code or null if not found
+ */
+export async function getParentSurveyCode(
+	surveyCode: string
+): Promise<string | null> {
+	const parentSurvey = await Survey.findOne({
+		childSurveyCodes: { $in: [surveyCode] }
+	}).select({ surveyCode: 1 });
+	return parentSurvey?.surveyCode ?? null;
 }
 
-export async function updateSurvey(req: AuthenticatedRequest, res: Response) {
-	const result = await Survey.findOneAndUpdate(
-		{ _id: req.params.objectId, deletedAt: null },
-		req.body,
-		{ new: true }
-	);
-	if (!result) {
-		return res.status(404).json({ message: 'Survey not found' });
+/**
+ * Handles collision errors by regenerating codes and determining if retry should occur
+ * @param req - The authenticated request
+ * @param message - The error message from the operation
+ * @returns boolean - true if collision was handled and retry should occur, false otherwise
+ */
+export function handleCollision(
+	req: AuthenticatedRequest,
+	message: string | undefined
+): boolean {
+	// No message -- no known collision error, do not retry and return
+	if (!message) {
+		return false;
 	}
-	return res
-		.status(200)
-		.json({
-			message: 'Survey updated successfully',
-			data: result.toObject()
-		});
-}
 
-export async function getSurvey(req: AuthenticatedRequest, res: Response) {
-	try {
-		const result = await Survey.findOne({
-			_id: req.params.objectId,
-			deletedAt: null
-		});
+	// Child survey codes not unique within this survey or across all surveys, retry
+	if (
+		message?.includes(errors.CHILD_SURVEY_CODES_NOT_UNIQUE.message) ||
+		message?.includes(
+			errors.CHILD_SURVEY_CODES_NOT_UNIQUE_ACROSS_ALL_SURVEYS.message
+		)
+	) {
+		req.body.childSurveyCodes = generateChildSurveyCodes();
+		return true;
+	}
 
-		// Survey not found
-		if (!result) {
-			return res.status(404).json({ message: 'Survey not found' });
-		}
+	// System generated survey code found in previous child codes or survey code already exists, retry
+	else if (
+		message?.includes(
+			errors.SYSTEM_GENERATED_SURVEY_CODE_FOUND_IN_PREVIOUS_CHILD_CODES
+				.message
+		) ||
+		message?.includes(errors.SURVEY_CODE_ALREADY_EXISTS.message)
+	) {
+		req.body.surveyCode = generateReferralCode();
+		return true;
+	}
 
-		// Successfully fetched survey
-		return res
-			.status(200)
-			.json({
-				message: 'Survey fetched successfully',
-				data: result.toObject()
-			});
-	} catch (error: any) {
-		// System error
-		return res.status(500).json({ message: error.message });
+	// Some other error -- do not retry and return
+	else {
+		return false;
 	}
 }
 
-export async function getSurveys(req: AuthenticatedRequest, res: Response) {
-	try {
-		const result = await Survey.find({
-			$and: [
-				req.query,
-				req?.authorization
-					? accessibleBy(req.authorization).ofType(Survey.modelName)
-					: {},
-				{ deletedAt: null }
-			]
-		});
-
-		// Successfully fetched surveys
-		return res
-			.status(200)
-			.json({
-				message: 'Surveys fetched successfully',
-				data: result.map(item => item.toObject())
-			});
-	} catch (error: any) {
-		// System error
-		return res.status(500).json({ message: error.message });
-	}
+/**
+ * Generates child survey codes for a new survey
+ * @returns Array<string> - The generated child survey codes
+ */
+export function generateChildSurveyCodes(): Array<string> {
+	// TODO: Natalie, thoughts on inserting the validation logic here?
+	return Array.from({ length: 3 }, () => generateReferralCode());
 }
 
-export async function deleteSurvey(req: AuthenticatedRequest, res: Response) {
-	// TODO: Delete specific fields within survey document as well
-	const result = await Survey.findByIdAndUpdate(
-		req.params.objectId,
-		{ deletedAt: new Date() },
-		{ new: true }
-	);
-	if (!result) {
-		return res.status(404).json({ message: 'Survey not found' });
-	}
-	return res
-		.status(200)
-		.json({
-			message: 'Survey deleted successfully',
-			data: result.toObject()
-		});
+// This function generates a random referral code
+// consisting of 6 alphanumeric characters.
+// The code is case-insensitive and can be used for
+// tracking referrals in a system.
+export function generateReferralCode(): string {
+	// e.g. 6-char random string
+	// TODO: Natalie, thoughts on inserting the validation logic here?
+	return Math.random().toString(36).substring(2, 8).toUpperCase();
 }

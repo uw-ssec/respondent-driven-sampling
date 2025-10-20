@@ -12,7 +12,7 @@ const options = {
 		},
 		servers: [
 			{
-				url: 'http://localhost:3000',
+				url: 'http://localhost:1234',
 				description: 'Development server'
 			}
 		],
@@ -24,13 +24,14 @@ const options = {
 					bearerFormat: 'JWT'
 				}
 			}
-		}
+		},
+		security: [
+			{
+				bearerAuth: []
+			}
+		]
 	},
-	apis: [
-		'./src/database/**/*.ts',
-		'./src/routes/**/*.ts',
-		'./src/controllers/**/*.ts'
-	]
+	apis: ['./src/routes/**/*.ts']
 };
 
 const specs = swaggerJsdoc(options);

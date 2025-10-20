@@ -1,17 +1,19 @@
 import { subject } from '@casl/ability';
-import express, { Response } from 'express';
+import { accessibleBy } from '@casl/mongoose';
+import express, { NextFunction, Response } from 'express';
 
+import Survey, { ISurvey } from '@/database/survey/mongoose/survey.model';
 import {
-	createSurvey,
-	deleteSurvey,
-	getSurvey,
-	getSurveys,
-	updateSurvey
+	generateChildSurveyCodes,
+	generateReferralCode,
+	getParentSurveyCode
 } from '@/database/survey/survey.controller';
 import {
 	createSurveySchema,
 	updateSurveySchema
 } from '@/database/survey/zod/survey.validator';
+import { SYSTEM_SURVEY_CODE } from '@/database/utils/constants';
+import { errors } from '@/database/utils/errors';
 import { auth } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
 import { AuthenticatedRequest } from '@/types/auth';
@@ -34,17 +36,33 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.get('/', [auth], async (req: AuthenticatedRequest, res: Response) => {
-	if (!req.authorization) {
-		res.sendStatus(403);
-		return;
+router.get(
+	'/',
+	[auth],
+	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		try {
+			const result = await Survey.find({
+				$and: [
+					req.query,
+					req?.authorization
+						? accessibleBy(req.authorization).ofType(
+								Survey.modelName
+							)
+						: {},
+					{ deletedAt: null }
+				]
+			});
+
+			// Successfully fetched surveys
+			res.status(200).json({
+				message: 'Surveys fetched successfully',
+				data: result.map(item => item.toObject())
+			});
+		} catch (err) {
+			next(err);
+		}
 	}
-	try {
-		await getSurveys(req, res);
-	} catch (error) {
-		console.error('Error fetching survey:', error);
-	}
-});
+);
 
 /**
  * @swagger
@@ -75,20 +93,31 @@ router.get('/', [auth], async (req: AuthenticatedRequest, res: Response) => {
 router.get(
 	'/:objectId',
 	[auth],
-	async (req: AuthenticatedRequest, res: Response) => {
+	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 		if (
 			!req.authorization?.can(
 				ACTIONS.CASL.READ,
 				subject(SUBJECTS.SURVEY, { _id: req.params.objectId })
 			)
 		) {
-			res.sendStatus(403);
-			return;
+			return res.sendStatus(403);
 		}
 		try {
-			await getSurvey(req, res);
-		} catch (error) {
-			console.error('Error fetching survey:', error);
+			const result = await Survey.findOne({
+				_id: req.params.objectId,
+				deletedAt: null
+			});
+			// Survey not found
+			if (!result) {
+				return res.status(404).json({ message: 'Survey not found' });
+			}
+			// Successfully fetched survey
+			res.status(200).json({
+				message: 'Survey fetched successfully',
+				data: result.toObject()
+			});
+		} catch (err) {
+			next(err);
 		}
 	}
 );
@@ -124,20 +153,30 @@ router.get(
 router.patch(
 	'/:objectId',
 	[auth, validate(updateSurveySchema)],
-	async (req: AuthenticatedRequest, res: Response) => {
+	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 		if (
 			!req.authorization?.can(
 				ACTIONS.CASL.UPDATE,
 				subject(SUBJECTS.SURVEY, { _id: req.params.objectId })
 			)
 		) {
-			res.sendStatus(403);
-			return;
+			return res.sendStatus(403);
 		}
 		try {
-			await updateSurvey(req, res);
-		} catch (error) {
-			console.error('Error updating survey:', error);
+			const result = await Survey.findOneAndUpdate(
+				{ _id: req.params.objectId, deletedAt: null },
+				req.body,
+				{ new: true }
+			);
+			if (!result) {
+				return res.status(404).json({ message: 'Survey not found' });
+			}
+			res.status(200).json({
+				message: 'Survey updated successfully',
+				data: result.toObject()
+			});
+		} catch (err) {
+			next(err);
 		}
 	}
 );
@@ -162,15 +201,52 @@ router.patch(
 router.post(
 	'/',
 	[auth, validate(createSurveySchema)],
-	async (req: AuthenticatedRequest, res: Response) => {
+	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 		if (!req.authorization?.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY)) {
-			res.sendStatus(403);
-			return;
+			return res.sendStatus(403);
 		}
 		try {
-			await createSurvey(req, res);
-		} catch (error) {
-			console.error('Error creating survey:', error);
+			const surveyData: ISurvey = req.body;
+			surveyData.childSurveyCodes = generateChildSurveyCodes();
+			// TODO: Natalie, please add pending code to validate child survey codes so that we don't have to retry here.
+
+			// Resolve parent survey code
+			if (surveyData.surveyCode) {
+				// If survey code is provided, try to find parent survey
+				const parentSurveyCode = await getParentSurveyCode(
+					surveyData.surveyCode
+				);
+				if (parentSurveyCode) {
+					// Found parent survey
+					surveyData.parentSurveyCode = parentSurveyCode;
+				} else {
+					// Parent survey not found
+					const err = errors.PARENT_SURVEY_NOT_FOUND;
+					return res.status(err.status).json({
+						message: err.message
+					});
+				}
+			} else if (req.query.new === 'true') {
+				// If `new` query parameter is true, generate new survey code and set parent to seed
+				surveyData.parentSurveyCode = SYSTEM_SURVEY_CODE;
+				surveyData.surveyCode = generateReferralCode();
+				// TODO: Natalie, please add pending code to handle collision if generated survey code already exists or breaks validation logic.
+			} else {
+				const err = errors.NO_SURVEY_CODE_PROVIDED;
+				return res.status(err.status).json({
+					message: err.message
+				});
+			}
+			// Attempt to create the survey
+			const result = await Survey.create(surveyData);
+
+			// Successful!
+			res.status(201).json({
+				message: 'Survey created successfully',
+				data: result.toObject()
+			});
+		} catch (err) {
+			next(err);
 		}
 	}
 );
@@ -202,11 +278,23 @@ router.post(
 router.delete(
 	'/:objectId',
 	[auth],
-	async (req: AuthenticatedRequest, res: Response) => {
+	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 		try {
-			await deleteSurvey(req, res);
-		} catch (error) {
-			console.error('Error deleting survey:', error);
+			// TODO: Delete specific fields within survey document as well
+			const result = await Survey.findByIdAndUpdate(
+				req.params.objectId,
+				{ deletedAt: new Date() },
+				{ new: true }
+			);
+			if (!result) {
+				return res.status(404).json({ message: 'Survey not found' });
+			}
+			res.status(200).json({
+				message: 'Survey deleted successfully',
+				data: result.toObject()
+			});
+		} catch (err) {
+			next(err);
 		}
 	}
 );

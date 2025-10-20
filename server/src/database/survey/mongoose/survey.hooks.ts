@@ -5,51 +5,55 @@ import { errors } from '../../utils/errors';
 
 // Pre-save hook to enforce uniqueness in generated survey codes (inter- and intra-document)
 export const uniquenessValidationHook = async function (this: any, next: any) {
-	if (this.isNew) {
-		// Only check for new documents
-		const codes = this.childSurveyCodes;
+	// Return if not a new document
+	if (!this.isNew) next();
+	try {
+		const currentDocumentChildSurveyCodes = this.childSurveyCodes;
 
-		// Check if any of these codes already exist in other documents
+		// Check if any of the child survey codes already exist in other documents
 		const existingSurveys = await this.constructor.find({
-			childSurveyCodes: { $in: codes }
+			childSurveyCodes: { $in: currentDocumentChildSurveyCodes }
 		});
 
 		if (existingSurveys.length > 0) {
-			return next(
-				errors.CHILD_SURVEY_CODES_NOT_UNIQUE_ACROSS_ALL_SURVEYS
-			);
+			next(errors.CHILD_SURVEY_CODES_NOT_UNIQUE_ACROSS_ALL_SURVEYS);
 		}
+		next();
+	} catch (err) {
+		return next(err as Error);
 	}
-	next();
 };
 
 // Pre-save hook to enforce chronological ordering of referrals
+// Ensures that a child survey is created after its parent survey
+// and that the survey code is listed in the parent survey's childSurveyCodes
 export const chronologicalValidationHook = async function (
 	this: any,
 	next: any
 ) {
-	if (!this.isNew) return next();
+	// Return if not a new document
+	if (!this.isNew) next();
 
 	try {
-		// If the survey is a system survey, skip the chronological ordering check
-		const parentCode = this.parentSurveyCode as string;
-		if (parentCode === SYSTEM_SURVEY_CODE) {
+		// If the survey is a system / seed survey, skip the chronological ordering check
+		const currentDocumentParentCode = this.parentSurveyCode as string;
+		if (currentDocumentParentCode === SYSTEM_SURVEY_CODE) {
 			// Check if the survey code exists in any other survey's childSurveyCodes
 			const existingSurveyWithCode = await this.constructor.findOne({
 				childSurveyCodes: { $in: [this.surveyCode] }
 			});
 
 			if (existingSurveyWithCode) {
-				return next(
+				next(
 					errors.SYSTEM_GENERATED_SURVEY_CODE_FOUND_IN_PREVIOUS_CHILD_CODES
 				);
 			}
-			return next();
+			next();
 		}
 
 		// Get the parent survey
 		const parentSurvey = await this.constructor
-			.findOne({ surveyCode: parentCode })
+			.findOne({ surveyCode: currentDocumentParentCode })
 			.select({ createdAt: 1, childSurveyCodes: 1 });
 
 		// Check if the parent survey exists
@@ -73,9 +77,9 @@ export const chronologicalValidationHook = async function (
 			return next(errors.SURVEY_CODE_NOT_FOUND_IN_PARENT_CODES);
 		}
 
-		return next();
+		next();
 	} catch (err) {
-		return next(err as Error);
+		next(err as Error);
 	}
 };
 
@@ -84,7 +88,8 @@ export const immutabilityValidationHook = async function (
 	this: any,
 	next: any
 ) {
-	if (this.isNew) return next();
+	// Return if new document
+	if (this.isNew) next();
 
 	// The immutable flags in our schema can only handle top-level fields
 	// So we need to check each nested field or array field individually
@@ -92,7 +97,7 @@ export const immutabilityValidationHook = async function (
 		(this.coordinates && this.isModified('coordinates')) ||
 		this.isModified('childSurveyCodes')
 	) {
-		return next(errors.IMMUTABLE_FIELD_VIOLATION);
+		next(errors.IMMUTABLE_FIELD_VIOLATION);
 	}
 	next();
 };

@@ -2,6 +2,7 @@
 
 export enum SiteLocation {
 	// TODO - get list of locations
+	// TODO: These may come from a collection. Check out #59.
 	LOCATION_A = 'Location A',
 	LOCATION_B = 'Location B'
 }

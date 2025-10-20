@@ -214,7 +214,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 	res.setHeader('X-XSS-Protection', '1; mode=block');
 
 	console.error(err.stack);
-	res.status(500).json({ message: 'Something went wrong!' });
+	res.status(500).json({ message: err.message });
 });
 
 const PORT = parseInt(process.env.PORT ?? '1234', 10);
