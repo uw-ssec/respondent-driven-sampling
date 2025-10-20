@@ -5,14 +5,13 @@ import {
   updateSurveySchema, 
   readSurveySchema, 
   readSurveyByObjectIdSchema 
-} from '../survey.type';
-import { SiteLocation, SYSTEM_SURVEY_CODE } from '../../utils/constants';
+} from '../survey.validator';
+import { SiteLocation, SYSTEM_SURVEY_CODE } from '../../../utils/constants';
 
 const validObjectId = new Types.ObjectId().toString();
 
 const validCreateData = {
     surveyCode: '123456',
-    parentSurveyCode: SYSTEM_SURVEY_CODE,
     createdByUserObjectId: validObjectId,
     responses: { question1: 'answer1', question2: 'answer2' },
     isCompleted: false,
@@ -21,7 +20,6 @@ const validCreateData = {
       longitude: -74.0060
     },
     siteLocation: SiteLocation.LOCATION_A,
-    childSurveyCodes: ['111111', '222222', '333333'],
   };
 
 describe('Survey Type Validation Schemas', () => {
@@ -35,8 +33,8 @@ describe('Survey Type Validation Schemas', () => {
       }
     });
 
-    test('should validate with minimal required fields', () => {
-      const minimalData = {
+    test('should reject unexpected fields', () => {
+      const invalidData = {
         surveyCode: '123456',
         createdByUserObjectId: validObjectId,
         siteLocation: SiteLocation.LOCATION_A,
@@ -48,42 +46,14 @@ describe('Survey Type Validation Schemas', () => {
         childSurveyCodes: ['111111', '222222', '333333'],
       };
       
-      const result = createSurveySchema.safeParse(minimalData);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.parentSurveyCode).toBe(SYSTEM_SURVEY_CODE);
-        expect(result.data.responses).toEqual({ question1: 'answer1' });
-        expect(result.data.isCompleted).toBe(false);
-      }
+      const result = createSurveySchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
     });
 
     test('should reject invalid survey code length', () => {
       const invalidData = {
         ...validCreateData,
         surveyCode: '12345' // Too short
-      };
-      
-      const result = createSurveySchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain('exactly 6 characters');
-      }
-    });
-
-    test('should reject child survey code duplication', () => {
-      const invalidData = {
-        ...validCreateData,
-        childSurveyCodes: ['111111', '111111', '222222']
-      };
-      
-      const result = createSurveySchema.safeParse(invalidData);
-      expect(result.success).toBe(false);
-    });
-
-    test('should reject invalid parentSurveyCode length', () => {
-      const invalidData = {
-        ...validCreateData,
-        parentSurveyCode: '12345' // Too short
       };
       
       const result = createSurveySchema.safeParse(invalidData);
@@ -114,6 +84,17 @@ describe('Survey Type Validation Schemas', () => {
       
       const result = createSurveySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
+    });
+
+    test('should accept minimal required fields', () => {
+      const minimalData = {
+        createdByUserObjectId: validObjectId,
+        siteLocation: SiteLocation.LOCATION_A,
+        responses: { question1: 'answer1', question2: 'answer2' },
+      };
+      
+      const result = createSurveySchema.safeParse(minimalData);
+      expect(result.success).toBe(true);
     });
   });
 

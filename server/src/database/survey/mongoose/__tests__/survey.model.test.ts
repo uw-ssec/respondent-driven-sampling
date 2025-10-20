@@ -2,8 +2,8 @@ import { describe, test, expect, beforeEach, beforeAll, afterAll } from '@jest/g
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import Survey from '../survey.model';
-import { SiteLocation, SYSTEM_SURVEY_CODE } from '../../utils/constants';
-import { errors } from '../../utils/error';
+import { SiteLocation, SYSTEM_SURVEY_CODE } from '../../../utils/constants';
+import { errors } from '../../../utils/errors';
 
 describe('Survey Model', () => {
     let mongoServer: MongoMemoryServer;

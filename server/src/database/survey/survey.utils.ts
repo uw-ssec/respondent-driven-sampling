@@ -1,42 +1,36 @@
-import { Response } from 'express';
-
 import { AuthenticatedRequest } from '@/types/auth';
+import { SYSTEM_SURVEY_CODE } from '../utils/constants';
 import generateReferralCode from '@/utils/generateReferralCode';
-
-import { findParentByChildCodeSchema } from '../types/survey.type';
-import { SYSTEM_SURVEY_CODE } from './constants';
-import { ErrorCode, errors } from './error';
-import { read } from './operations';
+import { ErrorCode, errors } from '../utils/errors';
+import Survey from './mongoose/survey.model';
 
 /**
  * Resolves the parent survey code for a new survey creation
  * If a survey code is provided, finds the parent survey and sets it as the parent survey code
  * If the parent survey is not found, returns 404 response
- * If not survey code is provided but noParent query parameter is true, generates new survey code and sets parent to seed
- * If no survey code is provided and noParent query parameter is not true, returns 400 response
+ * If not survey code is provided but `new` query parameter is true, generates new survey code and sets parent to seed
+ * If no survey code is provided and `new`` query parameter is not true, returns 400 response
  * @param req - The authenticated request
- * @param res - The response object
  * @returns Promise<ErrorCode | null> - null if successful, ErrorCode with appropriate status and message if not
  */
-export async function resolveParentSurveyCode(
-	req: AuthenticatedRequest,
-	res: Response
-): Promise<ErrorCode | null> {
-	if (req.body.surveyCode) {
-		const parentSurvey = await getParentSurvey(req);
-		if (parentSurvey) {
-			req.body.parentSurveyCode = parentSurvey;
-			return null;
-		} else {
-			return errors.PARENT_SURVEY_NOT_FOUND;
-		}
-	} else if (req.query.noParent === 'true') {
-		req.body.parentSurveyCode = SYSTEM_SURVEY_CODE;
-		req.body.surveyCode = generateReferralCode();
-		return null;
-	} else {
-		return errors.NO_SURVEY_CODE_PROVIDED;
-	}
+export async function resolveParentSurveyCode(req: AuthenticatedRequest): Promise<ErrorCode | null> {
+    if (req.body.surveyCode) {
+        const parentSurveyCode = await getParentSurvey(req.body.surveyCode);
+        if (parentSurveyCode) {
+            req.body.parentSurveyCode = parentSurveyCode;
+            return null;
+        } else {
+            return errors.PARENT_SURVEY_NOT_FOUND;
+        }
+    }
+    else if (req.query.new === 'true') {
+        req.body.parentSurveyCode = SYSTEM_SURVEY_CODE;
+        req.body.surveyCode = generateReferralCode();
+        return null;
+    }
+    else {
+        return errors.NO_SURVEY_CODE_PROVIDED;
+    }
 }
 
 /**
@@ -44,30 +38,9 @@ export async function resolveParentSurveyCode(
  * @param req - The authenticated request
  * @returns Promise<string | null> - The parent survey code or null if not found
  */
-export async function getParentSurvey(
-	req: AuthenticatedRequest
-): Promise<string | null> {
-	const parentLookupReq = {
-		body: { childSurveyCodes: { $in: [req.body.surveyCode] } },
-		params: {},
-		query: {}
-	} as AuthenticatedRequest;
-
-	const parentSurvey = await read(
-		parentLookupReq,
-		findParentByChildCodeSchema
-	);
-
-	if (
-		parentSurvey.status === 200 &&
-		'data' in parentSurvey &&
-		Array.isArray(parentSurvey.data) &&
-		parentSurvey.data.length === 1
-	) {
-		return parentSurvey.data[0].surveyCode;
-	} else {
-		return null;
-	}
+export async function getParentSurvey(surveyCode: string): Promise<string | null> {
+    const parentSurvey = await Survey.findOne({ childSurveyCodes: { $in: [surveyCode] } }).select({ surveyCode: 1 });
+    return parentSurvey?.surveyCode || null;
 }
 
 /**

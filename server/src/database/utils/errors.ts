@@ -55,11 +55,19 @@ export class ErrorCode extends Error {
       super(message);
       this.name = 'ErrorCode';
     }
+
+    toJSON() {
+      return {
+        code: this.code,
+        message: this.message,
+        status: this.status,
+      }
+    }
 }
 
 export const errors = {
-    PARENT_SURVEY_NOT_FOUND: new ErrorCode('PARENT_SURVEY_NOT_FOUND', 'Parent survey does not exist', 404),
-    NO_SURVEY_CODE_PROVIDED: new ErrorCode('NO_SURVEY_CODE_PROVIDED', 'No survey code provided. Please provide a survey code or use the noParent query parameter.', 400),
+    PARENT_SURVEY_NOT_FOUND: new ErrorCode('PARENT_SURVEY_NOT_FOUND', 'Could not find parent survey with matching survey code', 404),
+    NO_SURVEY_CODE_PROVIDED: new ErrorCode('NO_SURVEY_CODE_PROVIDED', 'No survey code provided. Please provide a survey code or use the `new` query parameter.', 400),
     SURVEY_CODE_NOT_FOUND_IN_PARENT_CODES: new ErrorCode('SURVEY_CODE_NOT_FOUND_IN_PARENT_CODES', 'Survey code not found in parent survey codes', 404),
     SYSTEM_GENERATED_SURVEY_CODE_FOUND_IN_PREVIOUS_CHILD_CODES: new ErrorCode('SYSTEM_GENERATED_SURVEY_CODE_FOUND_IN_PREVIOUS_CHILD_CODES', 'System generated survey code found in the child code of an already existing survey', 409),
     PARENT_SURVEY_MISSING_CREATED_AT: new ErrorCode('PARENT_SURVEY_MISSING_CREATED_AT', 'Parent survey is missing a valid createdAt timestamp', 500),
