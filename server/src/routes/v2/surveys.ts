@@ -1,11 +1,21 @@
 import { subject } from '@casl/ability';
-import { ACTIONS, SUBJECTS } from '@/utils/roleDefinitions';
 import express, { Response } from 'express';
+
+import {
+	createSurvey,
+	deleteSurvey,
+	getSurvey,
+	getSurveys,
+	updateSurvey
+} from '@/database/survey/survey.controller';
+import {
+	createSurveySchema,
+	updateSurveySchema
+} from '@/database/survey/zod/survey.validator';
 import { auth } from '@/middleware/auth';
-import { AuthenticatedRequest } from '@/types/auth';
-import { createSurvey, updateSurvey, getSurvey, getSurveys, deleteSurvey } from '@/database/survey/survey.controller';
 import { validate } from '@/middleware/validate';
-import { createSurveySchema, updateSurveySchema } from '@/database/survey/zod/survey.validator';
+import { AuthenticatedRequest } from '@/types/auth';
+import { ACTIONS, SUBJECTS } from '@/utils/roleDefinitions';
 
 const router = express.Router();
 
@@ -24,21 +34,17 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.get(
-	'/',
-	[auth],
-	async (req: AuthenticatedRequest, res: Response) => {
-        if (!req.authorization) {
-            res.sendStatus(403);
-            return;
-        }
-		try {
-			await getSurveys(req, res);
-		} catch (error) {
-			console.error('Error fetching survey:', error);
-		}
+router.get('/', [auth], async (req: AuthenticatedRequest, res: Response) => {
+	if (!req.authorization) {
+		res.sendStatus(403);
+		return;
 	}
-);
+	try {
+		await getSurveys(req, res);
+	} catch (error) {
+		console.error('Error fetching survey:', error);
+	}
+});
 
 /**
  * @swagger
@@ -129,7 +135,6 @@ router.patch(
 			return;
 		}
 		try {
-			// REVIEW: Update call on POST threw me off.
 			await updateSurvey(req, res);
 		} catch (error) {
 			console.error('Error updating survey:', error);
@@ -158,13 +163,10 @@ router.post(
 	'/',
 	[auth, validate(createSurveySchema)],
 	async (req: AuthenticatedRequest, res: Response) => {
-        if (!req.authorization?.can(
-            ACTIONS.CASL.CREATE,
-            SUBJECTS.SURVEY
-        )) {
-            res.sendStatus(403);
-            return;
-        }
+		if (!req.authorization?.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY)) {
+			res.sendStatus(403);
+			return;
+		}
 		try {
 			await createSurvey(req, res);
 		} catch (error) {
@@ -207,5 +209,5 @@ router.delete(
 			console.error('Error deleting survey:', error);
 		}
 	}
-)
+);
 export default router;

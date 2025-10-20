@@ -1,6 +1,7 @@
 import { AuthenticatedRequest } from '@/types/auth';
-import { SYSTEM_SURVEY_CODE } from '../utils/constants';
 import generateReferralCode from '@/utils/generateReferralCode';
+
+import { SYSTEM_SURVEY_CODE } from '../utils/constants';
 import { ErrorCode, errors } from '../utils/errors';
 import Survey from './mongoose/survey.model';
 
@@ -13,24 +14,24 @@ import Survey from './mongoose/survey.model';
  * @param req - The authenticated request
  * @returns Promise<ErrorCode | null> - null if successful, ErrorCode with appropriate status and message if not
  */
-export async function resolveParentSurveyCode(req: AuthenticatedRequest): Promise<ErrorCode | null> {
-    if (req.body.surveyCode) {
-        const parentSurveyCode = await getParentSurvey(req.body.surveyCode);
-        if (parentSurveyCode) {
-            req.body.parentSurveyCode = parentSurveyCode;
-            return null;
-        } else {
-            return errors.PARENT_SURVEY_NOT_FOUND;
-        }
-    }
-    else if (req.query.new === 'true') {
-        req.body.parentSurveyCode = SYSTEM_SURVEY_CODE;
-        req.body.surveyCode = generateReferralCode();
-        return null;
-    }
-    else {
-        return errors.NO_SURVEY_CODE_PROVIDED;
-    }
+export async function resolveParentSurveyCode(
+	req: AuthenticatedRequest
+): Promise<ErrorCode | null> {
+	if (req.body.surveyCode) {
+		const parentSurveyCode = await getParentSurvey(req.body.surveyCode);
+		if (parentSurveyCode) {
+			req.body.parentSurveyCode = parentSurveyCode;
+			return null;
+		} else {
+			return errors.PARENT_SURVEY_NOT_FOUND;
+		}
+	} else if (req.query.new === 'true') {
+		req.body.parentSurveyCode = SYSTEM_SURVEY_CODE;
+		req.body.surveyCode = generateReferralCode();
+		return null;
+	} else {
+		return errors.NO_SURVEY_CODE_PROVIDED;
+	}
 }
 
 /**
@@ -38,9 +39,13 @@ export async function resolveParentSurveyCode(req: AuthenticatedRequest): Promis
  * @param req - The authenticated request
  * @returns Promise<string | null> - The parent survey code or null if not found
  */
-export async function getParentSurvey(surveyCode: string): Promise<string | null> {
-    const parentSurvey = await Survey.findOne({ childSurveyCodes: { $in: [surveyCode] } }).select({ surveyCode: 1 });
-    return parentSurvey?.surveyCode || null;
+export async function getParentSurvey(
+	surveyCode: string
+): Promise<string | null> {
+	const parentSurvey = await Survey.findOne({
+		childSurveyCodes: { $in: [surveyCode] }
+	}).select({ surveyCode: 1 });
+	return parentSurvey?.surveyCode || null;
 }
 
 /**
