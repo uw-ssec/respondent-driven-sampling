@@ -32,7 +32,10 @@
 		"mongoose": "^8.10.1",
 		"nocache": "^4.0.0",
 		"nodemon": "^3.1.9",
-		"twilio": "^5.6.1"
+		"swagger-jsdoc": "^6.2.8",
+		"swagger-ui-express": "^5.0.1",
+		"twilio": "^5.6.1",
+		"zod": "^4.1.12"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.36.0",
@@ -46,6 +49,8 @@
 		"@types/jsonwebtoken": "^9.0.7",
 		"@types/node": "^22.7.5",
 		"@types/supertest": "^6.0.2",
+		"@types/swagger-jsdoc": "^6.0.4",
+		"@types/swagger-ui-express": "^4.1.8",
 		"@typescript-eslint/eslint-plugin": "^8.45.0",
 		"@typescript-eslint/parser": "^8.45.0",
 		"eslint": "^9.36.0",

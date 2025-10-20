@@ -1,5 +1,8 @@
+// REVIEW: Thoughts on calling this file, documents.types.ts instead of models.ts?
+
 import { Document, Types } from 'mongoose';
-import { Action, Subject, Condition } from '@/utils/roleDefinitions';
+
+import { Action, Condition, Subject } from '@/utils/roleDefinitions';
 
 export interface IReferralCode {
 	// QR code that will be distributed to participants, and will be used to create child surveys

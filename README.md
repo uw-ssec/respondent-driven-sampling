@@ -110,24 +110,26 @@ server/                   # Backend code
 │   ├── database.test.js
 │   └── server.test.js
 ├── database/              # Database layer
-│   ├── connection/                # Mongoose connection for database
-│   │   ├── __tests__/
-│   │   │   └── mongoose.test.ts
-│   │   └── mongoose.ts
-│   ├── models/                    # Mongoose models for database
-│   │   ├── __tests__/
-│   │   ├── seed.model.ts
-│   │   ├── survey.model.ts
-│   │   └── user.model.ts
-│   ├── controllers/               # Data access layer (i.e. CRUD operations)
-│   │   ├── __tests__/
-│   │   ├── seed.controller.ts
-│   │   ├── survey.controller.ts
-│   │   └── user.controller.ts
-│   ├── types/                     # Database type definitions
-│   │   ├── seed.type.ts
-│   │   ├── survey.type.ts
-│   │   └── user.type.ts 
+│   ├── __tests__/                 # Database tests
+│   │   └── index.test.ts
+│   ├── survey/                    # Survey domain module
+│   │   ├── mongoose/              # Mongoose models and hooks
+│   │   │   ├── __tests__/
+│   │   │   ├── survey.hooks.ts
+│   │   │   └── survey.model.ts
+│   │   ├── zod/                   # Zod validation schemas
+│   │   │   ├── __tests__/
+│   │   │   ├── survey.base.ts
+│   │   │   └── survey.validator.ts
+│   │   ├── survey.controller.ts   # Route operations
+│   │   └── survey.utils.ts        # Utility functions
+│   ├── user/                      # User domain module (same structure as survey)
+│   │   └── ...
+│   ├── seed/                      # Seed domain module (same structure as survey)
+│   │   └── ...
+│   ├── utils/                     # Database utilities
+│   │   ├── constants.ts
+│   │   └── errors.ts
 │   └── index.ts                   # Database module exports
 ├── models/               # Mongoose schemas
 │   └── __tests__/                 # Models tests

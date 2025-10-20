@@ -5,8 +5,6 @@ import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
 import defineAbilitiesForUser from '@/utils/roleBasedAccess';
 
-//dotenv.config({ path: './.env' });
-
 // Middleware for verifying token signature and storing token info in response
 // If this call passes to the next handler, it means the user is atleast a volunteer
 // and has been approved by an admin.
@@ -45,8 +43,6 @@ export async function auth(
 			employeeId: decodedAuthToken.employeeId
 		});
 
-		console.log(user);
-
 		if (!user) {
 			// This case means that the user has a valid JWT signed by our server but
 			// the account it is linked to does not exist in our database.
@@ -65,7 +61,15 @@ export async function auth(
 		}
 
 		// Add role authorization to the request
-		req.authorization = defineAbilitiesForUser(req, user.id, user.permissions);
+		req.authorization = defineAbilitiesForUser(
+			req,
+			user.id,
+			user.permissions
+		);
+		if (!req.authorization) {
+			res.sendStatus(403);
+			return;
+		}
 
 		next();
 	} catch (err: any) {

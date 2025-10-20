@@ -15,9 +15,8 @@
 		"noEmit": false,
 		"declaration": true,
 		"outDir": "./build",
-		"baseUrl": "src",
 		"paths": {
-			"@/*": ["*"]
+			"@/*": ["./src/*"]
 		},
 		"types": ["node", "jest"],
 		"lib": ["ES2022"]
