@@ -209,7 +209,7 @@ router.post(
 			const surveyData: ISurvey = req.body;
 
 			// Generate unique child survey codes for the new survey
-			surveyData.childSurveyCodes = generateUniqueChildSurveyCodes();
+			surveyData.childSurveyCodes = await generateUniqueChildSurveyCodes();
 
 			// Resolve parent survey code
 			if (surveyData.surveyCode) {
@@ -230,7 +230,7 @@ router.post(
 			} else if (req.query.new === 'true') {
 				// If `new` query parameter is true, generate new survey code and set parent to seed
 				surveyData.parentSurveyCode = SYSTEM_SURVEY_CODE;
-				surveyData.surveyCode = generateUniqueReferralCode();
+				surveyData.surveyCode = await generateUniqueReferralCode();
 			} else {
 				const err = errors.NO_SURVEY_CODE_PROVIDED;
 				return res.status(err.status).json({
