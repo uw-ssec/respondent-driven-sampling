@@ -1,7 +1,6 @@
 // src/pages/Login/login.js
 import { useEffect, useState } from 'react';
-
-import '@/styles/login.css';
+import { TextField, Button, Paper, Typography, Box } from '@mui/material';
 
 import { saveAuthToken, initializeSurveyStore } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
@@ -111,67 +110,144 @@ export default function Login({ onLogin }: LoginProps) {
 	};
 
 	return (
-		<div className="page-wrapper">
-			<div className="login-container">
-				<h2>{otpSent ? 'Verify OTP' : 'Hi, welcome to RDS Mobile!'}</h2>
+		<Box 
+			sx={{
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+				minHeight: '100vh',
+				margin: 0,
+				background: 'linear-gradient(to bottom right, #f0f2f5, #e0e6ed)',
+			}}
+		>
+			<Paper 
+				elevation={3}
+				sx={{
+					p: 6,
+					width: '100%',
+					maxWidth: 450,
+					textAlign: 'center',
+					borderRadius: 3,
+				}}
+			>
+				<Typography 
+					variant="h4" 
+					component="h2" 
+					color="primary.main"
+					sx={{ mb: 3 }}
+				>
+					{otpSent ? 'Verify OTP' : 'Hi, welcome to RDS Mobile!'}
+				</Typography>
 
 				{/* Initial login page */}
 				{!otpSent ? (
 					<>
-						<input
+						<TextField
 							type="email"
+							label="Enter Email"
 							placeholder="Enter Email"
 							value={email}
 							onChange={e => setEmail(e.target.value)}
 							onKeyDown={handleSendOtpKeyDown}
 							required
+							fullWidth
+							variant="outlined"
+							sx={{ mb: 2 }}
 						/>
-						<input
+						<TextField
 							type="text"
+							label="Phone Number"
 							placeholder="Phone (+1XXXXXXXXXX)"
 							value={phone}
 							onChange={handlePhoneChange}
 							onKeyDown={handleSendOtpKeyDown}
 							required
+							fullWidth
+							variant="outlined"
+							sx={{ mb: 2 }}
 						/>
-						<button onClick={sendOtp}>Send OTP &amp; Login</button>
+						<Button 
+							onClick={sendOtp}
+							variant="contained"
+							size="large"
+							fullWidth
+							sx={{ mb: 2, py: 1.5 }}
+						>
+							Send OTP &amp; Login
+						</Button>
 						{/* Button to registration page */}
-						<p className="switch-auth">
-							Don’t have an account?{' '}
-							<span
+						<Typography 
+							variant="body2" 
+							color="primary.main"
+							sx={{ mt: 2 }}
+						>
+							Don't have an account?{' '}
+							<Typography
+								component="span"
 								onClick={() => navigate('/signup')}
-								className="auth-link"
+								sx={{
+									cursor: 'pointer',
+									textDecoration: 'underline',
+									fontWeight: 500,
+									'&:hover': {
+										textDecoration: 'none'
+									}
+								}}
 							>
 								Sign Up
-							</span>
-						</p>
+							</Typography>
+						</Typography>
 					</>
 				) : (
 					<>
 						{/* OTP verification page */}
-						<input
+						<TextField
 							type="text"
+							label="Enter OTP"
 							placeholder="Enter OTP"
 							value={otp}
 							onChange={e => setOtp(e.target.value)}
 							onKeyDown={handleVerifyOtpKeyDown}
 							required
+							fullWidth
+							variant="outlined"
+							sx={{ mb: 2 }}
 						/>
-						<button onClick={verifyOtp}>
+						<Button 
+							onClick={verifyOtp}
+							variant="contained"
+							size="large"
+							fullWidth
+							sx={{ mb: 2, py: 1.5 }}
+						>
 							Verify OTP &amp; Login
-						</button>
+						</Button>
 						{/* Resend OTP button or countdown */}
-						<p className="resend-otp">
+						<Typography 
+							variant="body2" 
+							color="primary.main"
+							sx={{ mt: 2 }}
+						>
 							{countdown > 0 ? (
 								`Resend OTP in ${countdown}s`
 							) : (
-								<button onClick={sendOtp}>Resend OTP</button>
+								<Button 
+									onClick={sendOtp}
+									variant="text"
+								>
+									Resend OTP
+								</Button>
 							)}
-						</p>
+						</Typography>
 
 						{/* Option to go back to email/phone entry */}
-						<p className="switch-auth">
-							<span
+						<Typography 
+							variant="body2" 
+							color="primary.main"
+							sx={{ mt: 2 }}
+						>
+							<Typography
+								component="span"
 								onClick={() => {
 									setOtpSent(false);
 									setOtp('');
@@ -179,21 +255,32 @@ export default function Login({ onLogin }: LoginProps) {
 									setErrorMessage('');
 									setSuccessMessage('');
 								}}
-								className="auth-link"
+								sx={{
+									cursor: 'pointer',
+									textDecoration: 'underline',
+									fontWeight: 500,
+									'&:hover': {
+										textDecoration: 'none'
+									}
+								}}
 							>
 								Go back to Login
-							</span>
-						</p>
+							</Typography>
+						</Typography>
 					</>
 				)}
 
 				{errorMessage && (
-					<p className="error-message">{errorMessage}</p>
+					<Typography variant="body2" color="error.main" sx={{ mt: 1 }}>
+						{errorMessage}
+					</Typography>
 				)}
 				{successMessage && (
-					<p className="success-message">{successMessage}</p>
+					<Typography variant="body2" color="success.main" sx={{ mt: 1, fontWeight: 500 }}>
+						{successMessage}
+					</Typography>
 				)}
-			</div>
-		</div>
+			</Paper>
+		</Box>
 	);
 }

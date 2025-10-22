@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
 import NewUser from '@/pages/AdminDashboard/NewUser';
 import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
@@ -21,6 +23,7 @@ import {
 } from 'react-router-dom';
 
 import SurveyComponent from '@/pages/Survey/SurveyComponent';
+import { muiTheme } from './theme/muiTheme';
 
 import { hasAuthToken } from './utils/authTokenHandler';
 import { useSurveyStore } from './stores/useSurveyStore';
@@ -41,145 +44,148 @@ function App() {
 	};
 
 	return (
-		<Router>
-			<Routes>
-				<Route path="/" element={<Navigate replace to="/login" />} />
-				<Route
-					path="/login"
-					element={<Login onLogin={handleLogin} />}
-				/>
-				<Route path="/survey/:id/survey"
-					element={
-						isLoggedIn ? (
-						<SurveyComponent onLogout={handleLogout} />
-						) : (
-						<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route path="/signup" element={<Signup />} />
-				<Route
-					path="/dashboard"
-					element={
-						isLoggedIn ? (
-							<LandingPage onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/survey"
-					element={
-						isLoggedIn ? (
+		<ThemeProvider theme={muiTheme}>
+			<CssBaseline />
+			<Router>
+				<Routes>
+					<Route path="/" element={<Navigate replace to="/login" />} />
+					<Route
+						path="/login"
+						element={<Login onLogin={handleLogin} />}
+					/>
+					<Route path="/survey/:id/survey"
+						element={
+							isLoggedIn ? (
 							<SurveyComponent onLogout={handleLogout} />
-						) : (
+							) : (
 							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/admin-dashboard"
-					element={
-						isLoggedIn ? (
-							<AdminDashboard onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/admin-edit-profile/:id"
-					element={
-						isLoggedIn ? (
-							<AdminEditProfile onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/add-new-user"
-					element={
-						isLoggedIn ? (
-							<NewUser onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/survey-entries"
-					element={
-						isLoggedIn ? (
-							<SurveyEntryDashboard onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/qrcode"
-					element={
-						isLoggedIn ? (
-							<QrPage onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/past-entries"
-					element={
-						isLoggedIn ? (
-							<PastEntries onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/survey/:id"
-					element={
-						isLoggedIn ? (
-							<SurveyDetails onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/survey/:id/edit"
-					element={
-						isLoggedIn ? (
-							<SurveyEdit />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/apply-referral"
-					element={
-						isLoggedIn ? (
-							<ApplyReferral onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-				<Route
-					path="/view-profile"
-					element={
-						isLoggedIn ? (
-							<ViewProfile onLogout={handleLogout} />
-						) : (
-							<Navigate replace to="/login" />
-						)
-					}
-				/>
-			</Routes>
-		</Router>
+							)
+						}
+					/>
+					<Route path="/signup" element={<Signup />} />
+					<Route
+						path="/dashboard"
+						element={
+							isLoggedIn ? (
+								<LandingPage onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/survey"
+						element={
+							isLoggedIn ? (
+								<SurveyComponent onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/admin-dashboard"
+						element={
+							isLoggedIn ? (
+								<AdminDashboard onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/admin-edit-profile/:id"
+						element={
+							isLoggedIn ? (
+								<AdminEditProfile onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/add-new-user"
+						element={
+							isLoggedIn ? (
+								<NewUser onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/survey-entries"
+						element={
+							isLoggedIn ? (
+								<SurveyEntryDashboard onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/qrcode"
+						element={
+							isLoggedIn ? (
+								<QrPage onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/past-entries"
+						element={
+							isLoggedIn ? (
+								<PastEntries onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/survey/:id"
+						element={
+							isLoggedIn ? (
+								<SurveyDetails onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/survey/:id/edit"
+						element={
+							isLoggedIn ? (
+								<SurveyEdit />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/apply-referral"
+						element={
+							isLoggedIn ? (
+								<ApplyReferral onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+					<Route
+						path="/view-profile"
+						element={
+							isLoggedIn ? (
+								<ViewProfile onLogout={handleLogout} />
+							) : (
+								<Navigate replace to="/login" />
+							)
+						}
+					/>
+				</Routes>
+			</Router>
+		</ThemeProvider>
 	);
 }
 
