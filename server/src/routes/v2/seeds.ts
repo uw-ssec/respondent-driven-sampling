@@ -9,6 +9,23 @@ import { AuthenticatedRequest } from '@/types/auth';
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /api/v2/seeds:
+ *   get:
+ *     summary: Get all seeds
+ *     description: Retrieve all seeds with optional query filters
+ *     tags: [Seeds]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Seeds retrieved successfully
+ *       403:
+ *         description: Forbidden - insufficient permissions
+ *       500:
+ *         description: Internal server error
+ */
 router.get(
 	'/',
 	[auth], // TODO: add `read_seeds` permission check
@@ -28,6 +45,32 @@ router.get(
 	}
 );
 
+/**
+ * @swagger
+ * /api/v2/seeds/{objectId}:
+ *   get:
+ *     summary: Get seed by ID
+ *     description: Retrieve a specific seed by its ObjectId
+ *     tags: [Seeds]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: objectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Seed ObjectId
+ *     responses:
+ *       200:
+ *         description: Seed retrieved successfully
+ *       403:
+ *         description: Forbidden - insufficient permissions
+ *       404:
+ *         description: Seed not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get(
 	'/:objectId',
 	[auth], // TODO: add `read_seeds` permission check
@@ -49,6 +92,41 @@ router.get(
 	}
 );
 
+/**
+ * @swagger
+ * /api/v2/seeds:
+ *   post:
+ *     summary: Create seed
+ *     description: Create a new seed. A unique `surveyCode` is generated server-side; clients provide a `locationObjectId` and optionally `isFallback`.
+ *     tags: [Seeds]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - locationObjectId
+ *             properties:
+ *               locationObjectId:
+ *                 type: string
+ *                 description: Mongoose ObjectId of the location
+ *               isFallback:
+ *                 type: boolean
+ *                 default: false
+ *                 description: Whether this seed was generated as a fallback
+ *     responses:
+ *       201:
+ *         description: Seed created successfully
+ *       403:
+ *         description: Forbidden - insufficient permissions
+ *       409:
+ *         description: Conflict - survey code already exists
+ *       500:
+ *         description: Internal server error
+ */
 router.post(
 	'/',
 	[auth, validate(createSeedSchema)], // TODO: add `create_seeds` permission check
@@ -78,6 +156,32 @@ router.post(
 
 // No update route (intentional) - seeds are immutable once created
 
+/**
+ * @swagger
+ * /api/v2/seeds/{objectId}:
+ *   delete:
+ *     summary: Delete seed
+ *     description: Delete a specific seed by its ObjectId
+ *     tags: [Seeds]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: objectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Seed ObjectId
+ *     responses:
+ *       200:
+ *         description: Seed deleted successfully
+ *       403:
+ *         description: Forbidden - insufficient permissions
+ *       404:
+ *         description: Seed not found
+ *       500:
+ *         description: Internal server error
+ */
 router.delete(
 	'/:objectId',
 	[auth], // TODO: add `delete_seeds` permission check
