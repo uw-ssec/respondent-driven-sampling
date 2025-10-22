@@ -23,7 +23,7 @@ export async function getParentSurveyCode(
 export async function generateUniqueChildSurveyCodes(): Promise<Array<string>> {
 	for (let retries = 0; retries < 3; retries++) {
 		const codes = await Promise.all(Array.from({ length: 3 }, () =>
-			generateUniqueReferralCode()
+			generateUniqueSurveyCode()
 		));
 		// Enforce uniqueness within the array
 		if (isUniqueSurveyCodeArray(codes)) {
@@ -51,7 +51,7 @@ function isUniqueSurveyCodeArray(codes: Array<string>): boolean {
  * @returns string - A unique 6-character alphanumeric code in uppercase
  * @throws {Error} - Throws SURVEY_CODE_GENERATION_ERROR if unable to generate unique code after 3 retries
  */
-export async function generateUniqueReferralCode(): Promise<string> {
+export async function generateUniqueSurveyCode(): Promise<string> {
 	for (let retries = 0; retries < 3; retries++) {
 		const code = Math.random().toString(36).substring(2, 8).toUpperCase();
 		// Enforce individual code uniqueness
