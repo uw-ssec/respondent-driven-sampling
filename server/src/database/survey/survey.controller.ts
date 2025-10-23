@@ -20,11 +20,11 @@ export async function getParentSurveyCode(
  * @returns Array<string> - The generated child survey codes
  * @throws {Error} - Throws SURVEY_CODE_GENERATION_ERROR if unable to generate unique codes after 3 retries
  */
-export function generateUniqueChildSurveyCodes(): Array<string> {
+export async function generateUniqueChildSurveyCodes(): Promise<Array<string>> {
 	for (let retries = 0; retries < 3; retries++) {
-		const codes = Array.from({ length: 3 }, () =>
-			generateUniqueReferralCode()
-		);
+		const codes = await Promise.all(Array.from({ length: 3 }, () =>
+			generateUniqueSurveyCode()
+		));
 		// Enforce uniqueness within the array
 		if (isUniqueSurveyCodeArray(codes)) {
 			return codes;
@@ -51,11 +51,11 @@ function isUniqueSurveyCodeArray(codes: Array<string>): boolean {
  * @returns string - A unique 6-character alphanumeric code in uppercase
  * @throws {Error} - Throws SURVEY_CODE_GENERATION_ERROR if unable to generate unique code after 3 retries
  */
-export function generateUniqueReferralCode(): string {
+export async function generateUniqueSurveyCode(): Promise<string> {
 	for (let retries = 0; retries < 3; retries++) {
 		const code = Math.random().toString(36).substring(2, 8).toUpperCase();
 		// Enforce individual code uniqueness
-		if (isUniqueSurveyCode(code)) {
+		if (await isUniqueSurveyCode(code)) {
 			return code;
 		}
 	}
@@ -69,9 +69,9 @@ export function generateUniqueReferralCode(): string {
  * @param code - The survey code to check for uniqueness
  * @returns boolean - true if the code is unique, false if it already exists
  */
-function isUniqueSurveyCode(code: string): boolean {
+async function isUniqueSurveyCode(code: string): Promise<boolean> {
 	return (
-		Survey.findOne({ surveyCode: code }) === null &&
-		Survey.findOne({ childSurveyCodes: { $in: [code] } }) === null
+		await Survey.findOne({ surveyCode: code }) === null &&
+		await Survey.findOne({ childSurveyCodes: { $in: [code] } }) === null
 	);
 }
