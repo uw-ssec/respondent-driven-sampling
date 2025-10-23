@@ -9,13 +9,15 @@ import {
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 
+import Location from '../../../location/mongoose/location.model';
 import Survey from '../../../survey/mongoose/survey.model';
-import { SiteLocation, SYSTEM_SURVEY_CODE } from '../../../utils/constants';
+import { HubType, LocationType, SiteLocation, SYSTEM_SURVEY_CODE } from '../../../utils/constants';
 import { errors } from '../../../utils/errors';
 import Seed from '../seed.model';
 
 describe('Seed Model', () => {
 	let mongoServer: MongoMemoryServer;
+	let testLocation: any;
 
 	beforeAll(async () => {
 		// Connect once at the start
@@ -33,13 +35,23 @@ describe('Seed Model', () => {
 		// Clear the database before each test
 		await Seed.deleteMany({});
 		await Survey.deleteMany({});
+		await Location.deleteMany({});
+
+		// Create a test location for each test
+		const location = new Location({
+			hubName: 'Test Hub',
+			hubType: HubType.ESTABLISHMENT,
+			locationType: LocationType.ROOFTOP,
+			address: '123 Test St'
+		});
+		testLocation = await location.save();
 	});
 
 	// Test schema validation
 	test('valid seed creation (basic)', async () => {
 		const validSeed = {
 			surveyCode: '123456',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: testLocation._id,
 			isFallback: false
 		};
 
@@ -48,7 +60,7 @@ describe('Seed Model', () => {
 
 		expect(savedSeed._id).toBeDefined();
 		expect(savedSeed.surveyCode).toBe('123456');
-		expect(savedSeed.locationObjectId).toEqual(validSeed.locationObjectId);
+		expect(savedSeed.locationObjectId).toEqual(testLocation._id);
 		expect(savedSeed.isFallback).toBe(false);
 		expect(savedSeed.createdAt).toBeDefined();
 	});
@@ -56,7 +68,7 @@ describe('Seed Model', () => {
 	test('valid seed creation with default isFallback', async () => {
 		const validSeed = {
 			surveyCode: '789012',
-			locationObjectId: new mongoose.Types.ObjectId()
+			locationObjectId: testLocation._id
 			// isFallback not provided, should default to false
 		};
 
@@ -87,11 +99,24 @@ describe('Seed Model', () => {
 		await expect(seed.save()).rejects.toThrow();
 	});
 
+	test('invalid seed - non-existent locationObjectId', async () => {
+		const invalidSeed = {
+			surveyCode: '123456',
+			locationObjectId: new mongoose.Types.ObjectId(), // Non-existent location
+			isFallback: false
+		};
+
+		const seed = new Seed(invalidSeed);
+		await expect(seed.save()).rejects.toThrow(
+			errors.LOCATION_NOT_FOUND.message
+		);
+	});
+
 	// Test uniqueness constraints
 	test('duplicate surveyCode should fail', async () => {
 		const seedData = {
 			surveyCode: '123456',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: testLocation._id,
 			isFallback: false
 		};
 
@@ -111,14 +136,14 @@ describe('Seed Model', () => {
 			surveyCode: '123456',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: new mongoose.Types.ObjectId(),
-			siteLocation: SiteLocation.LOCATION_A
+			locationObjectId: testLocation._id
 		});
 		await survey.save();
 
 		// Try to create seed with same surveyCode
 		const seed = new Seed({
 			surveyCode: '123456',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: testLocation._id,
 			isFallback: false
 		});
 
@@ -133,7 +158,7 @@ describe('Seed Model', () => {
 			surveyCode: 'PARENT123',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: new mongoose.Types.ObjectId(),
-			siteLocation: SiteLocation.LOCATION_A,
+			locationObjectId: testLocation._id,
 			childSurveyCodes: ['123456', '789012']
 		});
 		await survey.save();
@@ -141,7 +166,7 @@ describe('Seed Model', () => {
 		// Try to create seed with surveyCode that exists in childSurveyCodes
 		const seed = new Seed({
 			surveyCode: '123456',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: testLocation._id,
 			isFallback: false
 		});
 
@@ -156,14 +181,14 @@ describe('Seed Model', () => {
 			surveyCode: 'DIFFERENT',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: new mongoose.Types.ObjectId(),
-			siteLocation: SiteLocation.LOCATION_A
+			locationObjectId: testLocation._id
 		});
 		await survey.save();
 
 		// Create seed with unique surveyCode
 		const seed = new Seed({
 			surveyCode: '123456',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: testLocation._id,
 			isFallback: false
 		});
 
@@ -176,7 +201,7 @@ describe('Seed Model', () => {
 	test('automatic timestamps', async () => {
 		const seedData = {
 			surveyCode: '123456',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: testLocation._id,
 			isFallback: false
 		};
 
@@ -190,7 +215,7 @@ describe('Seed Model', () => {
 	test('default values are set correctly', async () => {
 		const seedData = {
 			surveyCode: '123456',
-			locationObjectId: new mongoose.Types.ObjectId()
+			locationObjectId: testLocation._id
 			// Not providing isFallback
 		};
 
@@ -205,7 +230,7 @@ describe('Seed Model', () => {
 	test('immutable: cannot update surveyCode after creation', async () => {
 		const seed = new Seed({
 			surveyCode: 'ORIGINAL',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: testLocation._id,
 			isFallback: false
 		});
 		const savedSeed = await seed.save();
@@ -220,7 +245,7 @@ describe('Seed Model', () => {
 	test('immutable: cannot update locationObjectId after creation', async () => {
 		const seed = new Seed({
 			surveyCode: 'ORIGINAL2',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: testLocation._id,
 			isFallback: false
 		});
 		const savedSeed = await seed.save();
@@ -235,7 +260,7 @@ describe('Seed Model', () => {
 	test('immutable: cannot update isFallback after creation', async () => {
 		const seed = new Seed({
 			surveyCode: 'ORIGINAL3',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: testLocation._id,
 			isFallback: false
 		});
 		const savedSeed = await seed.save();
@@ -249,16 +274,25 @@ describe('Seed Model', () => {
 		);
 	});
 
-	test('can create multiple seeds', async () => {
+	test('can create multiple seeds with different locations', async () => {
+		// Create a second location
+		const location2 = new Location({
+			hubName: 'Second Hub',
+			hubType: HubType.CHURCH,
+			locationType: LocationType.APPROXIMATE,
+			address: '456 Second St'
+		});
+		const savedLocation2 = await location2.save();
+
 		const seed1 = new Seed({
 			surveyCode: 'SEED001',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: testLocation._id,
 			isFallback: false
 		});
 
 		const seed2 = new Seed({
 			surveyCode: 'SEED002',
-			locationObjectId: new mongoose.Types.ObjectId(),
+			locationObjectId: savedLocation2._id,
 			isFallback: true
 		});
 
@@ -267,6 +301,29 @@ describe('Seed Model', () => {
 
 		expect(savedSeed1.isFallback).toBe(false);
 		expect(savedSeed2.isFallback).toBe(true);
+		expect(savedSeed1.surveyCode).not.toBe(savedSeed2.surveyCode);
+		expect(savedSeed1.locationObjectId).toEqual(testLocation._id);
+		expect(savedSeed2.locationObjectId).toEqual(savedLocation2._id);
+	});
+
+	test('can create multiple seeds with same location', async () => {
+		const seed1 = new Seed({
+			surveyCode: 'SEED001',
+			locationObjectId: testLocation._id,
+			isFallback: false
+		});
+
+		const seed2 = new Seed({
+			surveyCode: 'SEED002',
+			locationObjectId: testLocation._id,
+			isFallback: true
+		});
+
+		const savedSeed1 = await seed1.save();
+		const savedSeed2 = await seed2.save();
+
+		expect(savedSeed1.locationObjectId).toEqual(testLocation._id);
+		expect(savedSeed2.locationObjectId).toEqual(testLocation._id);
 		expect(savedSeed1.surveyCode).not.toBe(savedSeed2.surveyCode);
 	});
 });

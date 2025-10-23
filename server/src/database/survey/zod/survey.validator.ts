@@ -5,7 +5,7 @@ export const createSurveySchema = baseSurveySchema
 	.pick({
 		surveyCode: true,
 		createdByUserObjectId: true,
-		siteLocation: true,
+		locationObjectId: true,
 		responses: true,
 		isCompleted: true,
 		coordinates: true

@@ -35,4 +35,5 @@ export const locationValidationHook = async function (this: any, next: any) {
 
 export const injectSeedHooks = (schema: Schema) => {
 	schema.pre('save', uniquenessValidationHook);
+	schema.pre('save', locationValidationHook);
 };

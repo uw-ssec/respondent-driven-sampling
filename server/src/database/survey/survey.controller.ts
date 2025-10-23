@@ -52,7 +52,7 @@ function isUniqueSurveyCodeArray(codes: Array<string>): boolean {
  * @throws {Error} - Throws SURVEY_CODE_GENERATION_ERROR if unable to generate unique code after 3 retries
  */
 export async function generateUniqueSurveyCode(): Promise<string> {
-    // TODO: Implement a more robust code generation algorithm
+	// TODO: Implement a more robust code generation algorithm
 	for (let retries = 0; retries < 3; retries++) {
 		const code = Math.random().toString(36).substring(2, 8).toUpperCase();
 		// Enforce individual code uniqueness

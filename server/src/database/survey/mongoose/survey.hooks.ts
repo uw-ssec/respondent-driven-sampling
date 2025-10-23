@@ -117,4 +117,5 @@ export const injectSurveyHooks = (schema: Schema) => {
 	schema.pre('save', uniquenessValidationHook);
 	schema.pre('save', chronologicalValidationHook);
 	schema.pre('save', immutabilityValidationHook);
+	schema.pre('save', locationValidationHook);
 };

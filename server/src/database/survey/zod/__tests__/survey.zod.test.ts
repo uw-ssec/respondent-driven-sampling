@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 import { Types } from 'mongoose';
 
-import { SiteLocation, SYSTEM_SURVEY_CODE } from '../../../utils/constants';
+import { SYSTEM_SURVEY_CODE } from '../../../utils/constants';
 import {
 	createSurveySchema,
 	readSurveySchema,
@@ -9,6 +9,7 @@ import {
 } from '../survey.validator';
 
 const validObjectId = new Types.ObjectId().toString();
+const validLocationObjectId = new Types.ObjectId().toString();
 
 const validCreateData = {
 	surveyCode: '123456',
@@ -19,7 +20,7 @@ const validCreateData = {
 		latitude: 40.7128,
 		longitude: -74.006
 	},
-	siteLocation: SiteLocation.LOCATION_A
+	locationObjectId: validLocationObjectId
 };
 
 describe('Survey Type Validation Schemas', () => {
@@ -36,7 +37,7 @@ describe('Survey Type Validation Schemas', () => {
 			const invalidData = {
 				surveyCode: '123456',
 				createdByUserObjectId: validObjectId,
-				siteLocation: SiteLocation.LOCATION_A,
+				locationObjectId: validLocationObjectId,
 				responses: {
 					question1: 'answer1'
 				},
@@ -77,20 +78,25 @@ describe('Survey Type Validation Schemas', () => {
 			expect(result.success).toBe(false);
 		});
 
-		test('should reject invalid site location', () => {
+		test('should reject invalid location objectId', () => {
 			const invalidData = {
 				...validCreateData,
-				siteLocation: 'InvalidLocation'
+				locationObjectId: 'invalid-object-id'
 			};
 
 			const result = createSurveySchema.safeParse(invalidData);
 			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.error.issues[0].message).toContain(
+					'Invalid location objectId'
+				);
+			}
 		});
 
 		test('should accept minimal required fields', () => {
 			const minimalData = {
 				createdByUserObjectId: validObjectId,
-				siteLocation: SiteLocation.LOCATION_A,
+				locationObjectId: validLocationObjectId,
 				responses: { question1: 'answer1', question2: 'answer2' }
 			};
 
@@ -164,7 +170,7 @@ describe('Survey Type Validation Schemas', () => {
 		test('should validate with all optional filters', () => {
 			const validData = {
 				createdByUserObjectId: validObjectId,
-				siteLocation: SiteLocation.LOCATION_A,
+				locationObjectId: validLocationObjectId,
 				isCompleted: true,
 				parentSurveyCode: '123456',
 				createdAt: new Date('2023-01-01'),
@@ -188,7 +194,7 @@ describe('Survey Type Validation Schemas', () => {
 		test('should validate with partial filters', () => {
 			const partialData = {
 				isCompleted: false,
-				siteLocation: SiteLocation.LOCATION_A
+				locationObjectId: validLocationObjectId
 			};
 
 			const result = readSurveySchema.safeParse(partialData);
@@ -209,13 +215,18 @@ describe('Survey Type Validation Schemas', () => {
 			}
 		});
 
-		test('should reject invalid site location', () => {
+		test('should reject invalid location objectId', () => {
 			const invalidData = {
-				siteLocation: 'InvalidLocation'
+				locationObjectId: 'invalid-id'
 			};
 
 			const result = readSurveySchema.safeParse(invalidData);
 			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.error.issues[0].message).toContain(
+					'Invalid location objectId'
+				);
+			}
 		});
 
 		test('should reject invalid isCompleted type', () => {

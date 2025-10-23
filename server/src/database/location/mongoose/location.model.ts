@@ -1,5 +1,6 @@
-import { HubType, LocationType } from '@database/utils/constants';
 import mongoose, { InferSchemaType, Model, Schema } from 'mongoose';
+
+import { HubType, LocationType } from '@/database/utils/constants';
 
 const locationSchema = new Schema({
 	hubName: { type: String, required: true, unique: true },
