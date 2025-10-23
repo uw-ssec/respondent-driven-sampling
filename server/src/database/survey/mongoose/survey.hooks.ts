@@ -1,5 +1,7 @@
 import { Schema } from 'mongoose';
 
+import Location from '@/database/location/mongoose/location.model';
+
 import { SYSTEM_SURVEY_CODE } from '../../utils/constants';
 import { errors } from '../../utils/errors';
 
@@ -98,6 +100,14 @@ export const immutabilityValidationHook = async function (
 		this.isModified('childSurveyCodes')
 	) {
 		next(errors.IMMUTABLE_FIELD_VIOLATION);
+	}
+	next();
+};
+
+export const locationValidationHook = async function (this: any, next: any) {
+	const location = await Location.findById(this.locationObjectId);
+	if (!location) {
+		return next(errors.LOCATION_NOT_FOUND);
 	}
 	next();
 };

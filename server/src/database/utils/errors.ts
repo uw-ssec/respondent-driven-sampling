@@ -139,5 +139,10 @@ export const errors = {
 		'SURVEY_CODE_GENERATION_ERROR',
 		'Could not generate valid survey code(s) after maximum retry attempts. Please try again.',
 		500
+	),
+	LOCATION_NOT_FOUND: new ErrorCode(
+		'LOCATION_NOT_FOUND',
+		'Could not find location with matching object ID',
+		404
 	)
 };

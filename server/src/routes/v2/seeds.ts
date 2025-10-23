@@ -2,7 +2,7 @@ import express, { NextFunction, Response } from 'express';
 
 import Seed, { ISeed } from '@/database/seed/mongoose/seed.model';
 import { createSeedSchema } from '@/database/seed/zod/seed.validator';
-import { generateUniqueReferralCode } from '@/database/survey/survey.controller';
+import { generateUniqueSurveyCode } from '@/database/survey/survey.controller';
 import { auth } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
 import { AuthenticatedRequest } from '@/types/auth';
@@ -133,7 +133,7 @@ router.post(
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 		try {
 			// Generate a unique survey code for the seed
-			const surveyCode = generateUniqueReferralCode();
+			const surveyCode = await generateUniqueSurveyCode();
 
 			// Create the seed data with information from the request
 			const seedData: ISeed = { surveyCode, ...req.body };
