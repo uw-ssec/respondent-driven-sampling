@@ -14,6 +14,7 @@ import pageRoutes from '@/routes/v1/pages';
 import surveyRoutes from '@/routes/v1/surveys';
 import surveyRoutesV2 from '@/routes/v2/surveys';
 import seedsRoutesV2 from '@/routes/v2/seeds';
+import locationsRoutesV2 from '@/routes/v2/locations';
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -150,6 +151,7 @@ app.use('/api/pages', securityWrapper(pageRoutes));
 app.use('/api/surveys', securityWrapper(surveyRoutes));
 app.use('/api/v2/surveys', securityWrapper(surveyRoutesV2));
 app.use('/api/v2/seeds', securityWrapper(seedsRoutesV2));
+app.use('/api/v2/locations', securityWrapper(locationsRoutesV2));
 
 // Serve static files with security headers
 const clientBuildPath = path.join(__dirname, '../dist');
