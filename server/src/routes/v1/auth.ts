@@ -4,7 +4,7 @@ import express, { Request, Response } from 'express';
 import twilio from 'twilio';
 
 import { auth } from '@/middleware/auth';
-import User from '@/models/users';
+import User from '@/database/user/mongoose/user.model';
 import {
 	AuthenticatedRequest,
 	LoginRequest,
@@ -13,6 +13,7 @@ import {
 } from '@/types/auth';
 import { generateAuthToken } from '@/utils/authTokenHandler';
 import { ACTIONS, SUBJECTS } from '@/utils/roleDefinitions';
+import { ApprovalStatus } from '@/database/utils/constants';
 
 const router = express.Router();
 
@@ -117,7 +118,7 @@ router.post(
 			const token = generateAuthToken(
 				newUser.firstName,
 				newUser.role,
-				newUser.employeeId
+				newUser.id
 			);
 
 			res.json({
@@ -155,7 +156,7 @@ router.post(
 				});
 				return;
 			}
-			if (user.approvalStatus !== 'Approved') {
+			if (user.approval?.status !== ApprovalStatus.APPROVED) {
 				res.status(403).json({
 					message:
 						'Account not approved yet. Please contact your admin.'
@@ -165,7 +166,7 @@ router.post(
 			const token = generateAuthToken(
 				user.firstName,
 				user.role,
-				user.employeeId
+				user.id
 			);
 
 			res.json({

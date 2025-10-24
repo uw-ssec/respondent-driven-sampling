@@ -4,7 +4,7 @@ import { JwtPayload } from 'jsonwebtoken';
 
 export interface AuthenticatedRequest extends Request {
 	user?: {
-		employeeId: string;
+		userObjectId: string;
 		role: string;
 		firstName: string;
 	};
@@ -12,7 +12,7 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export interface JWTPayload extends JwtPayload {
-	employeeId: string;
+	userObjectId: string;
 	role: string;
 }
 
