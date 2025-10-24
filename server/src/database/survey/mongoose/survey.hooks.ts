@@ -1,6 +1,9 @@
 import { Schema } from 'mongoose';
 
-import Location from '@/database/location/mongoose/location.model';
+import {
+	locationExistsValidationHook,
+	userExistsValidationHook
+} from '@/database/utils/hooks';
 
 import { SYSTEM_SURVEY_CODE } from '../../utils/constants';
 import { errors } from '../../utils/errors';
@@ -104,18 +107,11 @@ export const immutabilityValidationHook = async function (
 	next();
 };
 
-export const locationValidationHook = async function (this: any, next: any) {
-	const location = await Location.findById(this.locationObjectId);
-	if (!location) {
-		return next(errors.LOCATION_NOT_FOUND);
-	}
-	next();
-};
-
 // Function to register all hooks on a schema
 export const injectSurveyHooks = (schema: Schema) => {
 	schema.pre('save', uniquenessValidationHook);
 	schema.pre('save', chronologicalValidationHook);
 	schema.pre('save', immutabilityValidationHook);
-	schema.pre('save', locationValidationHook);
+	schema.pre('save', locationExistsValidationHook('locationObjectId'));
+	schema.pre('save', userExistsValidationHook('createdByUserObjectId'));
 };

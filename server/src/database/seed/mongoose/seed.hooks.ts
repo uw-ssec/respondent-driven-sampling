@@ -1,8 +1,8 @@
 import { Schema } from 'mongoose';
 
-import Location from '@/database/location/mongoose/location.model';
 import Survey from '@/database/survey/mongoose/survey.model';
 import { errors } from '@/database/utils/errors';
+import { locationExistsValidationHook } from '@/database/utils/hooks';
 
 export const uniquenessValidationHook = async function (this: any, next: any) {
 	if (this.isNew) {
@@ -25,15 +25,7 @@ export const uniquenessValidationHook = async function (this: any, next: any) {
 	next();
 };
 
-export const locationValidationHook = async function (this: any, next: any) {
-	const location = await Location.findById(this.locationObjectId);
-	if (!location) {
-		return next(errors.LOCATION_NOT_FOUND);
-	}
-	next();
-};
-
 export const injectSeedHooks = (schema: Schema) => {
 	schema.pre('save', uniquenessValidationHook);
-	schema.pre('save', locationValidationHook);
+	schema.pre('save', locationExistsValidationHook('locationObjectId'));
 };

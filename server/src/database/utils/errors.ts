@@ -140,9 +140,9 @@ export const errors = {
 		'Could not generate valid survey code(s) after maximum retry attempts. Please try again.',
 		500
 	),
-	LOCATION_NOT_FOUND: new ErrorCode(
-		'LOCATION_NOT_FOUND',
-		'Could not find location with matching object ID',
-		404
+	INVALID_FIELD_NAME: new ErrorCode(
+		'INVALID_FIELD_NAME',
+		'Field name is not a valid key on this document',
+		400
 	)
 };

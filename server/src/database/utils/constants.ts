@@ -21,14 +21,15 @@ export enum LocationType {
 
 // ---- USER CONSTANTS ----
 
-// export enum ApprovalStatus {
-//     PENDING = 'Pending',
-//     APPROVED = 'Approved',
-//     REJECTED = 'Rejected'
-// }
+export enum ApprovalStatus {
+	PENDING = 'PENDING',
+	APPROVED = 'APPROVED',
+	REJECTED = 'REJECTED'
+}
 
-// export enum Role {
-//     VOLUNTEER = 'Volunteer',
-//     MANAGER = 'Manager',
-//     ADMIN = 'Admin'
-// }
+export enum Role {
+	VOLUNTEER = 'VOLUNTEER',
+	MANAGER = 'MANAGER',
+	ADMIN = 'ADMIN',
+	SUPER_ADMIN = 'SUPER_ADMIN' // super admin de-prioritized for now
+}

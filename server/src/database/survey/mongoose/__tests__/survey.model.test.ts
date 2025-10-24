@@ -10,13 +10,19 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 
 import Location from '../../../location/mongoose/location.model';
-import { HubType, LocationType, SYSTEM_SURVEY_CODE } from '../../../utils/constants';
+import User from '../../../user/mongoose/user.model';
+import {
+	HubType,
+	LocationType,
+	SYSTEM_SURVEY_CODE
+} from '../../../utils/constants';
 import { errors } from '../../../utils/errors';
 import Survey from '../survey.model';
 
 describe('Survey Model', () => {
 	let mongoServer: MongoMemoryServer;
 	let testLocation: any;
+	let testUser: any; // Add this
 
 	beforeAll(async () => {
 		// Connect once at the start
@@ -34,6 +40,7 @@ describe('Survey Model', () => {
 		// Clear the database before each test
 		await Survey.deleteMany({});
 		await Location.deleteMany({});
+		await User.deleteMany({}); // Add this
 
 		// Create a test location for each test
 		const location = new Location({
@@ -43,6 +50,22 @@ describe('Survey Model', () => {
 			address: '123 Test St'
 		});
 		testLocation = await location.save();
+
+		// Create a test user for each test
+		const user = new User({
+			firstName: 'Test',
+			lastName: 'User',
+			email: 'test@example.com',
+			phone: '1234567890',
+			role: 'VOLUNTEER',
+			approval: {
+				status: 'APPROVED',
+				approvedByUserObjectId: new mongoose.Types.ObjectId() // Self-approved
+			},
+			locationObjectId: testLocation._id,
+			permissions: []
+		});
+		testUser = await user.save();
 	});
 
 	// Test schema validation (using system survey code as parent to avoid parent checks)
@@ -52,7 +75,7 @@ describe('Survey Model', () => {
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			childSurveyCodes: ['111111', '222222', '333333'],
 			responses: { question1: 'answer1', question2: 'answer2' },
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			coordinates: {
 				latitude: 40.7128,
@@ -89,14 +112,29 @@ describe('Survey Model', () => {
 		const invalidSurvey = {
 			surveyCode: '123456',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: new mongoose.Types.ObjectId() // Non-existent location
 		};
 
 		const survey = new Survey(invalidSurvey);
 
 		await expect(survey.save()).rejects.toThrow(
-			errors.LOCATION_NOT_FOUND.message
+			errors.OBJECT_ID_NOT_FOUND.message
+		);
+	});
+
+	test('invalid survey - non-existent createdByUserObjectId', async () => {
+		const invalidSurvey = {
+			surveyCode: '123456',
+			parentSurveyCode: SYSTEM_SURVEY_CODE,
+			createdByUserObjectId: new mongoose.Types.ObjectId(), // Non-existent user
+			locationObjectId: testLocation._id
+		};
+
+		const survey = new Survey(invalidSurvey);
+
+		await expect(survey.save()).rejects.toThrow(
+			errors.OBJECT_ID_NOT_FOUND.message
 		);
 	});
 
@@ -105,7 +143,7 @@ describe('Survey Model', () => {
 		const surveyData = {
 			surveyCode: '123456',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
 		};
 
@@ -123,7 +161,7 @@ describe('Survey Model', () => {
 		const surveyData1 = {
 			surveyCode: '123456',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			childSurveyCodes: ['111111', '222222', '333333']
 		};
@@ -131,7 +169,7 @@ describe('Survey Model', () => {
 		const surveyData2 = {
 			surveyCode: '789012',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			childSurveyCodes: ['111111', '444444', '555555']
 		};
@@ -151,7 +189,7 @@ describe('Survey Model', () => {
 		const surveyData = {
 			surveyCode: '123456',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
 		};
 
@@ -180,7 +218,7 @@ describe('Survey Model', () => {
 		const surveyData = {
 			surveyCode: '123456',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
 			// Not providing responses, isCompleted, generatedSurveyCodes
 		};
@@ -198,7 +236,7 @@ describe('Survey Model', () => {
 		const parent = new Survey({
 			surveyCode: 'PARENT1',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			childSurveyCodes: ['CHILD1A', 'CHILD1B', 'CHILD1C']
 		});
@@ -207,7 +245,7 @@ describe('Survey Model', () => {
 		const child = new Survey({
 			surveyCode: 'CHILD1A',
 			parentSurveyCode: savedParent.surveyCode,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			childSurveyCodes: ['CHILD1D', 'CHILD1E', 'CHILD1F']
 		});
@@ -221,7 +259,7 @@ describe('Survey Model', () => {
 		const parent = new Survey({
 			surveyCode: 'PARENT2',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
 		});
 		const savedParent = await parent.save();
@@ -238,7 +276,7 @@ describe('Survey Model', () => {
 		const child = new Survey({
 			surveyCode: 'CHILD2A',
 			parentSurveyCode: savedParent.surveyCode,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
 		});
 
@@ -251,7 +289,7 @@ describe('Survey Model', () => {
 		const child = new Survey({
 			surveyCode: 'CHILD3A',
 			parentSurveyCode: '999999',
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
 		});
 
@@ -265,7 +303,7 @@ describe('Survey Model', () => {
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
 			childSurveyCodes: ['111111', '222222', '333333']
@@ -283,7 +321,7 @@ describe('Survey Model', () => {
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL2',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
 			childSurveyCodes: ['444444', '555555', '666666']
@@ -301,7 +339,7 @@ describe('Survey Model', () => {
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL3',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
 			childSurveyCodes: ['777777', '888888', '999999']
@@ -319,7 +357,7 @@ describe('Survey Model', () => {
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL4',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
 			childSurveyCodes: ['AAA111', 'BBB222', 'CCC333']
@@ -338,7 +376,7 @@ describe('Survey Model', () => {
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL5',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
 			childSurveyCodes: ['DDD444', 'EEE555', 'FFF666']
@@ -356,7 +394,7 @@ describe('Survey Model', () => {
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL6',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
 			childSurveyCodes: ['GGG777', 'HHH888', 'III999'],
@@ -375,7 +413,7 @@ describe('Survey Model', () => {
 		const survey = new Survey({
 			surveyCode: 'MUTABLE1',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
 			childSurveyCodes: ['JJJ000', 'KKK111', 'LLL222'],
@@ -411,14 +449,14 @@ describe('Survey Model', () => {
 		const survey1 = new Survey({
 			surveyCode: 'SURVEY1',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
 		});
 
 		const survey2 = new Survey({
 			surveyCode: 'SURVEY2',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id,
 			locationObjectId: savedLocation2._id
 		});
 

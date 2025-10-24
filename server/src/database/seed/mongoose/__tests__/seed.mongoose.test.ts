@@ -11,13 +11,19 @@ import mongoose from 'mongoose';
 
 import Location from '../../../location/mongoose/location.model';
 import Survey from '../../../survey/mongoose/survey.model';
-import { HubType, LocationType, SiteLocation, SYSTEM_SURVEY_CODE } from '../../../utils/constants';
+import User from '../../../user/mongoose/user.model';
+import {
+	HubType,
+	LocationType,
+	SYSTEM_SURVEY_CODE
+} from '../../../utils/constants';
 import { errors } from '../../../utils/errors';
 import Seed from '../seed.model';
 
 describe('Seed Model', () => {
 	let mongoServer: MongoMemoryServer;
 	let testLocation: any;
+	let testUser: any; // Add this
 
 	beforeAll(async () => {
 		// Connect once at the start
@@ -36,6 +42,7 @@ describe('Seed Model', () => {
 		await Seed.deleteMany({});
 		await Survey.deleteMany({});
 		await Location.deleteMany({});
+		await User.deleteMany({}); // Add this
 
 		// Create a test location for each test
 		const location = new Location({
@@ -45,6 +52,22 @@ describe('Seed Model', () => {
 			address: '123 Test St'
 		});
 		testLocation = await location.save();
+
+		// Create a test user for each test
+		const user = new User({
+			firstName: 'Test',
+			lastName: 'User',
+			email: 'test@example.com',
+			phone: '1234567890',
+			role: 'VOLUNTEER',
+			approval: {
+				status: 'APPROVED',
+				approvedByUserObjectId: new mongoose.Types.ObjectId() // Self-approved
+			},
+			locationObjectId: testLocation._id,
+			permissions: []
+		});
+		testUser = await user.save();
 	});
 
 	// Test schema validation
@@ -108,7 +131,7 @@ describe('Seed Model', () => {
 
 		const seed = new Seed(invalidSeed);
 		await expect(seed.save()).rejects.toThrow(
-			errors.LOCATION_NOT_FOUND.message
+			errors.OBJECT_ID_NOT_FOUND.message
 		);
 	});
 
@@ -135,7 +158,7 @@ describe('Seed Model', () => {
 		const survey = new Survey({
 			surveyCode: '123456',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id, // Changed from new mongoose.Types.ObjectId()
 			locationObjectId: testLocation._id
 		});
 		await survey.save();
@@ -157,7 +180,7 @@ describe('Seed Model', () => {
 		const survey = new Survey({
 			surveyCode: 'PARENT123',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id, // Changed from new mongoose.Types.ObjectId()
 			locationObjectId: testLocation._id,
 			childSurveyCodes: ['123456', '789012']
 		});
@@ -180,7 +203,7 @@ describe('Seed Model', () => {
 		const survey = new Survey({
 			surveyCode: 'DIFFERENT',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(),
+			createdByUserObjectId: testUser._id, // Changed from new mongoose.Types.ObjectId()
 			locationObjectId: testLocation._id
 		});
 		await survey.save();
@@ -325,5 +348,19 @@ describe('Seed Model', () => {
 		expect(savedSeed1.locationObjectId).toEqual(testLocation._id);
 		expect(savedSeed2.locationObjectId).toEqual(testLocation._id);
 		expect(savedSeed1.surveyCode).not.toBe(savedSeed2.surveyCode);
+	});
+
+	test('invalid survey creation - non-existent createdByUserObjectId', async () => {
+		const invalidSurvey = {
+			surveyCode: '123456',
+			parentSurveyCode: SYSTEM_SURVEY_CODE,
+			createdByUserObjectId: new mongoose.Types.ObjectId(), // Non-existent user
+			locationObjectId: testLocation._id
+		};
+
+		const survey = new Survey(invalidSurvey);
+		await expect(survey.save()).rejects.toThrow(
+			errors.OBJECT_ID_NOT_FOUND.message
+		);
 	});
 });
