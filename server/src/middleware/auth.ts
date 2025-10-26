@@ -52,7 +52,7 @@ export async function auth(
 			return;
 		}
 		
-		if (user.approval?.status !== ApprovalStatus.APPROVED) {
+		if (user.approvalStatus !== ApprovalStatus.APPROVED) {
 			res.status(403).json({
 				message:
 					'User account not approved yet. Please contact your admin.'

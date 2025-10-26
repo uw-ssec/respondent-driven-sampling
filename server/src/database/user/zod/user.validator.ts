@@ -12,7 +12,4 @@ export const createUserSchema = baseUserSchema
 	.strict();
 
 // Can update all fields except locationObjectId
-export const updateUserSchema = baseUserSchema
-	.partial()
-	.omit({ locationObjectId: true })
-	.strict();
+export const updateUserSchema = baseUserSchema.partial().strict();

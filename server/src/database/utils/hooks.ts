@@ -1,6 +1,5 @@
 import Location from '../location/mongoose/location.model';
 import User from '../user/mongoose/user.model';
-import { ApprovalStatus } from './constants';
 import { errors } from './errors';
 
 // Hooks shared across several models; wrapped to allow for custom field names for validation

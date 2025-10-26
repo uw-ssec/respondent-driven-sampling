@@ -156,7 +156,7 @@ router.post(
 				});
 				return;
 			}
-			if (user.approval?.status !== ApprovalStatus.APPROVED) {
+			if (user.approvalStatus !== ApprovalStatus.APPROVED) {
 				res.status(403).json({
 					message:
 						'Account not approved yet. Please contact your admin.'
