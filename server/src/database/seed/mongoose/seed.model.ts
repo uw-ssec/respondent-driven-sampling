@@ -1,6 +1,6 @@
 import mongoose, { InferSchemaType, Model, Schema } from 'mongoose';
 
-import { injectSeedHooks } from './seed.hooks';
+import { injectSeedHooks } from '@/database/seed/mongoose/seed.hooks';
 
 const seedSchema = new Schema(
 	{

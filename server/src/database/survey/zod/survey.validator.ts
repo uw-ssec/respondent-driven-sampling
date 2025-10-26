@@ -1,5 +1,5 @@
-import Survey from '../mongoose/survey.model';
-import { baseSurveySchema } from './survey.base';
+import Survey from '@/database/survey/mongoose/survey.model';
+import { baseSurveySchema } from '@/database/survey/zod/survey.base';
 
 export const createSurveySchema = baseSurveySchema
 	.pick({

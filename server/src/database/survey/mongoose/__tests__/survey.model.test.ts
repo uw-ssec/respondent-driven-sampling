@@ -7,13 +7,14 @@ import {
 	test
 } from '@jest/globals';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 import Location from '../../../location/mongoose/location.model';
 import User from '../../../user/mongoose/user.model';
 import {
 	HubType,
 	LocationType,
+	Role,
 	SYSTEM_SURVEY_CODE
 } from '../../../utils/constants';
 import { errors } from '../../../utils/errors';
@@ -22,7 +23,7 @@ import Survey from '../survey.model';
 describe('Survey Model', () => {
 	let mongoServer: MongoMemoryServer;
 	let testLocation: any;
-	let testUser: any; // Add this
+	let testUser: any;
 
 	beforeAll(async () => {
 		// Connect once at the start
@@ -40,7 +41,7 @@ describe('Survey Model', () => {
 		// Clear the database before each test
 		await Survey.deleteMany({});
 		await Location.deleteMany({});
-		await User.deleteMany({}); // Add this
+		await User.deleteMany({});
 
 		// Create a test location for each test
 		const location = new Location({
@@ -52,20 +53,20 @@ describe('Survey Model', () => {
 		testLocation = await location.save();
 
 		// Create a test user for each test
-		const user = new User({
+		const userData = {
 			firstName: 'Test',
 			lastName: 'User',
 			email: 'test@example.com',
 			phone: '1234567890',
-			role: 'VOLUNTEER',
-			approval: {
-				status: 'APPROVED',
-				approvedByUserObjectId: new mongoose.Types.ObjectId() // Self-approved
-			},
+			role: Role.VOLUNTEER,
+			approvalStatus: 'APPROVED',
+			approvedByUserObjectId: new mongoose.Types.ObjectId(),
 			locationObjectId: testLocation._id,
 			permissions: []
-		});
-		testUser = await user.save();
+		};
+
+		testUser = await User.insertMany([userData]);
+		testUser = testUser[0]; // insertMany returns an array
 	});
 
 	// Test schema validation (using system survey code as parent to avoid parent checks)
@@ -445,6 +446,10 @@ describe('Survey Model', () => {
 			address: '456 Second St'
 		});
 		const savedLocation2 = await location2.save();
+
+		// Ensure testUser exists and is saved
+		expect(testUser._id).toBeDefined();
+		expect(testLocation._id).toBeDefined();
 
 		const survey1 = new Survey({
 			surveyCode: 'SURVEY1',

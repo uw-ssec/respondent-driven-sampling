@@ -144,5 +144,6 @@ export const errors = {
 		'INVALID_FIELD_NAME',
 		'Field name is not a valid key on this document',
 		400
-	)
+	),
+	NULL_OBJECT_ID: new ErrorCode('NULL_OBJECT_ID', 'Object ID is null', 400)
 };

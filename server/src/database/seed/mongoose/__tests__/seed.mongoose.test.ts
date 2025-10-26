@@ -42,7 +42,7 @@ describe('Seed Model', () => {
 		await Seed.deleteMany({});
 		await Survey.deleteMany({});
 		await Location.deleteMany({});
-		await User.deleteMany({}); // Add this
+		await User.deleteMany({});
 
 		// Create a test location for each test
 		const location = new Location({
@@ -54,20 +54,19 @@ describe('Seed Model', () => {
 		testLocation = await location.save();
 
 		// Create a test user for each test
-		const user = new User({
+		const userData = {
 			firstName: 'Test',
 			lastName: 'User',
 			email: 'test@example.com',
 			phone: '1234567890',
 			role: 'VOLUNTEER',
-			approval: {
-				status: 'APPROVED',
-				approvedByUserObjectId: new mongoose.Types.ObjectId() // Self-approved
-			},
+			approvalStatus: 'APPROVED',
+			approvedByUserObjectId: new mongoose.Types.ObjectId(),
 			locationObjectId: testLocation._id,
 			permissions: []
-		});
-		testUser = await user.save();
+		};
+		testUser = await User.insertMany([userData]);
+		testUser = testUser[0];
 	});
 
 	// Test schema validation

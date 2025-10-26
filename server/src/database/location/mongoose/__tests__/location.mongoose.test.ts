@@ -19,6 +19,7 @@ describe('Location Model', () => {
 		// Connect once at the start
 		mongoServer = await MongoMemoryServer.create();
 		await mongoose.connect(mongoServer.getUri());
+		await Location.ensureIndexes();
 	});
 
 	afterAll(async () => {

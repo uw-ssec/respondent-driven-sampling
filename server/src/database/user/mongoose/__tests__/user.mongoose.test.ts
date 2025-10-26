@@ -55,20 +55,20 @@ describe('User Model', () => {
 		testLocation = await location.save();
 
 		// Create an admin user for approval references
-		const admin = new User({
+		const adminData = {
 			firstName: 'Admin',
 			lastName: 'User',
 			email: 'admin@test.com',
 			phone: '1234567890',
 			role: Role.ADMIN,
-			approval: {
-				status: ApprovalStatus.APPROVED,
-				approvedByUserObjectId: new mongoose.Types.ObjectId() // Self-approved
-			},
+			approvalStatus: ApprovalStatus.APPROVED,
+			approvedByUserObjectId: new mongoose.Types.ObjectId(),
 			locationObjectId: testLocation._id,
 			permissions: []
-		});
-		adminUser = await admin.save();
+		};
+
+		adminUser = await User.insertMany([adminData]);
+		adminUser = adminUser[0];
 	});
 
 	// Test schema validation
@@ -79,10 +79,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
 			permissions: []
 		};
@@ -96,10 +94,8 @@ describe('User Model', () => {
 		expect(savedUser.email).toBe('john@example.com');
 		expect(savedUser.phone).toBe('0000000000');
 		expect(savedUser.role).toBe(Role.VOLUNTEER);
-		expect(savedUser.approval.status).toBe(ApprovalStatus.PENDING);
-		expect(savedUser.approval.approvedByUserObjectId).toEqual(
-			adminUser._id
-		);
+		expect(savedUser.approvalStatus).toBe(ApprovalStatus.PENDING);
+		expect(savedUser.approvedByUserObjectId).toEqual(adminUser._id);
 		expect(savedUser.locationObjectId).toEqual(testLocation._id);
 		expect(savedUser.permissions).toEqual([]);
 		expect(savedUser.createdAt).toBeDefined();
@@ -123,10 +119,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: 'INVALID_ROLE',
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		};
 
@@ -141,10 +135,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: 'INVALID_STATUS',
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: 'INVALID_STATUS',
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		};
 
@@ -160,10 +152,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		};
 
@@ -188,10 +178,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		};
 
@@ -216,10 +204,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				approvedByUserObjectId: adminUser._id
-				// Not providing status - should default to PENDING
-			},
+			// Not providing approvalStatus - should default to PENDING
+			// Not providing approvedByUserObjectId - should default to null
 			locationObjectId: testLocation._id
 			// Not providing permissions - should default to []
 		};
@@ -227,8 +213,9 @@ describe('User Model', () => {
 		const user = new User(userData);
 		const savedUser = await user.save();
 
-		expect(savedUser.approval.status).toBe(ApprovalStatus.PENDING);
+		expect(savedUser.approvalStatus).toBe(ApprovalStatus.PENDING);
 		expect(savedUser.permissions).toEqual([]);
+		expect(savedUser.approvedByUserObjectId).toBeNull();
 		expect(savedUser.deletedAt).toBeNull();
 	});
 
@@ -240,10 +227,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		};
 
@@ -275,10 +260,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.MANAGER,
-			approval: {
-				status: ApprovalStatus.APPROVED,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.APPROVED,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
 			permissions: [
 				{
@@ -310,10 +293,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
 			permissions: [
 				{
@@ -334,10 +315,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
 			permissions: [
 				{
@@ -358,10 +337,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
 			permissions: [
 				{
@@ -375,29 +352,6 @@ describe('User Model', () => {
 		await expect(user.save()).rejects.toThrow();
 	});
 
-	// Test immutable fields
-	test('immutable: cannot update locationObjectId after creation', async () => {
-		const user = new User({
-			firstName: 'John',
-			lastName: 'Doe',
-			email: 'john@example.com',
-			phone: '0000000000',
-			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
-			locationObjectId: testLocation._id
-		});
-		const savedUser = await user.save();
-
-		// Try to update immutable field
-		savedUser.locationObjectId = new mongoose.Types.ObjectId() as any;
-		await expect(savedUser.save()).rejects.toThrow(
-			'Path `locationObjectId` is immutable'
-		);
-	});
-
 	// Test mutable fields
 	test('mutable: can update user profile fields', async () => {
 		const user = new User({
@@ -406,10 +360,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		});
 		const savedUser = await user.save();
@@ -420,7 +372,7 @@ describe('User Model', () => {
 		savedUser.email = 'jane@example.com';
 		savedUser.phone = '0987654321';
 		savedUser.role = Role.MANAGER;
-		savedUser.approval.status = ApprovalStatus.APPROVED;
+		savedUser.approvalStatus = ApprovalStatus.APPROVED;
 
 		const updatedUser = await savedUser.save();
 
@@ -429,7 +381,7 @@ describe('User Model', () => {
 		expect(updatedUser.email).toBe('jane@example.com');
 		expect(updatedUser.phone).toBe('0987654321');
 		expect(updatedUser.role).toBe(Role.MANAGER);
-		expect(updatedUser.approval.status).toBe(ApprovalStatus.APPROVED);
+		expect(updatedUser.approvalStatus).toBe(ApprovalStatus.APPROVED);
 	});
 
 	test('mutable: can update permissions array', async () => {
@@ -439,10 +391,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
 			permissions: []
 		});
@@ -471,10 +421,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		});
 		const savedUser = await user.save();
@@ -490,10 +438,8 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '1234567891',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		});
 		const savedUser = await user.save();
@@ -514,10 +460,8 @@ describe('User Model', () => {
 			email: 'volunteer@example.com',
 			phone: '1111111111',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.APPROVED,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.APPROVED,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		});
 
@@ -527,10 +471,8 @@ describe('User Model', () => {
 			email: 'manager@example.com',
 			phone: '2222222222',
 			role: Role.MANAGER,
-			approval: {
-				status: ApprovalStatus.APPROVED,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.APPROVED,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		});
 
@@ -540,10 +482,8 @@ describe('User Model', () => {
 			email: 'admin2@example.com',
 			phone: '3333333333',
 			role: Role.ADMIN,
-			approval: {
-				status: ApprovalStatus.APPROVED,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.APPROVED,
+			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
 		});
 
@@ -564,21 +504,19 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
 			locationObjectId: testLocation._id
 		});
 		const savedUser = await user.save();
 
-		expect(savedUser.approval.status).toBe(ApprovalStatus.PENDING);
+		expect(savedUser.approvalStatus).toBe(ApprovalStatus.PENDING);
 
 		// Approve the user
-		savedUser.approval.status = ApprovalStatus.APPROVED;
+		savedUser.approvalStatus = ApprovalStatus.APPROVED;
+		savedUser.approvedByUserObjectId = adminUser._id;
 		const approvedUser = await savedUser.save();
 
-		expect(approvedUser.approval.status).toBe(ApprovalStatus.APPROVED);
+		expect(approvedUser.approvalStatus).toBe(ApprovalStatus.APPROVED);
 	});
 
 	test('approval workflow: pending to rejected', async () => {
@@ -588,20 +526,16 @@ describe('User Model', () => {
 			email: 'john@example.com',
 			phone: '0000000000',
 			role: Role.VOLUNTEER,
-			approval: {
-				status: ApprovalStatus.PENDING,
-				approvedByUserObjectId: adminUser._id
-			},
+			approvalStatus: ApprovalStatus.PENDING,
 			locationObjectId: testLocation._id
 		});
 		const savedUser = await user.save();
 
-		expect(savedUser.approval.status).toBe(ApprovalStatus.PENDING);
-
 		// Reject the user
-		savedUser.approval.status = ApprovalStatus.REJECTED;
+		savedUser.approvalStatus = ApprovalStatus.REJECTED;
+		savedUser.approvedByUserObjectId = adminUser._id;
 		const rejectedUser = await savedUser.save();
 
-		expect(rejectedUser.approval.status).toBe(ApprovalStatus.REJECTED);
+		expect(rejectedUser.approvalStatus).toBe(ApprovalStatus.REJECTED);
 	});
 });

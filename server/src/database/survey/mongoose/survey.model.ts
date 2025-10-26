@@ -1,6 +1,6 @@
 import mongoose, { InferSchemaType, Model, Schema, Types } from 'mongoose';
 
-import { injectSurveyHooks } from './survey.hooks';
+import { injectSurveyHooks } from '@/database/survey/mongoose/survey.hooks';
 
 const surveySchema = new Schema(
 	{
