@@ -1,9 +1,11 @@
 import { NextFunction, Response } from 'express';
 
-import User from '@/models/users';
+import User, { IUser } from '@/database/user/mongoose/user.model';
 import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
 import defineAbilitiesForUser from '@/utils/roleBasedAccess';
+import { ApprovalStatus } from '@/database/utils/constants';
+import { IPermission } from '@/types/models';
 
 // Middleware for verifying token signature and storing token info in response
 // If this call passes to the next handler, it means the user is atleast a volunteer
@@ -33,15 +35,13 @@ export async function auth(
 
 		// Add the decoded token to the request object
 		req.user = {
-			employeeId: decodedAuthToken.employeeId,
+			userObjectId: decodedAuthToken.userObjectId,
 			role: decodedAuthToken.role,
 			firstName: decodedAuthToken.firstName
 		};
 
 		// Checking if the user's account is approved
-		const user = await User.findOne({
-			employeeId: decodedAuthToken.employeeId
-		});
+		const user: IUser | null = await User.findById(decodedAuthToken.userObjectId);
 
 		if (!user) {
 			// This case means that the user has a valid JWT signed by our server but
@@ -51,8 +51,8 @@ export async function auth(
 			});
 			return;
 		}
-
-		if (user.approvalStatus !== 'Approved') {
+		
+		if (user.approvalStatus !== ApprovalStatus.APPROVED) {
 			res.status(403).json({
 				message:
 					'User account not approved yet. Please contact your admin.'
@@ -63,8 +63,12 @@ export async function auth(
 		// Add role authorization to the request
 		req.authorization = defineAbilitiesForUser(
 			req,
-			user.id,
-			user.permissions
+			decodedAuthToken.userObjectId,
+			user.permissions.map(permission => ({
+				action: permission.action,
+				subject: permission.subject ?? null,
+				condition: permission.condition ?? null
+			})) as IPermission[]
 		);
 		if (!req.authorization) {
 			res.sendStatus(403);

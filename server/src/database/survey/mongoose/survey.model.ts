@@ -1,7 +1,6 @@
 import mongoose, { InferSchemaType, Model, Schema, Types } from 'mongoose';
 
-import { SiteLocation } from '../../utils/constants';
-import { injectSurveyHooks } from './survey.hooks';
+import { injectSurveyHooks } from '@/database/survey/mongoose/survey.hooks';
 
 const surveySchema = new Schema(
 	{
@@ -20,9 +19,9 @@ const surveySchema = new Schema(
 			required: true,
 			immutable: true
 		},
-		siteLocation: {
-			type: String,
-			enum: SiteLocation,
+		locationObjectId: {
+			type: Types.ObjectId,
+			ref: 'Location',
 			required: true,
 			immutable: true
 		},

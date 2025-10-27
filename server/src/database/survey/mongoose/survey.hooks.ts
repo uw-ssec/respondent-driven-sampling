@@ -1,7 +1,11 @@
 import { Schema } from 'mongoose';
 
-import { SYSTEM_SURVEY_CODE } from '../../utils/constants';
-import { errors } from '../../utils/errors';
+import { SYSTEM_SURVEY_CODE } from '@/database/utils/constants';
+import { errors } from '@/database/utils/errors';
+import {
+	locationExistsValidationHook,
+	userExistsValidationHook
+} from '@/database/utils/hooks';
 
 // Pre-save hook to enforce uniqueness in generated survey codes (inter- and intra-document)
 export const uniquenessValidationHook = async function (this: any, next: any) {
@@ -107,4 +111,6 @@ export const injectSurveyHooks = (schema: Schema) => {
 	schema.pre('save', uniquenessValidationHook);
 	schema.pre('save', chronologicalValidationHook);
 	schema.pre('save', immutabilityValidationHook);
+	schema.pre('save', locationExistsValidationHook('locationObjectId'));
+	schema.pre('save', userExistsValidationHook('createdByUserObjectId'));
 };

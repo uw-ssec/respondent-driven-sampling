@@ -209,7 +209,8 @@ router.post(
 			const surveyData: ISurvey = req.body;
 
 			// Generate unique child survey codes for the new survey
-			surveyData.childSurveyCodes = await generateUniqueChildSurveyCodes();
+			surveyData.childSurveyCodes =
+				await generateUniqueChildSurveyCodes();
 
 			// Resolve parent survey code
 			if (surveyData.surveyCode) {

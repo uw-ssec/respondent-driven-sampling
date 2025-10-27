@@ -22,9 +22,9 @@ export async function getParentSurveyCode(
  */
 export async function generateUniqueChildSurveyCodes(): Promise<Array<string>> {
 	for (let retries = 0; retries < 3; retries++) {
-		const codes = await Promise.all(Array.from({ length: 3 }, () =>
-			generateUniqueSurveyCode()
-		));
+		const codes = await Promise.all(
+			Array.from({ length: 3 }, () => generateUniqueSurveyCode())
+		);
 		// Enforce uniqueness within the array
 		if (isUniqueSurveyCodeArray(codes)) {
 			return codes;
@@ -52,6 +52,7 @@ function isUniqueSurveyCodeArray(codes: Array<string>): boolean {
  * @throws {Error} - Throws SURVEY_CODE_GENERATION_ERROR if unable to generate unique code after 3 retries
  */
 export async function generateUniqueSurveyCode(): Promise<string> {
+	// TODO: Implement a more robust code generation algorithm
 	for (let retries = 0; retries < 3; retries++) {
 		const code = Math.random().toString(36).substring(2, 8).toUpperCase();
 		// Enforce individual code uniqueness
@@ -71,7 +72,7 @@ export async function generateUniqueSurveyCode(): Promise<string> {
  */
 async function isUniqueSurveyCode(code: string): Promise<boolean> {
 	return (
-		await Survey.findOne({ surveyCode: code }) === null &&
-		await Survey.findOne({ childSurveyCodes: { $in: [code] } }) === null
+		(await Survey.findOne({ surveyCode: code })) === null &&
+		(await Survey.findOne({ childSurveyCodes: { $in: [code] } })) === null
 	);
 }

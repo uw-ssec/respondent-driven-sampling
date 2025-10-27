@@ -139,5 +139,11 @@ export const errors = {
 		'SURVEY_CODE_GENERATION_ERROR',
 		'Could not generate valid survey code(s) after maximum retry attempts. Please try again.',
 		500
-	)
+	),
+	INVALID_FIELD_NAME: new ErrorCode(
+		'INVALID_FIELD_NAME',
+		'Field name is not a valid key on this document',
+		400
+	),
+	NULL_OBJECT_ID: new ErrorCode('NULL_OBJECT_ID', 'Object ID is null', 400)
 };

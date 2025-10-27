@@ -5,7 +5,6 @@ import Survey from '@/database/survey/mongoose/survey.model';
 
 import {
 	GENERATED_SURVEY_CODES_LENGTH,
-	SiteLocation,
 	SURVEY_CODE_LENGTH
 } from '../../utils/constants';
 
@@ -62,7 +61,9 @@ export const baseSurveySchema = z
 			})
 			.optional(),
 
-		siteLocation: z.enum(SiteLocation),
+		locationObjectId: z
+			.string()
+			.refine(Types.ObjectId.isValid, 'Invalid location objectId'),
 
 		createdAt: z.coerce.date(),
 		updatedAt: z.coerce.date()

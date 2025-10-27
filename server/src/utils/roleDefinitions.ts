@@ -33,7 +33,7 @@ export const CONDITIONS = {
 }
 
 // Types
-export type Context = { id: string; employeeId: string };
+export type Context = { userObjectId: string };
 export type Action = (typeof ACTION_ENUM)[number];
 export type Subject = (typeof SUBJECT_ENUM)[number];
 export type Condition = (typeof CONDITION_ENUM)[number];
@@ -42,7 +42,7 @@ export type Condition = (typeof CONDITION_ENUM)[number];
 // These can optionally take in the context of the user
 export const CONDITION_QUERIES: Record<Condition, (ctx: Context) => MongoQuery> = {
     [CONDITIONS.SCOPES.ALL]: (_: Context) => ({}),
-    [CONDITIONS.SCOPES.SELF]: (ctx: Context) => ({ employeeId: ctx.employeeId })
+    [CONDITIONS.SCOPES.SELF]: (ctx: Context) => ({ userObjectId: ctx.userObjectId })
 };
 
 export type Query = ReturnType<typeof CONDITION_QUERIES[Condition]> | {} // @typescript-eslint/no-empty-object-type
