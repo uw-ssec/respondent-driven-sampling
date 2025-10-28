@@ -4,10 +4,10 @@ import { baseSeedSchema } from './seed.base';
 export const createSeedSchema = baseSeedSchema
 	.pick({
 		locationObjectId: true,
-		isFallback: true
+		isFallback: true // This marks `isFallback` as acceptable in the request body
 	})
 	.partial({
-		isFallback: true // This marks `isFallback` as optional; defaults to false unless otherwise specified as declared in the base schema
+		isFallback: true // This marks `isFallback` as optional
 	})
 	.strict()
 	.meta({ model: Seed });

@@ -18,12 +18,10 @@ export const baseUserSchema = z
 			.length(10, 'Phone number must be exactly 10 digits')
 			.regex(/^\d+$/, 'Phone number must contain only digits'),
 		role: z.enum(Role),
-		approval: z.object({
-			status: z.enum(ApprovalStatus).default(ApprovalStatus.PENDING),
-			approvedByUserObjectId: z
-				.string()
-				.refine(Types.ObjectId.isValid, 'Invalid user objectId')
-		}),
+		approvalStatus: z.enum(ApprovalStatus),
+		approvedByUserObjectId: z
+			.string()
+			.refine(Types.ObjectId.isValid, 'Invalid user objectId'),
 		locationObjectId: z
 			.string()
 			.refine(Types.ObjectId.isValid, 'Invalid location objectId'),

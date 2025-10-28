@@ -15,6 +15,6 @@ export const baseSeedSchema = z
 		locationObjectId: z
 			.string()
 			.refine(Types.ObjectId.isValid, 'Invalid location objectId'),
-		isFallback: z.boolean().optional().default(false) // Assume false unless otherwise specified
+		isFallback: z.boolean().optional()
 	})
 	.meta({ model: Seed });
