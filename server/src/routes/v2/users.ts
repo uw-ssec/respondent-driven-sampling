@@ -1,3 +1,4 @@
+import { subject } from '@casl/ability';
 import { accessibleBy } from '@casl/mongoose';
 import express, { NextFunction, Response } from 'express';
 
@@ -32,15 +33,16 @@ const router = express.Router();
  */
 router.get(
 	'/',
-	[auth], // TODO: add `read_users` permission check
+	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.READ, SUBJECTS.USER)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await User.find({
 				$and: [
 					req.query,
-					req?.authorization
-						? accessibleBy(req.authorization).ofType(User.modelName)
-						: {},
+					accessibleBy(req.authorization).ofType(User.modelName),
 					{ deletedAt: null }
 				]
 			});
@@ -83,8 +85,16 @@ router.get(
  */
 router.get(
 	'/:objectId',
-	[auth], // TODO: add `read_users` permission check
+	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (
+			!req.authorization?.can(
+				ACTIONS.CASL.READ,
+				subject(SUBJECTS.USER, { _id: req.params.objectId })
+			)
+		) {
+			return res.status(403).json({ message: 'Forbidden' });
+		}
 		try {
 			const result = await User.findById(req.params.objectId);
 			if (!result) {
@@ -123,8 +133,11 @@ router.get(
  */
 router.post(
 	'/',
-	[auth, validate(createUserSchema)], // TODO: add `create_users` permission check
+	[auth, validate(createUserSchema)],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.CREATE, SUBJECTS.USER)) {
+			return res.status(403).json({ message: 'Forbidden' });
+		}
 		try {
 			const result = await User.create(req.body);
 			res.status(201).json({
@@ -167,9 +180,47 @@ router.post(
  */
 router.patch(
 	'/:objectId',
-	[auth, validate(updateUserSchema)], // TODO: add `update_users` permission check
+	[auth, validate(updateUserSchema)],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		// Basic check if permissible _id to update for user
+		if (
+			!req.authorization?.can(
+				ACTIONS.CASL.UPDATE,
+				subject(SUBJECTS.USER, { _id: req.params.objectId })
+			)
+		) {
+			return res.status(403).json({ message: 'Forbidden' });
+		}
 		try {
+			// Update access if document-dependent AND field-dependent (i.e. fields in our request body)
+			// so we first need to fetch the document and check permissions (more below)
+			const user = await User.findById(req.params.objectId);
+			if (!user) {
+				return res.status(404).json({ message: 'User not found' });
+			}
+
+			// Check if we are allowed to update all fields in request body
+			// These checks depend on interactions between our current user's role and location and the target user's role and location
+			// ex. a manager can only approve users with 'VOLUNTEER' role at their current location today, but are also allowed to update their own profile
+			// if the request tries to update a field that is impermissible for the document we fetched, we will return a 403 error
+			if (
+				!Object.keys(req.body).every(field =>
+					req.authorization?.can(
+						ACTIONS.CASL.UPDATE,
+						subject(SUBJECTS.USER, user.toObject()),
+						field
+					)
+				)
+			) {
+				return res
+					.status(403)
+					.json({
+						message:
+							'You are not allowed to make this update on this user'
+					});
+			}
+
+			// Passed permission checks, update user document
 			const result = await User.findByIdAndUpdate(
 				req.params.objectId,
 				req.body,
@@ -216,8 +267,16 @@ router.patch(
  */
 router.delete(
 	'/:objectId',
-	[auth], // TODO: add `delete_users` permission check
+	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (
+			!req.authorization?.can(
+				ACTIONS.CASL.DELETE,
+				subject(SUBJECTS.USER, { _id: req.params.objectId })
+			)
+		) {
+			return res.status(403).json({ message: 'Forbidden' });
+		}
 		try {
 			const result = await User.findByIdAndUpdate(
 				req.params.objectId,

@@ -1,4 +1,3 @@
-import { subject } from '@casl/ability';
 import { accessibleBy } from '@casl/mongoose';
 import express, { NextFunction, Response } from 'express';
 
@@ -40,15 +39,14 @@ router.get(
 	'/',
 	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await Survey.find({
 				$and: [
 					req.query,
-					req?.authorization
-						? accessibleBy(req.authorization).ofType(
-								Survey.modelName
-							)
-						: {},
+					accessibleBy(req.authorization).ofType(Survey.modelName),
 					{ deletedAt: null }
 				]
 			});
@@ -94,22 +92,26 @@ router.get(
 	'/:objectId',
 	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-		if (
-			!req.authorization?.can(
-				ACTIONS.CASL.READ,
-				subject(SUBJECTS.SURVEY, { _id: req.params.objectId })
-			)
-		) {
+		// Check for basic read permission (more permission checks happen within Mongo query)
+		if (!req.authorization?.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY)) {
 			return res.sendStatus(403);
 		}
 		try {
 			const result = await Survey.findOne({
-				_id: req.params.objectId,
-				deletedAt: null
+				$and: [
+					{ _id: req.params.objectId },
+					accessibleBy(req.authorization).ofType(Survey.modelName), // Need to pass in dynamic filter here because access is determined by `createdAt` and `locationObjectId` inside of Survey
+					{ deletedAt: null }
+				]
 			});
 			// Survey not found
 			if (!result) {
-				return res.status(404).json({ message: 'Survey not found' });
+				return res
+					.status(404)
+					.json({
+						message:
+							'Survey not found or you do not have permission to read this survey'
+					});
 			}
 			// Successfully fetched survey
 			res.status(200).json({
@@ -154,22 +156,33 @@ router.patch(
 	'/:objectId',
 	[auth, validate(updateSurveySchema)],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-		if (
-			!req.authorization?.can(
-				ACTIONS.CASL.UPDATE,
-				subject(SUBJECTS.SURVEY, { _id: req.params.objectId })
-			)
-		) {
+		// Basic check if user is allowed to update any survey at all
+		if (!req.authorization?.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY)) {
 			return res.sendStatus(403);
 		}
 		try {
+			// Update access is document-dependent but not field-dependent, so we only need to pass in
+			// an accessibleBy filter here
 			const result = await Survey.findOneAndUpdate(
-				{ _id: req.params.objectId, deletedAt: null },
+				{
+					$and: [
+						{ _id: req.params.objectId },
+						accessibleBy(req.authorization).ofType(
+							Survey.modelName
+						),
+						{ deletedAt: null }
+					]
+				},
 				req.body,
 				{ new: true }
 			);
 			if (!result) {
-				return res.status(404).json({ message: 'Survey not found' });
+				return res
+					.status(404)
+					.json({
+						message:
+							'Survey not found or you do not have permission to update this survey'
+					});
 			}
 			res.status(200).json({
 				message: 'Survey updated successfully',
@@ -202,8 +215,14 @@ router.post(
 	'/',
 	[auth, validate(createSurveySchema)],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-		if (!req.authorization?.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY)) {
-			return res.sendStatus(403);
+		// Different permissions based on creation with or without referral
+		// Check permission based on the action type based on query param `new`
+		let createActionType = ACTIONS.CASL.CREATE;
+		if (req.query.new === 'true') {
+			createActionType = ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL;
+		}
+		if (!req.authorization?.can(createActionType, SUBJECTS.USER)) {
+			return res.status(403).json({ message: 'Forbidden' });
 		}
 		try {
 			const surveyData: ISurvey = req.body;
@@ -280,6 +299,11 @@ router.delete(
 	'/:objectId',
 	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		// TODO: may want to revisit here and see if we need to make a distinction for
+		// hard/soft-delete in permissions
+		if (!req.authorization?.can(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY)) {
+			return res.sendStatus(403);
+		}
 		try {
 			// TODO: Delete specific fields within survey document as well
 			const result = await Survey.findByIdAndUpdate(
