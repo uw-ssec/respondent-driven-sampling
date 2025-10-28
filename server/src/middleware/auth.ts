@@ -1,11 +1,11 @@
 import { NextFunction, Response } from 'express';
 
 import User, { IUser } from '@/database/user/mongoose/user.model';
-import { AuthenticatedRequest } from '@/types/auth';
-import { verifyAuthToken } from '@/utils/authTokenHandler';
-import defineAbilitiesForUser from '@/permissions/abilityBuilder';
 import { ApprovalStatus } from '@/database/utils/constants';
+import defineAbilitiesForUser from '@/permissions/abilityBuilder';
+import { AuthenticatedRequest } from '@/types/auth';
 import { IPermission } from '@/types/models';
+import { verifyAuthToken } from '@/utils/authTokenHandler';
 import { getLatestLocation } from '@/utils/utils';
 
 // Middleware for verifying token signature and storing token info in response
@@ -35,7 +35,9 @@ export async function auth(
 		const decodedAuthToken = verifyAuthToken(token);
 
 		// Get user account from database
-		const user: IUser | null = await User.findById(decodedAuthToken.userObjectId);
+		const user: IUser | null = await User.findById(
+			decodedAuthToken.userObjectId
+		);
 
 		if (!user) {
 			// This case means that the user has a valid JWT signed by our server but
@@ -47,20 +49,11 @@ export async function auth(
 		}
 
 		// Derive latest location objectId from user's latest survey
-		// If no survey exists, use the user's current location
+		// If no survey exists, use the user's profile location
 		// This is for read/update permissions for surveys, where users can only read/update surveys created at their own location
-		let latestLocationObjectId = await getLatestLocation(decodedAuthToken.userObjectId);
-		if (!latestLocationObjectId) {
-			latestLocationObjectId = user.locationObjectId;
-		}
-
-		// Add user information to request object
-		req.user = {
-			userObjectId: decodedAuthToken.userObjectId.toString(),
-			role: user.role,
-			firstName: user.firstName,
-			locationObjectId: latestLocationObjectId.toString()
-		};
+		const latestLocationObjectId =
+			(await getLatestLocation(decodedAuthToken.userObjectId)) ??
+			user.locationObjectId;
 
 		// Check if user is approved
 		if (user.approvalStatus !== ApprovalStatus.APPROVED) {
@@ -70,7 +63,16 @@ export async function auth(
 			});
 			return;
 		}
-		
+
+		// Add user information to request object now that we have fully validated the user
+		// and fetched their latest location
+		req.user = {
+			userObjectId: decodedAuthToken.userObjectId.toString(),
+			role: user.role,
+			firstName: user.firstName,
+			locationObjectId: latestLocationObjectId.toString()
+		};
+
 		// Add role authorization to the request
 		req.authorization = defineAbilitiesForUser(
 			req,
