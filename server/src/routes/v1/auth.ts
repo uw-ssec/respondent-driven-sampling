@@ -12,7 +12,7 @@ import {
 	SignupRequest
 } from '@/types/auth';
 import { generateAuthToken } from '@/utils/authTokenHandler';
-import { ACTIONS, SUBJECTS } from '@/utils/roleDefinitions';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { ApprovalStatus } from '@/database/utils/constants';
 
 const router = express.Router();

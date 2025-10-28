@@ -16,8 +16,8 @@ import { SYSTEM_SURVEY_CODE } from '@/database/utils/constants';
 import { errors } from '@/database/utils/errors';
 import { auth } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { AuthenticatedRequest } from '@/types/auth';
-import { ACTIONS, SUBJECTS } from '@/utils/roleDefinitions';
 
 const router = express.Router();
 

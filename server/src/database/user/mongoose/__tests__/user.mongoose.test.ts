@@ -13,7 +13,7 @@ import {
 	ACTIONS,
 	CONDITIONS,
 	SUBJECTS
-} from '../../../../utils/roleDefinitions';
+} from '../../../../permissions/constants';
 import Location from '../../../location/mongoose/location.model';
 import {
 	ApprovalStatus,

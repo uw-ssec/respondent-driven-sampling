@@ -6,7 +6,7 @@ import {
 	ACTION_ENUM,
 	CONDITION_ENUM,
 	SUBJECT_ENUM
-} from '@/utils/roleDefinitions';
+} from '@/permissions/constants';
 
 export const baseUserSchema = z
 	.object({

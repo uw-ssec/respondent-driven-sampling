@@ -8,6 +8,7 @@ import {
 } from '@/database/user/zod/user.validator';
 import { auth } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { AuthenticatedRequest } from '@/types/auth';
 
 const router = express.Router();

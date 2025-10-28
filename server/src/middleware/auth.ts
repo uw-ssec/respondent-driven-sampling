@@ -3,9 +3,10 @@ import { NextFunction, Response } from 'express';
 import User, { IUser } from '@/database/user/mongoose/user.model';
 import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
-import defineAbilitiesForUser from '@/utils/roleBasedAccess';
+import defineAbilitiesForUser from '@/permissions/abilityBuilder';
 import { ApprovalStatus } from '@/database/utils/constants';
 import { IPermission } from '@/types/models';
+import { getLatestLocation } from '@/utils/utils';
 
 // Middleware for verifying token signature and storing token info in response
 // If this call passes to the next handler, it means the user is atleast a volunteer

@@ -8,7 +8,7 @@ import {
 	ACTION_ENUM,
 	CONDITION_ENUM,
 	SUBJECT_ENUM
-} from '@/utils/roleDefinitions';
+} from '@/permissions/constants';
 
 const userSchema = new Schema(
 	{
