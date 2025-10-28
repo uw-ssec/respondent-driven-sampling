@@ -106,12 +106,10 @@ router.get(
 			});
 			// Survey not found
 			if (!result) {
-				return res
-					.status(404)
-					.json({
-						message:
-							'Survey not found or you do not have permission to read this survey'
-					});
+				return res.status(404).json({
+					message:
+						'Survey not found or you do not have permission to read this survey'
+				});
 			}
 			// Successfully fetched survey
 			res.status(200).json({
@@ -177,12 +175,10 @@ router.patch(
 				{ new: true }
 			);
 			if (!result) {
-				return res
-					.status(404)
-					.json({
-						message:
-							'Survey not found or you do not have permission to update this survey'
-					});
+				return res.status(404).json({
+					message:
+						'Survey not found or you do not have permission to update this survey'
+				});
 			}
 			res.status(200).json({
 				message: 'Survey updated successfully',
@@ -221,7 +217,7 @@ router.post(
 		if (req.query.new === 'true') {
 			createActionType = ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL;
 		}
-		if (!req.authorization?.can(createActionType, SUBJECTS.USER)) {
+		if (!req.authorization?.can(createActionType, SUBJECTS.SURVEY)) {
 			return res.status(403).json({ message: 'Forbidden' });
 		}
 		try {

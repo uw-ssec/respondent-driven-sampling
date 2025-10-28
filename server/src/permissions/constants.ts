@@ -16,9 +16,11 @@ export const ACTIONS = {
 	},
 	// Custom actions can be used to describe more granular actions instead of just CRUD
 	// These will also fall under the 'manage' action
+	// Reserve custom actions for actions that cannot be captured
+	// through Mongo query filters
 	CUSTOM: {
-		APPROVE: 'approve',
-		PREAPPROVE: 'preapprove',
+		APPROVE: 'approve', // TODO: remove once v1 fully deprecated
+		PREAPPROVE: 'preapprove', // TODO: remove once v1 fully deprecated
 		CREATE_WITHOUT_REFERRAL: 'createWithoutReferral'
 	}
 };

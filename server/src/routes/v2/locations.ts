@@ -246,19 +246,26 @@ router.patch(
  *       500:
  *         description: Internal server error
  */
-router.delete('/:objectId', [auth], async (req: AuthenticatedRequest, res: Response, next: NextFunction) => { // TODO: add `delete_locations` permission check
-	try {
-		const result = await Location.findByIdAndDelete(req.params.objectId);
-		if (!result) {
-			return res.status(404).json({ message: 'Location not found' });
+router.delete(
+	'/:objectId',
+	[auth],
+	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		// TODO: add `delete_locations` permission check
+		try {
+			const result = await Location.findByIdAndDelete(
+				req.params.objectId
+			);
+			if (!result) {
+				return res.status(404).json({ message: 'Location not found' });
+			}
+			res.status(200).json({
+				message: 'Location deleted successfully',
+				data: result.toObject()
+			});
+		} catch (err) {
+			next(err);
 		}
-		res.status(200).json({
-			message: 'Location deleted successfully',
-			data: result.toObject()
-		});
-	} catch (err) {
-		next(err);
 	}
-});
+);
 
 export default router;

@@ -91,7 +91,7 @@ router.get(
 			!req.authorization?.can(
 				ACTIONS.CASL.READ,
 				subject(SUBJECTS.USER, { _id: req.params.objectId })
-			)
+			) // NOTE: will need to change forced subject() to SUBJECTS.USER if read permissions ever become field-dependent/document-dependent
 		) {
 			return res.status(403).json({ message: 'Forbidden' });
 		}
@@ -182,13 +182,7 @@ router.patch(
 	'/:objectId',
 	[auth, validate(updateUserSchema)],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-		// Basic check if permissible _id to update for user
-		if (
-			!req.authorization?.can(
-				ACTIONS.CASL.UPDATE,
-				subject(SUBJECTS.USER, { _id: req.params.objectId })
-			)
-		) {
+		if (!req.authorization?.can(ACTIONS.CASL.UPDATE, SUBJECTS.USER)) {
 			return res.status(403).json({ message: 'Forbidden' });
 		}
 		try {
@@ -212,12 +206,10 @@ router.patch(
 					)
 				)
 			) {
-				return res
-					.status(403)
-					.json({
-						message:
-							'You are not allowed to make this update on this user'
-					});
+				return res.status(403).json({
+					message:
+						'You are not allowed to make this update on this user'
+				});
 			}
 
 			// Passed permission checks, update user document
@@ -273,7 +265,7 @@ router.delete(
 			!req.authorization?.can(
 				ACTIONS.CASL.DELETE,
 				subject(SUBJECTS.USER, { _id: req.params.objectId })
-			)
+			) // NOTE: will need to change forced subject() to SUBJECTS.USER if delete permissions ever become field-dependent/document-dependent
 		) {
 			return res.status(403).json({ message: 'Forbidden' });
 		}

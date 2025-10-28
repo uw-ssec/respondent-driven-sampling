@@ -1,6 +1,7 @@
-import { Ability } from '@/permissions/constants';
 import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
+
+import { Ability } from '@/permissions/constants';
 
 export interface AuthenticatedRequest extends Request {
 	user?: {

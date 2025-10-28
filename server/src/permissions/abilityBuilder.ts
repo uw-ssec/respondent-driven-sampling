@@ -25,13 +25,13 @@ export default function defineAbilitiesForUser(
 	// Assign default rules by role
 	switch (req.user?.role) {
 		// TODO: super user
-		case 'Admin':
+		case 'ADMIN':
 			applyAdminPermissions(builder, ctx);
 			break;
-		case 'Manager':
+		case 'MANAGER':
 			applyManagerPermissions(builder, ctx);
 			break;
-		case 'Volunteer':
+		case 'VOLUNTEER':
 			applyVolunteerPermissions(builder, ctx);
 			break;
 	}
@@ -52,11 +52,9 @@ export default function defineAbilitiesForUser(
 // TODO: applySuperUserPermissions
 
 function applyAdminPermissions(builder: AbilityBuilder<Ability>, ctx: Context) {
-	// admins can approve anyone at their current location today
+	// admins can approve anyone but superadmins
 	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.USER, FIELDS.USER.APPROVAL, {
-		role: { $in: ['VOLUNTEER', 'MANAGER', 'ADMIN'] },
-		locationObjectId: ctx.latestLocationObjectId,
-		...isToday('createdAt')
+		role: { $in: ['VOLUNTEER', 'MANAGER', 'ADMIN'] }
 	});
 	// admins can update location and role of volunteers and managers
 	builder.can(
@@ -92,13 +90,13 @@ function applyManagerPermissions(
 	builder.can(ACTIONS.CASL.READ, SUBJECTS.USER);
 	// can only approve volunteers at their current location today
 	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.USER, FIELDS.USER.APPROVAL, {
-		role: 'Volunteer',
+		role: 'VOLUNTEER',
 		locationObjectId: ctx.latestLocationObjectId,
 		...isToday('createdAt')
 	});
 	// can only edit location of volunteers
 	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.USER, FIELDS.USER.LOCATION, {
-		role: 'Volunteer'
+		role: 'VOLUNTEER'
 	});
 	// can only edit own profile
 	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.USER, FIELDS.USER.PROFILE, {
