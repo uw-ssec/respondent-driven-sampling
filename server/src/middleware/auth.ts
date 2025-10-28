@@ -34,14 +34,7 @@ export async function auth(
 	try {
 		const decodedAuthToken = verifyAuthToken(token);
 
-		// Add the decoded token to the request object
-		req.user = {
-			userObjectId: decodedAuthToken.userObjectId,
-			role: decodedAuthToken.role,
-			firstName: decodedAuthToken.firstName
-		};
-
-		// Checking if the user's account is approved
+		// Get user account from database
 		const user: IUser | null = await User.findById(decodedAuthToken.userObjectId);
 
 		if (!user) {
@@ -52,7 +45,24 @@ export async function auth(
 			});
 			return;
 		}
-		
+
+		// Derive latest location objectId from user's latest survey
+		// If no survey exists, use the user's current location
+		// This is for read/update permissions for surveys, where users can only read/update surveys created at their own location
+		let latestLocationObjectId = await getLatestLocation(decodedAuthToken.userObjectId);
+		if (!latestLocationObjectId) {
+			latestLocationObjectId = user.locationObjectId;
+		}
+
+		// Add user information to request object
+		req.user = {
+			userObjectId: decodedAuthToken.userObjectId.toString(),
+			role: user.role,
+			firstName: user.firstName,
+			locationObjectId: latestLocationObjectId.toString()
+		};
+
+		// Check if user is approved
 		if (user.approvalStatus !== ApprovalStatus.APPROVED) {
 			res.status(403).json({
 				message:
@@ -60,11 +70,12 @@ export async function auth(
 			});
 			return;
 		}
-
+		
 		// Add role authorization to the request
 		req.authorization = defineAbilitiesForUser(
 			req,
 			decodedAuthToken.userObjectId,
+			latestLocationObjectId.toString(),
 			user.permissions.map(permission => ({
 				action: permission.action,
 				subject: permission.subject ?? null,

@@ -1,4 +1,4 @@
-import { Ability } from '@/utils/roleDefinitions';
+import { Ability } from '@/permissions/constants';
 import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 
@@ -7,6 +7,7 @@ export interface AuthenticatedRequest extends Request {
 		userObjectId: string;
 		role: string;
 		firstName: string;
+		locationObjectId: string;
 	};
 	authorization?: Ability;
 }
