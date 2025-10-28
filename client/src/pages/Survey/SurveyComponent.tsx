@@ -21,7 +21,9 @@ import Header from '@/pages/Header/Header';
 // It uses the useEffect hook to manage side effects, such as fetching data and updating state
 // It uses the useState hook to manage component state
 // It uses the useGeolocated hook to get the user's geolocation
-import surveyJson from './survey.json';
+// IMPORT SURVEY DEFINITION JSON
+//import surveyJson from './survey.json';
+import surveyJson from './qualtrics.json';
 
 const SurveyComponent = ({ onLogout }: LogoutProps) => {
   const [searchParams] = useSearchParams();
