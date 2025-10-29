@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/LandingPage.css';
 
+import Header from '@/pages/Header/Header';
 import { getFirstName, getRole } from '@/utils/authTokenHandler';
+import Container from '@mui/material/Container';
 
 import { LogoutProps } from '@/types/AuthProps';
-import Header from '@/pages/Header/Header';
 
 export default function LandingPage({ onLogout }: LogoutProps) {
 	const navigate = useNavigate();
@@ -39,7 +40,7 @@ export default function LandingPage({ onLogout }: LogoutProps) {
 		<>
 			<Header onLogout={handleLogout} />
 			{/* Main landing container */}
-			<div className="landing-container">
+			<Container maxWidth="md" sx={{ mt: 4 }}>
 				<h1 className="welcome-text">Welcome back, {firstName}!</h1>
 
 				<div className="actions-box">
@@ -114,7 +115,7 @@ export default function LandingPage({ onLogout }: LogoutProps) {
 						</div>
 					)}
 				</div>
-			</div>
+			</Container>
 		</>
 	);
 }

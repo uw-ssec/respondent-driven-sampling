@@ -3,6 +3,10 @@
 	"type": "module",
 	"dependencies": {
 		"@casl/ability": "^6.7.3",
+		"@emotion/react": "^11.14.0",
+		"@emotion/styled": "^11.14.1",
+		"@mui/icons-material": "^7.3.4",
+		"@mui/material": "^7.3.4",
 		"@types/jest": "^30.0.0",
 		"@types/node": "^24.0.3",
 		"@types/react": "^19.1.8",
