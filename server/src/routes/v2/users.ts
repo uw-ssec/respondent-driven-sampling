@@ -87,16 +87,16 @@ router.get(
 	'/:objectId',
 	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-		if (
-			!req.authorization?.can(
-				ACTIONS.CASL.READ,
-				subject(SUBJECTS.USER, { _id: req.params.objectId })
-			) // NOTE: will need to change forced subject() to SUBJECTS.USER if read permissions ever become field-dependent/document-dependent
-		) {
+		// Can't check for just permission just based on _id because user may have custom permissions around read access beyond just _id
+		// If a user has a custom permission that allows them to read target user's profile, it may reject early if we only check for _id permission
+		if (!req.authorization?.can(ACTIONS.CASL.READ, SUBJECTS.USER)) {
 			return res.status(403).json({ message: 'Forbidden' });
 		}
 		try {
-			const result = await User.findById(req.params.objectId);
+			const result = await User.findOne({
+				_id: req.params.objectId,
+				...accessibleBy(req.authorization).ofType(User.modelName) // Dynamic filter for handling custom permissions
+			});
 			if (!result) {
 				return res.status(404).json({ message: 'User not found' });
 			}

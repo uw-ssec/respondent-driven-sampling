@@ -1,4 +1,4 @@
-import { AbilityBuilder, createMongoAbility, Subject } from '@casl/ability';
+import { AbilityBuilder, createMongoAbility, MongoQuery, Subject } from '@casl/ability';
 
 import {
 	Ability,
@@ -9,7 +9,7 @@ import {
 	Context,
 	FIELDS,
 	ROLES,
-	SUBJECTS
+	SUBJECTS,
 } from '@/permissions/constants';
 import { AuthenticatedRequest } from '@/types/auth';
 
@@ -163,21 +163,24 @@ function applyCustomPermissions(
 		if (!permission.conditions.length) {
 			builder.can(permission.action, permission.subject);
 		}
-		// if conditions, apply all conditions in array (sequential)
+		// if conditions, combine all conditions into a single query
 		else {
-			permission.conditions.forEach(condition => {
+			const combinedQuery = permission.conditions.reduce((acc, condition) => {
 				// this should never happen because we should be validating ENUMs
 				if (!(condition in CONDITION_QUERIES)) {
-					throw new Error(`Unknown condition: ${condition}`);
+					throw new Error(`Corrupted permissions: unknown condition: ${condition}`);
 				}
-				// apply query for condition
+				// merge the condition query into our accumulator
 				const conditionQuery = CONDITION_QUERIES[condition](ctx);
-				builder.can(
-					permission.action,
-					permission.subject,
-					conditionQuery
-				);
-			});
+				return { ...acc, ...conditionQuery };
+			}, {} as MongoQuery);
+
+			// apply the permission once with all conditions combined 
+			builder.can(
+				permission.action,
+				permission.subject,
+				combinedQuery
+			);
 		}
 	});
 }
