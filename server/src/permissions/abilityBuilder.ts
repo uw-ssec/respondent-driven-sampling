@@ -13,31 +13,30 @@ import {
 	CONDITION_QUERIES,
 	Context,
 	FIELDS,
+	Role,
 	ROLES,
 	SUBJECTS
 } from '@/permissions/constants';
-import { AuthenticatedRequest } from '@/types/auth';
-
 import {
 	hasRole,
 	hasSameLocation,
 	isCreatedBySelf,
 	isSelf,
 	isToday
-} from './utils';
+} from '@/permissions/utils';
 
 // Assigns authorization by role and action
 export default function defineAbilitiesForUser(
-	req: AuthenticatedRequest,
+	userRole: Role,
 	userObjectId: string,
 	latestLocationObjectId: string,
 	permissions: { action: Action; subject: Subject; conditions: Condition[] }[]
 ): Ability {
 	const builder = new AbilityBuilder<Ability>(createMongoAbility);
-	const ctx: Context = { userObjectId, latestLocationObjectId }; // pass in userObjectId for context
+	const ctx: Context = { userObjectId, latestLocationObjectId };
 
 	// Assign default rules by role
-	switch (req.user?.role) {
+	switch (userRole) {
 		case ROLES.SUPER_ADMIN:
 			applySuperAdminPermissions(builder, ctx);
 			break;

@@ -1,3 +1,4 @@
+// TODO: Update tests to match changes in abilityBuilder.ts
 import { subject } from '@casl/ability';
 import { describe, expect, jest, test } from '@jest/globals';
 
@@ -62,10 +63,7 @@ describe('CASL abilityBuilder', () => {
 		describe('User permissions', () => {
 			test('Admin can approve volunteers', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -89,10 +87,7 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin can approve managers at their location created today', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -116,10 +111,7 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin can approve other admins at their location created today', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -143,10 +135,7 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin can update location and role of volunteers', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -171,10 +160,7 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin can update location and role of managers', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -199,10 +185,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin cannot update location and role of other admins', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.ADMIN,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -227,10 +214,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin can update own profile fields', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.ADMIN,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -254,10 +242,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin can read all users', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.ADMIN,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -270,10 +259,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin cannot delete users', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.ADMIN,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -288,10 +278,11 @@ describe('CASL abilityBuilder', () => {
 		describe('Survey permissions', () => {
 			test('Admin can create surveys', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.ADMIN,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -304,10 +295,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin can create surveys without referral', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.ADMIN,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -323,10 +315,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin can read all surveys', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.ADMIN,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -339,10 +332,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin can update surveys created today', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.ADMIN,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -359,10 +353,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Admin cannot delete surveys', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.ADMIN,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.ADMIN,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
 					[]
@@ -379,10 +374,11 @@ describe('CASL abilityBuilder', () => {
 		describe('User permissions', () => {
 			test('Manager can read all users', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -395,10 +391,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager can approve volunteers at their location created today', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -422,10 +419,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager cannot approve managers', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -449,10 +447,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager cannot approve volunteers at different location', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -476,10 +475,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager cannot approve self (universal rule)', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -499,10 +499,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager cannot update location of other managers', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -524,10 +525,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager can update own profile fields', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -551,10 +553,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager cannot delete users', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -569,10 +572,11 @@ describe('CASL abilityBuilder', () => {
 		describe('Survey permissions', () => {
 			test('Manager can create surveys', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -585,10 +589,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager can create surveys without referral', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -604,10 +609,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager can read only own surveys at own location created today', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -626,10 +632,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager cannot read surveys from other users', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -648,10 +655,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager cannot read surveys from different location', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -670,10 +678,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager can update only own surveys at own location created today', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -692,10 +701,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager cannot update surveys from other users', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -714,10 +724,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Manager cannot delete surveys', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.MANAGER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.MANAGER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
 					[]
@@ -734,10 +745,11 @@ describe('CASL abilityBuilder', () => {
 		describe('User permissions', () => {
 			test('Volunteer can read only self', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.VOLUNTEER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -756,10 +768,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Volunteer can update own profile fields', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.VOLUNTEER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -783,10 +796,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Volunteer cannot update other users', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.VOLUNTEER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -807,10 +821,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Volunteer cannot approve anyone', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.VOLUNTEER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -827,10 +842,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Volunteer cannot delete users', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.VOLUNTEER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -845,10 +861,11 @@ describe('CASL abilityBuilder', () => {
 		describe('Survey permissions', () => {
 			test('Volunteer can create surveys', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.VOLUNTEER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -861,10 +878,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Volunteer can create surveys without referral', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.VOLUNTEER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -880,11 +898,12 @@ describe('CASL abilityBuilder', () => {
 
 			test('Volunteer can read only own surveys at own location created today', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId,
-						locationObjectId: location1
-					}),
+					// makeReq({
+					// 	role: ROLES.VOLUNTEER,
+					// 	userObjectId: self.userObjectId,
+					// 	locationObjectId: location1
+					// }),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -903,10 +922,11 @@ describe('CASL abilityBuilder', () => {
 
 			test('Volunteer cannot read surveys from other users', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId
-					}),
+					// makeReq({
+					// 	role: ROLES.VOLUNTEER,
+					// 	userObjectId: self.userObjectId
+					// }),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -925,11 +945,12 @@ describe('CASL abilityBuilder', () => {
 
 			test('Volunteer can update only own surveys at own location created today', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId,
-						locationObjectId: location1
-					}),
+					// makeReq({
+					// 	role: ROLES.VOLUNTEER,
+					// 	userObjectId: self.userObjectId,
+					// 	locationObjectId: location1
+					// }),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -984,10 +1005,7 @@ describe('CASL abilityBuilder', () => {
 
 			test('Volunteer cannot update surveys from other users', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId
-					}),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]
@@ -1006,10 +1024,7 @@ describe('CASL abilityBuilder', () => {
 
 			test('Volunteer cannot delete surveys', () => {
 				const ability = defineAbilitiesForUser(
-					makeReq({
-						role: ROLES.VOLUNTEER,
-						userObjectId: self.userObjectId
-					}),
+					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
 					[]

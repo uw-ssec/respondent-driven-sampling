@@ -65,18 +65,10 @@ export async function auth(
 		const latestLocationObjectId =
 			latestSurvey?.locationObjectId ?? user.locationObjectId;
 
-		// Add user information to request object now that we have fully validated the user
-		// and fetched their latest location
-		req.user = {
-			userObjectId: decodedAuthToken.userObjectId.toString(),
-			role: user.role,
-			firstName: user.firstName,
-			locationObjectId: latestLocationObjectId.toString()
-		};
-
 		// Add role authorization to the request
+		// eslint-disable-next-line require-atomic-updates
 		req.authorization = defineAbilitiesForUser(
-			req,
+			user.role,
 			decodedAuthToken.userObjectId,
 			latestLocationObjectId.toString(),
 			user.permissions.map(permission => ({
