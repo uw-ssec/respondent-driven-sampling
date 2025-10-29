@@ -8,13 +8,13 @@ import {
 	isCreatedBySelf,
 	isSelf,
 	isToday
-} from './utils';
+} from '@/permissions/utils';
 
 export const ROLES = {
 	VOLUNTEER: 'VOLUNTEER',
 	MANAGER: 'MANAGER',
 	ADMIN: 'ADMIN',
-	SUPER_ADMIN: 'SUPER_ADMIN' // super admin de-prioritized for now
+	SUPER_ADMIN: 'SUPER_ADMIN'
 };
 
 // Native CASL actions -- CRUD + master action "manage"
@@ -113,7 +113,8 @@ export type Context = { userObjectId: string; latestLocationObjectId: string };
 export type Action = (typeof ACTION_ENUM)[number];
 export type Subject = (typeof SUBJECT_ENUM)[number];
 export type Condition = (typeof CONDITION_ENUM)[number];
-export type Query = ReturnType<(typeof CONDITION_QUERIES)[Condition]> | {}; // @typescript-eslint/no-empty-object-type
+
+export type Query = ReturnType<(typeof CONDITION_QUERIES)[Condition]> | object;
 // here, ForcedSubject is a type used when checking auth in our routes (i.e. building a dummy subject intead of just passing in a string)
 export type Ability = MongoAbility<
 	[Action, Subject | ForcedSubject<Subject>],
