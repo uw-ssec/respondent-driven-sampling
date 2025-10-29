@@ -2,7 +2,7 @@
 
 export const SYSTEM_SURVEY_CODE = '_SEED_';
 export const GENERATED_SURVEY_CODES_LENGTH = 3;
-export const SURVEY_CODE_LENGTH = 6;
+export const SURVEY_CODE_LENGTH = 8;
 
 // ---- LOCATION CONSTANTS ----
 

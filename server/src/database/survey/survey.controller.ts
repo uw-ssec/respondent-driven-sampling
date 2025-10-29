@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import Survey from '@/database/survey/mongoose/survey.model';
 import { errors } from '@/database/utils/errors';
 
@@ -45,16 +46,15 @@ function isUniqueSurveyCodeArray(codes: Array<string>): boolean {
 }
 
 /**
- * Generates a random referral code consisting of 6 alphanumeric characters.
+ * Generates a random referral code consisting of 8 hexadecimal characters.
  * The code is case-insensitive and can be used for tracking referrals in a system.
  * Guaranteed to be unique across all surveys within the database.
- * @returns string - A unique 6-character alphanumeric code in uppercase
+ * @returns string - A unique 8-character hexadecimal code in uppercase
  * @throws {Error} - Throws SURVEY_CODE_GENERATION_ERROR if unable to generate unique code after 3 retries
  */
 export async function generateUniqueSurveyCode(): Promise<string> {
-	// TODO: Implement a more robust code generation algorithm
 	for (let retries = 0; retries < 3; retries++) {
-		const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+		const code = randomBytes(4).toString('hex').toUpperCase();
 		// Enforce individual code uniqueness
 		if (await isUniqueSurveyCode(code)) {
 			return code;
