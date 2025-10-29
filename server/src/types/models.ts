@@ -1,5 +1,4 @@
-// REVIEW: Thoughts on calling this file, documents.types.ts instead of models.ts?
-
+// TODO: Delete this file once migration to v2 is complete.
 import { Document, Types } from 'mongoose';
 
 import { Action, Condition, Subject } from '@/permissions/constants';
