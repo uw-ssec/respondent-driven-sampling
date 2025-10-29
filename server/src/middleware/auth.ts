@@ -1,11 +1,11 @@
 import { NextFunction, Response } from 'express';
 
+import Survey from '@/database/survey/mongoose/survey.model';
 import User, { IUser } from '@/database/user/mongoose/user.model';
 import { ApprovalStatus } from '@/database/utils/constants';
 import defineAbilitiesForUser from '@/permissions/abilityBuilder';
 import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
-import { getLatestLocation } from '@/utils/utils';
 
 // Middleware for verifying token signature and storing token info in response
 // If this call passes to the next handler, it means the user is atleast a volunteer
@@ -47,13 +47,6 @@ export async function auth(
 			return;
 		}
 
-		// Derive latest location objectId from user's latest survey
-		// If no survey exists, use the user's profile location
-		// This is for read/update permissions for surveys, where users can only read/update surveys created at their own location
-		const latestLocationObjectId =
-			(await getLatestLocation(decodedAuthToken.userObjectId)) ??
-			user.locationObjectId;
-
 		// Check if user is approved
 		if (user.approvalStatus !== ApprovalStatus.APPROVED) {
 			res.status(403).json({
@@ -62,6 +55,15 @@ export async function auth(
 			});
 			return;
 		}
+
+		// Derive latest location objectId from user's latest survey
+		// This is for read/update permissions for surveys, where users can only read/update surveys created at their own location
+		const latestSurvey = await Survey.findOne({
+			createdByUserObjectId: decodedAuthToken.userObjectId
+		}).sort({ updatedAt: -1 });
+		// If user has no associated surveys, use the user's profile location
+		const latestLocationObjectId =
+			latestSurvey?.locationObjectId ?? user.locationObjectId;
 
 		// Add user information to request object now that we have fully validated the user
 		// and fetched their latest location
