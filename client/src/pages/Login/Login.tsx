@@ -1,8 +1,8 @@
 // src/pages/Login/login.js
 import { useEffect, useState } from 'react';
-import { TextField, Button, Paper, Typography, Box } from '@mui/material';
 
-import { saveAuthToken, initializeSurveyStore } from '@/utils/authTokenHandler';
+import { initializeSurveyStore, saveAuthToken } from '@/utils/authTokenHandler';
+import { Box, Button, Paper, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 import { LoginProps } from '../../types/AuthProps';
@@ -110,33 +110,33 @@ export default function Login({ onLogin }: LoginProps) {
 	};
 
 	return (
-		<Box 
+		<Box
 			sx={{
 				display: 'flex',
 				justifyContent: 'center',
 				alignItems: 'center',
 				minHeight: '100vh',
 				margin: 0,
-				background: 'linear-gradient(to bottom right, #f0f2f5, #e0e6ed)',
+				background: 'linear-gradient(to bottom right, #f0f2f5, #e0e6ed)'
 			}}
 		>
-			<Paper 
+			<Paper
 				elevation={3}
 				sx={{
 					p: 6,
 					width: '100%',
 					maxWidth: 450,
 					textAlign: 'center',
-					borderRadius: 3,
+					borderRadius: 3
 				}}
 			>
-				<Typography 
-					variant="h4" 
-					component="h2" 
+				<Typography
+					variant="h4"
+					component="h2"
 					color="primary.main"
 					sx={{ mb: 3 }}
 				>
-					{otpSent ? 'Verify OTP' : 'Hi, welcome to RDS Mobile!'}
+					{otpSent ? 'Verify OTP' : 'Hi, Welcome to RDS Mobile!'}
 				</Typography>
 
 				{/* Initial login page */}
@@ -166,7 +166,7 @@ export default function Login({ onLogin }: LoginProps) {
 							variant="outlined"
 							sx={{ mb: 2 }}
 						/>
-						<Button 
+						<Button
 							onClick={sendOtp}
 							variant="contained"
 							size="large"
@@ -176,8 +176,8 @@ export default function Login({ onLogin }: LoginProps) {
 							Send OTP &amp; Login
 						</Button>
 						{/* Button to registration page */}
-						<Typography 
-							variant="body2" 
+						<Typography
+							variant="body2"
 							color="primary.main"
 							sx={{ mt: 2 }}
 						>
@@ -213,7 +213,7 @@ export default function Login({ onLogin }: LoginProps) {
 							variant="outlined"
 							sx={{ mb: 2 }}
 						/>
-						<Button 
+						<Button
 							onClick={verifyOtp}
 							variant="contained"
 							size="large"
@@ -223,26 +223,23 @@ export default function Login({ onLogin }: LoginProps) {
 							Verify OTP &amp; Login
 						</Button>
 						{/* Resend OTP button or countdown */}
-						<Typography 
-							variant="body2" 
+						<Typography
+							variant="body2"
 							color="primary.main"
 							sx={{ mt: 2 }}
 						>
 							{countdown > 0 ? (
 								`Resend OTP in ${countdown}s`
 							) : (
-								<Button 
-									onClick={sendOtp}
-									variant="text"
-								>
+								<Button onClick={sendOtp} variant="text">
 									Resend OTP
 								</Button>
 							)}
 						</Typography>
 
 						{/* Option to go back to email/phone entry */}
-						<Typography 
-							variant="body2" 
+						<Typography
+							variant="body2"
 							color="primary.main"
 							sx={{ mt: 2 }}
 						>
@@ -271,12 +268,20 @@ export default function Login({ onLogin }: LoginProps) {
 				)}
 
 				{errorMessage && (
-					<Typography variant="body2" color="error.main" sx={{ mt: 1 }}>
+					<Typography
+						variant="body2"
+						color="error.main"
+						sx={{ mt: 1 }}
+					>
 						{errorMessage}
 					</Typography>
 				)}
 				{successMessage && (
-					<Typography variant="body2" color="success.main" sx={{ mt: 1, fontWeight: 500 }}>
+					<Typography
+						variant="body2"
+						color="success.main"
+						sx={{ mt: 1, fontWeight: 500 }}
+					>
 						{successMessage}
 					</Typography>
 				)}

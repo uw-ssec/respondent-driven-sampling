@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 
 import NewUser from '@/pages/AdminDashboard/NewUser';
 import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
@@ -9,12 +7,15 @@ import LandingPage from '@/pages/LandingPage/LandingPage';
 import Login from '@/pages/Login/Login';
 import PastEntries from '@/pages/PastEntries/PastEntries';
 import SurveyDetails from '@/pages/PastEntries/SurveyDetails';
+import SurveyEdit from '@/pages/PastEntries/SurveyEdit';
 import AdminEditProfile from '@/pages/Profile/AdminEditProfile';
 import ViewProfile from '@/pages/Profile/ViewProfile';
 import ApplyReferral from '@/pages/QRCodeScanAndReferral/ApplyReferral';
 import Signup from '@/pages/Signup/Signup';
+import SurveyComponent from '@/pages/Survey/SurveyComponent';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
-import SurveyEdit from '@/pages/PastEntries/SurveyEdit';
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider } from '@mui/material/styles';
 import {
 	Navigate,
 	Route,
@@ -22,12 +23,10 @@ import {
 	Routes
 } from 'react-router-dom';
 
-import SurveyComponent from '@/pages/Survey/SurveyComponent';
-import { muiTheme } from './theme/muiTheme';
-
-import { hasAuthToken } from './utils/authTokenHandler';
-import { useSurveyStore } from './stores/useSurveyStore';
 import { useAuthStore } from './stores/useAuthStore';
+import { useSurveyStore } from './stores/useSurveyStore';
+import { muiTheme } from './theme/muiTheme';
+import { hasAuthToken } from './utils/authTokenHandler';
 
 function App() {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(hasAuthToken());
@@ -48,17 +47,21 @@ function App() {
 			<CssBaseline />
 			<Router>
 				<Routes>
-					<Route path="/" element={<Navigate replace to="/login" />} />
+					<Route
+						path="/"
+						element={<Navigate replace to="/login" />}
+					/>
 					<Route
 						path="/login"
 						element={<Login onLogin={handleLogin} />}
 					/>
-					<Route path="/survey/:id/survey"
+					<Route
+						path="/survey/:id/survey"
 						element={
 							isLoggedIn ? (
-							<SurveyComponent onLogout={handleLogout} />
+								<SurveyComponent onLogout={handleLogout} />
 							) : (
-							<Navigate replace to="/login" />
+								<Navigate replace to="/login" />
 							)
 						}
 					/>
