@@ -1,11 +1,11 @@
 import { NextFunction, Response } from 'express';
 
+import Survey from '@/database/survey/mongoose/survey.model';
 import User, { IUser } from '@/database/user/mongoose/user.model';
+import { ApprovalStatus } from '@/database/utils/constants';
+import defineAbilitiesForUser from '@/permissions/abilityBuilder';
 import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
-import defineAbilitiesForUser from '@/utils/roleBasedAccess';
-import { ApprovalStatus } from '@/database/utils/constants';
-import { IPermission } from '@/types/models';
 
 // Middleware for verifying token signature and storing token info in response
 // If this call passes to the next handler, it means the user is atleast a volunteer
@@ -33,15 +33,10 @@ export async function auth(
 	try {
 		const decodedAuthToken = verifyAuthToken(token);
 
-		// Add the decoded token to the request object
-		req.user = {
-			userObjectId: decodedAuthToken.userObjectId,
-			role: decodedAuthToken.role,
-			firstName: decodedAuthToken.firstName
-		};
-
-		// Checking if the user's account is approved
-		const user: IUser | null = await User.findById(decodedAuthToken.userObjectId);
+		// Get user account from database
+		const user: IUser | null = await User.findById(
+			decodedAuthToken.userObjectId
+		);
 
 		if (!user) {
 			// This case means that the user has a valid JWT signed by our server but
@@ -51,7 +46,8 @@ export async function auth(
 			});
 			return;
 		}
-		
+
+		// Check if user is approved
 		if (user.approvalStatus !== ApprovalStatus.APPROVED) {
 			res.status(403).json({
 				message:
@@ -60,15 +56,26 @@ export async function auth(
 			return;
 		}
 
+		// Derive latest location objectId from user's latest survey
+		// This is for read/update permissions for surveys, where users can only read/update surveys created at their own location
+		const latestSurvey = await Survey.findOne({
+			createdByUserObjectId: decodedAuthToken.userObjectId
+		}).sort({ updatedAt: -1 });
+		// If user has no associated surveys, use the user's profile location
+		const latestLocationObjectId =
+			latestSurvey?.locationObjectId ?? user.locationObjectId;
+
 		// Add role authorization to the request
+		// eslint-disable-next-line require-atomic-updates
 		req.authorization = defineAbilitiesForUser(
-			req,
+			user.role,
 			decodedAuthToken.userObjectId,
+			latestLocationObjectId.toString(),
 			user.permissions.map(permission => ({
 				action: permission.action,
-				subject: permission.subject ?? null,
-				condition: permission.condition ?? null
-			})) as IPermission[]
+				subject: permission.subject,
+				conditions: permission.conditions
+			}))
 		);
 		if (!req.authorization) {
 			res.sendStatus(403);

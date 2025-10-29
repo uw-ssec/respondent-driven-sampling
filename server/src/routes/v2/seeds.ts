@@ -5,6 +5,7 @@ import { createSeedSchema } from '@/database/seed/zod/seed.validator';
 import { generateUniqueSurveyCode } from '@/database/survey/survey.controller';
 import { auth } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { AuthenticatedRequest } from '@/types/auth';
 
 const router = express.Router();
@@ -30,6 +31,9 @@ router.get(
 	'/',
 	[auth], // TODO: add `read_seeds` permission check
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.READ, SUBJECTS.SEED)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await Seed.find({
 				$and: [req.query]
@@ -73,8 +77,11 @@ router.get(
  */
 router.get(
 	'/:objectId',
-	[auth], // TODO: add `read_seeds` permission check
+	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.READ, SUBJECTS.SEED)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await Seed.findById(req.params.objectId);
 			// Seed not found
@@ -129,8 +136,11 @@ router.get(
  */
 router.post(
 	'/',
-	[auth, validate(createSeedSchema)], // TODO: add `create_seeds` permission check
+	[auth, validate(createSeedSchema)],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.CREATE, SUBJECTS.SEED)) {
+			return res.sendStatus(403);
+		}
 		try {
 			// Generate a unique survey code for the seed
 			const surveyCode = await generateUniqueSurveyCode();
@@ -184,8 +194,11 @@ router.post(
  */
 router.delete(
 	'/:objectId',
-	[auth], // TODO: add `delete_seeds` permission check
+	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.DELETE, SUBJECTS.SEED)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await Seed.findByIdAndDelete(req.params.objectId);
 			// Seed not found

@@ -12,14 +12,14 @@ import mongoose from 'mongoose';
 import {
 	ACTIONS,
 	CONDITIONS,
+	ROLES,
 	SUBJECTS
-} from '../../../../utils/roleDefinitions';
+} from '../../../../permissions/constants';
 import Location from '../../../location/mongoose/location.model';
 import {
 	ApprovalStatus,
 	HubType,
-	LocationType,
-	Role
+	LocationType
 } from '../../../utils/constants';
 import User from '../user.model';
 
@@ -60,7 +60,7 @@ describe('User Model', () => {
 			lastName: 'User',
 			email: 'admin@test.com',
 			phone: '1234567890',
-			role: Role.ADMIN,
+			role: ROLES.ADMIN,
 			approvalStatus: ApprovalStatus.APPROVED,
 			approvedByUserObjectId: new mongoose.Types.ObjectId(),
 			locationObjectId: testLocation._id,
@@ -78,7 +78,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
@@ -93,7 +93,7 @@ describe('User Model', () => {
 		expect(savedUser.lastName).toBe('Doe');
 		expect(savedUser.email).toBe('john@example.com');
 		expect(savedUser.phone).toBe('0000000000');
-		expect(savedUser.role).toBe(Role.VOLUNTEER);
+		expect(savedUser.role).toBe(ROLES.VOLUNTEER);
 		expect(savedUser.approvalStatus).toBe(ApprovalStatus.PENDING);
 		expect(savedUser.approvedByUserObjectId).toEqual(adminUser._id);
 		expect(savedUser.locationObjectId).toEqual(testLocation._id);
@@ -134,7 +134,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: 'INVALID_STATUS',
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
@@ -151,7 +151,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
@@ -177,7 +177,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
@@ -203,7 +203,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			// Not providing approvalStatus - should default to PENDING
 			// Not providing approvedByUserObjectId - should default to null
 			locationObjectId: testLocation._id
@@ -226,7 +226,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
@@ -259,7 +259,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.MANAGER,
+			role: ROLES.MANAGER,
 			approvalStatus: ApprovalStatus.APPROVED,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
@@ -267,12 +267,12 @@ describe('User Model', () => {
 				{
 					action: ACTIONS.CASL.CREATE,
 					subject: SUBJECTS.SURVEY,
-					condition: CONDITIONS.SCOPES.SELF
+					conditions: [CONDITIONS.IS_SELF]
 				},
 				{
 					action: ACTIONS.CASL.READ,
 					subject: SUBJECTS.USER,
-					condition: CONDITIONS.SCOPES.ALL
+					conditions: []
 				}
 			]
 		};
@@ -283,7 +283,9 @@ describe('User Model', () => {
 		expect(savedUser.permissions).toHaveLength(2);
 		expect(savedUser.permissions[0].action).toBe(ACTIONS.CASL.CREATE);
 		expect(savedUser.permissions[0].subject).toBe(SUBJECTS.SURVEY);
-		expect(savedUser.permissions[0].condition).toBe(CONDITIONS.SCOPES.SELF);
+		expect(savedUser.permissions[0].conditions).toStrictEqual([
+			CONDITIONS.IS_SELF
+		]);
 	});
 
 	test('invalid permissions - invalid action', async () => {
@@ -292,7 +294,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
@@ -314,7 +316,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
@@ -336,14 +338,14 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
 			permissions: [
 				{
 					subject: SUBJECTS.SURVEY,
-					condition: CONDITIONS.SCOPES.SELF
+					condition: [CONDITIONS.IS_SELF]
 				}
 			]
 		};
@@ -359,7 +361,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
@@ -371,7 +373,7 @@ describe('User Model', () => {
 		savedUser.lastName = 'Smith';
 		savedUser.email = 'jane@example.com';
 		savedUser.phone = '0987654321';
-		savedUser.role = Role.MANAGER;
+		savedUser.role = ROLES.MANAGER;
 		savedUser.approvalStatus = ApprovalStatus.APPROVED;
 
 		const updatedUser = await savedUser.save();
@@ -380,7 +382,7 @@ describe('User Model', () => {
 		expect(updatedUser.lastName).toBe('Smith');
 		expect(updatedUser.email).toBe('jane@example.com');
 		expect(updatedUser.phone).toBe('0987654321');
-		expect(updatedUser.role).toBe(Role.MANAGER);
+		expect(updatedUser.role).toBe(ROLES.MANAGER);
 		expect(updatedUser.approvalStatus).toBe(ApprovalStatus.APPROVED);
 	});
 
@@ -390,7 +392,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id,
@@ -403,7 +405,7 @@ describe('User Model', () => {
 			{
 				action: ACTIONS.CASL.CREATE,
 				subject: SUBJECTS.SURVEY,
-				condition: CONDITIONS.SCOPES.SELF
+				conditions: [CONDITIONS.IS_SELF]
 			}
 		]);
 
@@ -420,7 +422,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
@@ -437,7 +439,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '1234567891',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
@@ -459,7 +461,7 @@ describe('User Model', () => {
 			lastName: 'User',
 			email: 'volunteer@example.com',
 			phone: '1111111111',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.APPROVED,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
@@ -470,7 +472,7 @@ describe('User Model', () => {
 			lastName: 'User',
 			email: 'manager@example.com',
 			phone: '2222222222',
-			role: Role.MANAGER,
+			role: ROLES.MANAGER,
 			approvalStatus: ApprovalStatus.APPROVED,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
@@ -481,7 +483,7 @@ describe('User Model', () => {
 			lastName: 'User',
 			email: 'admin2@example.com',
 			phone: '3333333333',
-			role: Role.ADMIN,
+			role: ROLES.ADMIN,
 			approvalStatus: ApprovalStatus.APPROVED,
 			approvedByUserObjectId: adminUser._id,
 			locationObjectId: testLocation._id
@@ -491,9 +493,9 @@ describe('User Model', () => {
 		const savedManager = await manager.save();
 		const savedAdmin = await admin.save();
 
-		expect(savedVolunteer.role).toBe(Role.VOLUNTEER);
-		expect(savedManager.role).toBe(Role.MANAGER);
-		expect(savedAdmin.role).toBe(Role.ADMIN);
+		expect(savedVolunteer.role).toBe(ROLES.VOLUNTEER);
+		expect(savedManager.role).toBe(ROLES.MANAGER);
+		expect(savedAdmin.role).toBe(ROLES.ADMIN);
 	});
 
 	// Test approval workflow
@@ -503,7 +505,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			locationObjectId: testLocation._id
 		});
@@ -525,7 +527,7 @@ describe('User Model', () => {
 			lastName: 'Doe',
 			email: 'john@example.com',
 			phone: '0000000000',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: ApprovalStatus.PENDING,
 			locationObjectId: testLocation._id
 		});

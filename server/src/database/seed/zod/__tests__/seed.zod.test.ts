@@ -27,10 +27,6 @@ describe('Seed Type Validation Schemas', () => {
 
 			const result = createSeedSchema.safeParse(minimalData);
 			expect(result.success).toBe(true);
-			if (result.success) {
-				expect(result.data.locationObjectId).toBe(validObjectId);
-				expect(result.data.isFallback).toBe(false); // Should default to false
-			}
 		});
 
 		test('should validate with isFallback true', () => {

@@ -3,12 +3,13 @@
 import mongoose, { InferSchemaType, Model, Schema, Types } from 'mongoose';
 
 import { injectUserHooks } from '@/database/user/mongoose/user.hooks';
-import { ApprovalStatus, Role } from '@/database/utils/constants';
+import { ApprovalStatus } from '@/database/utils/constants';
 import {
 	ACTION_ENUM,
 	CONDITION_ENUM,
+	ROLE_ENUM,
 	SUBJECT_ENUM
-} from '@/utils/roleDefinitions';
+} from '@/permissions/constants';
 
 const userSchema = new Schema(
 	{
@@ -16,7 +17,7 @@ const userSchema = new Schema(
 		lastName: { type: String, required: true },
 		email: { type: String, required: true, unique: true },
 		phone: { type: String, required: true, unique: true },
-		role: { type: String, enum: Role, required: true },
+		role: { type: String, enum: ROLE_ENUM, required: true },
 		approvalStatus: {
 			type: String,
 			enum: ApprovalStatus,
@@ -42,7 +43,12 @@ const userSchema = new Schema(
 			{
 				action: { type: String, enum: ACTION_ENUM, required: true },
 				subject: { type: String, enum: SUBJECT_ENUM, required: true },
-				condition: { type: String, enum: CONDITION_ENUM }
+				conditions: {
+					type: [String],
+					enum: CONDITION_ENUM,
+					required: true,
+					default: []
+				}
 			}
 		],
 		default: [],

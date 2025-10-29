@@ -1,4 +1,4 @@
-import express, { NextFunction, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 
 import Location, {
 	ILocation
@@ -9,6 +9,7 @@ import {
 } from '@/database/location/zod/location.validator';
 import { auth } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { AuthenticatedRequest } from '@/types/auth';
 
 const router = express.Router();
@@ -30,23 +31,19 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.get(
-	'/',
-	[auth], // TODO: add `read_locations` permission check
-	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-		try {
-			const result = await Location.find({
-				$and: [req.query]
-			});
-			res.status(200).json({
-				message: 'Locations fetched successfully',
-				data: result.map(item => item.toObject())
-			});
-		} catch (err) {
-			next(err);
-		}
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const result = await Location.find({
+			$and: [req.query]
+		});
+		res.status(200).json({
+			message: 'Locations fetched successfully',
+			data: result.map(item => item.toObject())
+		});
+	} catch (err) {
+		next(err);
 	}
-);
+});
 
 /**
  * @swagger
@@ -76,8 +73,11 @@ router.get(
  */
 router.get(
 	'/:id',
-	[auth], // TODO: add `read_locations` permission check
+	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.READ, SUBJECTS.LOCATION)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await Location.findById(req.params.id);
 			if (!result) {
@@ -135,8 +135,11 @@ router.get(
  */
 router.post(
 	'/',
-	[auth, validate(createLocationSchema)], // TODO: add `create_locations` permission check
+	[auth, validate(createLocationSchema)],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.CREATE, SUBJECTS.LOCATION)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const locationData: ILocation = { ...req.body };
 			const result = await Location.create(locationData);
@@ -199,8 +202,11 @@ router.post(
  */
 router.patch(
 	'/:objectId',
-	[auth, validate(updateLocationSchema)], // TODO: add `update_locations` permission check
+	[auth, validate(updateLocationSchema)],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.UPDATE, SUBJECTS.LOCATION)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await Location.findByIdAndUpdate(
 				req.params.objectId,
@@ -246,19 +252,28 @@ router.patch(
  *       500:
  *         description: Internal server error
  */
-router.delete('/:objectId', [auth], async (req: AuthenticatedRequest, res: Response, next: NextFunction) => { // TODO: add `delete_locations` permission check
-	try {
-		const result = await Location.findByIdAndDelete(req.params.objectId);
-		if (!result) {
-			return res.status(404).json({ message: 'Location not found' });
+router.delete(
+	'/:objectId',
+	[auth],
+	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.DELETE, SUBJECTS.LOCATION)) {
+			return res.sendStatus(403);
 		}
-		res.status(200).json({
-			message: 'Location deleted successfully',
-			data: result.toObject()
-		});
-	} catch (err) {
-		next(err);
+		try {
+			const result = await Location.findByIdAndDelete(
+				req.params.objectId
+			);
+			if (!result) {
+				return res.status(404).json({ message: 'Location not found' });
+			}
+			res.status(200).json({
+				message: 'Location deleted successfully',
+				data: result.toObject()
+			});
+		} catch (err) {
+			next(err);
+		}
 	}
-});
+);
 
 export default router;
