@@ -40,8 +40,8 @@ const surveySchema = new Schema(
 			{ fields: 'surveyCode', unique: true },
 			{ fields: 'parentSurveyCode' },
 			{ fields: 'childSurveyCodes', unique: true },
-			{ fields: 'createdByUserObjectId' },
-			{ fields: 'siteLocation' }
+			{ fields: 'siteLocation' },
+			{ createdByUserObjectId: 1, updatedAt: -1 }, // Compound index for latest survey by user
 		]
 	}
 );
