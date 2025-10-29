@@ -1,5 +1,7 @@
+// TODO: Delete this file once migration to v2 is complete.
 import { Document, Types } from 'mongoose';
-import { Action, Subject, Condition } from '@/utils/roleDefinitions';
+
+import { Action, Condition, Subject } from '@/permissions/constants';
 
 export interface IReferralCode {
 	// QR code that will be distributed to participants, and will be used to create child surveys
