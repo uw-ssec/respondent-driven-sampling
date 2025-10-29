@@ -26,10 +26,3 @@ export enum ApprovalStatus {
 	APPROVED = 'APPROVED',
 	REJECTED = 'REJECTED'
 }
-
-export enum Role {
-	VOLUNTEER = 'VOLUNTEER',
-	MANAGER = 'MANAGER',
-	ADMIN = 'ADMIN',
-	SUPER_ADMIN = 'SUPER_ADMIN' // super admin de-prioritized for now
-}

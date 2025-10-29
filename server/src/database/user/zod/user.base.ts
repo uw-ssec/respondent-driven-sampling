@@ -5,6 +5,7 @@ import { ApprovalStatus, Role } from '@/database/utils/constants';
 import {
 	ACTION_ENUM,
 	CONDITION_ENUM,
+	ROLE_ENUM,
 	SUBJECT_ENUM
 } from '@/permissions/constants';
 

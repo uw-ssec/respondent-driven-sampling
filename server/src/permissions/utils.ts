@@ -13,3 +13,27 @@ export function isToday(fieldName: string) {
 		}
 	};
 }
+
+export function hasSameLocation(locationObjectId: string) {
+	return {
+		locationObjectId: locationObjectId
+	};
+}
+
+export function isSelf(userObjectId: string) {
+	return {
+		_id: userObjectId
+	};
+}
+
+export function isCreatedBySelf(userObjectId: string) {
+	return {
+		createdByUserObjectId: userObjectId
+	};
+}
+
+export function hasRole(roles: string[]) {
+	return {
+		role: { $in: roles }
+	};
+}

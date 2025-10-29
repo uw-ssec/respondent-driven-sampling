@@ -9,12 +9,12 @@ import {
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose, { Types } from 'mongoose';
 
+import { ROLES } from '../../../../permissions/constants';
 import Location from '../../../location/mongoose/location.model';
 import User from '../../../user/mongoose/user.model';
 import {
 	HubType,
 	LocationType,
-	Role,
 	SYSTEM_SURVEY_CODE
 } from '../../../utils/constants';
 import { errors } from '../../../utils/errors';
@@ -58,7 +58,7 @@ describe('Survey Model', () => {
 			lastName: 'User',
 			email: 'test@example.com',
 			phone: '1234567890',
-			role: Role.VOLUNTEER,
+			role: ROLES.VOLUNTEER,
 			approvalStatus: 'APPROVED',
 			approvedByUserObjectId: new mongoose.Types.ObjectId(),
 			locationObjectId: testLocation._id,

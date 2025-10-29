@@ -7,6 +7,7 @@ import { ApprovalStatus, Role } from '@/database/utils/constants';
 import {
 	ACTION_ENUM,
 	CONDITION_ENUM,
+	ROLE_ENUM,
 	SUBJECT_ENUM
 } from '@/permissions/constants';
 
@@ -16,7 +17,7 @@ const userSchema = new Schema(
 		lastName: { type: String, required: true },
 		email: { type: String, required: true, unique: true },
 		phone: { type: String, required: true, unique: true },
-		role: { type: String, enum: Role, required: true },
+		role: { type: String, enum: ROLE_ENUM, required: true },
 		approvalStatus: {
 			type: String,
 			enum: ApprovalStatus,
