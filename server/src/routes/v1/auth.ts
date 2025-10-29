@@ -1,18 +1,20 @@
 import { subject } from '@casl/ability';
 import { accessibleBy } from '@casl/mongoose';
 import express, { Request, Response } from 'express';
+import { Schema } from 'mongoose';
 import twilio from 'twilio';
 
+import User from '@/database/user/mongoose/user.model';
+import { ApprovalStatus } from '@/database/utils/constants';
 import { auth } from '@/middleware/auth';
-import User from '@/models/users';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import {
 	AuthenticatedRequest,
-	LoginRequest,
 	OTPRequest,
-	SignupRequest
+	SignupRequest,
+	VerifyOTPRequest
 } from '@/types/auth';
 import { generateAuthToken } from '@/utils/authTokenHandler';
-import { ACTIONS, SUBJECTS } from '@/utils/roleDefinitions';
 
 const router = express.Router();
 
@@ -22,6 +24,8 @@ const verifySid = process.env.TWILIO_VERIFY_SID as string;
 
 const client = twilio(accountSid, authToken);
 const verifyService = client.verify.v2.services(verifySid);
+
+// TODO: Implement Zod validation schemas for request bodies
 
 // ─── Send OTP for SIGNUP ─────────────────────────────────────────────
 router.post(
@@ -85,12 +89,15 @@ router.post(
 			firstName,
 			lastName,
 			email,
-			role
+			role,
+			locationObjectId
 		}: SignupRequest & {
 			firstName: string;
 			lastName: string;
 			role: string;
+			locationObjectId: Schema.Types.ObjectId;
 		} = req.body;
+
 		try {
 			const check = await verifyService.verificationChecks.create({
 				to: phone,
@@ -111,13 +118,14 @@ router.post(
 				lastName,
 				email,
 				phone,
-				role
+				role,
+				locationObjectId
 			});
 			await newUser.save();
 			const token = generateAuthToken(
 				newUser.firstName,
 				newUser.role,
-				newUser.employeeId
+				newUser.id
 			);
 
 			res.json({
@@ -138,7 +146,7 @@ router.post(
 router.post(
 	'/verify-otp-login',
 	async (req: Request, res: Response): Promise<void> => {
-		const { phone, code }: LoginRequest = req.body;
+		const { phone, code }: VerifyOTPRequest = req.body;
 		try {
 			const check = await verifyService.verificationChecks.create({
 				to: phone,
@@ -155,18 +163,14 @@ router.post(
 				});
 				return;
 			}
-			if (user.approvalStatus !== 'Approved') {
+			if (user.approvalStatus !== ApprovalStatus.APPROVED) {
 				res.status(403).json({
 					message:
 						'Account not approved yet. Please contact your admin.'
 				});
 				return;
 			}
-			const token = generateAuthToken(
-				user.firstName,
-				user.role,
-				user.employeeId
-			);
+			const token = generateAuthToken(user.firstName, user.role, user.id);
 
 			res.json({
 				message: 'Login successful!',
@@ -213,7 +217,7 @@ router.put(
 		if (
 			!req.authorization?.can(
 				ACTIONS.CUSTOM.APPROVE,
-				subject(SUBJECTS.USER, { _id: req.params.id }),
+				subject(SUBJECTS.USER, { _id: req.params.id })
 			)
 		) {
 			res.sendStatus(403);

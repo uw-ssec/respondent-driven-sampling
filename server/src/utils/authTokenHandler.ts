@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 
+import { JWTPayload } from '@/types/auth';
+
 // Get the token secret dynamically to support testing environment
 function getTokenSecret(): string {
 	const secret = process.env.AUTH_SECRET;
@@ -15,13 +17,13 @@ function getTokenSecret(): string {
 export function generateAuthToken(
 	firstName: string,
 	role: string,
-	employeeId: string
+	userObjectId: string
 ): string {
 	return jwt.sign(
 		{
 			firstName: firstName,
 			role: role,
-			employeeId: employeeId
+			userObjectId: userObjectId
 		},
 		getTokenSecret(),
 		{ expiresIn: '12h' }
@@ -29,6 +31,6 @@ export function generateAuthToken(
 }
 
 // Verifies the JSON Web Token and returns the decoded payload
-export function verifyAuthToken(token: string): any {
-	return jwt.verify(token, getTokenSecret());
+export function verifyAuthToken(token: string): JWTPayload {
+	return jwt.verify(token, getTokenSecret()) as JWTPayload;
 }

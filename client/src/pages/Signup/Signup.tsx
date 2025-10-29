@@ -12,12 +12,32 @@ export default function Signup() {
 		lastName: '',
 		email: '',
 		phone: '',
-		role: ''
+		role: '',
+		locationObjectId: ''
 	});
 	const [otp, setOtp] = useState('');
 	const [otpSent, setOtpSent] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [countdown, setCountdown] = useState(0);
+	const [locations, setLocations] = useState<
+		Array<{ _id: string; hubName: string }>
+	>([]);
+
+	useEffect(() => {
+		const fetchLocations = async () => {
+			try {
+				const response = await fetch('/api/v2/locations');
+				if (response.ok) {
+					const data = await response.json();
+					console.log('Fetched locations:', data);
+					setLocations(data.data);
+				}
+			} catch (error) {
+				console.error('Failed to fetch locations:', error);
+			}
+		};
+		fetchLocations();
+	}, []);
 
 	useEffect(() => {
 		let timer: string | number | NodeJS.Timeout | undefined;
@@ -125,15 +145,28 @@ export default function Signup() {
 							required
 						/>
 						<select
+							name="locationObjectId"
+							value={userData.locationObjectId}
+							onChange={handleChange}
+							required
+						>
+							<option value="">--Select Location--</option>
+							{locations.map(location => (
+								<option key={location._id} value={location._id}>
+									{location.hubName}
+								</option>
+							))}
+						</select>
+						<select
 							name="role"
 							value={userData.role}
 							onChange={handleChange}
 							required
 						>
 							<option value="">--Select Role--</option>
-							<option value="Volunteer">Volunteer</option>
-							<option value="Manager">Manager</option>
-							<option value="Admin">Admin</option>
+							<option value="VOLUNTEER">VOLUNTEER</option>
+							<option value="MANAGER">MANAGER</option>
+							<option value="ADMIN">ADMIN</option>
 						</select>
 						<button onClick={sendOtp}>Send OTP</button>
 						<p className="switch-auth">
