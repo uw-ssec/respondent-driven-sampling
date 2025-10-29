@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import { z } from 'zod';
 
-import { ApprovalStatus, Role } from '@/database/utils/constants';
+import { ApprovalStatus } from '@/database/utils/constants';
 import {
 	ACTION_ENUM,
 	CONDITION_ENUM,
@@ -18,7 +18,7 @@ export const baseUserSchema = z
 			.string()
 			.length(10, 'Phone number must be exactly 10 digits')
 			.regex(/^\d+$/, 'Phone number must contain only digits'),
-		role: z.enum(Role),
+		role: z.enum(ROLE_ENUM),
 		approvalStatus: z.enum(ApprovalStatus),
 		approvedByUserObjectId: z
 			.string()
@@ -29,8 +29,8 @@ export const baseUserSchema = z
 		permissions: z.array(
 			z.object({
 				action: z.enum(ACTION_ENUM),
-				subject: z.enum(SUBJECT_ENUM).optional(),
-				condition: z.enum(CONDITION_ENUM).optional()
+				subject: z.enum(SUBJECT_ENUM),
+				condition: z.enum(CONDITION_ENUM).optional() // Mongoose handles default, which is empty array
 			})
 		)
 	})

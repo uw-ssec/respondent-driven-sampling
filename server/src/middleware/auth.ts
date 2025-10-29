@@ -4,7 +4,6 @@ import User, { IUser } from '@/database/user/mongoose/user.model';
 import { ApprovalStatus } from '@/database/utils/constants';
 import defineAbilitiesForUser from '@/permissions/abilityBuilder';
 import { AuthenticatedRequest } from '@/types/auth';
-import { IPermission } from '@/types/models';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
 import { getLatestLocation } from '@/utils/utils';
 
@@ -80,9 +79,9 @@ export async function auth(
 			latestLocationObjectId.toString(),
 			user.permissions.map(permission => ({
 				action: permission.action,
-				subject: permission.subject ?? null,
-				condition: permission.condition ?? null
-			})) as IPermission[]
+				subject: permission.subject,
+				conditions: permission.conditions
+			}))
 		);
 		if (!req.authorization) {
 			res.sendStatus(403);
