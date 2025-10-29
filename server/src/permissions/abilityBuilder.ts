@@ -1,4 +1,9 @@
-import { AbilityBuilder, createMongoAbility, MongoQuery, Subject } from '@casl/ability';
+import {
+	AbilityBuilder,
+	createMongoAbility,
+	MongoQuery,
+	Subject
+} from '@casl/ability';
 
 import {
 	Ability,
@@ -9,7 +14,7 @@ import {
 	Context,
 	FIELDS,
 	ROLES,
-	SUBJECTS,
+	SUBJECTS
 } from '@/permissions/constants';
 import { AuthenticatedRequest } from '@/types/auth';
 
@@ -33,7 +38,9 @@ export default function defineAbilitiesForUser(
 
 	// Assign default rules by role
 	switch (req.user?.role) {
-		// TODO: super user
+		case ROLES.SUPER_ADMIN:
+			applySuperAdminPermissions(builder, ctx);
+			break;
 		case ROLES.ADMIN:
 			applyAdminPermissions(builder, ctx);
 			break;
@@ -48,29 +55,31 @@ export default function defineAbilitiesForUser(
 	// Apply custom permissions
 	applyCustomPermissions(builder, ctx, permissions);
 
-	// Universal rules for all roles that will override any custom rules go here
-	builder.cannot(ACTIONS.CUSTOM.APPROVE, SUBJECTS.USER, {
-		_id: ctx.userObjectId
-	});
-
 	return builder.build();
 }
 
-// TODO: applySuperUserPermissions
+function applySuperAdminPermissions(
+	builder: AbilityBuilder<Ability>,
+	_ctx: Context
+) {
+	// No restrictions
+	builder.can(ACTIONS.CASL.MANAGE, SUBJECTS.ALL);
+}
 
 function applyAdminPermissions(builder: AbilityBuilder<Ability>, ctx: Context) {
 	// admins can approve anyone but superadmins
-	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.USER, FIELDS.USER.APPROVAL, {
-		...hasRole(['VOLUNTEER', 'MANAGER', 'ADMIN'])
-	});
+	builder.can(
+		ACTIONS.CASL.UPDATE,
+		SUBJECTS.USER,
+		FIELDS.USER.APPROVAL,
+		hasRole(['VOLUNTEER', 'MANAGER', 'ADMIN'])
+	);
 	// admins can update location and role of volunteers and managers
 	builder.can(
 		ACTIONS.CASL.UPDATE,
 		SUBJECTS.USER,
 		[...FIELDS.USER.LOCATION, ...FIELDS.USER.ROLE],
-		{
-			...hasRole(['VOLUNTEER', 'MANAGER'])
-		}
+		hasRole(['VOLUNTEER', 'MANAGER'])
 	);
 	// admins can update own profile AND own location
 	builder.can(
@@ -165,22 +174,23 @@ function applyCustomPermissions(
 		}
 		// if conditions, combine all conditions into a single query
 		else {
-			const combinedQuery = permission.conditions.reduce((acc, condition) => {
-				// this should never happen because we should be validating ENUMs
-				if (!(condition in CONDITION_QUERIES)) {
-					throw new Error(`Corrupted permissions: unknown condition: ${condition}`);
-				}
-				// merge the condition query into our accumulator
-				const conditionQuery = CONDITION_QUERIES[condition](ctx);
-				return { ...acc, ...conditionQuery };
-			}, {} as MongoQuery);
-
-			// apply the permission once with all conditions combined 
-			builder.can(
-				permission.action,
-				permission.subject,
-				combinedQuery
+			const combinedQuery = permission.conditions.reduce(
+				(acc, condition) => {
+					// this should never happen because we should be validating ENUMs
+					if (!(condition in CONDITION_QUERIES)) {
+						throw new Error(
+							`Corrupted permissions: unknown condition: ${condition}`
+						);
+					}
+					// merge the condition query into our accumulator
+					const conditionQuery = CONDITION_QUERIES[condition](ctx);
+					return { ...acc, ...conditionQuery };
+				},
+				{} as MongoQuery
 			);
+
+			// apply the permission once with all conditions combined
+			builder.can(permission.action, permission.subject, combinedQuery);
 		}
 	});
 }

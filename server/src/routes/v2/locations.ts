@@ -10,6 +10,7 @@ import {
 import { auth } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
 import { AuthenticatedRequest } from '@/types/auth';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 
 const router = express.Router();
 
@@ -32,8 +33,11 @@ const router = express.Router();
  */
 router.get(
 	'/',
-	[auth], // TODO: add `read_locations` permission check
+	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.READ, SUBJECTS.LOCATION)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await Location.find({
 				$and: [req.query]
@@ -76,8 +80,11 @@ router.get(
  */
 router.get(
 	'/:id',
-	[auth], // TODO: add `read_locations` permission check
+	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.READ, SUBJECTS.LOCATION)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await Location.findById(req.params.id);
 			if (!result) {
@@ -135,8 +142,11 @@ router.get(
  */
 router.post(
 	'/',
-	[auth, validate(createLocationSchema)], // TODO: add `create_locations` permission check
+	[auth, validate(createLocationSchema)],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.CREATE, SUBJECTS.LOCATION)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const locationData: ILocation = { ...req.body };
 			const result = await Location.create(locationData);
@@ -199,8 +209,11 @@ router.post(
  */
 router.patch(
 	'/:objectId',
-	[auth, validate(updateLocationSchema)], // TODO: add `update_locations` permission check
+	[auth, validate(updateLocationSchema)],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+		if (!req.authorization?.can(ACTIONS.CASL.UPDATE, SUBJECTS.LOCATION)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await Location.findByIdAndUpdate(
 				req.params.objectId,
@@ -250,7 +263,9 @@ router.delete(
 	'/:objectId',
 	[auth],
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-		// TODO: add `delete_locations` permission check
+		if (!req.authorization?.can(ACTIONS.CASL.DELETE, SUBJECTS.LOCATION)) {
+			return res.sendStatus(403);
+		}
 		try {
 			const result = await Location.findByIdAndDelete(
 				req.params.objectId

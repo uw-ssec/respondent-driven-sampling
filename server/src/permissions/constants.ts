@@ -43,7 +43,10 @@ export const ACTIONS = {
 // Allowed resources
 export const SUBJECTS = {
 	USER: 'User',
-	SURVEY: 'Survey'
+	SURVEY: 'Survey',
+	SEED: 'Seed',
+	LOCATION: 'Location',
+	ALL: 'all' // special CASL keyword for all resources/subjects (analogous to 'manage' action)
 };
 
 export const FIELDS = {
