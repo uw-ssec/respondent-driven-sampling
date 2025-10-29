@@ -40,19 +40,6 @@ const otherUser = {
 const location1 = '6901027707fdae19aae38d4e';
 const location2 = '6901027707fdae19aae38d4f';
 
-function makeReq(
-	user: Partial<AuthenticatedRequest['user']>
-): AuthenticatedRequest {
-	return {
-		user: {
-			userObjectId: user?.userObjectId || self.userObjectId,
-			role: user?.role || ROLES.VOLUNTEER,
-			firstName: user?.firstName || 'Test',
-			locationObjectId: user?.locationObjectId || location1
-		}
-	} as AuthenticatedRequest;
-}
-
 // Helper to create a date object for today
 const today = new Date();
 const yesterday = new Date(today);

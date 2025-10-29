@@ -12,9 +12,9 @@ import connectDB from '@/database/index';
 import authRoutes from '@/routes/v1/auth';
 import pageRoutes from '@/routes/v1/pages';
 import surveyRoutes from '@/routes/v1/surveys';
-import surveyRoutesV2 from '@/routes/v2/surveys';
-import seedsRoutesV2 from '@/routes/v2/seeds';
 import locationsRoutesV2 from '@/routes/v2/locations';
+import seedsRoutesV2 from '@/routes/v2/seeds';
+import surveyRoutesV2 from '@/routes/v2/surveys';
 import usersRoutesV2 from '@/routes/v2/users';
 
 // Get __dirname equivalent for ES modules
@@ -204,6 +204,7 @@ app.get('*', (req: Request, res: Response) => {
 	res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
+console.log(process.env.NODE_ENV);
 // Error handler with security headers
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 	// Set security headers
@@ -220,7 +221,10 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 	res.setHeader('X-XSS-Protection', '1; mode=block');
 
 	console.error(err.stack);
-	res.status(500).json({ message: err.message });
+	const isDev = process.env.NODE_ENV === 'development';
+	res.status(500).json({
+		message: isDev ? err.message : 'Internal server error'
+	});
 });
 
 const PORT = parseInt(process.env.PORT ?? '1234', 10);
