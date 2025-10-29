@@ -16,6 +16,7 @@ export interface AuthenticatedRequest extends Request {
 export interface JWTPayload extends JwtPayload {
 	userObjectId: string;
 	role: string;
+	firstName: string;
 }
 
 export interface OTPRequest {
@@ -31,5 +32,3 @@ export interface SignupRequest extends VerifyOTPRequest {
 	name: string;
 	role: string;
 }
-
-export interface LoginRequest extends VerifyOTPRequest {}
