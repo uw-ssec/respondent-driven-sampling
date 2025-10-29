@@ -7,7 +7,7 @@ import {
 	test
 } from '@jest/globals';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import mongoose, { Types } from 'mongoose';
+import mongoose from 'mongoose';
 
 import { ROLES } from '../../../../permissions/constants';
 import Location from '../../../location/mongoose/location.model';
