@@ -43,8 +43,7 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 					onScanSuccess,
 					onScanFailure
 				)
-				.catch(err => {
-					console.error('Failed to start scanning:', err);
+				.catch(() => {
 					alert(
 						'We could not access the camera. Make sure camera permissions are granted.'
 					);
@@ -59,17 +58,14 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 					scannerRef.current
 						.stop()
 						.then(() => scannerRef.current?.clear())
-						.catch(err =>
-							console.warn(
-								'Failed to stop and clear QR scanner:',
-								err
-							)
-						);
+						.catch(() => {
+							// Failed to stop and clear QR scanner - silently handled
+						});
 				} else {
 					try {
 						scannerRef.current.clear();
-					} catch (err) {
-						console.warn('Failed to clear QR scanner:', err);
+					} catch {
+						// Failed to clear QR scanner - silently handled
 					}
 				}
 			}
@@ -83,11 +79,10 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 				.stop()
 				.then(() => {
 					scannerRef.current?.clear();
-					console.log('Scanner stopped after successful scan.');
 				})
-				.catch(error =>
-					console.error('Failed to stop scanner:', error)
-				);
+				.catch(() => {
+					// Failed to stop scanner - silently handled
+				});
 		}
 		setIsScanning(false);
 
@@ -95,14 +90,14 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 		try {
 			const url = new URL(decodedText);
 			window.location.href = url.href; // Redirect user to the scanned URL
-		} catch (error) {
+		} catch {
 			alert('Invalid QR Code. Please scan a valid link.');
 		}
 	};
 
 	// Function to handle QR code scan failure
-	const onScanFailure = (error: string) => {
-		console.warn(`QR Code scan error: ${error}`);
+	const onScanFailure = () => {
+		// QR Code scan error - silently handled
 	};
 
 	// Function to handle referral code submission

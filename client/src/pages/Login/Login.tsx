@@ -181,7 +181,7 @@ export default function Login({ onLogin }: LoginProps) {
 							color="primary.main"
 							sx={{ mt: 2 }}
 						>
-							Don't have an account?{' '}
+							Don&apos;t have an account?{' '}
 							<Typography
 								component="span"
 								onClick={() => navigate('/signup')}
