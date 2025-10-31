@@ -1,27 +1,47 @@
-import '@/styles/header.css';
+import React, { useState } from 'react';
 
-import { useEffect, useRef, useState } from 'react';
-
+import {
+	AppBar,
+	Box,
+	IconButton,
+	Menu,
+	MenuItem,
+	Toolbar,
+	Typography
+} from '@mui/material';
+import {
+	AccountCircle,
+	Add,
+	Folder,
+	Home
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 import { LogoutProps } from '@/types/AuthProps';
 
 function Header({ onLogout }: LogoutProps) {
-	const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const navigate = useNavigate();
-	const menuRef = useRef<HTMLDivElement | null>(null); // Ref to track the menu
+	const isProfileMenuOpen = Boolean(anchorEl);
 
-	// Function to toggle the profile menu
-	const toggleProfileMenu = () => {
-		setIsProfileMenuOpen(!isProfileMenuOpen);
+	// Function to open the profile menu
+	const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+		setAnchorEl(event.currentTarget);
+	};
+
+	// Function to close the profile menu
+	const handleProfileMenuClose = () => {
+		setAnchorEl(null);
 	};
 
 	// Function to handle navigation to past entries
 	const handleViewPastEntries = () => {
+		handleProfileMenuClose();
 		navigate('/past-entries');
 	};
 
 	const handleViewProfile = () => {
+		handleProfileMenuClose();
 		navigate('/view-profile');
 	};
 
@@ -41,122 +61,141 @@ function Header({ onLogout }: LogoutProps) {
 
 	// Function to handle logout
 	const handleLogout = () => {
+		handleProfileMenuClose();
 		if (onLogout) {
 			onLogout();
 			navigate('/login');
 		}
 	};
 
-	// Close menu when clicking outside
-	useEffect(() => {
-		const handleClickOutside = (event: { target: any }) => {
-			if (menuRef.current && !menuRef.current.contains(event.target)) {
-				setIsProfileMenuOpen(false);
-			}
-		};
-
-		// Attach event listener
-		document.addEventListener('mousedown', handleClickOutside);
-
-		return () => {
-			// Cleanup event listener on component unmount
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, []);
-
-	// Close menu when navigating
 	return (
-		<div className="header">
-			{/* Logo with Home Icon */}
-			<div
-				className="logo"
-				onClick={goToLanding}
-				style={{ cursor: 'pointer' }}
-			>
-				<div className="home-icon">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 24 24"
-						fill="#3E236E"
-						width="24px"
-						height="24px"
-					>
-						<path d="M0 0h24v24H0z" fill="none" />
-						<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-					</svg>
-				</div>
-				<h1>RDS Mobile</h1>
-			</div>
-
-			{/* Navigation Icons */}
-			<div className="nav-icons">
-				{/* New Entry/Plus Circle Outline Icon */}
-				<div className="nav-icon" onClick={handleNewEntry}>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="#3E236E"
-						viewBox="0 0 24 24"
-						width="24px"
-						height="24px"
-					>
-						<path d="M0 0h24v24H0z" fill="none" />
-						<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v4H7v2h4v4h2v-4h4v-2h-4V7z" />
-					</svg>
-				</div>
-
-				{/* Folder Stack Icon */}
-				<div className="nav-icon" onClick={handleEditSurvey}>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 24 24"
-						fill="#3E236E"
-						width="24px"
-						height="24px"
-					>
-						<path d="M0 0h24v24H0z" fill="none" />
-						<path d="M2 6c0-1.1.9-2 2-2h7l2 2h7c1.1 0 2 .9 2 2v1H2V6zm0 3h20v2H2V9zm0 4h20v6c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2v-6z" />
-					</svg>
-				</div>
-
-				{/* Profile Icon */}
-				<div
-					className="nav-icon profile-icon"
-					onClick={toggleProfileMenu}
-					ref={menuRef}
+		<AppBar 
+			position="sticky" 
+			sx={{ 
+				backgroundColor: 'white',
+				boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+				borderBottom: '2px solid rgba(0, 0, 0, 0.1)'
+			}}
+		>
+			<Toolbar sx={{ justifyContent: 'space-between', px: 2.5, py: 1 }}>
+				{/* Logo with Home Icon */}
+				<Box
+					onClick={goToLanding}
+					sx={{
+						display: 'flex',
+						alignItems: 'center',
+						gap: 1.25,
+						cursor: 'pointer'
+					}}
 				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 24 24"
-						fill="#3E236E"
-						width="24px"
-						height="24px"
+					<Home sx={{ color: 'primary.main', fontSize: 28 }} />
+					<Typography
+						variant="h5"
+						component="h1"
+						sx={{
+							color: 'primary.main',
+							fontWeight: 600,
+							fontSize: '1.8rem',
+							margin: 0
+						}}
 					>
-						<path d="M0 0h24v24H0z" fill="none" />
-						<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-					</svg>
+						RDS Mobile
+					</Typography>
+				</Box>
 
-					{/* Profile Dropdown Menu */}
-					{isProfileMenuOpen && (
-						<div className="profile-menu">
-							<ul>
-								<li onClick={handleViewProfile}>
-									View Profile
-								</li>
-								<li onClick={handleViewPastEntries}>
-									View Past Entries
-								</li>
-								<li
-									onClick={handleLogout}
-									className="logout-option"
-								>
-									Log Out
-								</li>
-							</ul>
-						</div>
-					)}
-				</div>
-			</div>
-		</div>
+				{/* Navigation Icons */}
+				<Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+					{/* New Entry Icon */}
+					<IconButton
+						onClick={handleNewEntry}
+						sx={{ color: 'primary.main' }}
+						aria-label="New Entry"
+					>
+						<Add />
+					</IconButton>
+
+					{/* Folder/Survey Icon */}
+					<IconButton
+						onClick={handleEditSurvey}
+						sx={{ color: 'primary.main' }}
+						aria-label="Survey Entries"
+					>
+						<Folder />
+					</IconButton>
+
+					{/* Profile Icon */}
+					<IconButton
+						onClick={handleProfileMenuOpen}
+						sx={{ color: 'primary.main' }}
+						aria-label="Profile Menu"
+					>
+						<AccountCircle />
+					</IconButton>
+
+					{/* Profile Menu */}
+					<Menu
+						anchorEl={anchorEl}
+						open={isProfileMenuOpen}
+						onClose={handleProfileMenuClose}
+						anchorOrigin={{
+							vertical: 'bottom',
+							horizontal: 'right'
+						}}
+						transformOrigin={{
+							vertical: 'top',
+							horizontal: 'right'
+						}}
+						sx={{
+							'& .MuiPaper-root': {
+								backgroundColor: 'rgba(62, 35, 110, 0.95)',
+								minWidth: 200,
+								mt: 1
+							}
+						}}
+					>
+						<MenuItem
+							onClick={handleViewProfile}
+							sx={{
+								color: 'white',
+								fontSize: '1.1rem',
+								py: 1.5,
+								'&:hover': {
+									backgroundColor: 'rgba(255, 255, 255, 0.1)'
+								}
+							}}
+						>
+							View Profile
+						</MenuItem>
+						<MenuItem
+							onClick={handleViewPastEntries}
+							sx={{
+								color: 'white',
+								fontSize: '1.1rem',
+								py: 1.5,
+								'&:hover': {
+									backgroundColor: 'rgba(255, 255, 255, 0.1)'
+								}
+							}}
+						>
+							View Past Entries
+						</MenuItem>
+						<MenuItem
+							onClick={handleLogout}
+							sx={{
+								color: 'white',
+								fontSize: '1.1rem',
+								py: 1.5,
+								'&:hover': {
+									backgroundColor: 'rgba(255, 255, 255, 0.1)'
+								}
+							}}
+						>
+							Log Out
+						</MenuItem>
+					</Menu>
+				</Box>
+			</Toolbar>
+		</AppBar>
 	);
 }
 

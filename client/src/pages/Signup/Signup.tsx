@@ -1,9 +1,20 @@
 import { useEffect, useState } from 'react';
-
-import '@/styles/signup.css';
+import { useNavigate } from 'react-router-dom';
+import {
+	Alert,
+	Box,
+	Button,
+	Container,
+	FormControl,
+	InputLabel,
+	MenuItem,
+	Paper,
+	Select,
+	TextField,
+	Typography
+} from '@mui/material';
 
 import { saveAuthToken } from '@/utils/authTokenHandler';
-import { useNavigate } from 'react-router-dom';
 
 export default function Signup() {
 	const navigate = useNavigate();
@@ -29,11 +40,10 @@ export default function Signup() {
 				const response = await fetch('/api/v2/locations');
 				if (response.ok) {
 					const data = await response.json();
-					console.log('Fetched locations:', data);
 					setLocations(data.data);
 				}
-			} catch (error) {
-				console.error('Failed to fetch locations:', error);
+			} catch {
+				// Failed to fetch locations - silently handled
 			}
 		};
 		fetchLocations();
@@ -47,7 +57,7 @@ export default function Signup() {
 		return () => clearTimeout(timer);
 	}, [otpSent, countdown]);
 
-	const handleChange = (e: { target: { name: any; value: any } }) => {
+	const handleChange = (e: { target: { name: string; value: string } }) => {
 		setUserData({ ...userData, [e.target.name]: e.target.value });
 	};
 
@@ -104,120 +114,239 @@ export default function Signup() {
 	};
 
 	return (
-		<div className="page-wrapper">
-			<div className="signup-container">
-				<h2>{otpSent ? 'Verify OTP' : 'Welcome! Sign Up Here!'}</h2>
+		<Box
+			sx={{
+				minHeight: '100vh',
+				background: 'linear-gradient(to bottom right, #f0f2f5, #e0e6ed)',
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				padding: 2
+			}}
+		>
+			<Container maxWidth="sm">
+				<Paper
+					elevation={10}
+					sx={{
+						p: 4,
+						borderRadius: 3,
+						width: '100%',
+						maxWidth: 450,
+						textAlign: 'center'
+					}}
+				>
+					<Typography
+						variant="h4"
+						component="h2"
+						sx={{
+							mb: 3,
+							color: 'primary.main',
+							fontWeight: 600
+						}}
+					>
+						{otpSent ? 'Verify OTP' : 'Welcome! Sign Up Here!'}
+					</Typography>
 
-				{!otpSent ? (
-					<>
-						<div className="name-row">
-							<input
-								type="text"
-								name="firstName"
-								placeholder="First Name"
-								value={userData.firstName}
+					{!otpSent ? (
+						<Box component="form" sx={{ mt: 2 }}>
+							<Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+								<TextField
+									fullWidth
+									name="firstName"
+									label="First Name"
+									value={userData.firstName}
+									onChange={handleChange}
+									required
+									variant="outlined"
+								/>
+								<TextField
+									fullWidth
+									name="lastName"
+									label="Last Name"
+									value={userData.lastName}
+									onChange={handleChange}
+									required
+									variant="outlined"
+								/>
+							</Box>
+
+							<TextField
+								fullWidth
+								name="email"
+								label="Email"
+								type="email"
+								value={userData.email}
 								onChange={handleChange}
 								required
+								variant="outlined"
+								sx={{ mb: 2 }}
 							/>
-							<input
-								type="text"
-								name="lastName"
-								placeholder="Last Name"
-								value={userData.lastName}
-								onChange={handleChange}
+
+							<TextField
+								fullWidth
+								name="phone"
+								label="Phone"
+								placeholder="+1XXXXXXXXXX"
+								value={userData.phone}
+								onChange={handlePhoneChange}
 								required
+								variant="outlined"
+								sx={{ mb: 2 }}
 							/>
-						</div>
-						<input
-							type="email"
-							name="email"
-							placeholder="Email"
-							value={userData.email}
-							onChange={handleChange}
-							required
-						/>
-						<input
-							type="text"
-							name="phone"
-							placeholder="Phone (+1XXXXXXXXXX)"
-							value={userData.phone}
-							onChange={handlePhoneChange}
-							required
-						/>
-						<select
-							name="locationObjectId"
-							value={userData.locationObjectId}
-							onChange={handleChange}
-							required
-						>
-							<option value="">--Select Location--</option>
-							{locations.map(location => (
-								<option key={location._id} value={location._id}>
-									{location.hubName}
-								</option>
-							))}
-						</select>
-						<select
-							name="role"
-							value={userData.role}
-							onChange={handleChange}
-							required
-						>
-							<option value="">--Select Role--</option>
-							<option value="VOLUNTEER">VOLUNTEER</option>
-							<option value="MANAGER">MANAGER</option>
-							<option value="ADMIN">ADMIN</option>
-						</select>
-						<button onClick={sendOtp}>Send OTP</button>
-						<p className="switch-auth">
-							Already have an account?{' '}
-							<span
-								onClick={() => navigate('/login')}
-								className="auth-link"
-							>
-								Login
-							</span>
-						</p>
-					</>
-				) : (
-					<>
-						<input
-							type="text"
-							placeholder="Enter OTP"
-							value={otp}
-							onChange={e => setOtp(e.target.value)}
-							required
-						/>
-						<button onClick={verifyOtp}>
-							Verify OTP & Complete Signup
-						</button>
-						<p className="resend-otp">
-							{countdown > 0 ? (
-								`Resend OTP in ${countdown}s`
-							) : (
-								<button onClick={sendOtp}>Resend OTP</button>
-							)}
-						</p>
-						<p className="switch-auth">
-							<span
-								onClick={() => {
-									setOtpSent(false);
-									setOtp('');
-									setCountdown(0);
-									setErrorMessage('');
+
+							<FormControl fullWidth sx={{ mb: 2 }}>
+								<InputLabel>Location</InputLabel>
+								<Select
+									name="locationObjectId"
+									value={userData.locationObjectId}
+									onChange={handleChange}
+									label="Location"
+									required
+								>
+									<MenuItem value="">
+										<em>--Select Location--</em>
+									</MenuItem>
+									{locations.map(location => (
+										<MenuItem key={location._id} value={location._id}>
+											{location.hubName}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+
+							<FormControl fullWidth sx={{ mb: 3 }}>
+								<InputLabel>Role</InputLabel>
+								<Select
+									name="role"
+									value={userData.role}
+									onChange={handleChange}
+									label="Role"
+									required
+								>
+									<MenuItem value="">
+										<em>--Select Role--</em>
+									</MenuItem>
+									<MenuItem value="VOLUNTEER">VOLUNTEER</MenuItem>
+									<MenuItem value="MANAGER">MANAGER</MenuItem>
+									<MenuItem value="ADMIN">ADMIN</MenuItem>
+								</Select>
+							</FormControl>
+
+							<Button
+								fullWidth
+								variant="contained"
+								onClick={sendOtp}
+								sx={{
+									py: 1.5,
+									borderRadius: 25,
+									fontSize: '16px',
+									fontWeight: 600,
+									mb: 2
 								}}
-								className="auth-link"
 							>
-								Go back to Signup
-							</span>
-						</p>
-					</>
-				)}
+								Send OTP
+							</Button>
 
-				{errorMessage && (
-					<p className="error-message">{errorMessage}</p>
-				)}
-			</div>
-		</div>
+							<Typography
+								variant="body2"
+								color="primary.main"
+								sx={{ mt: 2 }}
+							>
+								Already have an account?{' '}
+								<Typography
+									component="span"
+									onClick={() => navigate('/login')}
+									sx={{
+										cursor: 'pointer',
+										textDecoration: 'underline',
+										fontWeight: 500,
+										'&:hover': {
+											color: 'primary.dark'
+										}
+									}}
+								>
+									Login
+								</Typography>
+							</Typography>
+						</Box>
+					) : (
+						<Box sx={{ mt: 2 }}>
+							<TextField
+								fullWidth
+								label="Enter OTP"
+								value={otp}
+								onChange={e => setOtp(e.target.value)}
+								required
+								variant="outlined"
+								sx={{ mb: 3 }}
+							/>
+
+							<Button
+								fullWidth
+								variant="contained"
+								onClick={verifyOtp}
+								sx={{
+									py: 1.5,
+									borderRadius: 25,
+									fontSize: '16px',
+									fontWeight: 600,
+									mb: 2
+								}}
+							>
+								Verify OTP & Complete Signup
+							</Button>
+
+							<Typography variant="body2" sx={{ mb: 2 }}>
+								{countdown > 0 ? (
+									`Resend OTP in ${countdown}s`
+								) : (
+									<Button
+										variant="text"
+										onClick={sendOtp}
+										sx={{
+											textTransform: 'none',
+											fontWeight: 500
+										}}
+									>
+										Resend OTP
+									</Button>
+								)}
+							</Typography>
+
+							<Typography
+								variant="body2"
+								color="primary.main"
+							>
+								<Typography
+									component="span"
+									onClick={() => {
+										setOtpSent(false);
+										setOtp('');
+										setCountdown(0);
+										setErrorMessage('');
+									}}
+									sx={{
+										cursor: 'pointer',
+										textDecoration: 'underline',
+										fontWeight: 500,
+										'&:hover': {
+											color: 'primary.dark'
+										}
+									}}
+								>
+									Go back to Signup
+								</Typography>
+							</Typography>
+						</Box>
+					)}
+
+					{errorMessage && (
+						<Alert severity="error" sx={{ mt: 2 }}>
+							{errorMessage}
+						</Alert>
+					)}
+				</Paper>
+			</Container>
+		</Box>
 	);
 }
