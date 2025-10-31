@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 
+import {
+	Box,
+	Button,
+	Container,
+	Paper,
+	TextField,
+	Typography
+} from '@mui/material';
+import { CameraAlt, QrCodeScanner } from '@mui/icons-material';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useNavigate } from 'react-router-dom';
 
 import Header from '@/pages/Header/Header';
-
-import '@/styles/ApplyReferral.css';
 
 import { LogoutProps } from '@/types/AuthProps';
 import { useSurveyStore } from '@/stores/useSurveyStore';
@@ -113,67 +120,133 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 		navigate(`/survey?ref=${referralCode}`);
 	};
 
-	// Function to handle cancel button click
 	return (
-		<div className="apply-referral-page">
+		<Box>
 			<Header onLogout={onLogout} />
-			<div className="apply-referral-container">
-				<h2>Apply Referral Code</h2>
-				<p>Enter or scan a QR code to start a new survey.</p>
-
-				<input
-					type="text"
-					placeholder="Enter referral code..."
-					value={referralCode}
-					onChange={e =>
-						setReferralCode(e.target.value.toUpperCase())
-					}
-					className="referral-input"
-				/>
-
-				{/* Start Survey Button */}
-				<button
-					className="generate-btn"
-					onClick={handleStartSurvey}
-					disabled={loading}
+			<Container
+				maxWidth="md"
+				sx={{
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center',
+					minHeight: 'calc(100vh - 80px)',
+					py: 4
+				}}
+			>
+				<Paper
+					elevation={3}
+					sx={{
+						p: 4,
+						maxWidth: 600,
+						width: '100%',
+						textAlign: 'center',
+						borderRadius: 2
+					}}
 				>
-					{loading ? 'Checking...' : 'Start Survey with Referral'}
-				</button>
+					<Typography
+						variant="h4"
+						component="h2"
+						color="primary.main"
+						sx={{ mb: 2, fontWeight: 600 }}
+					>
+						Apply Referral Code
+					</Typography>
+					
+					<Typography
+						variant="body1"
+						color="text.secondary"
+						sx={{ mb: 4 }}
+					>
+						Enter or scan a QR code to start a new survey.
+					</Typography>
 
-				{/* QR Code Scanner Button */}
-				<button
-					className="generate-btn"
-					onClick={() => setIsScanning(!isScanning)}
-					disabled={loading}
-				>
-					{isScanning ? 'Stop Scanning' : 'Scan QR Code with Camera'}
-				</button>
+					<TextField
+						fullWidth
+						variant="outlined"
+						placeholder="Enter referral code..."
+						value={referralCode}
+						onChange={e =>
+							setReferralCode(e.target.value.toUpperCase())
+						}
+						sx={{ mb: 3 }}
+						inputProps={{
+							style: { textTransform: 'uppercase' }
+						}}
+					/>
 
-				<div
-					onClick={() => {navigate('/survey'); clearSurvey()}}
-					className="new-seed-btn"
-				>
-					No referral code? Start new seed
-				</div>
+					{/* Start Survey Button */}
+					<Button
+						variant="contained"
+						size="large"
+						fullWidth
+						onClick={handleStartSurvey}
+						disabled={loading}
+						sx={{ mb: 2, py: 1.5 }}
+					>
+						{loading ? 'Checking...' : 'Start Survey with Referral'}
+					</Button>
 
-				{/* QR Code Scanner Container (Only shows when scanning) */}
-				{isScanning && (
-					<div
-						ref={readerRef}
-						id="qr-reader"
-						style={{ width: '300px', margin: '10px auto' }}
-					></div>
-				)}
+					{/* QR Code Scanner Button */}
+					<Button
+						variant="outlined"
+						size="large"
+						fullWidth
+						onClick={() => setIsScanning(!isScanning)}
+						disabled={loading}
+						startIcon={isScanning ? <CameraAlt /> : <QrCodeScanner />}
+						sx={{ mb: 2, py: 1.5 }}
+					>
+						{isScanning ? 'Stop Scanning' : 'Scan QR Code with Camera'}
+					</Button>
 
-				{/* Cancel Button */}
-				<button
-					className="generate-btn cancel-btn"
-					onClick={() => navigate('/dashboard')}
-					disabled={loading}
-				>
-					Cancel
-				</button>
-			</div>
-		</div>
+					<Button
+						variant="text"
+						size="large"
+						fullWidth
+						onClick={() => {navigate('/survey'); clearSurvey()}}
+						sx={{ 
+							mb: 3, 
+							py: 1.5,
+							textDecoration: 'underline',
+							'&:hover': {
+								textDecoration: 'none'
+							}
+						}}
+					>
+						No referral code? Start new seed
+					</Button>
+
+					{/* QR Code Scanner Container (Only shows when scanning) */}
+					{isScanning && (
+						<Box
+							ref={readerRef}
+							id="qr-reader"
+							sx={{
+								width: 300,
+								mx: 'auto',
+								my: 2,
+								border: '2px solid',
+								borderColor: 'primary.main',
+								borderRadius: 2,
+								overflow: 'hidden'
+							}}
+						/>
+					)}
+
+					{/* Cancel Button */}
+					<Button
+						variant="outlined"
+						color="secondary"
+						size="large"
+						fullWidth
+						onClick={() => navigate('/dashboard')}
+						disabled={loading}
+						sx={{ py: 1.5 }}
+					>
+						Cancel
+					</Button>
+				</Paper>
+			</Container>
+		</Box>
 	);
 }
