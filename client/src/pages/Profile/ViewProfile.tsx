@@ -5,10 +5,11 @@ import '@/styles/profile.css';
 import { getAuthToken, getEmployeeId } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 
-import { LogoutProps } from '@/types/AuthProps';
 import { User } from '@/types/User';
+import { useAuthContext } from '@/contexts';
 
-export default function ViewProfile({ onLogout }: LogoutProps) {
+export default function ViewProfile() {
+	const { onLogout } = useAuthContext();
 	const [user, setUser] = useState<User | null>(null);
 	const [message, setMessage] = useState('');
 	const [error, setError] = useState('');

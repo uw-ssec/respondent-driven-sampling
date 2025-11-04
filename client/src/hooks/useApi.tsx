@@ -157,6 +157,5 @@ export const useApi = () => {
 		userService,
 		surveyService,
 		locationService,
-		fetchLocations
 	};
 };

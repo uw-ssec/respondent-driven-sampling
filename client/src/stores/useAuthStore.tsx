@@ -5,7 +5,7 @@ import {
 	Action,
 	Condition,
 	Subject
-} from '../../../server/src/permissions/constants';
+} from '@/permissions/constants';
 
 type AuthState = {
 	token: string;

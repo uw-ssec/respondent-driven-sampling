@@ -160,10 +160,8 @@ function App() {
 									<ProtectedRoute
 										isLoggedIn={isLoggedIn}
 										children={
-											<ViewProfile
-												onLogout={handleLogout}
-											/>
-										} // TODO: rm onLogout when updating API fetching to useApi hook
+											<ViewProfile />
+										}
 									/>
 								}
 							/>
