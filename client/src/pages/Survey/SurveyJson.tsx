@@ -503,7 +503,7 @@ const demographicsPage = {
 		},
 		{
 			type: 'tagbox',
-			name: 'race_id',
+			name: 'racial_id',
 			title: 'Which of the following best describes your racial identity? (Select all that apply)',
 			choices: raceChoices,
 			hasOther: true,
@@ -605,7 +605,7 @@ const householdPage = {
 			templateElements: [
 				{
 					type: 'text',
-					name: 'initials',
+					name: 'hh_member_initials',
 					title: 'Initials',
 					placeholder: 'e.g., JD',
 					validators: [
@@ -619,8 +619,8 @@ const householdPage = {
 				},
 				{
 					type: 'dropdown',
-					name: 'relationship',
-					title: 'How is {panel.initials} related to you?',
+					name: 'hh_member_relation',
+					title: 'How is {panel.hh_member_initials} related to you?',
 					choices: [
 						'Parent/Legal guardian',
 						'Other adult family member',
@@ -634,8 +634,8 @@ const householdPage = {
 				},
 				{
 					type: 'dropdown',
-					name: 'age_group',
-					title: 'How old is {panel.initials}?',
+					name: 'hh_member_age',
+					title: 'How old is {panel.hh_member_initials}?',
 					choices: [
 						'Under 18 years old',
 						'18 - 24 years old',
@@ -645,7 +645,7 @@ const householdPage = {
 				},
 				{
 					type: 'tagbox',
-					name: 'gender',
+					name: 'hh_member_gender_id',
 					title: 'Which of the following best describes the gender of {panel.initials}?',
 					choices: genderChoices,
 					searchEnabled: true,
@@ -653,7 +653,7 @@ const householdPage = {
 				},
 				{
 					type: 'dropdown',
-					name: 'ethnicity',
+					name: 'hh_member_ethnicity',
 					title: 'Is {panel.initials} Hispanic/Latina/e/o?',
 					choices: [
 						'Yes',
@@ -665,7 +665,7 @@ const householdPage = {
 				},
 				{
 					type: 'tagbox',
-					name: 'race',
+					name: 'hh_member_racial_id',
 					title: 'Which of the following best describes the racial identity of {panel.initials}?',
 					choices: raceChoices,
 					searchEnabled: true,
@@ -683,7 +683,7 @@ const householdPage = {
 				},
 				{
 					type: 'dropdown',
-					name: 'hh_member_veteran_status',
+					name: 'hh_member_vet_status',
 					title: 'Is {panel.initials} a veteran?',
 					choices: [
 						'Yes',
@@ -707,7 +707,7 @@ const householdPage = {
 				},
 				{
 					type: 'dropdown',
-					name: 'hh_member_mental_health',
+					name: 'hh_member_smi',
 					title: 'Does {panel.initials} identify as having a severe mental illness?',
 					choices: [
 						'Yes',
@@ -719,7 +719,7 @@ const householdPage = {
 				},
 				{
 					type: 'dropdown',
-					name: 'hh_member_substance_use',
+					name: 'hh_member_sud',
 					title: 'Does {panel.initials} identify as having a substance use disorder?',
 					choices: [
 						'Yes',
