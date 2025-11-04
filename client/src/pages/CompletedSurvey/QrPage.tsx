@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
+import { useSurveyStore } from '@/stores';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useSurveyStore } from '@/stores';
 
 import '@/styles/complete.css';
 

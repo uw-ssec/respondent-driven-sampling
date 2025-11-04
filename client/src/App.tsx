@@ -1,3 +1,5 @@
+import { AbilityContext, AuthProvider } from '@/contexts';
+import { useAbility, useAuth } from '@/hooks';
 import NewUser from '@/pages/AdminDashboard/NewUser';
 import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
 import QrPage from '@/pages/CompletedSurvey/QrPage';
@@ -13,7 +15,6 @@ import Signup from '@/pages/Signup/Signup';
 import SurveyComponent from '@/pages/Survey/SurveyComponent';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
 import CssBaseline from '@mui/material/CssBaseline';
-import { ProtectedRoute } from './components/ProtectedRoute';
 import { ThemeProvider } from '@mui/material/styles';
 import {
 	Navigate,
@@ -22,9 +23,8 @@ import {
 	Routes
 } from 'react-router-dom';
 
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { muiTheme } from './theme/muiTheme';
-import { AbilityContext, AuthProvider } from '@/contexts';
-import { useAbility, useAuth } from '@/hooks';
 
 function App() {
 	const { isLoggedIn, handleLogin, handleLogout } = useAuth();
@@ -48,9 +48,9 @@ function App() {
 							<Route
 								path="/survey/:id/survey"
 								element={
-									<ProtectedRoute 
-										isLoggedIn={isLoggedIn} 
-										children={<SurveyComponent />} 
+									<ProtectedRoute
+										isLoggedIn={isLoggedIn}
+										children={<SurveyComponent />}
 									/>
 								}
 							/>
@@ -58,101 +58,112 @@ function App() {
 							<Route
 								path="/dashboard"
 								element={
-										<ProtectedRoute 
-											isLoggedIn={isLoggedIn}
-											children={<LandingPage />} 
-										/>
+									<ProtectedRoute
+										isLoggedIn={isLoggedIn}
+										children={<LandingPage />}
+									/>
 								}
 							/>
 							<Route
 								path="/survey"
 								element={
-									<ProtectedRoute 
-										isLoggedIn={isLoggedIn} 
-										children={<SurveyComponent />} 
+									<ProtectedRoute
+										isLoggedIn={isLoggedIn}
+										children={<SurveyComponent />}
 									/>
 								}
 							/>
 							<Route
 								path="/admin-dashboard"
 								element={
-									<ProtectedRoute 
+									<ProtectedRoute
 										isLoggedIn={isLoggedIn}
-										children={<AdminDashboard />} 
+										children={<AdminDashboard />}
 									/>
 								}
 							/>
 							<Route
 								path="/admin-edit-profile/:id"
 								element={
-									<ProtectedRoute 
+									<ProtectedRoute
 										isLoggedIn={isLoggedIn}
-										children={<AdminEditProfile />} 
+										children={<AdminEditProfile />}
 									/>
 								}
 							/>
 							<Route
 								path="/add-new-user"
 								element={
-									<ProtectedRoute 
+									<ProtectedRoute
 										isLoggedIn={isLoggedIn}
-										children={<NewUser />} 
+										children={<NewUser />}
 									/>
 								}
 							/>
 							<Route
 								path="/survey-entries"
 								element={
-									<ProtectedRoute isLoggedIn={isLoggedIn}
-										children={<SurveyEntryDashboard />} 
+									<ProtectedRoute
+										isLoggedIn={isLoggedIn}
+										children={<SurveyEntryDashboard />}
 									/>
 								}
 							/>
 							<Route
 								path="/qrcode"
 								element={
-									<ProtectedRoute isLoggedIn={isLoggedIn}
-										children={<QrPage />} 
+									<ProtectedRoute
+										isLoggedIn={isLoggedIn}
+										children={<QrPage />}
 									/>
 								}
 							/>
 							<Route
 								path="/past-entries"
 								element={
-									<ProtectedRoute isLoggedIn={isLoggedIn}
-										children={<PastEntries />} 
+									<ProtectedRoute
+										isLoggedIn={isLoggedIn}
+										children={<PastEntries />}
 									/>
 								}
 							/>
 							<Route
 								path="/survey/:id"
 								element={
-									<ProtectedRoute isLoggedIn={isLoggedIn}
-										children={<SurveyDetails />} 
+									<ProtectedRoute
+										isLoggedIn={isLoggedIn}
+										children={<SurveyDetails />}
 									/>
 								}
 							/>
 							<Route
 								path="/survey/:id/edit"
 								element={
-									<ProtectedRoute isLoggedIn={isLoggedIn}
-										children={<SurveyEdit />} 
+									<ProtectedRoute
+										isLoggedIn={isLoggedIn}
+										children={<SurveyEdit />}
 									/>
 								}
 							/>
 							<Route
 								path="/apply-referral"
 								element={
-									<ProtectedRoute isLoggedIn={isLoggedIn}
-										children={<ApplyReferral />} 
+									<ProtectedRoute
+										isLoggedIn={isLoggedIn}
+										children={<ApplyReferral />}
 									/>
 								}
 							/>
 							<Route
 								path="/view-profile"
 								element={
-									<ProtectedRoute isLoggedIn={isLoggedIn}
-										children={<ViewProfile onLogout={handleLogout} />}  // TODO: rm onLogout when updating API fetching to useApi hook
+									<ProtectedRoute
+										isLoggedIn={isLoggedIn}
+										children={
+											<ViewProfile
+												onLogout={handleLogout}
+											/>
+										} // TODO: rm onLogout when updating API fetching to useApi hook
 									/>
 								}
 							/>

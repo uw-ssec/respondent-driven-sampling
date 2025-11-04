@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/ApplyReferral.css';
 
-import { useSurveyStore } from '@/stores';
 import { useAbility } from '@/hooks';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
+import { useSurveyStore } from '@/stores';
 
 export default function ApplyReferral() {
 	const ability = useAbility();
@@ -148,11 +148,17 @@ export default function ApplyReferral() {
 					{isScanning ? 'Stop Scanning' : 'Scan QR Code with Camera'}
 				</button>
 
-				{ability.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY) && (
+				{ability.can(
+					ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL,
+					SUBJECTS.SURVEY
+				) && (
 					<div
-					onClick={() => {navigate('/survey'); clearSurvey()}}
-					className="new-seed-btn"
-				>
+						onClick={() => {
+							navigate('/survey');
+							clearSurvey();
+						}}
+						className="new-seed-btn"
+					>
 						No referral code? Start new seed
 					</div>
 				)}

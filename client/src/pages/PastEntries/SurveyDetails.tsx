@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 
 import { useNavigate, useParams } from 'react-router-dom';
 
-
 import '@/styles/SurveyDetailsCss.css';
 
+import { useAuthContext } from '@/contexts';
 import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
 
-import { useAuthContext } from '@/contexts';
 import { Survey } from '@/types/Survey';
 
 export default function SurveyDetails() {
@@ -183,9 +182,7 @@ export default function SurveyDetails() {
 				{/* Edit Pre-screen Questions Button */}
 				<button
 					className="edit-button"
-					onClick={() =>
-						navigate(`/survey/${id}/edit`)
-					}
+					onClick={() => navigate(`/survey/${id}/edit`)}
 				>
 					Edit Prescreen Responses
 				</button>

@@ -2,9 +2,8 @@ import '@/styles/header.css';
 
 import { useEffect, useRef, useState } from 'react';
 
-import { useNavigate } from 'react-router-dom';
-
 import { useAuthContext } from '@/contexts';
+import { useNavigate } from 'react-router-dom';
 
 export function Header() {
 	const { onLogout } = useAuthContext();

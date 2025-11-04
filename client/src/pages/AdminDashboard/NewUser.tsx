@@ -2,10 +2,9 @@ import { useState } from 'react';
 
 import '@/styles/profile.css';
 
+import { useAuthContext } from '@/contexts';
 import { getAuthToken } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
-
-import { useAuthContext } from '@/contexts';
 
 export default function NewUser() {
 	const { onLogout } = useAuthContext();
@@ -57,75 +56,75 @@ export default function NewUser() {
 	};
 
 	return (
-			<div className="edit-profile-container">
-				<div className="edit-profile-card">
-					<h2 className="profile-name">Add New User</h2>
-					<form className="edit-profile-form" onSubmit={handleSubmit}>
-						<div className="input-group">
-							{/* First name input */}
-							<label>First Name</label>
-							<input
-								type="text"
-								value={firstName}
-								onChange={e => setFirstName(e.target.value)}
-								required
-							/>
-						</div>
+		<div className="edit-profile-container">
+			<div className="edit-profile-card">
+				<h2 className="profile-name">Add New User</h2>
+				<form className="edit-profile-form" onSubmit={handleSubmit}>
+					<div className="input-group">
+						{/* First name input */}
+						<label>First Name</label>
+						<input
+							type="text"
+							value={firstName}
+							onChange={e => setFirstName(e.target.value)}
+							required
+						/>
+					</div>
 
-						<div className="input-group">
-							{/* Last name input */}
-							<label>Last Name</label>
-							<input
-								type="text"
-								value={lastName}
-								onChange={e => setLastName(e.target.value)}
-								required
-							/>
-						</div>
+					<div className="input-group">
+						{/* Last name input */}
+						<label>Last Name</label>
+						<input
+							type="text"
+							value={lastName}
+							onChange={e => setLastName(e.target.value)}
+							required
+						/>
+					</div>
 
-						<div className="input-group">
-							{/* Email input */}
-							<label>Email</label>
-							<input
-								type="email"
-								value={email}
-								onChange={e => setEmail(e.target.value)}
-								required
-							/>
-						</div>
+					<div className="input-group">
+						{/* Email input */}
+						<label>Email</label>
+						<input
+							type="email"
+							value={email}
+							onChange={e => setEmail(e.target.value)}
+							required
+						/>
+					</div>
 
-						<div className="input-group">
-							{/* Phone number input */}
-							<label>Phone Number</label>
-							<input
-								type="text"
-								value={phone}
-								onChange={e => setPhone(e.target.value)}
-								required
-							/>
-						</div>
+					<div className="input-group">
+						{/* Phone number input */}
+						<label>Phone Number</label>
+						<input
+							type="text"
+							value={phone}
+							onChange={e => setPhone(e.target.value)}
+							required
+						/>
+					</div>
 
-						{/* Role dropdown */}
-						<div className="input-group">
-							<label>Role</label>
-							<select
-								value={role}
-								onChange={e => setRole(e.target.value)}
-								required
-							>
-								<option value="Volunteer">Volunteer</option>
-								<option value="Admin">Admin</option>
-							</select>
-						</div>
+					{/* Role dropdown */}
+					<div className="input-group">
+						<label>Role</label>
+						<select
+							value={role}
+							onChange={e => setRole(e.target.value)}
+							required
+						>
+							<option value="Volunteer">Volunteer</option>
+							<option value="Admin">Admin</option>
+						</select>
+					</div>
 
-						{/* Submit button */}
-						<button type="submit" className="save-button">
-							Register User
-						</button>
+					{/* Submit button */}
+					<button type="submit" className="save-button">
+						Register User
+					</button>
 
-						{message && <p className="status-message">{message}</p>}
-					</form>
-				</div>
+					{message && <p className="status-message">{message}</p>}
+				</form>
 			</div>
+		</div>
 	);
 }

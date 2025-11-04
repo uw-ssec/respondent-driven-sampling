@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 
+import { useAuthContext } from '@/contexts';
 import { getAuthToken, getRole } from '@/utils/authTokenHandler';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { useAuthContext } from '@/contexts';
 import { User } from '@/types/User';
 
 export default function AdminEditProfile() {

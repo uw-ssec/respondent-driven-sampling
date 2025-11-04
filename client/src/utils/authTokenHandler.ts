@@ -1,7 +1,6 @@
 // This file provides helper functions to manage JWTs used in authentication.
+import { useAuthStore, useSurveyStore } from '@/stores';
 import { jwtDecode } from 'jwt-decode';
-import { useAuthStore } from '@/stores';
-import { useSurveyStore } from '@/stores';
 
 interface JwtPayload {
 	firstName: string;
@@ -57,11 +56,12 @@ export function getObjectId(): string {
 }
 
 export function initializeSurveyStore() {
-    const { setEmployeeId, setEmployeeName, setReferredByCode, setObjectId } = useSurveyStore.getState();
-    const objectId = getObjectId();
-    const employeeName = getFirstName();
-    setEmployeeId(objectId);
-    setEmployeeName(employeeName);
+	const { setEmployeeId, setEmployeeName, setReferredByCode, setObjectId } =
+		useSurveyStore.getState();
+	const objectId = getObjectId();
+	const employeeName = getFirstName();
+	setEmployeeId(objectId);
+	setEmployeeName(employeeName);
 	setReferredByCode(null);
 	setObjectId(null);
 }

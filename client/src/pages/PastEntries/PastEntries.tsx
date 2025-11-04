@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import '@/styles/PastEntriesCss.css';
 import '@/styles/StaffDashboard.css';
 
+import { useAuthContext } from '@/contexts';
 import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
 
-import { useAuthContext } from '@/contexts';
 import { Survey } from '@/types/Survey';
 
 export default function PastEntries() {
@@ -59,52 +59,50 @@ export default function PastEntries() {
 
 	// If loading, show a loading message
 	return (
-			<div className="dashboard-container">
-				<h2 className="dashboard-title">Past Survey Entries</h2>
+		<div className="dashboard-container">
+			<h2 className="dashboard-title">Past Survey Entries</h2>
 
-				<div className="flex-box">
-					<div className="list-header">
-						<div className="header-item">Employee ID</div>
-						<div className="header-item">Employee Name</div>
-						<div className="header-item">Submitted At</div>
-						<div className="header-item">Referral Code</div>
-						<div className="header-item">Survey Responses</div>
-					</div>
-
-					{surveys.map((survey, index) => {
-						return (
-							<div className="list-row" key={index}>
-								<div className="header-item">
-									{survey.employeeId}
-								</div>
-								<div className="header-item">
-									{survey.employeeName}
-								</div>
-
-								<div className="header-item">
-									{new Date(
-										survey.createdAt
-									).toLocaleString()}
-								</div>
-								<div className="header-item">
-									{survey.referredByCode
-										? survey.referredByCode
-										: 'N/A'}
-								</div>
-								<div className="header-item">
-									<button
-										onClick={() =>
-											navigate(`/survey/${survey._id}`)
-										}
-										className=""
-									>
-										View Details
-									</button>
-								</div>
-							</div>
-						);
-					})}
+			<div className="flex-box">
+				<div className="list-header">
+					<div className="header-item">Employee ID</div>
+					<div className="header-item">Employee Name</div>
+					<div className="header-item">Submitted At</div>
+					<div className="header-item">Referral Code</div>
+					<div className="header-item">Survey Responses</div>
 				</div>
+
+				{surveys.map((survey, index) => {
+					return (
+						<div className="list-row" key={index}>
+							<div className="header-item">
+								{survey.employeeId}
+							</div>
+							<div className="header-item">
+								{survey.employeeName}
+							</div>
+
+							<div className="header-item">
+								{new Date(survey.createdAt).toLocaleString()}
+							</div>
+							<div className="header-item">
+								{survey.referredByCode
+									? survey.referredByCode
+									: 'N/A'}
+							</div>
+							<div className="header-item">
+								<button
+									onClick={() =>
+										navigate(`/survey/${survey._id}`)
+									}
+									className=""
+								>
+									View Details
+								</button>
+							</div>
+						</div>
+					);
+				})}
 			</div>
+		</div>
 	);
 }
