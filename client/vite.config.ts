@@ -9,13 +9,15 @@ export default defineConfig({
 	plugins: [basicSsl(), react(), checker({ typescript: true })],
 	resolve: {
 		alias: {
+			'@/permissions': path.resolve(__dirname, '../server/src/permissions'),
 			'@': path.resolve(__dirname, 'src'),
 			'@/components': path.resolve(__dirname, 'src/components'),
 			'@/pages': path.resolve(__dirname, 'src/pages'),
 			'@/types': path.resolve(__dirname, 'src/types'),
 			'@/styles': path.resolve(__dirname, 'src/styles'),
-			'@/assets': path.resolve(__dirname, 'src/assets')
+			'@/assets': path.resolve(__dirname, 'src/assets'),
 			// Add more aliases as needed
+			// server-side aliases (needed for permissions)
 		}
 	},
 	server: {

@@ -4,13 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/StaffDashboard.css';
 
-import { getAuthToken } from '@/utils/authTokenHandler';
-
-import { LogoutProps } from '@/types/AuthProps';
+import { useApi } from '@/hooks';
 import filter from '@/assets/filter.png';
 import editPencil from '@/assets/pencil.png';
 import trash from '@/assets/trash.png';
-import Header from '@/pages/Header/Header';
 
 // Description: Dashboard for administrators to view, approve/reject, search, and sort application users.
 
@@ -21,8 +18,9 @@ interface StaffMember {
 	approvalStatus: string;
 }
 
-export default function StaffDashboard({ onLogout }: LogoutProps) {
+export default function StaffDashboard() {
 	const navigate = useNavigate();
+	const { userService } = useApi();
 	const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
 	const [filteredStaff, setFilteredStaff] = useState<StaffMember[]>([]);
 	const [searchQuery, setSearchQuery] = useState('');
@@ -41,25 +39,9 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 	useEffect(() => {
 		async function fetchUsers() {
 			try {
-				const token = getAuthToken();
-				const response = await fetch('/api/auth/users', {
-					headers: { Authorization: `Bearer ${token}` }
-				});
-				if (!response.ok) {
-					// Error fetching user data, possibly user does not have permission
-					// to get requested data or token has expired.
-					if (response.status == 401) {
-						// Token Error, either expired or invalid for some other reason.
-						// Log user out so they can relogin to generate a new valid token
-						onLogout();
-						navigate('/login');
-						return;
-					}
-					console.error(response);
-					return;
-				}
-				const data = await response.json();
-				const formatted = data.map(
+				const users = await userService.fetchUsers();
+				if (!users) return;
+				const formatted = users.data.map(
 					(user: {
 						_id: any;
 						firstName: any;
@@ -70,7 +52,7 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 						id: user._id,
 						name: `${user.firstName} ${user.lastName}`,
 						position: user.role,
-						approvalStatus: user.approvalStatus || 'Pending'
+						approvalStatus: user.approvalStatus || 'PENDING'
 					})
 				);
 				setStaffMembers(formatted);
@@ -96,33 +78,15 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 	// Handles the approval/rejection of new accounts
 	const handleApproval = async (id: string, status: string) => {
 		try {
-			const token = getAuthToken();
-			const response = await fetch(`/api/auth/users/${id}/approve`, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`
-				},
-				body: JSON.stringify({ status })
-			});
-			if (response.ok) {
-				setStaffMembers(prev =>
-					prev.map(staffMem =>
-						staffMem.id === id
-							? { ...staffMem, approvalStatus: status }
-							: staffMem
-					)
-				);
-			} else if (response.status === 401) {
-				// Token Error, either expired or invalid for some other reason.
-				// Log user out so they can relogin to generate a new valid token
-				onLogout();
-				navigate('/login');
-			} else {
-				// Other Error, possibly user does not have permission to make
-				// the request or their account is not approved.
-				console.error(response);
-			}
+			const response = await userService.approveUser(id, status);
+			if (!response) return;
+			setStaffMembers(prev =>
+				prev.map(staffMem =>
+					staffMem.id === id
+						? { ...staffMem, approvalStatus: status }
+						: staffMem
+				)
+			);
 		} catch (err) {
 			console.error(`Error updating status to ${status}:`, err);
 		}
@@ -160,7 +124,6 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 
 	return (
 		<>
-			<Header onLogout={onLogout} />
 			{/* Main dashboard layout */}
 			<div className="dashboard-container">
 				<h2 className="dashboard-title">Staff Dashboard</h2>
@@ -231,7 +194,7 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 							</div>
 							<div className="header-item">{member.position}</div>
 							<div className="header-item">
-								{member.approvalStatus === 'Pending' ? (
+								{member.approvalStatus === 'PENDING' ? (
 									<div className="list-status">
 										<div className="approval-buttons">
 											<button
@@ -239,7 +202,7 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 												onClick={() =>
 													handleApproval(
 														member.id,
-														'Approved'
+														'APPROVED'
 													)
 												}
 											>
@@ -250,7 +213,7 @@ export default function StaffDashboard({ onLogout }: LogoutProps) {
 												onClick={() =>
 													handleApproval(
 														member.id,
-														'Rejected'
+														'REJECTED'
 													)
 												}
 											>

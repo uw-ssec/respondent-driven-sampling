@@ -5,10 +5,10 @@ import '@/styles/profile.css';
 import { getAuthToken } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 
-import { LogoutProps } from '@/types/AuthProps';
-import Header from '@/pages/Header/Header';
+import { useAuthContext } from '@/contexts';
 
-export default function NewUser({ onLogout }: LogoutProps) {
+export default function NewUser() {
+	const { onLogout } = useAuthContext();
 	const [firstName, setFirstName] = useState('');
 	const [lastName, setLastName] = useState('');
 	const [email, setEmail] = useState('');
@@ -57,9 +57,6 @@ export default function NewUser({ onLogout }: LogoutProps) {
 	};
 
 	return (
-		<>
-			<Header onLogout={onLogout} />
-			{/* New user form */}
 			<div className="edit-profile-container">
 				<div className="edit-profile-card">
 					<h2 className="profile-name">Add New User</h2>
@@ -130,6 +127,5 @@ export default function NewUser({ onLogout }: LogoutProps) {
 					</form>
 				</div>
 			</div>
-		</>
 	);
 }

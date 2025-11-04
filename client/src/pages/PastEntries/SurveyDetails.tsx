@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react';
 
 import { useNavigate, useParams } from 'react-router-dom';
 
-import Header from '@/pages/Header/Header';
 
 import '@/styles/SurveyDetailsCss.css';
 
 import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
 
-import { LogoutProps } from '@/types/AuthProps';
+import { useAuthContext } from '@/contexts';
 import { Survey } from '@/types/Survey';
 
-export default function SurveyDetails({ onLogout }: LogoutProps) {
+export default function SurveyDetails() {
+	const { onLogout } = useAuthContext();
 	const { id } = useParams();
 	const [survey, setSurvey] = useState<Survey>();
 	const [loading, setLoading] = useState(true);
@@ -100,7 +100,6 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 	// Function to handle logout
 	return (
 		<div>
-			<Header onLogout={onLogout} />
 			<br />
 			<br />
 			<br />

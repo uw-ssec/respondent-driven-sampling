@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useNavigate } from 'react-router-dom';
 
-import Header from '@/pages/Header/Header';
-
 import '@/styles/ApplyReferral.css';
 
-import { LogoutProps } from '@/types/AuthProps';
-import { useSurveyStore } from '@/stores/useSurveyStore';
+import { useSurveyStore } from '@/stores';
+import { useAbility } from '@/hooks';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 
-export default function ApplyReferral({ onLogout }: LogoutProps) {
+export default function ApplyReferral() {
+	const ability = useAbility();
 	const navigate = useNavigate();
 	const [referralCode, setReferralCode] = useState('');
 	const [loading, setLoading] = useState(false);
@@ -116,7 +116,6 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 	// Function to handle cancel button click
 	return (
 		<div className="apply-referral-page">
-			<Header onLogout={onLogout} />
 			<div className="apply-referral-container">
 				<h2>Apply Referral Code</h2>
 				<p>Enter or scan a QR code to start a new survey.</p>
@@ -149,12 +148,14 @@ export default function ApplyReferral({ onLogout }: LogoutProps) {
 					{isScanning ? 'Stop Scanning' : 'Scan QR Code with Camera'}
 				</button>
 
-				<div
+				{ability.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY) && (
+					<div
 					onClick={() => {navigate('/survey'); clearSurvey()}}
 					className="new-seed-btn"
 				>
-					No referral code? Start new seed
-				</div>
+						No referral code? Start new seed
+					</div>
+				)}
 
 				{/* QR Code Scanner Container (Only shows when scanning) */}
 				{isScanning && (

@@ -1,119 +1,64 @@
-import { useEffect, useState } from 'react';
-
+import { useAbility } from '@/hooks';
 import { useNavigate } from 'react-router-dom';
 
 import '@/styles/LandingPage.css';
 
-import Header from '@/pages/Header/Header';
-import { getFirstName, getRole } from '@/utils/authTokenHandler';
 import Container from '@mui/material/Container';
 
-import { LogoutProps } from '@/types/AuthProps';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
+import { isCreatedBySelf } from '@/permissions/utils';
+import { subject } from '@casl/ability';
+import { useAuthStore } from '@/stores';
 
-export default function LandingPage({ onLogout }: LogoutProps) {
+export default function LandingPage() {
 	const navigate = useNavigate();
-	const [firstName, setFirstName] = useState('');
-	const [role, setRole] = useState('');
-
-	// useEffect to retrieve firstName and role from localStorage
-	useEffect(() => {
-		const storedFirstName = getFirstName();
-		const storedRole = getRole();
-
-		if (storedFirstName) {
-			setFirstName(storedFirstName);
-		}
-
-		if (storedRole) {
-			setRole(storedRole);
-		}
-	}, []);
-
-	// Function to handle logout
-	const handleLogout = () => {
-		onLogout();
-		navigate('/login');
-	};
+	const { firstName, userObjectId } = useAuthStore();
+	const ability = useAbility();
 
 	// Function to handle navigation to the survey page
 	return (
 		<>
-			<Header onLogout={handleLogout} />
 			{/* Main landing container */}
 			<Container maxWidth="md" sx={{ mt: 4 }}>
 				<h1 className="welcome-text">Welcome back, {firstName}!</h1>
 
 				<div className="actions-box">
 					<h2>Your Actions:</h2>
-
-					{/*<button 
-                        className="action-button new-survey" 
-                        onClick={() => navigate('/survey')}
-                    >
-                        New Survey
-                    </button>*/}
-
-					{/* Actions availible to volunteers */}
-					{role === 'Volunteer' && (
 						<div>
-							<button
-								className="action-button scan-referral"
-								onClick={() => navigate('/apply-referral')}
-							>
-								New Entry
-							</button>
-
-							<button
-								className="action-button"
-								onClick={() => navigate('/past-entries')}
-							>
-								View Your Entries
-							</button>
-						</div>
-					)}
-
-					{/* Actions visible to Admins */}
-					{role === 'Admin' && (
-						<div>
-							<button
+							{ability.can(ACTIONS.CASL.UPDATE, SUBJECTS.USER, 'approvalStatus') && (
+								<button
 								className="action-button view-dashboard"
 								onClick={() => navigate('/admin-dashboard')}
 							>
 								View Staff Dashboard
 							</button>
-							<button
-								className="action-button"
-								onClick={() => navigate('/survey-entries')}
-							>
-								View Survey Entries
-							</button>
-						</div>
-					)}
+							)}
+							{ability.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY) && (
+								<button
+									className="action-button scan-referral"
+									onClick={() => navigate('/apply-referral')}
+								>
+									New Entry
+								</button>
+								)}
 
-					{/* Actions visible to Managers */}
-					{role === 'Manager' && (
-						<div>
-							<button
-								className="action-button view-dashboard"
-								onClick={() => navigate('/admin-dashboard')}
-							>
-								View Staff Dashboard
-							</button>
-							<button
-								className="action-button scan-referral"
-								onClick={() => navigate('/apply-referral')}
-							>
-								New Entry
-							</button>
-
-							<button
-								className="action-button"
-								onClick={() => navigate('/past-entries')}
-							>
-								View Your Entries
-							</button>
+							{ability.can(ACTIONS.CASL.READ, subject('Survey', isCreatedBySelf(userObjectId))) && (
+								<button
+									className="action-button"
+									onClick={() => navigate('/past-entries')}
+									>
+									View Your Entries
+								</button>
+							)}
+							{ability.can(ACTIONS.CASL.READ, subject('Survey', { $ne: isCreatedBySelf(userObjectId) })) && (
+								<button
+									className="action-button"
+									onClick={() => navigate('/survey-entries')}
+									>
+									View Survey Entries
+								</button>
+							)}
 						</div>
-					)}
 				</div>
 			</Container>
 		</>

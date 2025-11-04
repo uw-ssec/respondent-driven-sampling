@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { getAuthToken, getRole } from '@/utils/authTokenHandler';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { LogoutProps } from '@/types/AuthProps';
+import { useAuthContext } from '@/contexts';
 import { User } from '@/types/User';
-import Header from '@/pages/Header/Header';
 
-export default function AdminEditProfile({ onLogout }: LogoutProps) {
+export default function AdminEditProfile() {
+	const { onLogout } = useAuthContext();
 	const { id } = useParams();
 	const [user, setUser] = useState<User | null>(null);
 	const [message, setMessage] = useState('');
@@ -105,7 +105,6 @@ export default function AdminEditProfile({ onLogout }: LogoutProps) {
 
 	return (
 		<>
-			<Header onLogout={onLogout} />
 			<div className="edit-profile-container">
 				<div className="edit-profile-card">
 					<h2 className="profile-name">

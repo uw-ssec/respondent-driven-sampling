@@ -2,16 +2,13 @@ import { useEffect, useState } from 'react';
 
 import { QRCodeCanvas } from 'qrcode.react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useSurveyStore } from '@/stores/useSurveyStore';
-
-import { LogoutProps } from '@/types/AuthProps';
-import Header from '@/pages/Header/Header';
+import { useSurveyStore } from '@/stores';
 
 import '@/styles/complete.css';
 
 // Description: Displays referral QR codes and allows them to be printing
 
-export default function QrPage({ onLogout }: LogoutProps) {
+export default function QrPage() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [referralCodes, setReferralCodes] = useState([]);
@@ -36,8 +33,6 @@ export default function QrPage({ onLogout }: LogoutProps) {
 
 	return (
 		<div className="completed-survey-page">
-			<Header onLogout={onLogout} />
-
 			<div className="completed-survey-container">
 				<h2>Referral QR Codes</h2>
 				<p>Provide these QR codes to referred individuals.</p>

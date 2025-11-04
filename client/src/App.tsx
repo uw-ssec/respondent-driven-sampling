@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import NewUser from '@/pages/AdminDashboard/NewUser';
 import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
 import QrPage from '@/pages/CompletedSurvey/QrPage';
@@ -15,6 +13,7 @@ import Signup from '@/pages/Signup/Signup';
 import SurveyComponent from '@/pages/Survey/SurveyComponent';
 import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
 import CssBaseline from '@mui/material/CssBaseline';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { ThemeProvider } from '@mui/material/styles';
 import {
 	Navigate,
@@ -23,172 +22,145 @@ import {
 	Routes
 } from 'react-router-dom';
 
-import { useAuthStore } from './stores/useAuthStore';
-import { useSurveyStore } from './stores/useSurveyStore';
 import { muiTheme } from './theme/muiTheme';
-import { hasAuthToken } from './utils/authTokenHandler';
+import { AbilityContext, AuthProvider } from '@/contexts';
+import { useAbility, useAuth } from '@/hooks';
 
 function App() {
-	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(hasAuthToken());
-
-	const handleLogin = () => {
-		setIsLoggedIn(true);
-	};
-
-	const handleLogout = () => {
-		setIsLoggedIn(false);
-		// Clear auth and survey storage upon logout
-		useAuthStore.getState().clearSession();
-		useSurveyStore.getState().clearSession();
-	};
+	const { isLoggedIn, handleLogin, handleLogout } = useAuth();
+	const ability = useAbility();
 
 	return (
-		<ThemeProvider theme={muiTheme}>
-			<CssBaseline />
-			<Router>
-				<Routes>
-					<Route
-						path="/"
-						element={<Navigate replace to="/login" />}
-					/>
-					<Route
-						path="/login"
-						element={<Login onLogin={handleLogin} />}
-					/>
-					<Route
-						path="/survey/:id/survey"
-						element={
-							isLoggedIn ? (
-								<SurveyComponent onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route path="/signup" element={<Signup />} />
-					<Route
-						path="/dashboard"
-						element={
-							isLoggedIn ? (
-								<LandingPage onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/survey"
-						element={
-							isLoggedIn ? (
-								<SurveyComponent onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/admin-dashboard"
-						element={
-							isLoggedIn ? (
-								<AdminDashboard onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/admin-edit-profile/:id"
-						element={
-							isLoggedIn ? (
-								<AdminEditProfile onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/add-new-user"
-						element={
-							isLoggedIn ? (
-								<NewUser onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/survey-entries"
-						element={
-							isLoggedIn ? (
-								<SurveyEntryDashboard onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/qrcode"
-						element={
-							isLoggedIn ? (
-								<QrPage onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/past-entries"
-						element={
-							isLoggedIn ? (
-								<PastEntries onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/survey/:id"
-						element={
-							isLoggedIn ? (
-								<SurveyDetails onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/survey/:id/edit"
-						element={
-							isLoggedIn ? (
-								<SurveyEdit />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/apply-referral"
-						element={
-							isLoggedIn ? (
-								<ApplyReferral onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/view-profile"
-						element={
-							isLoggedIn ? (
-								<ViewProfile onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-				</Routes>
-			</Router>
-		</ThemeProvider>
+		<AuthProvider value={{ onLogout: handleLogout, isLoggedIn }}>
+			<AbilityContext.Provider value={ability}>
+				<ThemeProvider theme={muiTheme}>
+					<CssBaseline />
+					<Router>
+						<Routes>
+							<Route
+								path="/"
+								element={<Navigate replace to="/login" />}
+							/>
+							<Route
+								path="/login"
+								element={<Login onLogin={handleLogin} />}
+							/>
+							<Route
+								path="/survey/:id/survey"
+								element={
+									<ProtectedRoute 
+										isLoggedIn={isLoggedIn} 
+										children={<SurveyComponent />} 
+									/>
+								}
+							/>
+							<Route path="/signup" element={<Signup />} />
+							<Route
+								path="/dashboard"
+								element={
+										<ProtectedRoute 
+											isLoggedIn={isLoggedIn}
+											children={<LandingPage />} 
+										/>
+								}
+							/>
+							<Route
+								path="/survey"
+								element={
+									<ProtectedRoute 
+										isLoggedIn={isLoggedIn} 
+										children={<SurveyComponent />} 
+									/>
+								}
+							/>
+							<Route
+								path="/admin-dashboard"
+								element={
+									<ProtectedRoute 
+										isLoggedIn={isLoggedIn}
+										children={<AdminDashboard />} 
+									/>
+								}
+							/>
+							<Route
+								path="/admin-edit-profile/:id"
+								element={
+									<ProtectedRoute 
+										isLoggedIn={isLoggedIn}
+										children={<AdminEditProfile />} 
+									/>
+								}
+							/>
+							<Route
+								path="/add-new-user"
+								element={
+									<ProtectedRoute 
+										isLoggedIn={isLoggedIn}
+										children={<NewUser />} 
+									/>
+								}
+							/>
+							<Route
+								path="/survey-entries"
+								element={
+									<ProtectedRoute isLoggedIn={isLoggedIn}
+										children={<SurveyEntryDashboard />} 
+									/>
+								}
+							/>
+							<Route
+								path="/qrcode"
+								element={
+									<ProtectedRoute isLoggedIn={isLoggedIn}
+										children={<QrPage />} 
+									/>
+								}
+							/>
+							<Route
+								path="/past-entries"
+								element={
+									<ProtectedRoute isLoggedIn={isLoggedIn}
+										children={<PastEntries />} 
+									/>
+								}
+							/>
+							<Route
+								path="/survey/:id"
+								element={
+									<ProtectedRoute isLoggedIn={isLoggedIn}
+										children={<SurveyDetails />} 
+									/>
+								}
+							/>
+							<Route
+								path="/survey/:id/edit"
+								element={
+									<ProtectedRoute isLoggedIn={isLoggedIn}
+										children={<SurveyEdit />} 
+									/>
+								}
+							/>
+							<Route
+								path="/apply-referral"
+								element={
+									<ProtectedRoute isLoggedIn={isLoggedIn}
+										children={<ApplyReferral />} 
+									/>
+								}
+							/>
+							<Route
+								path="/view-profile"
+								element={
+									<ProtectedRoute isLoggedIn={isLoggedIn}
+										children={<ViewProfile onLogout={handleLogout} />}  // TODO: rm onLogout when updating API fetching to useApi hook
+									/>
+								}
+							/>
+						</Routes>
+					</Router>
+				</ThemeProvider>
+			</AbilityContext.Provider>
+		</AuthProvider>
 	);
 }
 

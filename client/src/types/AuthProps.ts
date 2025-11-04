@@ -1,5 +1,5 @@
 export interface LoginProps {
-  onLogin: () => void;
+  onLogin: (token: string) => Promise<void>;
 }
 
 export interface LogoutProps {

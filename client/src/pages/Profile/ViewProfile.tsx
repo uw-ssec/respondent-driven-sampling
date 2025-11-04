@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { LogoutProps } from '@/types/AuthProps';
 import { User } from '@/types/User';
-import Header from '@/pages/Header/Header';
 
 export default function ViewProfile({ onLogout }: LogoutProps) {
 	const [user, setUser] = useState<User | null>(null);
@@ -103,7 +102,6 @@ export default function ViewProfile({ onLogout }: LogoutProps) {
 
 	return (
 		<>
-			<Header onLogout={onLogout} />
 			<div className="edit-profile-container">
 				<div className="edit-profile-card">
 					<h2 className="profile-name">

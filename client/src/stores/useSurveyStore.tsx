@@ -4,6 +4,7 @@ import { persist, combine } from 'zustand/middleware';
 type SurveyState = {
     employeeId: string;
     employeeName: string;
+    userObjectId: string;
     surveyData: {
         objectId?: string | null;
         referredByCode?: string | null;
@@ -31,8 +32,11 @@ export const useSurveyStore = create(
                 employeeId: '',
                 employeeName: '',
                 surveyData: null,
+                userObjectId: '',
             },
             (set, get) => ({
+                setUserObjectId: (userObjectId : string) => set({ userObjectId }),
+                getUserObjectId: () => get().userObjectId,
                 setEmployeeId: (employeeId : string) => set({ employeeId }),
                 setEmployeeName: (employeeName : string) => set({ employeeName }),
                 setSurveyData: (surveyData : any | null) => set({ surveyData }),

@@ -83,7 +83,7 @@ export default function Login({ onLogin }: LoginProps) {
 			const data = await response.json();
 			if (response.ok) {
 				// Successful login and store user data
-				onLogin();
+				onLogin(data.token);
 				saveAuthToken(data.token);
 				initializeSurveyStore();
 				navigate(data.redirectTo);

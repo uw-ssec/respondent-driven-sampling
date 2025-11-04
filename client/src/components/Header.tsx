@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { LogoutProps } from '@/types/AuthProps';
+import { useAuthContext } from '@/contexts';
 
-function Header({ onLogout }: LogoutProps) {
+export function Header() {
+	const { onLogout } = useAuthContext();
 	const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 	const navigate = useNavigate();
 	const menuRef = useRef<HTMLDivElement | null>(null); // Ref to track the menu
@@ -159,5 +160,3 @@ function Header({ onLogout }: LogoutProps) {
 		</div>
 	);
 }
-
-export default Header;

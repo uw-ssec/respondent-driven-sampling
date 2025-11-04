@@ -2,17 +2,16 @@ import { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import Header from '@/pages/Header/Header';
-
 import '@/styles/PastEntriesCss.css';
 import '@/styles/StaffDashboard.css';
 
 import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
 
-import { LogoutProps } from '@/types/AuthProps';
+import { useAuthContext } from '@/contexts';
 import { Survey } from '@/types/Survey';
 
-export default function PastEntries({ onLogout }: LogoutProps) {
+export default function PastEntries() {
+	const { onLogout } = useAuthContext();
 	const [surveys, setSurveys] = useState<Survey[]>([]);
 	const [_loading, setLoading] = useState(true);
 	const navigate = useNavigate();
@@ -60,9 +59,6 @@ export default function PastEntries({ onLogout }: LogoutProps) {
 
 	// If loading, show a loading message
 	return (
-		<>
-			<Header onLogout={onLogout} />
-
 			<div className="dashboard-container">
 				<h2 className="dashboard-title">Past Survey Entries</h2>
 
@@ -110,6 +106,5 @@ export default function PastEntries({ onLogout }: LogoutProps) {
 					})}
 				</div>
 			</div>
-		</>
 	);
 }

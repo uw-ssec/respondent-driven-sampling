@@ -3,17 +3,19 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Header from '@/pages/Header/Header';
 import '@/styles/SurveyDashboard.css';
 
 import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
 
-import { LogoutProps } from '@/types/AuthProps';
 import { Survey } from '@/types/Survey';
-import filter from '@/assets/filter.png';
+import filter from '@/assets/filter.png'
+import { useAuthContext } from '@/contexts';
 import trash from '@/assets/trash.png';
+import { useApi } from '@/hooks';
 
-export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
+export default function SurveyEntryDashboard() {
+	const { onLogout } = useAuthContext();
+	const { surveyService } = useApi();
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(true);
 	const [surveys, setSurveys] = useState<Survey[]>([]);
@@ -127,7 +129,6 @@ export default function SurveyEntryDashboard({ onLogout }: LogoutProps) {
 
 	return (
 		<div>
-			<Header onLogout={onLogout} />
 			<div className="dashboard-container">
 				<h2 className="dashboard-title">Survey Entry Dashboard</h2>
 
