@@ -49,7 +49,7 @@ router.get(
 					accessibleBy(req.authorization).ofType(Survey.modelName),
 					{ deletedAt: null }
 				]
-			});
+			}).sort({ createdAt: -1 }); // always sort most to least recent
 
 			// Successfully fetched surveys
 			res.status(200).json({
@@ -213,12 +213,14 @@ router.post(
 	async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 		// Different permissions based on creation with or without referral
 		// Check permission based on the action type based on query param `new`
-		let createActionType = ACTIONS.CASL.CREATE;
-		if (req.query.new === 'true') {
-			createActionType = ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL;
-		}
-		if (!req.authorization?.can(createActionType, SUBJECTS.SURVEY)) {
-			return res.status(403).json({ message: 'Forbidden' });
+		if (req.body.surveyCode === null) {
+			if (!req.authorization?.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY)) {
+				return res.status(403).json({ message: 'Please provide a referral code to create a survey.' });
+			}
+		} else {
+			if (!req.authorization?.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY)) {
+				return res.status(403).json({ message: 'Forbidden' });
+			}
 		}
 		try {
 			const surveyData: ISurvey = req.body;
@@ -243,16 +245,11 @@ router.post(
 						message: err.message
 					});
 				}
-			} else if (req.query.new === 'true') {
-				// If `new` query parameter is true, generate new survey code and set parent to seed
+			} else {
 				surveyData.parentSurveyCode = SYSTEM_SURVEY_CODE;
 				surveyData.surveyCode = await generateUniqueSurveyCode();
-			} else {
-				const err = errors.NO_SURVEY_CODE_PROVIDED;
-				return res.status(err.status).json({
-					message: err.message
-				});
 			}
+
 			// Attempt to create the survey
 			const result = await Survey.create(surveyData);
 
