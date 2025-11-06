@@ -1,16 +1,37 @@
 import { useState } from 'react';
-
 import { useNavigate } from 'react-router-dom';
-
-import '@/styles/StaffDashboard.css';
+import {
+	Box,
+	Button,
+	TextField,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	Paper,
+	IconButton,
+	Chip,
+	Typography,
+	Radio,
+	Stack,
+	TablePagination,
+	TableSortLabel,
+	InputAdornment,
+	MenuItem,
+	Select,
+	FormControl,
+	InputLabel
+} from '@mui/material';
+import {
+	Delete as DeleteIcon,
+	Edit as EditIcon,
+	Search as SearchIcon
+} from '@mui/icons-material';
 
 import { useAbility, useApi } from '@/hooks';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
-
-import editPencil from '@/assets/pencil.png';
-import trash from '@/assets/trash.png';
-
-// Description: Dashboard for administrators to view, approve/reject, search, and sort application users.
 
 interface StaffMember {
 	id: string;
@@ -25,6 +46,16 @@ export default function StaffDashboard() {
 	const { userService } = useApi();
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filterRole, setFilterRole] = useState('');
+	const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
+	const [currentPage, setCurrentPage] = useState(0); // MUI uses 0-based index
+	const [itemsPerPage, setItemsPerPage] = useState(10);
+	const [sortConfig, setSortConfig] = useState<{
+		key: keyof StaffMember | null;
+		direction: 'asc' | 'desc';
+	}>({
+		key: null,
+		direction: 'asc'
+	});
 
 	const { data: users, mutate } = userService.useUsers() || {};
 
@@ -43,17 +74,6 @@ export default function StaffDashboard() {
 			(filterRole ? staff.position === filterRole : true)
 	);
 
-	const [sortConfig, setSortConfig] = useState<{
-		key: keyof StaffMember | null;
-		direction: 'asc' | 'desc';
-	}>({
-		key: null,
-		direction: 'asc'
-	});
-	const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
-	const [currentPage, setCurrentPage] = useState(1);
-	const itemsPerPage = 10;
-
 	// Handles the approval/rejection of new accounts
 	const handleApproval = async (id: string, status: string) => {
 		try {
@@ -67,10 +87,10 @@ export default function StaffDashboard() {
 
 	// Sort staff column
 	const handleSort = (key: keyof StaffMember) => {
-		let dir: 'asc' | 'desc' = 'asc';
-		if (sortConfig.key === key && sortConfig.direction === 'asc')
-			dir = 'desc';
-		setSortConfig({ key, direction: dir });
+		setSortConfig(prev => ({
+			key,
+			direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+		}));
 	};
 
 	const sortedAndFilteredStaff = [...filteredStaff].sort((a, b) => {
@@ -86,188 +106,255 @@ export default function StaffDashboard() {
 		return 0;
 	});
 
-	const indexLast = currentPage * itemsPerPage;
-	const indexFirst = indexLast - itemsPerPage;
-	const currentStaff = sortedAndFilteredStaff.slice(indexFirst, indexLast);
-	const totalPages = Math.ceil(sortedAndFilteredStaff.length / itemsPerPage);
+	const currentStaff = sortedAndFilteredStaff.slice(
+		currentPage * itemsPerPage,
+		currentPage * itemsPerPage + itemsPerPage
+	);
 
-	const renderSortIcons = (key: keyof StaffMember) => {
-		if (sortConfig.key === key) {
-			return sortConfig.direction === 'asc' ? '↑' : '↓';
+	const getStatusColor = (status: string): 'warning' | 'success' | 'error' => {
+		switch (status) {
+			case 'PENDING':
+				return 'warning';
+			case 'APPROVED':
+				return 'success';
+			case 'REJECTED':
+				return 'error';
+			default:
+				return 'warning';
 		}
-		return '↑↓';
 	};
 
 	return (
-		<>
-			{/* Main dashboard layout */}
-			<div className="dashboard-container">
-				<h2 className="dashboard-title">Staff Dashboard</h2>
-				<div className="flex-box">
-					{/* Controls for delete, filter, and search */}
-					<div className="top-controls">
-						<button className="control-button">
-							<img src={trash} alt="Delete" /> Delete
-						</button>
-						<input
-							type="search"
-							className="search-input"
-							placeholder="Search Name..."
-							value={searchTerm}
-							onChange={e => setSearchTerm(e.target.value)}
-						/>
-						<select
-							className="search-input"
+		<Box sx={{ p: 3 }}>
+			<Typography 
+				variant="h4" 
+				sx={{ 
+					mb: 3, 
+					color: '#3E236E', 
+					textAlign: 'center', 
+					fontWeight: 'bold' 
+				}}
+			>
+				Staff Dashboard
+			</Typography>
+
+			<Paper elevation={2} sx={{ width: '100%', mb: 2 }}>
+				{/* Controls */}
+				<Box 
+					sx={{ 
+						p: 2, 
+						display: 'flex', 
+						gap: 2, 
+						flexWrap: 'wrap', 
+						alignItems: 'center' 
+					}}
+				>
+					<Button
+						variant="outlined"
+						startIcon={<DeleteIcon />}
+						sx={{ color: '#3E236E', borderColor: '#3E236E' }}
+					>
+						Delete
+					</Button>
+					
+					<TextField
+						size="small"
+						placeholder="Search Name..."
+						value={searchTerm}
+						onChange={e => setSearchTerm(e.target.value)}
+						sx={{ flexGrow: 1, minWidth: 250 }}
+						InputProps={{
+							startAdornment: (
+								<InputAdornment position="start">
+									<SearchIcon />
+								</InputAdornment>
+							),
+						}}
+					/>
+
+					<FormControl size="small" sx={{ minWidth: 150 }}>
+						<InputLabel>Filter Role</InputLabel>
+						<Select
 							value={filterRole}
+							label="Filter Role"
 							onChange={e => setFilterRole(e.target.value)}
 						>
-							<option value="">All Roles</option>
-							<option value="ADMIN">Admin</option>
-							<option value="MANAGER">Manager</option>
-							<option value="VOLUNTEER">Volunteer</option>
-						</select>
-					</div>
+							<MenuItem value="">All Roles</MenuItem>
+							<MenuItem value="ADMIN">Admin</MenuItem>
+							<MenuItem value="MANAGER">Manager</MenuItem>
+							<MenuItem value="VOLUNTEER">Volunteer</MenuItem>
+						</Select>
+					</FormControl>
 
-					{/* Column headers */}
-					<div className="list-header">
-						<div
-							className="header-item"
-							onClick={() => handleSort('name')}
-						>
-							Name{' '}
-							<span className="sort-icons">
-								{renderSortIcons('name')}
-							</span>
-						</div>
-						<div
-							className="header-item"
-							onClick={() => handleSort('position')}
-						>
-							Position{' '}
-							<span className="sort-icons">
-								{renderSortIcons('position')}
-							</span>
-						</div>
-						<div
-							className="header-item"
-							onClick={() => handleSort('approvalStatus')}
-						>
-							Status{' '}
-							<span className="sort-icons">
-								{renderSortIcons('approvalStatus')}
-							</span>
-						</div>
-						<div className="header-item test"></div>
-					</div>
+					<Button
+						variant="contained"
+						onClick={() => navigate('/add-new-user')}
+						sx={{ 
+							ml: 'auto',
+							backgroundColor: '#3E236E',
+							'&:hover': { backgroundColor: '#5F2A96' }
+						}}
+					>
+						New User
+					</Button>
+				</Box>
 
-					{/* Staff rows */}
-					{currentStaff.map((member: StaffMember) => (
-						<div className="list-row" key={member.id}>
-							<div className="header-item">
-								<input
-									type="radio"
-									name="selectedStaff"
-									className="radio-button"
-									checked={selectedStaffId === member.id}
-									onChange={() =>
-										setSelectedStaffId(member.id)
-									}
-								/>
-								{member.name}
-							</div>
-							<div className="header-item">{member.position}</div>
-							<div className="header-item">
-								{member.approvalStatus === 'PENDING' ? (
-									<div className="list-status">
-										<div className="approval-buttons">
-											<button
-												className="approve-button"
-												onClick={() =>
-													handleApproval(
-														member.id,
-														'APPROVED'
-													)
-												}
-											>
-												Approve
-											</button>
-											<button
-												className="reject-button"
-												onClick={() =>
-													handleApproval(
-														member.id,
-														'REJECTED'
-													)
-												}
-											>
-												Reject
-											</button>
-										</div>
-									</div>
-								) : (
-									member.approvalStatus
-								)}
-							</div>
-							<div className="header-item test">
-								{ability.can(
-									ACTIONS.CASL.UPDATE,
-									SUBJECTS.USER
-								) && (
-									<img
-										src={editPencil}
-										alt="edit"
-										className="list-edit"
-										onClick={() =>
-											navigate(`/profile/${member.id}`)
-										}
-									/>
-								)}
-							</div>
-						</div>
-					))}
+				{/* Table */}
+				<TableContainer sx={{ maxHeight: 'calc(100vh - 350px)' }}>
+					<Table stickyHeader>
+						<TableHead>
+							<TableRow>
+								<TableCell 
+									sx={{ 
+										fontWeight: 600, 
+										backgroundColor: '#f9f9f9',
+										width: 50 
+									}}
+								>
+									Select
+								</TableCell>
+								<TableCell 
+									sx={{ 
+										fontWeight: 600, 
+										backgroundColor: '#f9f9f9' 
+									}}
+								>
+									<TableSortLabel
+										active={sortConfig.key === 'name'}
+										direction={sortConfig.key === 'name' ? sortConfig.direction : 'asc'}
+										onClick={() => handleSort('name')}
+									>
+										Name
+									</TableSortLabel>
+								</TableCell>
+								<TableCell 
+									sx={{ 
+										fontWeight: 600, 
+										backgroundColor: '#f9f9f9' 
+									}}
+								>
+									<TableSortLabel
+										active={sortConfig.key === 'position'}
+										direction={sortConfig.key === 'position' ? sortConfig.direction : 'asc'}
+										onClick={() => handleSort('position')}
+									>
+										Position
+									</TableSortLabel>
+								</TableCell>
+								<TableCell 
+									sx={{ 
+										fontWeight: 600, 
+										backgroundColor: '#f9f9f9' 
+									}}
+								>
+									<TableSortLabel
+										active={sortConfig.key === 'approvalStatus'}
+										direction={sortConfig.key === 'approvalStatus' ? sortConfig.direction : 'asc'}
+										onClick={() => handleSort('approvalStatus')}
+									>
+										Status
+									</TableSortLabel>
+								</TableCell>
+								<TableCell 
+									sx={{ 
+										fontWeight: 600, 
+										backgroundColor: '#f9f9f9',
+										width: 80 
+									}}
+								>
+									Actions
+								</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{currentStaff.length === 0 ? (
+								<TableRow>
+									<TableCell colSpan={5} align="center">
+										No staff members found.
+									</TableCell>
+								</TableRow>
+							) : (
+								currentStaff.map((member: StaffMember) => (
+									<TableRow 
+										key={member.id}
+										hover
+										sx={{ 
+											'&:hover': { backgroundColor: '#f8f8f8' },
+											backgroundColor: selectedStaffId === member.id ? '#f0f0f0' : 'inherit'
+										}}
+									>
+										<TableCell>
+											<Radio
+												checked={selectedStaffId === member.id}
+												onChange={() => setSelectedStaffId(member.id)}
+												value={member.id}
+												name="selectedStaff"
+											/>
+										</TableCell>
+										<TableCell>{member.name}</TableCell>
+										<TableCell>{member.position}</TableCell>
+										<TableCell>
+											{member.approvalStatus === 'PENDING' ? (
+												<Stack direction="row" spacing={1}>
+													<Button
+														size="small"
+														variant="contained"
+														color="success"
+														onClick={() => handleApproval(member.id, 'APPROVED')}
+														sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+													>
+														Approve
+													</Button>
+													<Button
+														size="small"
+														variant="contained"
+														color="error"
+														onClick={() => handleApproval(member.id, 'REJECTED')}
+														sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+													>
+														Reject
+													</Button>
+												</Stack>
+											) : (
+												<Chip 
+													label={member.approvalStatus} 
+													color={getStatusColor(member.approvalStatus)}
+													size="small"
+												/>
+											)}
+										</TableCell>
+										<TableCell>
+											{ability.can(ACTIONS.CASL.UPDATE, SUBJECTS.USER) && (
+												<IconButton
+													size="small"
+													onClick={() => navigate(`/profile/${member.id}`)}
+													sx={{ color: '#3E236E' }}
+												>
+													<EditIcon fontSize="small" />
+												</IconButton>
+											)}
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				</TableContainer>
 
-					{currentStaff.length < itemsPerPage &&
-						Array.from({
-							length: itemsPerPage - currentStaff.length
-						}).map((_, value) => (
-							<div className="list-row" key={`empty-${value}`} />
-						))}
-					{/* Footer with pagination arrows and new user button */}
-					<div className="staff-footer">
-						<button
-							className="new-user-button"
-							onClick={() => navigate('/add-new-user')}
-						>
-							New User
-						</button>
-						<div className="pagination-controls">
-							<button
-								className="arrow-button"
-								onClick={() =>
-									setCurrentPage(p => Math.max(p - 1, 1))
-								}
-								disabled={currentPage === 1}
-							>
-								&larr;
-							</button>
-							<span className="pagination-info">
-								Page {currentPage} of {totalPages}
-							</span>
-							<button
-								className="arrow-button"
-								onClick={() =>
-									setCurrentPage(p =>
-										Math.min(p + 1, totalPages)
-									)
-								}
-								disabled={currentPage >= totalPages}
-							>
-								&rarr;
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</>
+				{/* Pagination */}
+				<TablePagination
+					component="div"
+					count={sortedAndFilteredStaff.length}
+					page={currentPage}
+					onPageChange={(_e, newPage) => setCurrentPage(newPage)}
+					rowsPerPage={itemsPerPage}
+					onRowsPerPageChange={(e) => {
+						setItemsPerPage(parseInt(e.target.value, 10));
+						setCurrentPage(0);
+					}}
+					rowsPerPageOptions={[5, 10, 25, 50]}
+				/>
+			</Paper>
+		</Box>
 	);
 }

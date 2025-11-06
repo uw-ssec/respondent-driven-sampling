@@ -1,8 +1,7 @@
 import { useState } from 'react';
 
-import { useApi, useAuth } from '@/hooks';
+import { useApi } from '@/hooks';
 import { Alert, Box, Button, Stack, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 
 import {
 	FormInput,
@@ -12,7 +11,6 @@ import {
 } from '@/components/forms';
 
 export default function NewUser() {
-	const { handleLogout } = useAuth();
 	const { userService } = useApi();
 	const [firstName, setFirstName] = useState('');
 	const [lastName, setLastName] = useState('');
@@ -21,13 +19,12 @@ export default function NewUser() {
 	const [phone, setPhone] = useState('');
 	const [role, setRole] = useState('');
 	const [message, setMessage] = useState('');
-	const navigate = useNavigate();
 
 	const handleSubmit = async (e: { preventDefault: () => void }) => {
 		e.preventDefault();
 
 		try {
-			const response = await userService.createUser({
+			const createdUser = await userService.createUser({
 				locationObjectId,
 				firstName,
 				lastName,
@@ -36,17 +33,10 @@ export default function NewUser() {
 				role
 			});
 
-			const data = await response.json();
-
-			if (response.ok) {
-				setMessage('User registered successfully!');
-			} else if (response.status == 401) {
-				// Token Error, either expired or invalid for some other reason.
-				// Log user out so they can relogin to generate a new valid token
-				handleLogout();
-				navigate('/login');
+			if (createdUser) {
+				setMessage(createdUser.message ?? 'User created successfully!');
 			} else {
-				setMessage(data.message || 'Failed to register user.');
+				setMessage(createdUser?.message ?? 'Failed to create user.');
 			}
 		} catch (error) {
 			console.error('Error creating user:', error);

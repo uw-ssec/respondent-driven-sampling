@@ -4,7 +4,6 @@ import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
 import QrPage from '@/pages/CompletedSurvey/QrPage';
 import LandingPage from '@/pages/LandingPage/LandingPage';
 import Login from '@/pages/Login/Login';
-import PastEntries from '@/pages/PastEntries/PastEntries';
 import SurveyDetails from '@/pages/PastEntries/SurveyDetails';
 import Profile from '@/pages/Profile/Profile';
 import ApplyReferral from '@/pages/QRCodeScanAndReferral/ApplyReferral';
@@ -38,88 +37,100 @@ function App() {
 						<Route
 							path="/survey/:id/continue"
 							element={
-								<ProtectedRoute
-									children={<SurveyComponent />}
-								/>
+								<ProtectedRoute>
+									<SurveyComponent />
+								</ProtectedRoute>
 							}
 						/>
 						<Route path="/signup" element={<Signup />} />
 						<Route
 							path="/dashboard"
 							element={
-								<ProtectedRoute children={<LandingPage />} />
+								<ProtectedRoute>
+									<LandingPage />
+								</ProtectedRoute>
 							}
 						/>
 						<Route
 							path="/survey"
 							element={
-								<ProtectedRoute
-									children={<SurveyComponent />}
-								/>
+								<ProtectedRoute>
+									<SurveyComponent />
+								</ProtectedRoute>
 							}
 						/>
 						<Route
 							path="/admin-dashboard"
 							element={
-								<ProtectedRoute children={<AdminDashboard />} />
+								<ProtectedRoute>
+									<AdminDashboard />
+								</ProtectedRoute>
 							}
 						/>
 						<Route
 							path="/profile/:id"
-							element={<ProtectedRoute children={<Profile />} />}
+							element={
+								<ProtectedRoute>
+									<Profile />
+								</ProtectedRoute>
+							}
 						/>
 						<Route
 							path="/add-new-user"
-							element={<ProtectedRoute children={<NewUser />} />}
+							element={
+								<ProtectedRoute>
+									<NewUser />
+								</ProtectedRoute>
+							}
 						/>
 						<Route
 							path="/survey-entries"
 							element={
-								<ProtectedRoute
-									children={<SurveyEntryDashboard />}
-								/>
+								<ProtectedRoute>
+									<SurveyEntryDashboard />
+								</ProtectedRoute>
 							}
 						/>
 						<Route
 							path="/qrcode"
-							element={<ProtectedRoute children={<QrPage />} />}
-						/>
-						<Route
-							path="/past-entries"
 							element={
-								<ProtectedRoute children={<PastEntries />} />
+								<ProtectedRoute>
+									<QrPage />
+								</ProtectedRoute>
 							}
 						/>
+						{/* <Route
+							path="/past-entries"
+							element={
+								<ProtectedRoute>
+									<PastEntries />
+								</ProtectedRoute>
+							}
+						/> */}
 						<Route
 							path="/survey/:id"
 							element={
-								<ProtectedRoute children={<SurveyDetails />} />
+								<ProtectedRoute>
+									<SurveyDetails />
+								</ProtectedRoute>
 							}
 						/>
 						<Route
 							path="/survey/:id/edit"
 							element={
-								<ProtectedRoute
-									children={<SurveyComponent />}
-								/>
+								<ProtectedRoute>
+									<SurveyComponent />
+								</ProtectedRoute>
 							}
 						/>
 						<Route
 							path="/apply-referral"
 							element={
-								<ProtectedRoute children={<ApplyReferral />} />
+								<ProtectedRoute>
+									<ApplyReferral />
+								</ProtectedRoute>
 							}
 						/>
-						{/* <Route
-								path="/view-profile"
-								element={
-									<ProtectedRoute
-										children={
-											<ViewProfile />
-										}
-									/>
-								}
-							/> */}
 					</Routes>
 				</Router>
 			</ThemeProvider>

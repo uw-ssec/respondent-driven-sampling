@@ -1,17 +1,42 @@
 // @ts-nocheck
 // TODO: Remove @ts-nocheck when types are fixed.
 import { useEffect, useState } from 'react';
-
 import { useNavigate } from 'react-router-dom';
-
-import '@/styles/SurveyDashboard.css';
+import {
+	Box,
+	Button,
+	TextField,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	Paper,
+	IconButton,
+	Chip,
+	Typography,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	Radio,
+	RadioGroup,
+	FormControlLabel,
+	Stack,
+	TablePagination,
+	TableSortLabel,
+	InputAdornment,
+	Tooltip
+} from '@mui/material';
+import {
+	Delete as DeleteIcon,
+	FilterList as FilterIcon,
+	Search as SearchIcon
+} from '@mui/icons-material';
 
 import { useApi } from '@/hooks';
-import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
-
 import { Survey } from '@/types/Survey';
-import filter from '@/assets/filter.png';
-import trash from '@/assets/trash.png';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function SurveyEntryDashboard() {
@@ -27,15 +52,15 @@ export default function SurveyEntryDashboard() {
 	const [showFilterPopup, setShowFilterPopup] = useState(false);
 	const [sortConfig, setSortConfig] = useState<{
 		key: string | null;
-		direction: string;
+		direction: 'asc' | 'desc';
 	}>({
 		key: null,
 		direction: 'asc'
 	});
 	const { data: surveys, isLoading } =
 		surveyService.useSurveysWithUsersAndLocations() || {};
-	const [currentPage, setCurrentPage] = useState(1);
-	const itemsPerPage = 10;
+	const [currentPage, setCurrentPage] = useState(0); // MUI uses 0-based index
+	const [itemsPerPage, setItemsPerPage] = useState(10);
 
 	const toPacificDateOnlyString = (input: string | number | Date) => {
 		const d = input instanceof Date ? input : new Date(input);
@@ -61,15 +86,14 @@ export default function SurveyEntryDashboard() {
 
 	useEffect(() => {
 		setViewAll(filterMode === 'viewAll');
-		setCurrentPage(1);
+		setCurrentPage(0);
 	}, [filterMode, selectedDate, searchTerm]);
 
-	// Helper function to get nested property value
 	const getNestedValue = (obj: any, path: string) => {
 		return path.split('.').reduce((acc, part) => acc?.[part], obj);
 	};
 
-	const handleSort = (key: string | null) => {
+	const handleSort = (key: string) => {
 		setSortConfig(prev => ({
 			key,
 			direction:
@@ -91,7 +115,6 @@ export default function SurveyEntryDashboard() {
 		let aValue = getNestedValue(a, sortConfig.key);
 		let bValue = getNestedValue(b, sortConfig.key);
 
-		// Handle dates specially
 		if (sortConfig.key === 'createdAt') {
 			aValue = new Date(aValue).getTime();
 			bValue = new Date(bValue).getTime();
@@ -100,7 +123,6 @@ export default function SurveyEntryDashboard() {
 				: bValue - aValue;
 		}
 
-		// Handle strings/numbers
 		const aStr = (aValue || '').toString().toLowerCase();
 		const bStr = (bValue || '').toString().toLowerCase();
 
@@ -125,236 +147,252 @@ export default function SurveyEntryDashboard() {
 		return search.includes(searchTerm.toLowerCase());
 	});
 
-	const last = currentPage * itemsPerPage;
-	const first = last - itemsPerPage;
-	const currentSurveys = searchedSurveys.slice(first, last);
-	const totalPages = Math.max(
-		1,
-		Math.ceil(searchedSurveys.length / itemsPerPage)
+	const currentSurveys = searchedSurveys.slice(
+		currentPage * itemsPerPage,
+		currentPage * itemsPerPage + itemsPerPage
 	);
 
+	const columns = [
+		{ key: 'createdAt', label: 'Date & Time', sortable: true, width: 120 },
+		{ key: 'employeeId', label: 'Employee ID', sortable: true, width: 120 },
+		{ key: 'employeeName', label: 'Employee Name', sortable: true, width: 120 },
+		{ key: 'locationName', label: 'Location', sortable: true, width: 130 },
+		{ key: 'parentSurveyCode', label: 'Referred By Code', sortable: true, width: 140 },
+		{ key: 'responses.first_two_letters_fname', label: 'First 2 of First', sortable: true, width: 110 },
+		{ key: 'responses.first_two_letters_lname', label: 'First 2 of Last', sortable: true, width: 110 },
+		{ key: 'responses.date_of_birth', label: 'Year of Birth', sortable: true, width: 110 },
+		{ key: 'actions', label: 'Survey Responses', sortable: false, width: 130 },
+		{ key: 'progress', label: 'Progress', sortable: false, width: 120 }
+	];
+
 	return (
-		<div>
-			<div className="dashboard-container">
-				<h2 className="dashboard-title">Survey Entry Dashboard</h2>
+		<Box sx={{ p: 3 }}>
+			<Typography variant="h4" sx={{ mb: 1, color: '#3E236E', textAlign: 'center', fontWeight: 'bold' }}>
+				Survey Entry Dashboard
+			</Typography>
 
-				<div className="date-nav-container">
-					<h3>
-						{viewAll
-							? 'Viewing All Survey Entries'
-							: `Entries for: ${toPacificDateOnlyString(selectedDate)}`}
-					</h3>
-				</div>
+			<Typography variant="h6" sx={{ mb: 2, color: '#ababab', textAlign: 'center' }}>
+				{viewAll
+					? 'Viewing All Survey Entries'
+					: `Entries for: ${toPacificDateOnlyString(selectedDate)}`}
+			</Typography>
 
-				<div className="flex-box-survey">
-					<div className="top-controls">
-						<button className="control-button">
-							<img src={trash} alt="Delete" /> Delete
-						</button>
-						<button
-							className="control-button"
-							onClick={() => {
-								setTempFilterMode(filterMode);
-								setTempSelectedDate(selectedDate);
-								setShowFilterPopup(true);
-							}}
-						>
-							<img src={filter} alt="Filter" /> Filter
-						</button>
-						<input
-							type="search"
-							className="search-input"
-							placeholder="Search Employee, Location, Ref Code, Survey Data..."
-							value={searchTerm}
-							onChange={e => setSearchTerm(e.target.value)}
-						/>
-					</div>
+			<Paper elevation={2} sx={{ width: '100%', mb: 2 }}>
+				{/* Controls */}
+				<Box sx={{ p: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+					<Button
+						variant="outlined"
+						startIcon={<DeleteIcon />}
+						sx={{ color: '#3E236E', borderColor: '#3E236E' }}
+					>
+						Delete
+					</Button>
+					<Button
+						variant="outlined"
+						startIcon={<FilterIcon />}
+						onClick={() => {
+							setTempFilterMode(filterMode);
+							setTempSelectedDate(selectedDate);
+							setShowFilterPopup(true);
+						}}
+						sx={{ color: '#3E236E', borderColor: '#3E236E' }}
+					>
+						Filter
+					</Button>
+					<TextField
+						size="small"
+						placeholder="Search Employee, Location, Ref Code, Survey Data..."
+						value={searchTerm}
+						onChange={e => setSearchTerm(e.target.value)}
+						sx={{ flexGrow: 1, minWidth: 300 }}
+						InputProps={{
+							startAdornment: (
+								<InputAdornment position="start">
+									<SearchIcon />
+								</InputAdornment>
+							),
+						}}
+					/>
+				</Box>
 
-					<div className="list-header">
-						{[
-							['createdAt', 'Date & Time'],
-							['employeeId', 'Employee ID'],
-							['employeeName', 'Employee Name'],
-							['locationName', 'Location'],
-							['parentSurveyCode', 'Referred By Code'],
-							[
-								'responses.first_two_letters_fname',
-								'First 2 of First'
-							],
-							[
-								'responses.first_two_letters_lname',
-								'First 2 of Last'
-							],
-							['responses.date_of_birth', 'Year of Birth']
-						].map(([key, label]) => (
-							<div
-								key={key}
-								className="header-item"
-								onClick={() => handleSort(key)}
-							>
-								{label} <span className="sort-icons">↑↓</span>
-							</div>
-						))}
-						<div className="header-item">Survey Responses</div>
-						<div className="header-item">Progress</div>
-					</div>
-
-					{isLoading ? (
-						<p>Loading surveys...</p>
-					) : searchedSurveys.length === 0 ? (
-						<p>No surveys found.</p>
-					) : (
-						<>
-							{currentSurveys.map((s, i) => (
-								<div className="list-row" key={i}>
-									<div className="header-item">
-										{toPacificDateTimeString(s.createdAt)}
-									</div>
-									<div className="header-item">
-										{s.employeeId}
-									</div>
-									<div className="header-item">
-										{s.employeeName}
-									</div>
-									<div className="header-item">
-										{s.locationName || 'N/A'}
-									</div>
-									<div className="header-item">
-										{s.parentSurveyCode || 'N/A'}
-									</div>
-									<div className="header-item">
-										{s.responses?.first_two_letters_fname ||
-											'N/A'}
-									</div>
-									<div className="header-item">
-										{s.responses?.first_two_letters_lname ||
-											'N/A'}
-									</div>
-									<div className="header-item">
-										{s.responses?.date_of_birth || 'N/A'}
-									</div>
-									<div className="header-item">
-										<button
-											onClick={() =>
-												navigate(`/survey/${s._id}`)
-											}
-											className="view-details-btn"
-										>
-											View Details
-										</button>
-									</div>
-									<div className="header-item">
-										{s.lastUpdated ? (
-											<span className="submitted-text">
-												Submitted
-											</span>
-										) : (
-											<button
-												className="view-details-btn"
-												onClick={() =>
-													navigate(
-														`/survey/${s._id}/continue`
-													)
-												}
-											>
-												Continue
-											</button>
-										)}
-									</div>
-								</div>
-							))}
-						</>
-					)}
-
-					<div className="staff-footer">
-						<div className="pagination-controls">
-							<button
-								className="arrow-button"
-								onClick={() =>
-									setCurrentPage(p => Math.max(p - 1, 1))
-								}
-								disabled={currentPage === 1}
-							>
-								&larr;
-							</button>
-							<span className="pagination-info">
-								Page {currentPage} of {totalPages}
-							</span>
-							<button
-								className="arrow-button"
-								onClick={() =>
-									setCurrentPage(p =>
-										Math.min(p + 1, totalPages)
-									)
-								}
-								disabled={currentPage >= totalPages}
-							>
-								&rarr;
-							</button>
-						</div>
-					</div>
-				</div>
-
-				{showFilterPopup && (
-					<div className="popup-overlay">
-						<div className="popup-content">
-							<h3>Filter Options</h3>
-							<form className="popup-form">
-								<label>
-									<input
-										type="radio"
-										name="filterOption"
-										value="viewAll"
-										checked={tempFilterMode === 'viewAll'}
-										onChange={() =>
-											setTempFilterMode('viewAll')
-										}
-									/>
-									View all surveys
-								</label>
-								<label>
-									<input
-										type="radio"
-										name="filterOption"
-										value="byDate"
-										checked={tempFilterMode === 'byDate'}
-										onChange={() =>
-											setTempFilterMode('byDate')
-										}
-									/>
-									View by date
-								</label>
-								{tempFilterMode === 'byDate' && (
-									<input
-										type="date"
-										className="date-picker-input"
-										value={toPacificDateOnlyString(
-											tempSelectedDate
-										)}
-										onChange={e => {
-											const [y, m, d] = e.target.value
-												.split('-')
-												.map(Number);
-											setTempSelectedDate(
-												new Date(y, m - 1, d)
-											);
+				{/* Table */}
+				<TableContainer sx={{ maxHeight: 'calc(100vh - 400px)' }}>
+					<Table stickyHeader>
+						<TableHead>
+							<TableRow>
+								{columns.map(column => (
+									<TableCell
+										key={column.key}
+										sx={{ 
+											fontWeight: 600, 
+											backgroundColor: '#f9f9f9',
+											minWidth: column.width 
 										}}
-									/>
-								)}
-							</form>
-							<button
-								onClick={() => {
-									setFilterMode(tempFilterMode);
-									setSelectedDate(tempSelectedDate);
-									setShowFilterPopup(false);
-								}}
-							>
-								Close
-							</button>
-						</div>
-					</div>
-				)}
-			</div>
-		</div>
+									>
+										{column.sortable ? (
+											<TableSortLabel
+												active={sortConfig.key === column.key}
+												direction={sortConfig.key === column.key ? sortConfig.direction : 'asc'}
+												onClick={() => handleSort(column.key)}
+											>
+												{column.label}
+											</TableSortLabel>
+										) : (
+											column.label
+										)}
+									</TableCell>
+								))}
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{isLoading ? (
+								<TableRow>
+									<TableCell colSpan={columns.length} align="center">
+										Loading surveys...
+									</TableCell>
+								</TableRow>
+							) : searchedSurveys.length === 0 ? (
+								<TableRow>
+									<TableCell colSpan={columns.length} align="center">
+										No surveys found.
+									</TableCell>
+								</TableRow>
+							) : (
+								currentSurveys.map((s, i) => (
+									<TableRow 
+										key={i}
+										hover
+										sx={{ '&:hover': { backgroundColor: '#f8f8f8' } }}
+									>
+										<TableCell>{toPacificDateTimeString(s.createdAt)}</TableCell>
+										<TableCell>
+											<Tooltip title={s.employeeId} arrow>
+												<Typography 
+													variant="body2" 
+													sx={{ 
+														fontSize: '0.85rem',
+														maxWidth: '90px',
+														overflow: 'hidden',
+														textOverflow: 'ellipsis',
+														whiteSpace: 'nowrap'
+													}}
+												>
+													{s.employeeId}
+												</Typography>
+											</Tooltip>
+										</TableCell>
+										<TableCell>{s.employeeName}</TableCell>
+										<TableCell>{s.locationName || 'N/A'}</TableCell>
+										<TableCell>{s.parentSurveyCode || 'N/A'}</TableCell>
+										<TableCell>{s.responses?.first_two_letters_fname || 'N/A'}</TableCell>
+										<TableCell>{s.responses?.first_two_letters_lname || 'N/A'}</TableCell>
+										<TableCell>{s.responses?.date_of_birth || 'N/A'}</TableCell>
+										<TableCell>
+											<Button
+												size="small"
+												variant="contained"
+												onClick={() => navigate(`/survey/${s._id}`)}
+												sx={{ 
+													textTransform: 'none',
+													backgroundColor: '#3E236E',
+													'&:hover': { backgroundColor: '#5F2A96' }
+												}}
+											>
+												View Details
+											</Button>
+										</TableCell>
+										<TableCell>
+											{/* TODO: add some kind of permission check/unlocking functionality here for admin */}
+											{s.lastUpdated ? (
+												<Chip 
+													label="Submitted" 
+													color="success" 
+													size="small"
+												/>
+											) : (
+												<Button
+													size="small"
+													variant="outlined"
+													onClick={() => navigate(`/survey/${s._id}/continue`)}
+													sx={{ textTransform: 'none' }}
+												>
+													Continue
+												</Button>
+											)}
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				</TableContainer>
+
+				{/* Pagination */}
+				<TablePagination
+					component="div"
+					count={searchedSurveys.length}
+					page={currentPage}
+					onPageChange={(e, newPage) => setCurrentPage(newPage)}
+					rowsPerPage={itemsPerPage}
+					onRowsPerPageChange={(e) => {
+						setItemsPerPage(parseInt(e.target.value, 10));
+						setCurrentPage(0);
+					}}
+					rowsPerPageOptions={[5, 10, 25, 50]}
+				/>
+			</Paper>
+
+			{/* Filter Dialog */}
+			<Dialog 
+				open={showFilterPopup} 
+				onClose={() => setShowFilterPopup(false)}
+				maxWidth="xs"
+				fullWidth
+			>
+				<DialogTitle>Filter Options</DialogTitle>
+				<DialogContent>
+					<RadioGroup
+						value={tempFilterMode}
+						onChange={(e) => setTempFilterMode(e.target.value)}
+					>
+						<FormControlLabel
+							value="viewAll"
+							control={<Radio />}
+							label="View all surveys"
+						/>
+						<FormControlLabel
+							value="byDate"
+							control={<Radio />}
+							label="View by date"
+						/>
+					</RadioGroup>
+					{tempFilterMode === 'byDate' && (
+						<TextField
+							type="date"
+							fullWidth
+							sx={{ mt: 2 }}
+							value={toPacificDateOnlyString(tempSelectedDate)}
+							onChange={e => {
+								const [y, m, d] = e.target.value.split('-').map(Number);
+								setTempSelectedDate(new Date(y, m - 1, d));
+							}}
+						/>
+					)}
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={() => setShowFilterPopup(false)}>Cancel</Button>
+					<Button
+						variant="contained"
+						onClick={() => {
+							setFilterMode(tempFilterMode);
+							setSelectedDate(tempSelectedDate);
+							setShowFilterPopup(false);
+						}}
+					>
+						Apply
+					</Button>
+				</DialogActions>
+			</Dialog>
+		</Box>
 	);
 }

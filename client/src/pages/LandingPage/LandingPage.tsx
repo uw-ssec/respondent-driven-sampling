@@ -5,13 +5,11 @@ import '@/styles/LandingPage.css';
 
 import { useAuthContext } from '@/contexts';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
-import { isCreatedBySelf } from '@/permissions/utils';
-import { subject } from '@casl/ability';
 import Container from '@mui/material/Container';
 
 export default function LandingPage() {
 	const navigate = useNavigate();
-	const { firstName, userObjectId } = useAuthContext();
+	const { firstName } = useAuthContext();
 	const ability = useAbility();
 
 	// Function to handle navigation to the survey page
@@ -44,23 +42,9 @@ export default function LandingPage() {
 								New Entry
 							</button>
 						)}
-
 						{ability.can(
 							ACTIONS.CASL.READ,
-							subject('Survey', isCreatedBySelf(userObjectId))
-						) && (
-							<button
-								className="action-button"
-								onClick={() => navigate('/past-entries')}
-							>
-								View Your Entries
-							</button>
-						)}
-						{ability.can(
-							ACTIONS.CASL.READ,
-							subject('Survey', {
-								$ne: isCreatedBySelf(userObjectId)
-							})
+							SUBJECTS.SURVEY
 						) && (
 							<button
 								className="action-button"
