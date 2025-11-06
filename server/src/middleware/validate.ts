@@ -13,9 +13,10 @@ export function validate(
 			next();
 		} catch (error) {
 			if (error instanceof z.ZodError) {
+				const message = error.issues.map(issue => issue.message).join(', ');
 				res.status(400).json({
 					code: 'VALIDATION_ERROR',
-					message: 'Invalid request body',
+					message: message,
 					status: 400,
 					errors: error.issues
 				});
