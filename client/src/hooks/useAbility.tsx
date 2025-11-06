@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 
+import { useAuthContext } from '@/contexts';
 import defineAbilitiesForUser from '@/permissions/abilityBuilder';
-import { useAuthStore } from '@/stores';
 
 export const useAbility = () => {
 	const { userRole, userObjectId, lastestLocationObjectId, permissions } =
-		useAuthStore();
+		useAuthContext();
 
 	// updates whenever our auth store updates
 	return useMemo(

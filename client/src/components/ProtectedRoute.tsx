@@ -1,19 +1,19 @@
 import { ReactNode } from 'react';
 
 import { Header } from '@/components';
+import { useAuthContext } from '@/contexts';
 import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
-	isLoggedIn: boolean;
 	children: ReactNode;
 	redirectTo?: string;
 }
 
 export const ProtectedRoute = ({
-	isLoggedIn,
 	children,
 	redirectTo = '/login'
 }: ProtectedRouteProps) => {
+	const { isLoggedIn } = useAuthContext();
 	return isLoggedIn ? (
 		<>
 			<Header />

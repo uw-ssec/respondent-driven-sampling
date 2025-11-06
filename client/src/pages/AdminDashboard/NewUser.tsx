@@ -1,15 +1,22 @@
 import { useState } from 'react';
 
-import '@/styles/profile.css';
-
-import { useAuthContext } from '@/contexts';
-import { getAuthToken } from '@/utils/authTokenHandler';
+import { useApi, useAuth } from '@/hooks';
+import { Alert, Box, Button, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
+import {
+	FormInput,
+	LocationSelect,
+	PhoneInput,
+	RoleSelect
+} from '@/components/forms';
+
 export default function NewUser() {
-	const { onLogout } = useAuthContext();
+	const { handleLogout } = useAuth();
+	const { userService } = useApi();
 	const [firstName, setFirstName] = useState('');
 	const [lastName, setLastName] = useState('');
+	const [locationObjectId, setLocationObjectId] = useState('');
 	const [email, setEmail] = useState('');
 	const [phone, setPhone] = useState('');
 	const [role, setRole] = useState('');
@@ -20,21 +27,13 @@ export default function NewUser() {
 		e.preventDefault();
 
 		try {
-			// Sends request to pre-approve users
-			const token = getAuthToken();
-			const response = await fetch('/api/auth/preapprove', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`
-				},
-				body: JSON.stringify({
-					firstName,
-					lastName,
-					email,
-					phone,
-					role
-				})
+			const response = await userService.createUser({
+				locationObjectId,
+				firstName,
+				lastName,
+				email,
+				phone,
+				role
 			});
 
 			const data = await response.json();
@@ -44,7 +43,7 @@ export default function NewUser() {
 			} else if (response.status == 401) {
 				// Token Error, either expired or invalid for some other reason.
 				// Log user out so they can relogin to generate a new valid token
-				onLogout();
+				handleLogout();
 				navigate('/login');
 			} else {
 				setMessage(data.message || 'Failed to register user.');
@@ -56,75 +55,89 @@ export default function NewUser() {
 	};
 
 	return (
-		<div className="edit-profile-container">
-			<div className="edit-profile-card">
-				<h2 className="profile-name">Add New User</h2>
-				<form className="edit-profile-form" onSubmit={handleSubmit}>
-					<div className="input-group">
-						{/* First name input */}
-						<label>First Name</label>
-						<input
-							type="text"
-							value={firstName}
-							onChange={e => setFirstName(e.target.value)}
-							required
-						/>
-					</div>
+		<Box
+			sx={{
+				maxWidth: 600,
+				mx: 'auto',
+				mt: 4,
+				p: 3,
+				backgroundColor: 'white',
+				borderRadius: 2,
+				boxShadow: 2
+			}}
+		>
+			<Typography variant="h5" component="h2" gutterBottom sx={{ mb: 3 }}>
+				Add New User
+			</Typography>
 
-					<div className="input-group">
-						{/* Last name input */}
-						<label>Last Name</label>
-						<input
-							type="text"
-							value={lastName}
-							onChange={e => setLastName(e.target.value)}
-							required
-						/>
-					</div>
+			<form onSubmit={handleSubmit}>
+				<Stack spacing={3}>
+					<FormInput
+						label="First Name"
+						value={firstName}
+						onChange={e => setFirstName(e.target.value)}
+						required
+					/>
 
-					<div className="input-group">
-						{/* Email input */}
-						<label>Email</label>
-						<input
-							type="email"
-							value={email}
-							onChange={e => setEmail(e.target.value)}
-							required
-						/>
-					</div>
+					<FormInput
+						label="Last Name"
+						value={lastName}
+						onChange={e => setLastName(e.target.value)}
+						required
+					/>
 
-					<div className="input-group">
-						{/* Phone number input */}
-						<label>Phone Number</label>
-						<input
-							type="text"
-							value={phone}
-							onChange={e => setPhone(e.target.value)}
-							required
-						/>
-					</div>
+					<FormInput
+						label="Email"
+						type="email"
+						value={email}
+						onChange={e => setEmail(e.target.value)}
+						required
+					/>
 
-					{/* Role dropdown */}
-					<div className="input-group">
-						<label>Role</label>
-						<select
-							value={role}
-							onChange={e => setRole(e.target.value)}
-							required
-						>
-							<option value="Volunteer">Volunteer</option>
-							<option value="Admin">Admin</option>
-						</select>
-					</div>
+					<PhoneInput
+						label="Phone Number"
+						value={phone}
+						onChange={e => setPhone(e.target.value)}
+						required
+					/>
 
-					{/* Submit button */}
-					<button type="submit" className="save-button">
+					<RoleSelect
+						value={role}
+						onChange={e => setRole(e.target.value as string)}
+						required
+					/>
+
+					<LocationSelect
+						value={locationObjectId}
+						onChange={e =>
+							setLocationObjectId(e.target.value as string)
+						}
+						required
+					/>
+
+					<Button
+						type="submit"
+						variant="contained"
+						size="large"
+						fullWidth
+						sx={{ mt: 2 }}
+					>
 						Register User
-					</button>
+					</Button>
 
-					{message && <p className="status-message">{message}</p>}
-				</form>
-			</div>
-		</div>
+					{message && (
+						<Alert
+							severity={
+								message.includes('success')
+									? 'success'
+									: 'error'
+							}
+						>
+							{message}
+						</Alert>
+					)}
+				</Stack>
+			</form>
+		</Box>
 	);
 }

@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
 import '@/styles/StaffDashboard.css';
 
-import { useApi } from '@/hooks';
+import { useAbility, useApi } from '@/hooks';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 
-import filter from '@/assets/filter.png';
 import editPencil from '@/assets/pencil.png';
 import trash from '@/assets/trash.png';
 
@@ -20,11 +20,29 @@ interface StaffMember {
 }
 
 export default function StaffDashboard() {
+	const ability = useAbility();
 	const navigate = useNavigate();
 	const { userService } = useApi();
-	const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
-	const [filteredStaff, setFilteredStaff] = useState<StaffMember[]>([]);
-	const [searchQuery, setSearchQuery] = useState('');
+	const [searchTerm, setSearchTerm] = useState('');
+	const [filterRole, setFilterRole] = useState('');
+
+	const { data: users, mutate } = userService.useUsers() || {};
+
+	const staffMembers =
+		users?.map((user: any) => ({
+			id: user._id,
+			name: `${user.firstName} ${user.lastName}`,
+			position: user.role,
+			approvalStatus: user.approvalStatus || 'PENDING'
+		})) || [];
+
+	// Filter derived from staffMembers
+	const filteredStaff = staffMembers.filter(
+		(staff: StaffMember) =>
+			staff.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+			(filterRole ? staff.position === filterRole : true)
+	);
+
 	const [sortConfig, setSortConfig] = useState<{
 		key: keyof StaffMember | null;
 		direction: 'asc' | 'desc';
@@ -36,58 +54,12 @@ export default function StaffDashboard() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const itemsPerPage = 10;
 
-	// Fetch users from backend database
-	useEffect(() => {
-		async function fetchUsers() {
-			try {
-				const users = await userService.fetchUsers();
-				if (!users) return;
-				const formatted = users.data.map(
-					(user: {
-						_id: any;
-						firstName: any;
-						lastName: any;
-						role: any;
-						approvalStatus: any;
-					}) => ({
-						id: user._id,
-						name: `${user.firstName} ${user.lastName}`,
-						position: user.role,
-						approvalStatus: user.approvalStatus || 'PENDING'
-					})
-				);
-				setStaffMembers(formatted);
-				setFilteredStaff(formatted);
-			} catch (err) {
-				console.error('Error fetching users:', err);
-			}
-		}
-		fetchUsers();
-	}, []);
-
-	// Filter staff list using search bar
-	useEffect(() => {
-		const results = staffMembers.filter(
-			m =>
-				m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				m.position.toLowerCase().includes(searchQuery.toLowerCase())
-		);
-		setFilteredStaff(results);
-		setCurrentPage(1);
-	}, [searchQuery, staffMembers]);
-
 	// Handles the approval/rejection of new accounts
 	const handleApproval = async (id: string, status: string) => {
 		try {
 			const response = await userService.approveUser(id, status);
 			if (!response) return;
-			setStaffMembers(prev =>
-				prev.map(staffMem =>
-					staffMem.id === id
-						? { ...staffMem, approvalStatus: status }
-						: staffMem
-				)
-			);
+			mutate(); // Refresh the list
 		} catch (err) {
 			console.error(`Error updating status to ${status}:`, err);
 		}
@@ -99,22 +71,25 @@ export default function StaffDashboard() {
 		if (sortConfig.key === key && sortConfig.direction === 'asc')
 			dir = 'desc';
 		setSortConfig({ key, direction: dir });
-
-		const sorted = [...filteredStaff].sort((a, b) => {
-			const filterA = a[key] ? (a[key].toLowerCase?.() ?? a[key]) : '';
-			const filterB = b[key] ? (b[key].toLowerCase?.() ?? b[key]) : '';
-			if (filterA < filterB) return dir === 'asc' ? -1 : 1;
-			if (filterA > filterB) return dir === 'asc' ? 1 : -1;
-			return 0;
-		});
-
-		setFilteredStaff(sorted);
 	};
+
+	const sortedAndFilteredStaff = [...filteredStaff].sort((a, b) => {
+		if (!sortConfig.key) return 0;
+		const filterA = a[sortConfig.key]
+			? (a[sortConfig.key].toLowerCase?.() ?? a[sortConfig.key])
+			: '';
+		const filterB = b[sortConfig.key]
+			? (b[sortConfig.key].toLowerCase?.() ?? b[sortConfig.key])
+			: '';
+		if (filterA < filterB) return sortConfig.direction === 'asc' ? -1 : 1;
+		if (filterA > filterB) return sortConfig.direction === 'asc' ? 1 : -1;
+		return 0;
+	});
 
 	const indexLast = currentPage * itemsPerPage;
 	const indexFirst = indexLast - itemsPerPage;
-	const currentStaff = filteredStaff.slice(indexFirst, indexLast);
-	const totalPages = Math.ceil(filteredStaff.length / itemsPerPage);
+	const currentStaff = sortedAndFilteredStaff.slice(indexFirst, indexLast);
+	const totalPages = Math.ceil(sortedAndFilteredStaff.length / itemsPerPage);
 
 	const renderSortIcons = (key: keyof StaffMember) => {
 		if (sortConfig.key === key) {
@@ -134,16 +109,23 @@ export default function StaffDashboard() {
 						<button className="control-button">
 							<img src={trash} alt="Delete" /> Delete
 						</button>
-						<button className="control-button">
-							<img src={filter} alt="Filter" /> Filter
-						</button>
 						<input
 							type="search"
 							className="search-input"
-							placeholder="Search Name or Position..."
-							value={searchQuery}
-							onChange={e => setSearchQuery(e.target.value)}
+							placeholder="Search Name..."
+							value={searchTerm}
+							onChange={e => setSearchTerm(e.target.value)}
 						/>
+						<select
+							className="search-input"
+							value={filterRole}
+							onChange={e => setFilterRole(e.target.value)}
+						>
+							<option value="">All Roles</option>
+							<option value="ADMIN">Admin</option>
+							<option value="MANAGER">Manager</option>
+							<option value="VOLUNTEER">Volunteer</option>
+						</select>
 					</div>
 
 					{/* Column headers */}
@@ -179,7 +161,7 @@ export default function StaffDashboard() {
 					</div>
 
 					{/* Staff rows */}
-					{currentStaff.map(member => (
+					{currentStaff.map((member: StaffMember) => (
 						<div className="list-row" key={member.id}>
 							<div className="header-item">
 								<input
@@ -227,16 +209,19 @@ export default function StaffDashboard() {
 								)}
 							</div>
 							<div className="header-item test">
-								<img
-									src={editPencil}
-									alt="edit"
-									className="list-edit"
-									onClick={() =>
-										navigate(
-											`/admin-edit-profile/${member.id}`
-										)
-									}
-								/>
+								{ability.can(
+									ACTIONS.CASL.UPDATE,
+									SUBJECTS.USER
+								) && (
+									<img
+										src={editPencil}
+										alt="edit"
+										className="list-edit"
+										onClick={() =>
+											navigate(`/profile/${member.id}`)
+										}
+									/>
+								)}
 							</div>
 						</div>
 					))}

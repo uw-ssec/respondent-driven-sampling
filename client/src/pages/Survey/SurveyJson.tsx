@@ -23,6 +23,17 @@ export const generateSurveyJson = (locations: any[]) => {
 	};
 };
 
+export const generateEditSurveyJson = (locationChoices: any[]) => {
+	const preScreenPage = generateVolunteerPreScreenPage(locationChoices);
+
+	return {
+		title: 'Homelessness Experience Survey (Edit Mode)',
+		showProgressBar: 'top',
+		progressBarType: 'buttons',
+		pages: [preScreenPage, consentPage, surveyValidationPage]
+	};
+};
+
 // PRE-SCREENING
 const generateVolunteerPreScreenPage = (locationChoices: any[]) => {
 	return {
@@ -218,7 +229,8 @@ const personalLivingSituationPage = {
 			isRequired: true,
 			visibleIf: '{sleeping_situation} notempty'
 		}
-	]
+	],
+	visibleIf: "{consent_given} = 'Yes'"
 };
 
 // SECTION 3.0
@@ -1398,7 +1410,8 @@ const specialQuestionsPage = {
 			allowRemovePanel: true,
 			visibleIf: "{pet_animal} = 'Yes'"
 		}
-	]
+	],
+	visibleIf: "{consent_given} = 'Yes'"
 };
 
 // SECTION 5.1

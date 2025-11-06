@@ -1,18 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Model } from 'survey-core';
 import { Survey } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
+import { useAuthContext } from '@/contexts';
 import { useAbility, useApi } from '@/hooks';
-import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 // Global Zustand store managing state of survey components
-import { useAuthStore, useSurveyStore } from '@/stores';
+import { useSurveyStore } from '@/stores';
+import { initializeSurvey, validateReferralCode } from '@/utils/surveyUtils';
 import { useGeolocated } from 'react-geolocated';
-
-import { generateSurveyJson } from './SurveyJson';
 
 // This component is responsible for rendering the survey and handling its logic
 // It uses the SurveyJS library to create and manage the survey
@@ -20,102 +19,56 @@ import { generateSurveyJson } from './SurveyJson';
 // It uses React Router for navigation and URL parameter handling
 // It uses Zustand (with persist) & localstorage to manage and persist data across sessions
 // It uses the useEffect hook to manage side effects, such as fetching data and updating state
-// It uses the useState hook to manage component state
 // It uses the useGeolocated hook to get the user's geolocation
 const SurveyComponent = () => {
-	const { surveyService } = useApi();
+	const { surveyService, locationService } = useApi();
 	const [searchParams] = useSearchParams();
-	const codeInUrl = searchParams.get('ref');
-
-	const [loading, setLoading] = useState(true);
+	const surveyCodeInUrl = searchParams.get('ref');
+	const { id: surveyObjectIdInUrl } = useParams();
+	const isEditMode = window.location.pathname.includes('/edit');
 
 	const navigate = useNavigate();
 	const surveyRef = useRef<Model | null>(null);
-	const { locationService } = useApi();
-
+	const isInitialized = useRef(false);
 	const ability = useAbility();
+	const { userObjectId, lastestLocationObjectId } = useAuthContext();
 
-	const { userObjectId, lastestLocationObjectId } = useAuthStore();
+	// Add a ref to store the original full survey data in edit mode
+	const originalSurveyData = useRef<any>(null);
 
-	// Pulls state values and update functions from Zustand store
+	// Get locations with loading state
+	const { data: locations, isLoading: locationsLoading } =
+		locationService.useLocations() || {};
+
+	// Conditionally fetch survey by referral code (only when surveyCodeInUrl exists)
+	const { data: surveyByRefCode, isLoading: surveyByRefLoading } =
+		surveyCodeInUrl
+			? surveyService.useSurveyBySurveyCode(surveyCodeInUrl)
+			: {};
+
+	// Conditionally fetch parent survey (only when surveyCodeInUrl exists)
+	const { data: parentSurvey, isLoading: parentLoading } = surveyCodeInUrl
+		? surveyService.useParentOfSurveyCode(surveyCodeInUrl)
+		: {};
+
+	// Conditionally fetch survey by object id (only when surveyObjectIdInUrl exists)
+	const { data: surveyByObjectId, isLoading: surveyByObjectIdLoading } =
+		surveyObjectIdInUrl ? surveyService.useSurvey(surveyObjectIdInUrl) : {};
+
+	// Store methods
 	const {
 		getObjectId,
 		setObjectId,
-		getReferredByCode,
-		setReferredByCode,
-		setSurveyData
+		getParentSurveyCode,
+		setParentSurveyCode,
+		setSurveyData,
+		setChildSurveyCodes
 	} = useSurveyStore();
 
 	const { coords } = useGeolocated({
-		positionOptions: {
-			enableHighAccuracy: false
-		},
+		positionOptions: { enableHighAccuracy: false },
 		userDecisionTimeout: 5000
 	});
-
-	// If referral code is in URL, set it in Zustand store -- this is used for
-	// initial survey load. If no referral code, this is a root survey and an empty survey is created.
-	useEffect(() => {
-		const init = async () => {
-			setLoading(true);
-
-			const locations = await locationService.fetchLocations();
-			const locationChoices = locations.data.map((location: any) => ({
-				value: location._id,
-				text: location.hubName
-			}));
-
-			// Initialize survey with empty data
-			surveyRef.current = new Model(generateSurveyJson(locationChoices));
-			surveyRef.current.data = {};
-			setSurveyData(surveyRef.current.data);
-
-			// Use referral code if provided
-			if (codeInUrl && codeInUrl !== getReferredByCode()) {
-				// Check for any pre-existing survey data linked to the referral code
-				const surveyData =
-					await surveyService.fetchSurveyByReferralCode(codeInUrl);
-				
-				if (surveyData.data.length == 1) {
-					// in progress survey found, populate survey with existing data
-					surveyRef.current.data = surveyData.data[0].responses;
-					setSurveyData(surveyData);
-					setObjectId(surveyData._id);
-					setReferredByCode(codeInUrl);
-				} else {
-					// If no in-progress survey found, check if there is a parent survey
-					// If there is no parent survey, this is an invalid survey code
-					const parentSurvey =
-						await surveyService.fetchParentOfSurveyCode(codeInUrl);
-					
-					if (parentSurvey.data.length == 0) {
-						alert('Invalid survey code. Please try again.');
-						navigate('/apply-referral');
-						return;
-					}
-				}
-			} else if (!codeInUrl) {
-				// If no referral code, check if user has permission to create a survey without a referral code
-				if (
-					!ability.can(
-						ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL,
-						SUBJECTS.SURVEY
-					)
-				) {
-					alert(
-						'You do not have permission to create a survey without a referral code.'
-					);
-					navigate('/apply-referral');
-					return;
-				}
-			}
-
-			// Attach survey events to the survey
-			attachSurveyEventHandlers(surveyRef.current);
-			setLoading(false);
-		};
-		init();
-	}, []);
 
 	const attachSurveyEventHandlers = (survey: Model | null) => {
 		if (!survey) return;
@@ -136,9 +89,15 @@ const SurveyComponent = () => {
 		};
 
 		const getSurveyData = (data: any) => {
+			// In edit mode, merge with original data to preserve all fields
+			const responses =
+				isEditMode && originalSurveyData.current
+					? { ...originalSurveyData.current, ...data }
+					: (data ?? {});
+
 			return {
-				responses: data ?? {},
-				referredByCode: getReferredByCode() ?? null,
+				responses,
+				parentSurveyCode: getParentSurveyCode() ?? null,
 				coords: coords ?? { latitude: 0, longitude: 0 },
 				objectId: getObjectId() ?? null
 			};
@@ -158,17 +117,19 @@ const SurveyComponent = () => {
 				if (getObjectId() === null) {
 					const req: any = {
 						createdByUserObjectId: userObjectId,
-						locationObjectId: lastestLocationObjectId,
+						locationObjectId:
+							surveyData.responses.location ||
+							lastestLocationObjectId,
 						responses: surveyData.responses
 					};
 					// Add survey code to request if it exists
-					if (getReferredByCode()) {
-						req.surveyCode = getReferredByCode();
+					if (surveyCodeInUrl) {
+						req.surveyCode = surveyCodeInUrl;
 					}
 					result = await surveyService.createSurvey(req);
 				} else {
 					result = await surveyService.updateSurvey(getObjectId()!, {
-						responses: surveyData.responses
+						responses: surveyData.responses // Now includes merged data
 					});
 				}
 				if (result) {
@@ -181,7 +142,7 @@ const SurveyComponent = () => {
 
 		survey.onComplete.add(async sender => {
 			const surveyData = {
-				...getSurveyData(sender.data),
+				...getSurveyData(sender.data), // Merging happens here too
 				completed: true
 			};
 			setSurveyData(surveyData);
@@ -194,14 +155,92 @@ const SurveyComponent = () => {
 						isCompleted: true
 					}
 				);
-				if (result) {
-					setObjectId(result.data._id);
+
+				if (isEditMode) {
+					// TODO: handle revoking consent edits
+					navigate(`/survey/${getObjectId()}`);
+					return;
+				}
+
+				if (result && result.data.childSurveyCodes) {
+					setChildSurveyCodes(result.data.childSurveyCodes);
+					navigate('/qrcode');
+					return;
 				}
 			} catch (error) {
 				console.error('Error saving survey:', error);
 			}
 		});
 	};
+
+	// Check if all required data is loaded
+	const isDataReady =
+		!locationsLoading &&
+		locations &&
+		(!surveyCodeInUrl || !surveyByRefLoading) &&
+		!parentLoading &&
+		!surveyByObjectIdLoading;
+
+	// Single, clean useEffect for survey initialization
+	useEffect(() => {
+		// Prevent re-initialization if already done
+		if (isInitialized.current) return;
+
+		// Wait for all data to be ready
+		if (!isDataReady) return;
+
+		// Validate referral code and permissions
+		const validation = validateReferralCode(
+			surveyCodeInUrl,
+			surveyByRefCode,
+			parentSurvey,
+			ability
+		);
+		if (!validation.isValid) {
+			alert(validation.message);
+			navigate('/apply-referral');
+			return;
+		}
+
+		// Initialize the survey
+		const { survey, existingData } = initializeSurvey(
+			locations,
+			surveyByRefCode,
+			surveyByObjectId,
+			parentSurvey,
+			isEditMode
+		);
+		surveyRef.current = survey;
+
+		// Store original full survey data in edit mode
+		if (isEditMode && surveyByObjectId) {
+			originalSurveyData.current = { ...surveyByObjectId.responses };
+		}
+
+		// Set survey data in store
+		if (existingData) {
+			setSurveyData(existingData.surveyData);
+			setObjectId(existingData.objectId);
+			setParentSurveyCode(existingData.parentSurveyCode);
+		} else {
+			setSurveyData(survey.data);
+			setParentSurveyCode(parentSurvey?.surveyCode);
+		}
+
+		// Attach event handlers
+		attachSurveyEventHandlers(survey);
+
+		// Mark as initialized
+		isInitialized.current = true;
+	}, [
+		isDataReady,
+		surveyCodeInUrl,
+		surveyByRefCode,
+		surveyByObjectId,
+		parentSurvey,
+		locations,
+		ability
+	]);
 
 	// Handle browser back/forward for survey pages
 	useEffect(() => {
@@ -218,7 +257,14 @@ const SurveyComponent = () => {
 		return () => window.removeEventListener('popstate', handlePopState);
 	}, []);
 
-	if (loading) return <p>Loading survey...</p>;
+	// Loading state (need to fetch all data)
+	const isLoading =
+		locationsLoading ||
+		(surveyCodeInUrl && surveyByRefLoading) ||
+		parentLoading ||
+		surveyByObjectIdLoading;
+
+	if (isLoading) return <p>Loading survey...</p>;
 	if (!surveyRef.current) return <p>Survey not found.</p>;
 
 	return (

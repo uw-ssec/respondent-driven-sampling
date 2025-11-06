@@ -22,13 +22,20 @@ export function getAuthToken(): string {
 
 function getDecodedAuthToken(): JwtPayload | null {
 	const token = getAuthToken();
-	return token ? jwtDecode<JwtPayload>(token) : null;
+	if (!token) return null;
+	try {
+		return jwtDecode<JwtPayload>(token);
+	} catch (error) {
+		console.error('Error decoding token:', error);
+		return null;
+	}
 }
 
 export function hasAuthToken(): boolean {
 	// If the token exists we will assume we are logged in, even if the token is expired.
 	// We can relogin on a failed API call if expired.
-	return getAuthToken() != null;
+	const token = getAuthToken();
+	return token != null && token !== '';
 }
 
 export function getRole(): string {
@@ -56,12 +63,18 @@ export function getObjectId(): string {
 }
 
 export function initializeSurveyStore() {
-	const { setEmployeeId, setEmployeeName, setReferredByCode, setObjectId } =
-		useSurveyStore.getState();
+	const {
+		setEmployeeId,
+		setEmployeeName,
+		setParentSurveyCode,
+		setObjectId,
+		setChildSurveyCodes
+	} = useSurveyStore.getState();
 	const objectId = getObjectId();
 	const employeeName = getFirstName();
 	setEmployeeId(objectId);
 	setEmployeeName(employeeName);
-	setReferredByCode(null);
+	setParentSurveyCode(null);
+	setChildSurveyCodes([]);
 	setObjectId(null);
 }

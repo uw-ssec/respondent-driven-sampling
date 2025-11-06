@@ -1,11 +1,6 @@
+import { Action, Condition, Subject } from '@/permissions/constants';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-import {
-	Action,
-	Condition,
-	Subject
-} from '@/permissions/constants';
 
 type AuthState = {
 	token: string;

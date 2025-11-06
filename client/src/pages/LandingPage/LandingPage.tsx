@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/LandingPage.css';
 
+import { useAuthContext } from '@/contexts';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { isCreatedBySelf } from '@/permissions/utils';
-import { useAuthStore } from '@/stores';
 import { subject } from '@casl/ability';
 import Container from '@mui/material/Container';
 
 export default function LandingPage() {
 	const navigate = useNavigate();
-	const { firstName, userObjectId } = useAuthStore();
+	const { firstName, userObjectId } = useAuthContext();
 	const ability = useAbility();
 
 	// Function to handle navigation to the survey page

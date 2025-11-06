@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
-
 import { useSurveyStore } from '@/stores';
 import { QRCodeCanvas } from 'qrcode.react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import '@/styles/complete.css';
 
@@ -10,21 +8,8 @@ import '@/styles/complete.css';
 
 export default function QrPage() {
 	const navigate = useNavigate();
-	const location = useLocation();
-	const [referralCodes, setReferralCodes] = useState([]);
-
-	// Clear referred-by-code from Zustand store now that we are done with the survey
-	const { setReferredByCode } = useSurveyStore();
-	useEffect(() => {
-		setReferredByCode(null);
-	}, [setReferredByCode]);
-
-	// Extract referral codes
-	useEffect(() => {
-		if (location.state && location.state.referralCodes) {
-			setReferralCodes(location.state.referralCodes);
-		}
-	}, [location.state]);
+	const { surveyData } = useSurveyStore();
+	const childSurveyCodes = surveyData?.childSurveyCodes || [];
 
 	// Trigger browser printing
 	const handlePrint = () => {
@@ -40,22 +25,25 @@ export default function QrPage() {
 				{/* Display QR Codes */}
 				<div className="print-area">
 					<div className="qr-code-container">
-						{referralCodes.length > 0 ? (
-							referralCodes.map((code, index) => {
-								const qrUrl = `${window.location.origin}/survey?ref=${code}`;
-								return (
-									<div key={index} className="qr-box">
-										<QRCodeCanvas
-											value={qrUrl}
-											size={120}
-											level="M"
-										/>
-										<p className="qr-code-text">
-											{index + 1}. Referral Code: {code}
-										</p>
-									</div>
-								);
-							})
+						{childSurveyCodes.length > 0 ? (
+							childSurveyCodes.map(
+								(code: string, index: number) => {
+									const qrUrl = `${window.location.origin}/survey?ref=${code}`;
+									return (
+										<div key={index} className="qr-box">
+											<QRCodeCanvas
+												value={qrUrl}
+												size={120}
+												level="M"
+											/>
+											<p className="qr-code-text">
+												{index + 1}. Referral Code:{' '}
+												{code}
+											</p>
+										</div>
+									);
+								}
+							)
 						) : (
 							<p>No referral codes available.</p>
 						)}

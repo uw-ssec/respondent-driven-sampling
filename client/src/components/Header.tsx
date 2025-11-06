@@ -5,12 +5,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuthContext } from '@/contexts';
 import { useNavigate } from 'react-router-dom';
 
+import { useAuth } from '@/hooks/useAuth';
+
 export function Header() {
-	const { onLogout } = useAuthContext();
+	const { handleLogout } = useAuth();
 	const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 	const navigate = useNavigate();
 	const menuRef = useRef<HTMLDivElement | null>(null); // Ref to track the menu
-
+	const { userObjectId } = useAuthContext();
 	// Function to toggle the profile menu
 	const toggleProfileMenu = () => {
 		setIsProfileMenuOpen(!isProfileMenuOpen);
@@ -22,7 +24,7 @@ export function Header() {
 	};
 
 	const handleViewProfile = () => {
-		navigate('/view-profile');
+		navigate(`/profile/${userObjectId}`);
 	};
 
 	const goToLanding = () => {
@@ -37,14 +39,6 @@ export function Header() {
 	// Function to handle edit survey navigation
 	const handleEditSurvey = () => {
 		navigate('/survey-entries');
-	};
-
-	// Function to handle logout
-	const handleLogout = () => {
-		if (onLogout) {
-			onLogout();
-			navigate('/login');
-		}
 	};
 
 	// Close menu when clicking outside

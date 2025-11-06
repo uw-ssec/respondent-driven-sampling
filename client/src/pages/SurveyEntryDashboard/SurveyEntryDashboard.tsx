@@ -6,20 +6,18 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/SurveyDashboard.css';
 
-import { useAuthContext } from '@/contexts';
 import { useApi } from '@/hooks';
 import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
 
 import { Survey } from '@/types/Survey';
 import filter from '@/assets/filter.png';
 import trash from '@/assets/trash.png';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SurveyEntryDashboard() {
-	const { onLogout } = useAuthContext();
+	const { handleLogout } = useAuth();
 	const { surveyService } = useApi();
 	const navigate = useNavigate();
-	const [loading, setLoading] = useState(true);
-	const [surveys, setSurveys] = useState<Survey[]>([]);
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [tempSelectedDate, setTempSelectedDate] = useState(new Date());
 	const [searchTerm, setSearchTerm] = useState('');
@@ -34,6 +32,8 @@ export default function SurveyEntryDashboard() {
 		key: null,
 		direction: 'asc'
 	});
+	const { data: surveys, isLoading } =
+		surveyService.useSurveysWithUsersAndLocations() || {};
 	const [currentPage, setCurrentPage] = useState(1);
 	const itemsPerPage = 10;
 
@@ -59,44 +59,15 @@ export default function SurveyEntryDashboard() {
 		return d.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
 	};
 
-	// Fetch surveys on mount
-	useEffect(() => {
-		(async () => {
-			try {
-				const role = getRole();
-				const employeeId = getEmployeeId();
-
-				const token = getAuthToken();
-				const response = await fetch('/api/surveys/all', {
-					headers: {
-						'x-user-role': role,
-						'x-employee-id': employeeId,
-						Authorization: `Bearer ${token}`
-					}
-				});
-				if (response.ok) {
-					const data = await response.json();
-					setSurveys(data);
-				} else if (response.status === 401) {
-					// Token expired, log out user
-					onLogout();
-					navigate('/login');
-					return;
-				} else {
-					console.error('Failed to fetch surveys.');
-				}
-			} catch (e) {
-				console.error('Error fetching surveys:', e);
-			} finally {
-				setLoading(false);
-			}
-		})();
-	}, []);
-
 	useEffect(() => {
 		setViewAll(filterMode === 'viewAll');
 		setCurrentPage(1);
-	}, [filterMode, selectedDate]);
+	}, [filterMode, selectedDate, searchTerm]);
+
+	// Helper function to get nested property value
+	const getNestedValue = (obj: any, path: string) => {
+		return path.split('.').reduce((acc, part) => acc?.[part], obj);
+	};
 
 	const handleSort = (key: string | null) => {
 		setSortConfig(prev => ({
@@ -106,25 +77,51 @@ export default function SurveyEntryDashboard() {
 		}));
 	};
 
-	const filteredSurveys = surveys.filter(s => {
-		if (viewAll) return true;
-		const surveyDate = toPacificDateOnlyString(s.createdAt);
-		const selDate = toPacificDateOnlyString(selectedDate);
-		return surveyDate && surveyDate === selDate;
-	});
+	const filteredSurveys =
+		surveys?.filter((s: Survey) => {
+			if (viewAll) return true;
+			const surveyDate = toPacificDateOnlyString(s.createdAt);
+			const selDate = toPacificDateOnlyString(selectedDate);
+			return surveyDate && surveyDate === selDate;
+		}) || [];
 
 	const sortedSurveys = [...filteredSurveys].sort((a, b) => {
 		if (!sortConfig.key) return 0;
-		const aSorted = (a[sortConfig.key] || '').toString().toLowerCase();
-		const bSorted = (b[sortConfig.key] || '').toString().toLowerCase();
+
+		let aValue = getNestedValue(a, sortConfig.key);
+		let bValue = getNestedValue(b, sortConfig.key);
+
+		// Handle dates specially
+		if (sortConfig.key === 'createdAt') {
+			aValue = new Date(aValue).getTime();
+			bValue = new Date(bValue).getTime();
+			return sortConfig.direction === 'asc'
+				? aValue - bValue
+				: bValue - aValue;
+		}
+
+		// Handle strings/numbers
+		const aStr = (aValue || '').toString().toLowerCase();
+		const bStr = (bValue || '').toString().toLowerCase();
+
 		return sortConfig.direction === 'asc'
-			? aSorted.localeCompare(bSorted)
-			: bSorted.localeCompare(aSorted);
+			? aStr.localeCompare(bStr)
+			: bStr.localeCompare(aStr);
 	});
 
 	const searchedSurveys = sortedSurveys.filter(s => {
-		const search =
-			`${s.employeeId} ${s.employeeName} ${s.responses?.location || ''} ${s.referredByCode || ''}`.toLowerCase();
+		const search = [
+			s.employeeId,
+			s.employeeName,
+			s.locationName,
+			s.parentSurveyCode,
+			s.responses?.first_two_letters_fname,
+			s.responses?.first_two_letters_lname,
+			s.responses?.date_of_birth
+		]
+			.filter(Boolean)
+			.join(' ')
+			.toLowerCase();
 		return search.includes(searchTerm.toLowerCase());
 	});
 
@@ -167,11 +164,9 @@ export default function SurveyEntryDashboard() {
 						<input
 							type="search"
 							className="search-input"
-							placeholder="Search Employee ID, Name, Location..."
+							placeholder="Search Employee, Location, Ref Code, Survey Data..."
 							value={searchTerm}
-							onChange={employee =>
-								setSearchTerm(employee.target.value)
-							}
+							onChange={e => setSearchTerm(e.target.value)}
 						/>
 					</div>
 
@@ -180,8 +175,8 @@ export default function SurveyEntryDashboard() {
 							['createdAt', 'Date & Time'],
 							['employeeId', 'Employee ID'],
 							['employeeName', 'Employee Name'],
-							['responses.location', 'Location'],
-							['referredByCode', 'Referred By Code'],
+							['locationName', 'Location'],
+							['parentSurveyCode', 'Referred By Code'],
 							[
 								'responses.first_two_letters_fname',
 								'First 2 of First'
@@ -190,7 +185,7 @@ export default function SurveyEntryDashboard() {
 								'responses.first_two_letters_lname',
 								'First 2 of Last'
 							],
-							['responses.year_born', 'Year of Birth']
+							['responses.date_of_birth', 'Year of Birth']
 						].map(([key, label]) => (
 							<div
 								key={key}
@@ -204,7 +199,7 @@ export default function SurveyEntryDashboard() {
 						<div className="header-item">Progress</div>
 					</div>
 
-					{loading ? (
+					{isLoading ? (
 						<p>Loading surveys...</p>
 					) : searchedSurveys.length === 0 ? (
 						<p>No surveys found.</p>
@@ -222,10 +217,10 @@ export default function SurveyEntryDashboard() {
 										{s.employeeName}
 									</div>
 									<div className="header-item">
-										{s.responses?.location || 'N/A'}
+										{s.locationName || 'N/A'}
 									</div>
 									<div className="header-item">
-										{s.referredByCode || 'N/A'}
+										{s.parentSurveyCode || 'N/A'}
 									</div>
 									<div className="header-item">
 										{s.responses?.first_two_letters_fname ||
@@ -236,7 +231,7 @@ export default function SurveyEntryDashboard() {
 											'N/A'}
 									</div>
 									<div className="header-item">
-										{s.responses?.year_born || 'N/A'}
+										{s.responses?.date_of_birth || 'N/A'}
 									</div>
 									<div className="header-item">
 										<button
@@ -258,7 +253,7 @@ export default function SurveyEntryDashboard() {
 												className="view-details-btn"
 												onClick={() =>
 													navigate(
-														`/survey/${s._id}/survey`
+														`/survey/${s._id}/continue`
 													)
 												}
 											>

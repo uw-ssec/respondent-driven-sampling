@@ -1,14 +1,15 @@
 // src/pages/Login/login.js
 import { useEffect, useState } from 'react';
 
-import { initializeSurveyStore, saveAuthToken } from '@/utils/authTokenHandler';
+import { initializeSurveyStore } from '@/utils/authTokenHandler';
 import { Box, Button, Paper, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-import { LoginProps } from '../../types/AuthProps';
+import { useAuth } from '@/hooks/useAuth';
 
 //Description: Login using email or phone number and OTP verification
-export default function Login({ onLogin }: LoginProps) {
+export default function Login() {
+	const { handleLogin } = useAuth();
 	const navigate = useNavigate();
 	const [email, setEmail] = useState('');
 	const [phone, setPhone] = useState('');
@@ -83,8 +84,7 @@ export default function Login({ onLogin }: LoginProps) {
 			const data = await response.json();
 			if (response.ok) {
 				// Successful login and store user data
-				onLogin(data.token);
-				saveAuthToken(data.token);
+				await handleLogin(data.token);
 				initializeSurveyStore();
 				navigate(data.redirectTo);
 			} else {

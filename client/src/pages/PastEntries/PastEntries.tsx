@@ -5,13 +5,13 @@ import { useNavigate } from 'react-router-dom';
 import '@/styles/PastEntriesCss.css';
 import '@/styles/StaffDashboard.css';
 
-import { useAuthContext } from '@/contexts';
 import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
 
 import { Survey } from '@/types/Survey';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function PastEntries() {
-	const { onLogout } = useAuthContext();
+	const { handleLogout } = useAuth();
 	const [surveys, setSurveys] = useState<Survey[]>([]);
 	const [_loading, setLoading] = useState(true);
 	const navigate = useNavigate();
@@ -41,7 +41,7 @@ export default function PastEntries() {
 				} else if (response.status == 401) {
 					// Token Error, either expired or invalid for some other reason.
 					// Log user out so they can relogin to generate a new valid token
-					onLogout();
+					handleLogout();
 					navigate('/login');
 					return;
 				} else {
