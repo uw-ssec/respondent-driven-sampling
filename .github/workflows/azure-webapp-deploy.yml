@@ -19,11 +19,20 @@ jobs:
         with:
           node-version: "22"
 
-      # Install client dependencies and build React app
-      - name: Build React client
+      # Install client and server dependencies and build React app
+      - name: Install client dependencies
         run: |
           cd client
           npm install
+
+      - name: Install server dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: Build React client
+        run: |
+          cd client
           npm run build
 
       # Copy React dist into server folder
