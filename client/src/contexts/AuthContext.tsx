@@ -7,11 +7,10 @@ import {
 } from 'react';
 
 import { Action, Condition, Subject } from '@/permissions/constants';
-import { useAuthStore } from '@/stores';
 import {
 	getAuthToken,
-	getObjectId,
-	hasAuthToken
+	getDecodedAuthToken,
+	deleteAuthToken
 } from '@/utils/authTokenHandler';
 
 interface AuthState {
@@ -48,46 +47,46 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-	// Initialize from Zustand store (which is persisted to localStorage)
-	const authStore = useAuthStore();
+function getDefaultAuthState(): AuthState {
+	return {
+		token: '',
+		firstName: '',
+		userObjectId: '',
+		userRole: '',
+		lastestLocationObjectId: '',
+		permissions: [],
+		isLoggedIn: false,
+		isLoading: false
+	};
+}
 
-	const [state, setState] = useState<AuthState>({
-		token: authStore.token,
-		firstName: authStore.firstName,
-		userObjectId: authStore.userObjectId,
-		userRole: authStore.userRole,
-		lastestLocationObjectId: authStore.lastestLocationObjectId,
-		permissions: authStore.permissions,
-		isLoggedIn: !!authStore.token,
-		isLoading: true
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+	const [state, setState] = useState<AuthState>(() => {
+		const token = getAuthToken();  // Reads from Zustand
+		if (!token) return getDefaultAuthState();
+
+		const decoded = getDecodedAuthToken();
+		if (!decoded) return getDefaultAuthState();
+
+		return {
+			token,
+			firstName: decoded.firstName,
+			userRole: decoded.role,
+			userObjectId: decoded.userObjectId,
+			permissions: [],
+			lastestLocationObjectId: '',
+			isLoggedIn: true,
+			isLoading: true
+		};
 	});
 
-	// on mount, check if token exists and fetch user data
+	// Fetch additional data on mount
 	useEffect(() => {
-		const initAuth = async () => {
-			if (hasAuthToken()) {
-				const userObjectId = getObjectId();
-				const token = getAuthToken();
-
-				if (userObjectId && token) {
-					setState(prev => ({
-						...prev,
-						token,
-						userObjectId,
-						isLoading: true,
-						isLoggedIn: true
-					}));
-					await fetchUserContext(userObjectId);
-				} else {
-					setState(prev => ({ ...prev, isLoading: false }));
-				}
-			} else {
-				setState(prev => ({ ...prev, isLoading: false }));
-			}
-		};
-
-		initAuth();
+		if (state.token && state.userObjectId) {
+			fetchUserContext(state.userObjectId);
+		} else {
+			setState(prev => ({ ...prev, isLoading: false }));
+		}
 	}, []);
 
 	const fetchUserContext = async (userObjectId: string) => {
@@ -132,49 +131,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	const setToken = (token: string) => {
-		useAuthStore.getState().setToken(token);
 		setState(prev => ({ ...prev, token, isLoggedIn: !!token }));
 	};
 
 	const setUserObjectId = (userObjectId: string) => {
-		useAuthStore.getState().setUserObjectId(userObjectId);
 		setState(prev => ({ ...prev, userObjectId }));
 	};
 
 	const setFirstName = (firstName: string) => {
-		useAuthStore.getState().setFirstName(firstName);
 		setState(prev => ({ ...prev, firstName }));
 	};
 
 	const setUserRole = (userRole: string) => {
-		useAuthStore.getState().setUserRole(userRole);
 		setState(prev => ({ ...prev, userRole }));
 	};
 
 	const setLastestLocationObjectId = (lastestLocationObjectId: string) => {
-		useAuthStore
-			.getState()
-			.setLastestLocationObjectId(lastestLocationObjectId);
 		setState(prev => ({ ...prev, lastestLocationObjectId }));
 	};
 
 	const setPermissions = (permissions: AuthState['permissions']) => {
-		useAuthStore.getState().setPermissions(permissions);
 		setState(prev => ({ ...prev, permissions }));
 	};
 
 	const clearSession = () => {
-		useAuthStore.getState().clearSession();
-		setState({
-			token: '',
-			firstName: '',
-			userObjectId: '',
-			userRole: '',
-			lastestLocationObjectId: '',
-			permissions: [],
-			isLoggedIn: false,
-			isLoading: false
-		});
+		deleteAuthToken();  // Clears from Zustand
+		setState(getDefaultAuthState());
 	};
 
 	const value: AuthContextValue = {

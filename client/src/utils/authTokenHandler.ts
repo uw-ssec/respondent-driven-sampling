@@ -13,14 +13,14 @@ export function saveAuthToken(token: string): void {
 }
 
 export function deleteAuthToken(): void {
-	useAuthStore.getState().clearSession();
+	useAuthStore.getState().clearToken();
 }
 
 export function getAuthToken(): string {
 	return useAuthStore.getState().token;
 }
 
-function getDecodedAuthToken(): JwtPayload | null {
+export function getDecodedAuthToken(): JwtPayload | null {
 	const token = getAuthToken();
 	if (!token) return null;
 	try {
