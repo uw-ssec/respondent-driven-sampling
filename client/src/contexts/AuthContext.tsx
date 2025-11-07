@@ -8,9 +8,9 @@ import {
 
 import { Action, Condition, Subject } from '@/permissions/constants';
 import {
+	deleteAuthToken,
 	getAuthToken,
-	getDecodedAuthToken,
-	deleteAuthToken
+	getDecodedAuthToken
 } from '@/utils/authTokenHandler';
 
 interface AuthState {
@@ -62,7 +62,7 @@ function getDefaultAuthState(): AuthState {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [state, setState] = useState<AuthState>(() => {
-		const token = getAuthToken();  // Reads from Zustand
+		const token = getAuthToken(); // Reads from Zustand
 		if (!token) return getDefaultAuthState();
 
 		const decoded = getDecodedAuthToken();
@@ -76,11 +76,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			permissions: [],
 			lastestLocationObjectId: '',
 			isLoggedIn: true,
+			// REVIEW: where are we using isLoading?
 			isLoading: true
 		};
 	});
 
-	// Fetch additional data on mount
+	/*
+	The `useEffect` hook runs once when the component mounts (indicated by the empty dependency array `[]`). This is the authentication context initialization logic that determines whether to load user data or immediately mark the auth state as ready.
+
+	**The conditional logic branch works as follows**: If both `state.token` and `state.userObjectId` exist (meaning the user has a valid JWT token and MongoDB user ID stored in localStorage via Zustand), the effect calls `fetchUserContext()` to retrieve the full user profile from the backend. This happens when a user refreshes the page or returns to the app with an existing session. The function will make an API call to `/api/v2/users/:id`, validate the token via the auth middleware, and populate the context with user details like name, role, and permissions.
+
+	**If either value is missing**, the effect takes a different path: it immediately sets `isLoading: false` without making any API calls. This signals to the rest of the application that there's no active session to restore, allowing login/registration screens to render immediately instead of showing a loading spinner while waiting for a user fetch that would fail anyway.
+
+	**A critical gotcha here**: The empty dependency array means this only runs on mount, so if `state.token` or `state.userObjectId` change later (e.g., after login), this effect won't re-run. The app must handle user data fetching separately in the login flow—typically in the login success handler that sets these values and then manually calls `fetchUserContext()` or triggers a re-render that causes the context to update through other means.
+
+	This pattern is common in auth contexts because you want to check for existing sessions exactly once at startup, not repeatedly as state changes during normal app usage. The actual authentication state updates happen through explicit actions (login, logout) rather than reactive effects.
+	*/
 	useEffect(() => {
 		if (state.token && state.userObjectId) {
 			fetchUserContext(state.userObjectId);
@@ -155,10 +166,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	const clearSession = () => {
-		deleteAuthToken();  // Clears from Zustand
+		deleteAuthToken(); // Clears from Zustand
 		setState(getDefaultAuthState());
 	};
 
+	// The value that you want to pass to all the components reading this context inside this provider.
 	const value: AuthContextValue = {
 		...state,
 		setToken,
@@ -176,6 +188,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	);
 };
 
+// REVIEW: Why is this here? Move to a separate file? What does useAuth do?
 export const useAuthContext = () => {
 	const context = useContext(AuthContext);
 	if (!context) {

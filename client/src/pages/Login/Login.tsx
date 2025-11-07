@@ -1,4 +1,3 @@
-// src/pages/Login/login.js
 import { useEffect, useState } from 'react';
 
 import { initializeSurveyStore } from '@/utils/authTokenHandler';
@@ -7,11 +6,10 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/hooks/useAuth';
 
-//Description: Login using email or phone number and OTP verification
 export default function Login() {
 	const { handleLogin } = useAuth();
 	const navigate = useNavigate();
-	const [email, setEmail] = useState('');
+	// const [email, setEmail] = useState('');
 	const [phone, setPhone] = useState('');
 	const [otp, setOtp] = useState('');
 	const [otpSent, setOtpSent] = useState(false);
@@ -41,11 +39,11 @@ export default function Login() {
 		setPhone(formatted);
 	};
 
-	// Sends OTP to user's phone after validation
+	// Sends OTP to phone
 	const sendOtp = async () => {
 		// basic client‑side check
-		if (!email || phone.length !== 12) {
-			setErrorMessage('Enter a valid email and 10‑digit phone number');
+		if (phone.length !== 12) {
+			setErrorMessage('Enter a valid 10‑digit phone number');
 			setSuccessMessage('');
 			return;
 		}
@@ -53,7 +51,7 @@ export default function Login() {
 			const response = await fetch('/api/auth/send-otp-login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email, phone })
+				body: JSON.stringify({ phone })
 			});
 			const data = await response.json();
 			if (response.ok) {
@@ -68,7 +66,7 @@ export default function Login() {
 				setSuccessMessage('');
 			}
 		} catch {
-			setErrorMessage('Failed to send OTP');
+			setErrorMessage('Failed to send OTP! Please try again.');
 			setSuccessMessage('');
 		}
 	};
@@ -142,7 +140,7 @@ export default function Login() {
 				{/* Initial login page */}
 				{!otpSent ? (
 					<>
-						<TextField
+						{/* <TextField
 							type="email"
 							label="Enter Email"
 							placeholder="Enter Email"
@@ -153,7 +151,7 @@ export default function Login() {
 							fullWidth
 							variant="outlined"
 							sx={{ mb: 2 }}
-						/>
+						/> */}
 						<TextField
 							type="text"
 							label="Phone Number"
@@ -181,7 +179,7 @@ export default function Login() {
 							color="primary.main"
 							sx={{ mt: 2 }}
 						>
-							Don't have an account?{' '}
+							Do not have an account?{' '}
 							<Typography
 								component="span"
 								onClick={() => navigate('/signup')}
@@ -237,7 +235,7 @@ export default function Login() {
 							)}
 						</Typography>
 
-						{/* Option to go back to email/phone entry */}
+						{/* Option to go back to phone entry */}
 						<Typography
 							variant="body2"
 							color="primary.main"

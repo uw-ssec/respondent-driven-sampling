@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 
 const router = express.Router();
 
+// REVIEW: Old?
+
 //Sends static messages
 
 // Dashboard Page
