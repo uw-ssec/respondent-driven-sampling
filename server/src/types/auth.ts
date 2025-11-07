@@ -21,7 +21,8 @@ export interface JWTPayload extends JwtPayload {
 
 export interface OTPRequest {
 	phone: string;
-	email: string;
+	// Removed email to simplify OTP flow based on phone number only
+	// email: string;
 }
 
 export interface VerifyOTPRequest extends OTPRequest {
