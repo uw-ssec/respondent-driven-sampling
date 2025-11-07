@@ -51,10 +51,6 @@ export function getFirstName(): string {
 	return decodedAuthToken.firstName;
 }
 
-export function getEmployeeId(): string {
-	return getObjectId();
-}
-
 export function getObjectId(): string {
 	const decodedAuthToken = getDecodedAuthToken();
 	if (decodedAuthToken == null || decodedAuthToken.userObjectId == null)

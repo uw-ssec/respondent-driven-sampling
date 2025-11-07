@@ -1,7 +1,7 @@
 import {
 	generateEditSurveyJson,
 	generateSurveyJson
-} from '@/pages/Survey/SurveyJson';
+} from './SurveyJson';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { Model } from 'survey-core';
 

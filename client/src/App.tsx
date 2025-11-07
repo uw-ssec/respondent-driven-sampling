@@ -1,15 +1,17 @@
 import { AuthProvider } from '@/contexts';
-import NewUser from '@/pages/AdminDashboard/NewUser';
-import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
-import QrPage from '@/pages/CompletedSurvey/QrPage';
-import LandingPage from '@/pages/LandingPage/LandingPage';
-import Login from '@/pages/Login/Login';
-import SurveyDetails from '@/pages/PastEntries/SurveyDetails';
-import Profile from '@/pages/Profile/Profile';
-import ApplyReferral from '@/pages/QRCodeScanAndReferral/ApplyReferral';
-import Signup from '@/pages/Signup/Signup';
-import SurveyComponent from '@/pages/Survey/SurveyComponent';
-import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
+import {
+	Survey,
+	SurveyDetails,
+	SurveyEntryDashboard,
+	QrPage,
+	LandingPage,
+	Login,
+	Profile,
+	ApplyReferral,
+	Signup,
+	StaffDashboard,
+	NewUser
+} from '@/pages';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import {
@@ -18,9 +20,8 @@ import {
 	BrowserRouter as Router,
 	Routes
 } from 'react-router-dom';
-
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { muiTheme } from './theme/muiTheme';
+import { ProtectedRoute } from '@/components';
+import { muiTheme } from '@/theme/muiTheme';
 
 function App() {
 	return (
@@ -38,7 +39,7 @@ function App() {
 							path="/survey/:id/continue"
 							element={
 								<ProtectedRoute>
-									<SurveyComponent />
+									<Survey />
 								</ProtectedRoute>
 							}
 						/>
@@ -55,7 +56,7 @@ function App() {
 							path="/survey"
 							element={
 								<ProtectedRoute>
-									<SurveyComponent />
+									<Survey />
 								</ProtectedRoute>
 							}
 						/>
@@ -63,7 +64,7 @@ function App() {
 							path="/admin-dashboard"
 							element={
 								<ProtectedRoute>
-									<AdminDashboard />
+									<StaffDashboard />
 								</ProtectedRoute>
 							}
 						/>
@@ -119,7 +120,7 @@ function App() {
 							path="/survey/:id/edit"
 							element={
 								<ProtectedRoute>
-									<SurveyComponent />
+									<Survey />
 								</ProtectedRoute>
 							}
 						/>

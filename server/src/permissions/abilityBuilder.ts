@@ -68,7 +68,7 @@ function applySuperAdminPermissions(
 function applyAdminPermissions(builder: AbilityBuilder<Ability>, ctx: Context) {
 	// admins can approve anyone but superadmins
 	builder.can(
-		[ACTIONS.CASL.UPDATE, ACTIONS.CASL.CREATE],
+		[ACTIONS.CASL.UPDATE],
 		SUBJECTS.USER,
 		FIELDS.USER.APPROVAL,
 		hasRole(['VOLUNTEER', 'MANAGER', 'ADMIN'])

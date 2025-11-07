@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Model } from 'survey-core';
-import { Survey } from 'survey-react-ui';
+import { Survey as SurveyComponent } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
@@ -10,7 +10,7 @@ import { useAuthContext } from '@/contexts';
 import { useAbility, useApi } from '@/hooks';
 // Global Zustand store managing state of survey components
 import { useSurveyStore } from '@/stores';
-import { initializeSurvey, validateReferralCode } from '@/utils/surveyUtils';
+import { initializeSurvey, validateReferralCode } from './utils/surveyUtils';
 import { useGeolocated } from 'react-geolocated';
 
 // This component is responsible for rendering the survey and handling its logic
@@ -20,7 +20,7 @@ import { useGeolocated } from 'react-geolocated';
 // It uses Zustand (with persist) & localstorage to manage and persist data across sessions
 // It uses the useEffect hook to manage side effects, such as fetching data and updating state
 // It uses the useGeolocated hook to get the user's geolocation
-const SurveyComponent = () => {
+const Survey = () => {
 	const { surveyService, locationService } = useApi();
 	const [searchParams] = useSearchParams();
 	const surveyCodeInUrl = searchParams.get('ref');
@@ -270,7 +270,7 @@ const SurveyComponent = () => {
 	return (
 		<>
 			<div style={{ padding: '20px' }}>
-				{surveyRef.current && <Survey model={surveyRef.current} />}
+				{surveyRef.current && <SurveyComponent model={surveyRef.current} />}
 				<div
 					style={{
 						display: 'flex',
@@ -337,4 +337,4 @@ const SurveyComponent = () => {
 	);
 };
 
-export default SurveyComponent;
+export default Survey;

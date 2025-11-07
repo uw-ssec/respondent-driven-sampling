@@ -30,14 +30,6 @@ export default function AdminEditProfile() {
 		);
 	};
 
-	// useEffect(() => {
-	// 	const fetchLocations = async () => {
-	// 		const response = await fetch('/api/v2/locations');
-	// 		const data = await response.json();
-	// 		setLocations(data.data);
-	// 	};
-	// 	fetchLocations();
-	// }, []);
 	const handleSave = async () => {
 		if (!user) return;
 

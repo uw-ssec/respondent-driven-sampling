@@ -12,6 +12,7 @@ export default function SurveyDetails() {
 	const navigate = useNavigate();
 
 	// Renaming the json names
+	// TODO: verify these are the correct names for FA25 survey
 	const labelMap: Record<string, string> = {
 		first_two_letters_fname: 'First two letters of first name',
 		first_two_letters_lname: 'First two letters of last name',
