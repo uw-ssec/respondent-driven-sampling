@@ -7,6 +7,7 @@ import {
 	TableRow,
 	TableSortLabel
 } from '@mui/material';
+
 import StaffDashboardRow from './StaffDashboardRow';
 
 interface StaffMember {
@@ -44,67 +45,83 @@ export default function StaffDashboardTable({
 			<Table stickyHeader>
 				<TableHead>
 					<TableRow>
-						<TableCell 
-							sx={{ 
-								fontWeight: 600, 
-								backgroundColor: '#f9f9f9' 
+						<TableCell
+							sx={{
+								fontWeight: 600,
+								backgroundColor: '#f9f9f9'
 							}}
 						>
 							<TableSortLabel
 								active={sortConfig.key === 'employeeId'}
-								direction={sortConfig.key === 'employeeId' ? sortConfig.direction : 'asc'}
+								direction={
+									sortConfig.key === 'employeeId'
+										? sortConfig.direction
+										: 'asc'
+								}
 								onClick={() => onSort('employeeId')}
 							>
 								Employee ID
 							</TableSortLabel>
 						</TableCell>
-						<TableCell 
-							sx={{ 
-								fontWeight: 600, 
-								backgroundColor: '#f9f9f9' 
+						<TableCell
+							sx={{
+								fontWeight: 600,
+								backgroundColor: '#f9f9f9'
 							}}
 						>
 							<TableSortLabel
 								active={sortConfig.key === 'name'}
-								direction={sortConfig.key === 'name' ? sortConfig.direction : 'asc'}
+								direction={
+									sortConfig.key === 'name'
+										? sortConfig.direction
+										: 'asc'
+								}
 								onClick={() => onSort('name')}
 							>
 								Name
 							</TableSortLabel>
 						</TableCell>
-						<TableCell 
-							sx={{ 
-								fontWeight: 600, 
-								backgroundColor: '#f9f9f9' 
+						<TableCell
+							sx={{
+								fontWeight: 600,
+								backgroundColor: '#f9f9f9'
 							}}
 						>
 							<TableSortLabel
 								active={sortConfig.key === 'position'}
-								direction={sortConfig.key === 'position' ? sortConfig.direction : 'asc'}
+								direction={
+									sortConfig.key === 'position'
+										? sortConfig.direction
+										: 'asc'
+								}
 								onClick={() => onSort('position')}
 							>
 								Position
 							</TableSortLabel>
 						</TableCell>
-						<TableCell 
-							sx={{ 
-								fontWeight: 600, 
-								backgroundColor: '#f9f9f9' 
+						<TableCell
+							sx={{
+								fontWeight: 600,
+								backgroundColor: '#f9f9f9'
 							}}
 						>
 							<TableSortLabel
 								active={sortConfig.key === 'approvalStatus'}
-								direction={sortConfig.key === 'approvalStatus' ? sortConfig.direction : 'asc'}
+								direction={
+									sortConfig.key === 'approvalStatus'
+										? sortConfig.direction
+										: 'asc'
+								}
 								onClick={() => onSort('approvalStatus')}
 							>
 								Status
 							</TableSortLabel>
 						</TableCell>
-						<TableCell 
-							sx={{ 
-								fontWeight: 600, 
+						<TableCell
+							sx={{
+								fontWeight: 600,
 								backgroundColor: '#f9f9f9',
-								width: 80 
+								width: 80
 							}}
 						>
 							Actions
@@ -121,7 +138,9 @@ export default function StaffDashboardTable({
 					) : (
 						staff.map((member: StaffMember) => {
 							// Find the corresponding full user object for CASL checks
-							const userData = usersData.find((u: any) => u._id === member.id);
+							const userData = usersData.find(
+								(u: any) => u._id === member.id
+							);
 							return (
 								<StaffDashboardRow
 									key={member.id}
@@ -139,4 +158,3 @@ export default function StaffDashboardTable({
 		</TableContainer>
 	);
 }
-

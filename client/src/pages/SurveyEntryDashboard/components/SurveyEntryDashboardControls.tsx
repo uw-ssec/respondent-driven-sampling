@@ -1,5 +1,9 @@
-import { Box, Button, TextField, InputAdornment } from '@mui/material';
-import { Delete as DeleteIcon, FilterList as FilterIcon, Search as SearchIcon } from '@mui/icons-material';
+import {
+	Delete as DeleteIcon,
+	FilterList as FilterIcon,
+	Search as SearchIcon
+} from '@mui/icons-material';
+import { Box, Button, InputAdornment, TextField } from '@mui/material';
 
 interface SurveyEntryDashboardControlsProps {
 	searchTerm: string;
@@ -13,7 +17,15 @@ export default function SurveyEntryDashboardControls({
 	onFilterClick
 }: SurveyEntryDashboardControlsProps) {
 	return (
-		<Box sx={{ p: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+		<Box
+			sx={{
+				p: 2,
+				display: 'flex',
+				gap: 2,
+				flexWrap: 'wrap',
+				alignItems: 'center'
+			}}
+		>
 			<Button
 				variant="outlined"
 				startIcon={<DeleteIcon />}
@@ -40,10 +52,9 @@ export default function SurveyEntryDashboardControls({
 						<InputAdornment position="start">
 							<SearchIcon />
 						</InputAdornment>
-					),
+					)
 				}}
 			/>
 		</Box>
 	);
 }
-

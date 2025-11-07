@@ -1,16 +1,14 @@
+import { Search as SearchIcon } from '@mui/icons-material';
 import {
 	Box,
 	Button,
-	TextField,
+	FormControl,
 	InputAdornment,
+	InputLabel,
 	MenuItem,
 	Select,
-	FormControl,
-	InputLabel
+	TextField
 } from '@mui/material';
-import {
-	Search as SearchIcon
-} from '@mui/icons-material';
 
 interface StaffDashboardControlsProps {
 	searchTerm: string;
@@ -28,13 +26,13 @@ export default function StaffDashboardControls({
 	onNewUserClick
 }: StaffDashboardControlsProps) {
 	return (
-		<Box 
-			sx={{ 
-				p: 2, 
-				display: 'flex', 
-				gap: 2, 
-				flexWrap: 'wrap', 
-				alignItems: 'center' 
+		<Box
+			sx={{
+				p: 2,
+				display: 'flex',
+				gap: 2,
+				flexWrap: 'wrap',
+				alignItems: 'center'
 			}}
 		>
 			<TextField
@@ -48,7 +46,7 @@ export default function StaffDashboardControls({
 						<InputAdornment position="start">
 							<SearchIcon />
 						</InputAdornment>
-					),
+					)
 				}}
 			/>
 
@@ -69,7 +67,7 @@ export default function StaffDashboardControls({
 			<Button
 				variant="contained"
 				onClick={onNewUserClick}
-				sx={{ 
+				sx={{
 					ml: 'auto',
 					backgroundColor: '#3E236E',
 					'&:hover': { backgroundColor: '#5F2A96' }
@@ -80,4 +78,3 @@ export default function StaffDashboardControls({
 		</Box>
 	);
 }
-

@@ -1,15 +1,17 @@
 import * as React from 'react';
-import { 
-	Dialog, 
-	DialogTitle, 
-	DialogContent, 
-	DialogActions, 
-	Button, 
-	RadioGroup, 
-	FormControlLabel, 
+
+import {
+	Button,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	FormControlLabel,
 	Radio,
-	TextField 
+	RadioGroup,
+	TextField
 } from '@mui/material';
+
 import { toPacificDateOnlyString } from '../utils/SurveyEntryDashboardUtils';
 
 interface FilterDialogProps {
@@ -28,7 +30,8 @@ export default function FilterDialog({
 	onApply
 }: FilterDialogProps) {
 	const [tempFilterMode, setTempFilterMode] = React.useState(filterMode);
-	const [tempSelectedDate, setTempSelectedDate] = React.useState(selectedDate);
+	const [tempSelectedDate, setTempSelectedDate] =
+		React.useState(selectedDate);
 
 	React.useEffect(() => {
 		if (open) {
@@ -43,17 +46,12 @@ export default function FilterDialog({
 	};
 
 	return (
-		<Dialog 
-			open={open} 
-			onClose={onClose}
-			maxWidth="xs"
-			fullWidth
-		>
+		<Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
 			<DialogTitle>Filter Options</DialogTitle>
 			<DialogContent>
 				<RadioGroup
 					value={tempFilterMode}
-					onChange={(e) => setTempFilterMode(e.target.value)}
+					onChange={e => setTempFilterMode(e.target.value)}
 				>
 					<FormControlLabel
 						value="viewAll"
@@ -73,7 +71,9 @@ export default function FilterDialog({
 						sx={{ mt: 2 }}
 						value={toPacificDateOnlyString(tempSelectedDate)}
 						onChange={e => {
-							const [y, m, d] = e.target.value.split('-').map(Number);
+							const [y, m, d] = e.target.value
+								.split('-')
+								.map(Number);
 							setTempSelectedDate(new Date(y, m - 1, d));
 						}}
 					/>
@@ -81,14 +81,10 @@ export default function FilterDialog({
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Cancel</Button>
-				<Button
-					variant="contained"
-					onClick={handleApply}
-				>
+				<Button variant="contained" onClick={handleApply}>
 					Apply
 				</Button>
 			</DialogActions>
 		</Dialog>
 	);
 }
-

@@ -1,18 +1,17 @@
-import {
-	TableRow,
-	TableCell,
-	Stack,
-	IconButton,
-	Typography,
-	Tooltip,
-	Select,
-	MenuItem,
-	
-} from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useAbility } from '@/hooks';
 import { ACTIONS, FIELDS, SUBJECTS } from '@/permissions/constants';
 import { subject } from '@casl/ability';
+import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import {
+	IconButton,
+	MenuItem,
+	Select,
+	Stack,
+	TableCell,
+	TableRow,
+	Tooltip,
+	Typography
+} from '@mui/material';
 
 interface StaffMember {
 	id: string;
@@ -42,40 +41,62 @@ export default function StaffDashboardRow({
 	// Convert createdAt to a Date object for CASL comparison
 	userData.createdAt = new Date(userData.createdAt);
 
-	// Check permissions for this specific user
-	const canEdit = FIELDS.USER.PROFILE.some(field => ability.can(ACTIONS.CASL.UPDATE, subject(SUBJECTS.USER, userData), field));
-	const canDelete = ability.can(ACTIONS.CASL.DELETE, subject(SUBJECTS.USER, userData));
-	const canApprove = ability.can(ACTIONS.CASL.UPDATE, subject(SUBJECTS.USER, userData), FIELDS.USER.APPROVAL[0]);
-	
+	// Check permissions for this specific user (checking profile and role fields)
+	// TODO: this maybe should be a permission on whether or not the user can read these fields
+	// and then this logic would wrap the 'Update' button instead on Profile page...
+	const canEdit = [...FIELDS.USER.PROFILE, ...FIELDS.USER.ROLE].some(field =>
+		ability.can(
+			ACTIONS.CASL.UPDATE,
+			subject(SUBJECTS.USER, userData),
+			field
+		)
+	);
+	const canDelete = ability.can(
+		ACTIONS.CASL.DELETE,
+		subject(SUBJECTS.USER, userData)
+	);
+	const canApprove = ability.can(
+		ACTIONS.CASL.UPDATE,
+		subject(SUBJECTS.USER, userData),
+		FIELDS.USER.APPROVAL[0]
+	);
+
 	return (
-		<TableRow 
+		<TableRow
 			hover
-			sx={{ 
+			sx={{
 				'&:hover': { backgroundColor: '#f8f8f8' }
 			}}
 		>
 			<TableCell>
-			<Typography 
-				variant="body2" 
-				sx={{ 
-					fontSize: '0.85rem'
-				}}
-			>
-				{member.employeeId}
-			</Typography>
-		</TableCell>
+				<Typography
+					variant="body2"
+					sx={{
+						fontSize: '0.85rem'
+					}}
+				>
+					{member.employeeId}
+				</Typography>
+			</TableCell>
 			<TableCell>{member.name}</TableCell>
 			<TableCell>{member.position}</TableCell>
 			<TableCell>
-				<Tooltip 
-					title={canApprove ? "" : "You do not have permission to update this user's status"} 
+				<Tooltip
+					title={
+						canApprove
+							? ''
+							: "You do not have permission to update this user's status"
+					}
 					arrow
 					placement="top"
 				>
-					<span> {/* Wrapper needed for tooltip on disabled element */}
+					<span>
+						{/* Wrapper needed for tooltip on disabled element */}
 						<Select
 							value={member.approvalStatus}
-							onChange={(e) => onApproval(member.id, e.target.value)}
+							onChange={e =>
+								onApproval(member.id, e.target.value)
+							}
 							disabled={!canApprove}
 							size="small"
 							sx={{
@@ -85,17 +106,23 @@ export default function StaffDashboardRow({
 								'& .MuiSelect-select': {
 									py: 0.5,
 									fontWeight: 500,
-									color: 
-										member.approvalStatus === 'APPROVED' ? '#2e7d32' :
-										member.approvalStatus === 'REJECTED' ? '#d32f2f' :
-										'#0288d1'
+									color:
+										member.approvalStatus === 'APPROVED'
+											? '#2e7d32'
+											: member.approvalStatus ===
+												  'REJECTED'
+												? '#d32f2f'
+												: '#0288d1'
 								},
 								// Border color
 								'& .MuiOutlinedInput-notchedOutline': {
-									borderColor: 
-										member.approvalStatus === 'APPROVED' ? '#4caf50' :
-										member.approvalStatus === 'REJECTED' ? '#f44336' :
-										'#2196f3'
+									borderColor:
+										member.approvalStatus === 'APPROVED'
+											? '#4caf50'
+											: member.approvalStatus ===
+												  'REJECTED'
+												? '#f44336'
+												: '#2196f3'
 								}
 							}}
 						>
@@ -106,45 +133,58 @@ export default function StaffDashboardRow({
 					</span>
 				</Tooltip>
 			</TableCell>
-		<TableCell>
-			<Stack direction="row" spacing={1}>
-				<Tooltip title={canEdit ? "Edit user" : "You do not have permission to edit this user"} arrow>
-					<span>
-						<IconButton
-							size="small"
-							disabled={!canEdit}
-							onClick={() => onEdit(member.id)}
-							sx={{ 
-								color: '#3E236E',
-								'&.Mui-disabled': {
-									color: 'rgba(0, 0, 0, 0.26)'
-								}
-							}}
-						>
-							<EditIcon fontSize="small" />
-						</IconButton>
-					</span>
-				</Tooltip>
-				<Tooltip title={canDelete ? "Delete user" : "You do not have permission to delete this user"} arrow>
-					<span>
-						<IconButton
-							size="small"
-							disabled={!canDelete}
-							onClick={() => onDelete(member.id)}
-							sx={{ 
-								color: '#d32f2f',
-								'&.Mui-disabled': {
-									color: 'rgba(0, 0, 0, 0.26)'
-								}
-							}}
-						>
-							<DeleteIcon fontSize="small" />
-						</IconButton>
-					</span>
-				</Tooltip>
-			</Stack>
-		</TableCell>
+			<TableCell>
+				<Stack direction="row" spacing={1}>
+					<Tooltip
+						title={
+							canEdit
+								? 'Edit user'
+								: 'You do not have permission to edit this user'
+						}
+						arrow
+					>
+						<span>
+							<IconButton
+								size="small"
+								disabled={!canEdit}
+								onClick={() => onEdit(member.id)}
+								sx={{
+									color: '#3E236E',
+									'&.Mui-disabled': {
+										color: 'rgba(0, 0, 0, 0.26)'
+									}
+								}}
+							>
+								<EditIcon fontSize="small" />
+							</IconButton>
+						</span>
+					</Tooltip>
+					<Tooltip
+						title={
+							canDelete
+								? 'Delete user'
+								: 'You do not have permission to delete this user'
+						}
+						arrow
+					>
+						<span>
+							<IconButton
+								size="small"
+								disabled={!canDelete}
+								onClick={() => onDelete(member.id)}
+								sx={{
+									color: '#d32f2f',
+									'&.Mui-disabled': {
+										color: 'rgba(0, 0, 0, 0.26)'
+									}
+								}}
+							>
+								<DeleteIcon fontSize="small" />
+							</IconButton>
+						</span>
+					</Tooltip>
+				</Stack>
+			</TableCell>
 		</TableRow>
 	);
 }
-

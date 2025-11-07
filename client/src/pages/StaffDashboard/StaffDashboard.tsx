@@ -1,23 +1,16 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-	Box,
-	Paper,
-	Typography,
-	TablePagination
-} from '@mui/material';
 
 import { useApi } from '@/hooks';
+import { Box, Paper, TablePagination, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
+import { StaffDashboardControls, StaffDashboardTable } from './components';
 import {
-	transformUsersToStaff,
 	filterStaff,
+	paginateStaff,
 	sortStaff,
-	paginateStaff
+	transformUsersToStaff
 } from './utils/StaffDashboardUtils';
-import {
-	StaffDashboardControls,
-	StaffDashboardTable
-} from './components';
 
 interface StaffMember {
 	id: string;
@@ -58,7 +51,8 @@ export default function StaffDashboard() {
 	const handleSort = (key: keyof StaffMember) => {
 		setSortConfig(prev => ({
 			key,
-			direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+			direction:
+				prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
 		}));
 	};
 
@@ -80,21 +74,21 @@ export default function StaffDashboard() {
 	const filteredStaff = filterStaff(staffMembers, searchTerm, filterRole);
 	const sortedStaff = sortStaff(filteredStaff, sortConfig);
 	const currentStaff = paginateStaff(sortedStaff, currentPage, itemsPerPage);
-	
+
 	// Get corresponding user data for current page (for CASL permission checks)
-	const currentUsersData = currentStaff.map(staff => 
-		users?.find((u: any) => u._id === staff.id)
-	).filter(Boolean);
+	const currentUsersData = currentStaff
+		.map(staff => users?.find((u: any) => u._id === staff.id))
+		.filter(Boolean);
 
 	return (
 		<Box sx={{ p: 3 }}>
-			<Typography 
-				variant="h4" 
-				sx={{ 
-					mb: 3, 
-					color: '#3E236E', 
-					textAlign: 'center', 
-					fontWeight: 'bold' 
+			<Typography
+				variant="h4"
+				sx={{
+					mb: 3,
+					color: '#3E236E',
+					textAlign: 'center',
+					fontWeight: 'bold'
 				}}
 			>
 				Staff Dashboard
@@ -109,15 +103,15 @@ export default function StaffDashboard() {
 					onNewUserClick={() => navigate('/add-new-user')}
 				/>
 
-			<StaffDashboardTable
-				staff={currentStaff}
-				usersData={currentUsersData}
-				sortConfig={sortConfig}
-				onSort={handleSort}
-				onApproval={handleApproval}
-				onEdit={(id) => navigate(`/profile/${id}`)}
-				onDelete={handleDelete}
-			/>
+				<StaffDashboardTable
+					staff={currentStaff}
+					usersData={currentUsersData}
+					sortConfig={sortConfig}
+					onSort={handleSort}
+					onApproval={handleApproval}
+					onEdit={id => navigate(`/profile/${id}`)}
+					onDelete={handleDelete}
+				/>
 
 				<TablePagination
 					component="div"
@@ -125,7 +119,7 @@ export default function StaffDashboard() {
 					page={currentPage}
 					onPageChange={(_e, newPage) => setCurrentPage(newPage)}
 					rowsPerPage={itemsPerPage}
-					onRowsPerPageChange={(e) => {
+					onRowsPerPageChange={e => {
 						setItemsPerPage(parseInt(e.target.value, 10));
 						setCurrentPage(0);
 					}}

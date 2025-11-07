@@ -100,14 +100,6 @@ function App() {
 								</ProtectedRoute>
 							}
 						/>
-						{/* <Route
-							path="/past-entries"
-							element={
-								<ProtectedRoute>
-									<PastEntries />
-								</ProtectedRoute>
-							}
-						/> */}
 						<Route
 							path="/survey/:id"
 							element={

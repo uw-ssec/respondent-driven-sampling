@@ -10,12 +10,10 @@ interface PhoneInputProps extends Omit<TextFieldProps, 'variant' | 'type'> {
 export const PhoneInput = ({
 	canEdit = true,
 	showTooltip = false,
-	disabled,
 	value,
 	onChange,
 	...props
 }: PhoneInputProps) => {
-	const isDisabled = disabled || !canEdit;
 
 	const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (!onChange) return;
@@ -46,15 +44,15 @@ export const PhoneInput = ({
 		<TextField
 			{...props}
 			type="tel"
-			value={value || ''}
+			value={value ?? ''}
 			onChange={handlePhoneChange}
-			disabled={isDisabled}
+			disabled={!canEdit}
 			variant="outlined"
 			fullWidth
 			placeholder="+1XXXXXXXXXX"
 			sx={{
 				'& .MuiOutlinedInput-root': {
-					backgroundColor: isDisabled ? '#f5f5f5' : 'white'
+					backgroundColor: !canEdit ? '#f5f5f5' : 'white'
 				}
 			}}
 		/>

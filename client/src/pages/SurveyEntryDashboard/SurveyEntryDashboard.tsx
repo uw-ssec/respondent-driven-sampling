@@ -1,28 +1,25 @@
 // @ts-nocheck
 // TODO: Remove @ts-nocheck when types are fixed.
 import { useEffect, useState } from 'react';
-import {
-	Box,
-	Paper,
-	Typography,
-	TablePagination
-} from '@mui/material';
 
 import { useApi } from '@/hooks';
+import { Box, Paper, TablePagination, Typography } from '@mui/material';
+
 import { Survey } from '@/types/Survey';
 import { useAuth } from '@/hooks/useAuth';
-import { 
-	toPacificDateOnlyString,
-	filterSurveysByDate,
-	sortSurveys,
-	searchSurveys,
-	paginateSurveys
-} from './utils/SurveyEntryDashboardUtils';
-import { 
-	SurveyEntryDashboardControls, 
-	FilterDialog, 
-	SurveyEntryTable 
+
+import {
+	FilterDialog,
+	SurveyEntryDashboardControls,
+	SurveyEntryTable
 } from './components';
+import {
+	filterSurveysByDate,
+	paginateSurveys,
+	searchSurveys,
+	sortSurveys,
+	toPacificDateOnlyString
+} from './utils/SurveyEntryDashboardUtils';
 
 export default function SurveyEntryDashboard() {
 	const { handleLogout } = useAuth();
@@ -61,28 +58,73 @@ export default function SurveyEntryDashboard() {
 	const filteredSurveys = filterSurveysByDate(surveys, viewAll, selectedDate);
 	const sortedSurveys = sortSurveys(filteredSurveys, sortConfig);
 	const searchedSurveys = searchSurveys(sortedSurveys, searchTerm);
-	const currentSurveys = paginateSurveys(searchedSurveys, currentPage, itemsPerPage);
+	const currentSurveys = paginateSurveys(
+		searchedSurveys,
+		currentPage,
+		itemsPerPage
+	);
 
 	const columns = [
 		{ key: 'createdAt', label: 'Date & Time', sortable: true, width: 120 },
 		{ key: 'employeeId', label: 'Employee ID', sortable: true, width: 120 },
-		{ key: 'employeeName', label: 'Employee Name', sortable: true, width: 120 },
+		{
+			key: 'employeeName',
+			label: 'Employee Name',
+			sortable: true,
+			width: 120
+		},
 		{ key: 'locationName', label: 'Location', sortable: true, width: 130 },
-		{ key: 'parentSurveyCode', label: 'Referred By Code', sortable: true, width: 140 },
-		{ key: 'responses.first_two_letters_fname', label: 'First 2 of First', sortable: true, width: 110 },
-		{ key: 'responses.first_two_letters_lname', label: 'First 2 of Last', sortable: true, width: 110 },
-		{ key: 'responses.date_of_birth', label: 'Year of Birth', sortable: true, width: 110 },
-		{ key: 'actions', label: 'Survey Responses', sortable: false, width: 130 },
+		{
+			key: 'parentSurveyCode',
+			label: 'Referred By Code',
+			sortable: true,
+			width: 140
+		},
+		{
+			key: 'responses.first_two_letters_fname',
+			label: 'First 2 of First',
+			sortable: true,
+			width: 110
+		},
+		{
+			key: 'responses.first_two_letters_lname',
+			label: 'First 2 of Last',
+			sortable: true,
+			width: 110
+		},
+		{
+			key: 'responses.date_of_birth',
+			label: 'Year of Birth',
+			sortable: true,
+			width: 110
+		},
+		{
+			key: 'actions',
+			label: 'Survey Responses',
+			sortable: false,
+			width: 130
+		},
 		{ key: 'progress', label: 'Progress', sortable: false, width: 120 }
 	];
 
 	return (
 		<Box sx={{ p: 3 }}>
-			<Typography variant="h4" sx={{ mb: 1, color: '#3E236E', textAlign: 'center', fontWeight: 'bold' }}>
+			<Typography
+				variant="h4"
+				sx={{
+					mb: 1,
+					color: '#3E236E',
+					textAlign: 'center',
+					fontWeight: 'bold'
+				}}
+			>
 				Survey Entry Dashboard
 			</Typography>
 
-			<Typography variant="h6" sx={{ mb: 2, color: '#ababab', textAlign: 'center' }}>
+			<Typography
+				variant="h6"
+				sx={{ mb: 2, color: '#ababab', textAlign: 'center' }}
+			>
 				{viewAll
 					? 'Viewing All Survey Entries'
 					: `Entries for: ${toPacificDateOnlyString(selectedDate)}`}
@@ -109,7 +151,7 @@ export default function SurveyEntryDashboard() {
 					page={currentPage}
 					onPageChange={(e, newPage) => setCurrentPage(newPage)}
 					rowsPerPage={itemsPerPage}
-					onRowsPerPageChange={(e) => {
+					onRowsPerPageChange={e => {
 						setItemsPerPage(parseInt(e.target.value, 10));
 						setCurrentPage(0);
 					}}

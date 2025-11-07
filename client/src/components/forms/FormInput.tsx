@@ -10,20 +10,18 @@ interface FormInputProps extends Omit<TextFieldProps, 'variant'> {
 export const FormInput = ({
 	canEdit = true,
 	showTooltip = false,
-	disabled,
 	...props
 }: FormInputProps) => {
-	const isDisabled = disabled || !canEdit;
 
 	const input = (
 		<TextField
 			{...props}
-			disabled={isDisabled}
+			disabled={!canEdit}
 			variant="outlined"
 			fullWidth
 			sx={{
 				'& .MuiOutlinedInput-root': {
-					backgroundColor: isDisabled ? '#f5f5f5' : 'white'
+					backgroundColor: !canEdit ? '#f5f5f5' : 'white'
 				}
 			}}
 		/>

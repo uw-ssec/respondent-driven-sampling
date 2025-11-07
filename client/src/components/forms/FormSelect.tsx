@@ -25,23 +25,21 @@ export const FormSelect = ({
 	showTooltip = false,
 	helperText,
 	error,
-	disabled,
 	...props
 }: FormSelectProps) => {
-	const isDisabled = disabled || !canEdit;
-	const labelId = `${props.name || 'select'}-label`;
+	const labelId = `${props.name ?? 'select'}-label`;
 
 	const selectControl = (
-		<FormControl fullWidth error={error} disabled={isDisabled}>
+		<FormControl fullWidth error={error} disabled={!canEdit}>
 			<InputLabel id={labelId}>{label}</InputLabel>
 			<Select
 				{...props}
 				labelId={labelId}
 				label={label}
 				variant="outlined"
-				disabled={isDisabled}
+				disabled={!canEdit}
 				sx={{
-					backgroundColor: isDisabled ? '#f5f5f5' : 'white'
+					backgroundColor: !canEdit ? '#f5f5f5' : 'white'
 				}}
 			>
 				{options.map(option => (

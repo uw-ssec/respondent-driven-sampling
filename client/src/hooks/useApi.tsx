@@ -62,12 +62,12 @@ export const useApi = () => {
 
 	const fetchUser = async (userObjectId: string) => {
 		const response = await fetchWithAuth(`/api/v2/users/${userObjectId}`);
-		return (await response?.json()).data || null;
+		return (await response?.json())?.data || null;
 	};
 
 	const fetchUsers = async () => {
 		const response = await fetchWithAuth(`/api/v2/users`);
-		return (await response?.json()).data || [];
+		return (await response?.json())?.data || [];
 	};
 
 	const approveUser = async (
@@ -116,19 +116,19 @@ export const useApi = () => {
 		const response = await fetchWithAuth(
 			`/api/v2/surveys/${surveyObjectId}`
 		);
-		return (await response?.json()).data || null;
+		return (await response?.json())?.data || null;
 	};
 
 	const fetchSurveys = async () => {
 		const response = await fetchWithAuth(`/api/v2/surveys`);
-		return (await response?.json()).data || [];
+		return (await response?.json())?.data || [];
 	};
 
 	const fetchSurveyBySurveyCode = async (surveyCode: string) => {
 		const response = await fetchWithAuth(
 			`/api/v2/surveys?surveyCode=${surveyCode}`
 		);
-		return (await response?.json()).data[0] || null;
+		return (await response?.json())?.data[0] || null;
 	};
 
 	const createSurvey = async (surveyData: object) => {
@@ -174,7 +174,7 @@ export const useApi = () => {
 		const parentSurvey = await fetchWithAuth(
 			`/api/v2/surveys?childSurveyCodes=${surveyCode}`
 		);
-		return (await parentSurvey?.json()).data[0] || null;
+		return (await parentSurvey?.json())?.data[0] || null;
 	};
 
 	const useSurvey = (surveyObjectId: string) => {
@@ -298,7 +298,7 @@ export const useApi = () => {
 
 	const fetchLocations = async () => {
 		const response = await fetchWithAuth(`/api/v2/locations`);
-		return (await response?.json()).data || null;
+		return (await response?.json())?.data || null;
 	};
 
 	const locationService = { fetchLocations, useLocations };

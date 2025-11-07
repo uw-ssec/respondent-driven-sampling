@@ -9,7 +9,9 @@ interface StaffMember {
 /**
  * Get color for approval status chip
  */
-export const getStatusColor = (status: string): 'warning' | 'success' | 'error' => {
+export const getStatusColor = (
+	status: string
+): 'warning' | 'success' | 'error' => {
 	switch (status) {
 		case 'PENDING':
 			return 'warning';
@@ -56,7 +58,7 @@ export const sortStaff = (
 		const filterB = b[sortConfig.key!]
 			? (b[sortConfig.key!].toLowerCase?.() ?? b[sortConfig.key!])
 			: '';
-		
+
 		if (filterA < filterB) return sortConfig.direction === 'asc' ? -1 : 1;
 		if (filterA > filterB) return sortConfig.direction === 'asc' ? 1 : -1;
 		return 0;
@@ -79,9 +81,11 @@ export const paginateStaff = (
 /**
  * Transform users data to staff members format
  */
-export const transformUsersToStaff = (users: any[] | undefined): StaffMember[] => {
+export const transformUsersToStaff = (
+	users: any[] | undefined
+): StaffMember[] => {
 	if (!users) return [];
-	
+
 	return users.map((user: any) => ({
 		id: user._id,
 		employeeId: user._id || 'N/A',
@@ -90,4 +94,3 @@ export const transformUsersToStaff = (users: any[] | undefined): StaffMember[] =
 		approvalStatus: user.approvalStatus || 'PENDING'
 	}));
 };
-
