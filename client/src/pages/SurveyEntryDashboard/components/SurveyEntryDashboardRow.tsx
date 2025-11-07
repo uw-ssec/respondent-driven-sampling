@@ -42,15 +42,15 @@ export default function SurveyEntryDashboardRow({
 				</Tooltip>
 			</TableCell>
 			<TableCell>{survey.employeeName}</TableCell>
-			<TableCell>{survey.locationName || 'N/A'}</TableCell>
-			<TableCell>{survey.parentSurveyCode || 'N/A'}</TableCell>
+			<TableCell>{survey.locationName ?? 'N/A'}</TableCell>
+			<TableCell>{survey.parentSurveyCode ?? 'N/A'}</TableCell>
 			<TableCell>
-				{survey.responses?.first_two_letters_fname || 'N/A'}
+				{survey.responses?.first_two_letters_fname ?? 'N/A'}
 			</TableCell>
 			<TableCell>
-				{survey.responses?.first_two_letters_lname || 'N/A'}
+				{survey.responses?.first_two_letters_lname ?? 'N/A'}
 			</TableCell>
-			<TableCell>{survey.responses?.date_of_birth || 'N/A'}</TableCell>
+			<TableCell>{survey.responses?.date_of_birth ?? 'N/A'}</TableCell>
 			<TableCell>
 				<Button
 					size="small"
@@ -67,8 +67,13 @@ export default function SurveyEntryDashboardRow({
 			</TableCell>
 			<TableCell>
 				{/* TODO: add some kind of permission check/unlocking functionality here for admin */}
-				{survey.lastUpdated ? (
-					<Chip label="Submitted" color="success" size="small" />
+				{survey.isCompleted ? (
+					<Chip
+						label="Submitted"
+						variant="outlined"
+						color="success"
+						size="small"
+					/>
 				) : (
 					<Button
 						size="small"

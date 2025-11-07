@@ -29,6 +29,7 @@ export default function SurveyEntryDashboardControls({
 			<Button
 				variant="outlined"
 				startIcon={<DeleteIcon />}
+				onClick={() => alert('Delete Functionality Pending!')}
 				sx={{ color: '#3E236E', borderColor: '#3E236E' }}
 			>
 				Delete

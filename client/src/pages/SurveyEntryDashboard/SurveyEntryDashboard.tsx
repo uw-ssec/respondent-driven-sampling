@@ -1,12 +1,7 @@
-// @ts-nocheck
-// TODO: Remove @ts-nocheck when types are fixed.
 import { useEffect, useState } from 'react';
 
 import { useApi } from '@/hooks';
 import { Box, Paper, TablePagination, Typography } from '@mui/material';
-
-import { Survey } from '@/types/Survey';
-import { useAuth } from '@/hooks/useAuth';
 
 import {
 	FilterDialog,
@@ -22,7 +17,6 @@ import {
 } from './utils/SurveyEntryDashboardUtils';
 
 export default function SurveyEntryDashboard() {
-	const { handleLogout } = useAuth();
 	const { surveyService } = useApi();
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [searchTerm, setSearchTerm] = useState('');
@@ -149,7 +143,7 @@ export default function SurveyEntryDashboard() {
 					component="div"
 					count={searchedSurveys.length}
 					page={currentPage}
-					onPageChange={(e, newPage) => setCurrentPage(newPage)}
+					onPageChange={(_e, newPage) => setCurrentPage(newPage)}
 					rowsPerPage={itemsPerPage}
 					onRowsPerPageChange={e => {
 						setItemsPerPage(parseInt(e.target.value, 10));

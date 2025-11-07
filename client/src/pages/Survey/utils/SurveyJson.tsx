@@ -17,7 +17,7 @@ export const generateSurveyJson = (locations: any[]) => {
 			householdPage,
 			specialQuestionsPage,
 			youthSpecialQuestionsPage,
-			surveyDepulicationPage,
+			surveyDeduplicationPage,
 			outroPage
 		]
 	};
@@ -1452,13 +1452,13 @@ const youthSpecialQuestionsPage = {
 };
 
 // SECTION 6.0
-const surveyDepulicationPage = {
-	name: 'survey_depulication',
-	title: 'Survey Depulication',
+const surveyDeduplicationPage = {
+	name: 'survey_deduplication',
+	title: 'Survey Deduplication',
 	elements: [
 		{
 			type: 'dropdown',
-			name: 'survey_depulication',
+			name: 'survey_deduplication',
 			title: 'After completing this survey, do you believe you’ve completed this before?',
 			choices: ['Yes', 'No'],
 			isRequired: true

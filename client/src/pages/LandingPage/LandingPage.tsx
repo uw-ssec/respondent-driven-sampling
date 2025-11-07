@@ -42,10 +42,7 @@ export default function LandingPage() {
 								New Entry
 							</button>
 						)}
-						{ability.can(
-							ACTIONS.CASL.READ,
-							SUBJECTS.SURVEY
-						) && (
+						{ability.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY) && (
 							<button
 								className="action-button"
 								onClick={() => navigate('/survey-entries')}
