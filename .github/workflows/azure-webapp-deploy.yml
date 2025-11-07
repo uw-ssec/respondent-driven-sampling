@@ -38,6 +38,12 @@ jobs:
           cd server
           npm install
 
+      # Build server dependencies
+      - name: Build server
+        run: |
+          cd server
+          npm run build
+
       # Deploy to Azure App Service using Azure/webapps-deploy action
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
