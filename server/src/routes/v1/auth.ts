@@ -58,12 +58,12 @@ router.post(
 router.post(
 	'/send-otp-login',
 	async (req: Request, res: Response): Promise<void> => {
-		const { email, phone }: OTPRequest = req.body;
+		const { phone }: OTPRequest = req.body;
 		try {
-			const user = await User.findOne({ email, phone });
+			const user = await User.findOne({ phone });
 			if (!user) {
 				res.status(400).json({
-					message: 'Email and phone number do not match any user.'
+					message: 'No account for this phone – please sign up.'
 				});
 				return;
 			}
