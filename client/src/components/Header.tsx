@@ -18,11 +18,6 @@ export function Header() {
 		setIsProfileMenuOpen(!isProfileMenuOpen);
 	};
 
-	// Function to handle navigation to past entries
-	const handleViewPastEntries = () => {
-		navigate('/past-entries');
-	};
-
 	const handleViewProfile = () => {
 		navigate(`/profile/${userObjectId}`);
 	};
@@ -135,9 +130,6 @@ export function Header() {
 							<ul>
 								<li onClick={handleViewProfile}>
 									View Profile
-								</li>
-								<li onClick={handleViewPastEntries}>
-									View Past Entries
 								</li>
 								<li
 									onClick={handleLogout}
