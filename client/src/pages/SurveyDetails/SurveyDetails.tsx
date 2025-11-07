@@ -1,23 +1,18 @@
-import { useEffect, useState } from 'react';
-
 import { useNavigate, useParams } from 'react-router-dom';
-
-import Header from '@/pages/Header/Header';
 
 import '@/styles/SurveyDetailsCss.css';
 
-import { getAuthToken, getEmployeeId, getRole } from '@/utils/authTokenHandler';
+import { useApi } from '@/hooks/useApi';
 
-import { LogoutProps } from '@/types/AuthProps';
-import { Survey } from '@/types/Survey';
-
-export default function SurveyDetails({ onLogout }: LogoutProps) {
+export default function SurveyDetails() {
 	const { id } = useParams();
-	const [survey, setSurvey] = useState<Survey>();
-	const [loading, setLoading] = useState(true);
+	const { surveyService } = useApi();
+	const { data: survey, isLoading: loading } =
+		surveyService.useSurveyWithUser(id || '') || {};
 	const navigate = useNavigate();
 
 	// Renaming the json names
+	// TODO: verify these are the correct names for FA25 survey
 	const labelMap: Record<string, string> = {
 		first_two_letters_fname: 'First two letters of first name',
 		first_two_letters_lname: 'First two letters of last name',
@@ -54,44 +49,6 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 		current_sleeping_location: 'Current Sleeping Location'
 	};
 
-	useEffect(() => {
-		const fetchSurvey = async () => {
-			try {
-				const role = getRole();
-				const employeeId = getEmployeeId();
-
-				// Fetch survey details from the server
-				const token = getAuthToken();
-				const response = await fetch(`/api/surveys/${id}`, {
-					headers: {
-						'x-user-role': role,
-						'x-employee-id': employeeId,
-						Authorization: `Bearer ${token}`
-					}
-				});
-
-				if (response.ok) {
-					const data = await response.json();
-					setSurvey(data);
-				} else if (response.status == 401) {
-					// Token Error, either expired or invalid for some other reason.
-					// Log user out so they can relogin to generate a new valid token
-					onLogout();
-					navigate('/login');
-					return;
-				} else {
-					console.error('Failed to fetch survey details.');
-				}
-			} catch (error) {
-				console.error('Error fetching survey details:', error);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchSurvey();
-	}, [id]);
-
 	if (loading) return <p>Loading...</p>;
 	if (!survey) return <p>Survey not found.</p>;
 
@@ -100,7 +57,6 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 	// Function to handle logout
 	return (
 		<div>
-			<Header onLogout={onLogout} />
 			<br />
 			<br />
 			<br />
@@ -125,19 +81,27 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 					<h3>Referral Information</h3>
 					<p>
 						<strong>Referred By Code:</strong>{' '}
-						{survey.referredByCode ? survey.referredByCode : 'N/A'}
+						{survey.parentSurveyCode
+							? survey.parentSurveyCode
+							: 'N/A'}
 					</p>
 
 					<p>
 						<strong>Generated Referral Codes:</strong>
 					</p>
-					{survey.referralCodes && survey.referralCodes.length > 0 ? (
+					{survey.childSurveyCodes &&
+					survey.childSurveyCodes.length > 0 ? (
 						<ul className="referral-list">
-							{survey.referralCodes.map((rc, index) => (
-								<li key={index} className="referral-code-tag">
-									{rc.code}
-								</li>
-							))}
+							{survey.childSurveyCodes.map(
+								(code: string, index: number) => (
+									<li
+										key={index}
+										className="referral-code-tag"
+									>
+										{code}
+									</li>
+								)
+							)}
 						</ul>
 					) : (
 						<p>N/A</p>
@@ -184,9 +148,7 @@ export default function SurveyDetails({ onLogout }: LogoutProps) {
 				{/* Edit Pre-screen Questions Button */}
 				<button
 					className="edit-button"
-					onClick={() =>
-						navigate(`/survey/${id}/edit`)
-					}
+					onClick={() => navigate(`/survey/${id}/edit`)}
 				>
 					Edit Prescreen Responses
 				</button>

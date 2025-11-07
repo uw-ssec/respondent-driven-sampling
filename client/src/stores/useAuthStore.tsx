@@ -1,25 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type AuthState = {
-  token: string | null;
+type AuthStore = {
+	token: string;
+	setToken: (token: string) => void;
+	clearToken: () => void;
 };
 
-type AuthActions = {
-  setToken: (token: string | null) => void;
-  clearSession: () => void;
-};
-
-export const useAuthStore = create<AuthState & AuthActions>()(
-  persist(
-    (set) => ({
-      token: null,
-      setToken: (token : string | null) => set({ token }),
-      clearSession: () => {
-        set({ token: null }); 
-        useAuthStore.persist.clearStorage()
-    }
-    }),
-    { name: 'auth-storage' }
-  )
+export const useAuthStore = create<AuthStore>()(
+	persist(
+		(set) => ({
+			token: '',
+			setToken: (token: string) => set({ token }),
+			clearToken: () => set({ token: '' })
+		}),
+		{ name: 'auth-storage' }
+	)
 );

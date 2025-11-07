@@ -2,27 +2,24 @@ import '@/styles/header.css';
 
 import { useEffect, useRef, useState } from 'react';
 
+import { useAuthContext } from '@/contexts';
 import { useNavigate } from 'react-router-dom';
 
-import { LogoutProps } from '@/types/AuthProps';
+import { useAuth } from '@/hooks/useAuth';
 
-function Header({ onLogout }: LogoutProps) {
+export function Header() {
+	const { handleLogout } = useAuth();
 	const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 	const navigate = useNavigate();
 	const menuRef = useRef<HTMLDivElement | null>(null); // Ref to track the menu
-
+	const { userObjectId } = useAuthContext();
 	// Function to toggle the profile menu
 	const toggleProfileMenu = () => {
 		setIsProfileMenuOpen(!isProfileMenuOpen);
 	};
 
-	// Function to handle navigation to past entries
-	const handleViewPastEntries = () => {
-		navigate('/past-entries');
-	};
-
 	const handleViewProfile = () => {
-		navigate('/view-profile');
+		navigate(`/profile/${userObjectId}`);
 	};
 
 	const goToLanding = () => {
@@ -37,14 +34,6 @@ function Header({ onLogout }: LogoutProps) {
 	// Function to handle edit survey navigation
 	const handleEditSurvey = () => {
 		navigate('/survey-entries');
-	};
-
-	// Function to handle logout
-	const handleLogout = () => {
-		if (onLogout) {
-			onLogout();
-			navigate('/login');
-		}
 	};
 
 	// Close menu when clicking outside
@@ -142,9 +131,6 @@ function Header({ onLogout }: LogoutProps) {
 								<li onClick={handleViewProfile}>
 									View Profile
 								</li>
-								<li onClick={handleViewPastEntries}>
-									View Past Entries
-								</li>
 								<li
 									onClick={handleLogout}
 									className="logout-option"
@@ -159,5 +145,3 @@ function Header({ onLogout }: LogoutProps) {
 		</div>
 	);
 }
-
-export default Header;

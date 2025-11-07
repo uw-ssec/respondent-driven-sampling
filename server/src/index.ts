@@ -113,7 +113,7 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 app.use(
 	cors({
 		origin: '*', // Replace with specific domains in production
-		methods: ['GET', 'POST', 'PUT', 'DELETE'],
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 		allowedHeaders: ['Content-Type', 'Authorization'],
 		credentials: true,
 		maxAge: 86400

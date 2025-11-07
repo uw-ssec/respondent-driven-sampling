@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react';
 
-import '@/styles/signup.css';
-
 import { saveAuthToken } from '@/utils/authTokenHandler';
+import { Alert, Box, Button, Link, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+
+import {
+	FormInput,
+	LocationSelect,
+	PhoneInput,
+	RoleSelect
+} from '@/components/forms';
 
 export default function Signup() {
 	const navigate = useNavigate();
@@ -19,25 +25,6 @@ export default function Signup() {
 	const [otpSent, setOtpSent] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [countdown, setCountdown] = useState(0);
-	const [locations, setLocations] = useState<
-		Array<{ _id: string; hubName: string }>
-	>([]);
-
-	useEffect(() => {
-		const fetchLocations = async () => {
-			try {
-				const response = await fetch('/api/v2/locations');
-				if (response.ok) {
-					const data = await response.json();
-					console.log('Fetched locations:', data);
-					setLocations(data.data);
-				}
-			} catch (error) {
-				console.error('Failed to fetch locations:', error);
-			}
-		};
-		fetchLocations();
-	}, []);
 
 	useEffect(() => {
 		let timer: string | number | NodeJS.Timeout | undefined;
@@ -104,120 +91,166 @@ export default function Signup() {
 	};
 
 	return (
-		<div className="page-wrapper">
-			<div className="signup-container">
-				<h2>{otpSent ? 'Verify OTP' : 'Welcome! Sign Up Here!'}</h2>
+		<Box
+			sx={{
+				minHeight: '100vh',
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				backgroundColor: '#f5f5f5',
+				py: 4
+			}}
+		>
+			<Box
+				sx={{
+					maxWidth: 500,
+					width: '100%',
+					mx: 2,
+					p: 4,
+					backgroundColor: 'white',
+					borderRadius: 2,
+					boxShadow: 3
+				}}
+			>
+				<Typography
+					variant="h4"
+					component="h2"
+					gutterBottom
+					textAlign="center"
+					sx={{ mb: 3 }}
+				>
+					{otpSent ? 'Verify OTP' : 'Welcome! Sign Up Here!'}
+				</Typography>
 
 				{!otpSent ? (
-					<>
-						<div className="name-row">
-							<input
-								type="text"
+					<Stack spacing={2.5}>
+						<Box sx={{ display: 'flex', gap: 2 }}>
+							<FormInput
 								name="firstName"
-								placeholder="First Name"
+								label="First Name"
 								value={userData.firstName}
 								onChange={handleChange}
 								required
 							/>
-							<input
-								type="text"
+							<FormInput
 								name="lastName"
-								placeholder="Last Name"
+								label="Last Name"
 								value={userData.lastName}
 								onChange={handleChange}
 								required
 							/>
-						</div>
-						<input
-							type="email"
+						</Box>
+
+						<FormInput
 							name="email"
-							placeholder="Email"
+							label="Email"
+							type="email"
 							value={userData.email}
 							onChange={handleChange}
 							required
 						/>
-						<input
-							type="text"
+
+						<PhoneInput
 							name="phone"
-							placeholder="Phone (+1XXXXXXXXXX)"
+							label="Phone Number"
 							value={userData.phone}
 							onChange={handlePhoneChange}
 							required
 						/>
-						<select
+
+						<LocationSelect
 							name="locationObjectId"
 							value={userData.locationObjectId}
 							onChange={handleChange}
 							required
-						>
-							<option value="">--Select Location--</option>
-							{locations.map(location => (
-								<option key={location._id} value={location._id}>
-									{location.hubName}
-								</option>
-							))}
-						</select>
-						<select
+						/>
+
+						<RoleSelect
 							name="role"
 							value={userData.role}
 							onChange={handleChange}
 							required
+						/>
+
+						<Button
+							variant="contained"
+							size="large"
+							fullWidth
+							onClick={sendOtp}
+							sx={{ mt: 2 }}
 						>
-							<option value="">--Select Role--</option>
-							<option value="VOLUNTEER">VOLUNTEER</option>
-							<option value="MANAGER">MANAGER</option>
-							<option value="ADMIN">ADMIN</option>
-						</select>
-						<button onClick={sendOtp}>Send OTP</button>
-						<p className="switch-auth">
+							Send OTP
+						</Button>
+
+						<Typography variant="body2" textAlign="center">
 							Already have an account?{' '}
-							<span
+							<Link
+								component="button"
+								variant="body2"
 								onClick={() => navigate('/login')}
-								className="auth-link"
+								sx={{ cursor: 'pointer' }}
 							>
 								Login
-							</span>
-						</p>
-					</>
+							</Link>
+						</Typography>
+					</Stack>
 				) : (
-					<>
-						<input
-							type="text"
-							placeholder="Enter OTP"
+					<Stack spacing={2.5}>
+						<FormInput
+							label="Enter OTP"
 							value={otp}
 							onChange={e => setOtp(e.target.value)}
 							required
 						/>
-						<button onClick={verifyOtp}>
+
+						<Button
+							variant="contained"
+							size="large"
+							fullWidth
+							onClick={verifyOtp}
+						>
 							Verify OTP & Complete Signup
-						</button>
-						<p className="resend-otp">
+						</Button>
+
+						<Box textAlign="center">
 							{countdown > 0 ? (
-								`Resend OTP in ${countdown}s`
+								<Typography
+									variant="body2"
+									color="text.secondary"
+								>
+									Resend OTP in {countdown}s
+								</Typography>
 							) : (
-								<button onClick={sendOtp}>Resend OTP</button>
+								<Button variant="text" onClick={sendOtp}>
+									Resend OTP
+								</Button>
 							)}
-						</p>
-						<p className="switch-auth">
-							<span
+						</Box>
+
+						<Typography variant="body2" textAlign="center">
+							<Link
+								component="button"
+								variant="body2"
 								onClick={() => {
 									setOtpSent(false);
 									setOtp('');
 									setCountdown(0);
 									setErrorMessage('');
 								}}
-								className="auth-link"
+								sx={{ cursor: 'pointer' }}
 							>
 								Go back to Signup
-							</span>
-						</p>
-					</>
+							</Link>
+						</Typography>
+					</Stack>
 				)}
 
 				{errorMessage && (
-					<p className="error-message">{errorMessage}</p>
+					<Alert severity="error" sx={{ mt: 2 }}>
+						{errorMessage}
+					</Alert>
 				)}
-			</div>
-		</div>
+			</Box>
+		</Box>
 	);
 }

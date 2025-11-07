@@ -68,9 +68,15 @@ function applySuperAdminPermissions(
 function applyAdminPermissions(builder: AbilityBuilder<Ability>, ctx: Context) {
 	// admins can approve anyone but superadmins
 	builder.can(
-		ACTIONS.CASL.UPDATE,
+		[ACTIONS.CASL.UPDATE],
 		SUBJECTS.USER,
 		FIELDS.USER.APPROVAL,
+		hasRole(['VOLUNTEER', 'MANAGER', 'ADMIN'])
+	);
+	// admins can pre-approve/create anyone but superadmins
+	builder.can(
+		ACTIONS.CASL.CREATE,
+		SUBJECTS.USER,
 		hasRole(['VOLUNTEER', 'MANAGER', 'ADMIN'])
 	);
 	// admins can update location and role of volunteers and managers
@@ -112,6 +118,14 @@ function applyManagerPermissions(
 		...hasSameLocation(ctx.latestLocationObjectId),
 		...isToday('createdAt')
 	});
+	// managers can pre-approve/create volunteers at their location
+	builder.can(
+		ACTIONS.CASL.CREATE,
+		SUBJECTS.USER, {
+			...hasRole(['VOLUNTEER']),
+			...hasSameLocation(ctx.latestLocationObjectId),
+		}
+	);
 	// can only edit own profile
 	builder.can(
 		ACTIONS.CASL.UPDATE,

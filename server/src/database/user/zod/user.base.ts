@@ -16,8 +16,8 @@ export const baseUserSchema = z
 		email: z.email(),
 		phone: z
 			.string()
-			.length(10, 'Phone number must be exactly 10 digits')
-			.regex(/^\d+$/, 'Phone number must contain only digits'),
+			.length(12, 'Phone number must be exactly 12 characters (+1 and 10 digits)')
+			.regex(/^\+1\d{10}$/, 'Phone number must be in format +1XXXXXXXXXX, only digits'),
 		role: z.enum(ROLE_ENUM),
 		approvalStatus: z.enum(ApprovalStatus),
 		approvedByUserObjectId: z

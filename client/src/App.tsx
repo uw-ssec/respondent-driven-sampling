@@ -1,19 +1,17 @@
-import { useState } from 'react';
-
-import NewUser from '@/pages/AdminDashboard/NewUser';
-import AdminDashboard from '@/pages/AdminDashboard/StaffDashboard';
-import QrPage from '@/pages/CompletedSurvey/QrPage';
-import LandingPage from '@/pages/LandingPage/LandingPage';
-import Login from '@/pages/Login/Login';
-import PastEntries from '@/pages/PastEntries/PastEntries';
-import SurveyDetails from '@/pages/PastEntries/SurveyDetails';
-import SurveyEdit from '@/pages/PastEntries/SurveyEdit';
-import AdminEditProfile from '@/pages/Profile/AdminEditProfile';
-import ViewProfile from '@/pages/Profile/ViewProfile';
-import ApplyReferral from '@/pages/QRCodeScanAndReferral/ApplyReferral';
-import Signup from '@/pages/Signup/Signup';
-import SurveyComponent from '@/pages/Survey/SurveyComponent';
-import SurveyEntryDashboard from '@/pages/SurveyEntryDashboard/SurveyEntryDashboard';
+import { AuthProvider } from '@/contexts';
+import {
+	Survey,
+	SurveyDetails,
+	SurveyEntryDashboard,
+	QrPage,
+	LandingPage,
+	Login,
+	Profile,
+	ApplyReferral,
+	Signup,
+	StaffDashboard,
+	NewUser
+} from '@/pages';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import {
@@ -22,173 +20,114 @@ import {
 	BrowserRouter as Router,
 	Routes
 } from 'react-router-dom';
-
-import { useAuthStore } from './stores/useAuthStore';
-import { useSurveyStore } from './stores/useSurveyStore';
-import { muiTheme } from './theme/muiTheme';
-import { hasAuthToken } from './utils/authTokenHandler';
+import { ProtectedRoute } from '@/components';
+import { muiTheme } from '@/theme/muiTheme';
 
 function App() {
-	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(hasAuthToken());
-
-	const handleLogin = () => {
-		setIsLoggedIn(true);
-	};
-
-	const handleLogout = () => {
-		setIsLoggedIn(false);
-		// Clear auth and survey storage upon logout
-		useAuthStore.getState().clearSession();
-		useSurveyStore.getState().clearSession();
-	};
-
 	return (
-		<ThemeProvider theme={muiTheme}>
-			<CssBaseline />
-			<Router>
-				<Routes>
-					<Route
-						path="/"
-						element={<Navigate replace to="/login" />}
-					/>
-					<Route
-						path="/login"
-						element={<Login onLogin={handleLogin} />}
-					/>
-					<Route
-						path="/survey/:id/survey"
-						element={
-							isLoggedIn ? (
-								<SurveyComponent onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route path="/signup" element={<Signup />} />
-					<Route
-						path="/dashboard"
-						element={
-							isLoggedIn ? (
-								<LandingPage onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/survey"
-						element={
-							isLoggedIn ? (
-								<SurveyComponent onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/admin-dashboard"
-						element={
-							isLoggedIn ? (
-								<AdminDashboard onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/admin-edit-profile/:id"
-						element={
-							isLoggedIn ? (
-								<AdminEditProfile onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/add-new-user"
-						element={
-							isLoggedIn ? (
-								<NewUser onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/survey-entries"
-						element={
-							isLoggedIn ? (
-								<SurveyEntryDashboard onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/qrcode"
-						element={
-							isLoggedIn ? (
-								<QrPage onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/past-entries"
-						element={
-							isLoggedIn ? (
-								<PastEntries onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/survey/:id"
-						element={
-							isLoggedIn ? (
-								<SurveyDetails onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/survey/:id/edit"
-						element={
-							isLoggedIn ? (
-								<SurveyEdit />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/apply-referral"
-						element={
-							isLoggedIn ? (
-								<ApplyReferral onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-					<Route
-						path="/view-profile"
-						element={
-							isLoggedIn ? (
-								<ViewProfile onLogout={handleLogout} />
-							) : (
-								<Navigate replace to="/login" />
-							)
-						}
-					/>
-				</Routes>
-			</Router>
-		</ThemeProvider>
+		<AuthProvider>
+			<ThemeProvider theme={muiTheme}>
+				<CssBaseline />
+				<Router>
+					<Routes>
+						<Route
+							path="/"
+							element={<Navigate replace to="/login" />}
+						/>
+						<Route path="/login" element={<Login />} />
+						<Route
+							path="/survey/:id/continue"
+							element={
+								<ProtectedRoute>
+									<Survey />
+								</ProtectedRoute>
+							}
+						/>
+						<Route path="/signup" element={<Signup />} />
+						<Route
+							path="/dashboard"
+							element={
+								<ProtectedRoute>
+									<LandingPage />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/survey"
+							element={
+								<ProtectedRoute>
+									<Survey />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/admin-dashboard"
+							element={
+								<ProtectedRoute>
+									<StaffDashboard />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/profile/:id"
+							element={
+								<ProtectedRoute>
+									<Profile />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/add-new-user"
+							element={
+								<ProtectedRoute>
+									<NewUser />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/survey-entries"
+							element={
+								<ProtectedRoute>
+									<SurveyEntryDashboard />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/qrcode"
+							element={
+								<ProtectedRoute>
+									<QrPage />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/survey/:id"
+							element={
+								<ProtectedRoute>
+									<SurveyDetails />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/survey/:id/edit"
+							element={
+								<ProtectedRoute>
+									<Survey />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="/apply-referral"
+							element={
+								<ProtectedRoute>
+									<ApplyReferral />
+								</ProtectedRoute>
+							}
+						/>
+					</Routes>
+				</Router>
+			</ThemeProvider>
+		</AuthProvider>
 	);
 }
 

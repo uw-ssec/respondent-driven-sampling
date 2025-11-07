@@ -1,12 +1,11 @@
 // This file provides helper functions to manage JWTs used in authentication.
+import { useAuthStore, useSurveyStore } from '@/stores';
 import { jwtDecode } from 'jwt-decode';
-import { useAuthStore } from '../stores/useAuthStore';
-import { useSurveyStore } from '../stores/useSurveyStore';
 
 interface JwtPayload {
 	firstName: string;
 	role: string;
-	employeeId: string;
+	userObjectId: string;
 }
 
 export function saveAuthToken(token: string): void {
@@ -14,22 +13,29 @@ export function saveAuthToken(token: string): void {
 }
 
 export function deleteAuthToken(): void {
-	useAuthStore.getState().clearSession();
+	useAuthStore.getState().clearToken();
 }
 
-export function getAuthToken(): string | null {
+export function getAuthToken(): string {
 	return useAuthStore.getState().token;
 }
 
-function getDecodedAuthToken(): JwtPayload | null {
+export function getDecodedAuthToken(): JwtPayload | null {
 	const token = getAuthToken();
-	return token ? jwtDecode<JwtPayload>(token) : null;
+	if (!token) return null;
+	try {
+		return jwtDecode<JwtPayload>(token);
+	} catch (error) {
+		console.error('Error decoding token:', error);
+		return null;
+	}
 }
 
 export function hasAuthToken(): boolean {
 	// If the token exists we will assume we are logged in, even if the token is expired.
 	// We can relogin on a failed API call if expired.
-	return getAuthToken() != null;
+	const token = getAuthToken();
+	return token != null && token !== '';
 }
 
 export function getRole(): string {
@@ -45,19 +51,26 @@ export function getFirstName(): string {
 	return decodedAuthToken.firstName;
 }
 
-export function getEmployeeId(): string {
+export function getObjectId(): string {
 	const decodedAuthToken = getDecodedAuthToken();
-	if (decodedAuthToken == null || decodedAuthToken.employeeId == null)
+	if (decodedAuthToken == null || decodedAuthToken.userObjectId == null)
 		return '';
-	return decodedAuthToken.employeeId;
+	return decodedAuthToken.userObjectId;
 }
 
 export function initializeSurveyStore() {
-    const { setEmployeeId, setEmployeeName, setReferredByCode, setObjectId } = useSurveyStore.getState();
-    const employeeId = getEmployeeId();
-    const employeeName = getFirstName();
-    setEmployeeId(employeeId);
-    setEmployeeName(employeeName);
-	setReferredByCode(null);
+	const {
+		setEmployeeId,
+		setEmployeeName,
+		setParentSurveyCode,
+		setObjectId,
+		setChildSurveyCodes
+	} = useSurveyStore.getState();
+	const objectId = getObjectId();
+	const employeeName = getFirstName();
+	setEmployeeId(objectId);
+	setEmployeeName(employeeName);
+	setParentSurveyCode(null);
+	setChildSurveyCodes([]);
 	setObjectId(null);
 }
