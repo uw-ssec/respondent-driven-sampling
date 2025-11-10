@@ -13,8 +13,7 @@
 		"clean": "rimraf build",
 		"lint": "eslint . --ext js,ts",
 		"lint:fix": "eslint . --ext js,ts --fix",
-		"generate-seeds": "tsx --env-file=.env ../scripts/generateSeeds.ts",
-		"list-locations": "tsx --env-file=.env ../scripts/listLocations.ts"
+		"generate-seeds": "tsx --env-file=.env ../scripts/generateSeeds.ts"
 	},
 	"keywords": [],
 	"author": "",
