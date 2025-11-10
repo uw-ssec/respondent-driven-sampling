@@ -1,6 +1,6 @@
 // ---- SURVEY CONSTANTS ----
 
-export const SYSTEM_SURVEY_CODE = '_SEED_';
+export const SYSTEM_SURVEY_CODE = '__SEED__';
 export const GENERATED_SURVEY_CODES_LENGTH = 3;
 export const SURVEY_CODE_LENGTH = 8;
 

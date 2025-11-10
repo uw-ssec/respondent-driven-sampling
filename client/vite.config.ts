@@ -10,6 +10,7 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'@/permissions': path.resolve(__dirname, '../server/src/permissions'),
+			'@/constants': path.resolve(__dirname, '../server/src/database/utils/constants'),
 			'@': path.resolve(__dirname, 'src'),
 			'@/components': path.resolve(__dirname, 'src/components'),
 			'@/pages': path.resolve(__dirname, 'src/pages'),

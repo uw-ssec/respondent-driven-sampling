@@ -75,6 +75,16 @@ export const errors = {
 		'Could not find parent survey with matching survey code',
 		404
 	),
+	SEED_CODE_NOT_FOUND: new ErrorCode(
+		'SEED_CODE_NOT_FOUND',
+		'Could not find seed with matching survey code',
+		404
+	),
+	SEED_LOCATION_MISMATCH: new ErrorCode(
+		'SEED_LOCATION_MISMATCH',
+		'Seed location does not match the location of the survey',
+		409
+	),
 	NO_SURVEY_CODE_PROVIDED: new ErrorCode(
 		'NO_SURVEY_CODE_PROVIDED',
 		'No survey code provided. Please provide a survey code or use the `new` query parameter.',
