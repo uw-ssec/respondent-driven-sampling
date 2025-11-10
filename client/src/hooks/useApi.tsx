@@ -303,10 +303,22 @@ export const useApi = () => {
 
 	const locationService = { fetchLocations, useLocations };
 
+	const createSeed = async (seedData: object) => {
+		const response = await fetchWithAuth(`/api/v2/seeds`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(seedData)
+		});
+		return response?.json();
+	};
+
+	const seedService = { createSeed };
+
 	return {
 		fetchWithAuth,
 		userService,
 		surveyService,
-		locationService
+		locationService,
+		seedService
 	};
 };

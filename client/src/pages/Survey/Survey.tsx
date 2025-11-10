@@ -8,6 +8,7 @@ import 'survey-core/defaultV2.min.css';
 
 import { useAuthContext } from '@/contexts';
 import { useAbility, useApi } from '@/hooks';
+import { SYSTEM_SURVEY_CODE } from '@/constants';
 // Global Zustand store managing state of survey components
 import { useSurveyStore } from '@/stores';
 import { initializeSurvey, validateReferralCode } from './utils/surveyUtils';
@@ -21,7 +22,7 @@ import { useGeolocated } from 'react-geolocated';
 // It uses the useEffect hook to manage side effects, such as fetching data and updating state
 // It uses the useGeolocated hook to get the user's geolocation
 const Survey = () => {
-	const { surveyService, locationService } = useApi();
+	const { surveyService, locationService, seedService } = useApi();
 	const [searchParams] = useSearchParams();
 	const surveyCodeInUrl = searchParams.get('ref');
 	const { id: surveyObjectIdInUrl } = useParams();
@@ -59,6 +60,7 @@ const Survey = () => {
 	const {
 		getObjectId,
 		setObjectId,
+		setSurveyCode,
 		getParentSurveyCode,
 		setParentSurveyCode,
 		setSurveyData,
@@ -126,6 +128,17 @@ const Survey = () => {
 					if (surveyCodeInUrl) {
 						req.surveyCode = surveyCodeInUrl;
 					}
+					else {
+						// Generate a new fallback seed to link to the survey
+						const seed = await seedService.createSeed({
+							locationObjectId: surveyData.responses.location,
+							isFallback: true
+						});
+						// Set the survey code as the fallback seed code
+						// Set the parent survey code as the system survey code seed
+						req.surveyCode = seed.data.surveyCode;
+						req.parentSurveyCode = SYSTEM_SURVEY_CODE;
+					}
 					result = await surveyService.createSurvey(req);
 				} else {
 					result = await surveyService.updateSurvey(getObjectId()!, {
@@ -134,6 +147,8 @@ const Survey = () => {
 				}
 				if (result) {
 					setObjectId(result.data._id);
+					setParentSurveyCode(result.data.parentSurveyCode);
+					setSurveyCode(result.data.surveyCode);
 				}
 			} catch (error) {
 				console.error('Autosave failed:', error);
