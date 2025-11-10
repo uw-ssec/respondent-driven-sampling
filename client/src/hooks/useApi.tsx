@@ -303,6 +303,20 @@ export const useApi = () => {
 
 	const locationService = { fetchLocations, useLocations };
 
+	const useSeedBySurveyCode = (surveyCode: string | null) => {
+		return useSWR(
+			surveyCode ? `/api/v2/seeds?surveyCode=${surveyCode}` : null,
+			() => fetchSeedBySurveyCode(surveyCode!)
+		);
+	};
+
+	const fetchSeedBySurveyCode = async (surveyCode: string) => {
+		const response = await fetchWithAuth(
+			`/api/v2/seeds?surveyCode=${surveyCode}`
+		);
+		return (await response?.json())?.data[0] || null;
+	};
+
 	const createSeed = async (seedData: object) => {
 		const response = await fetchWithAuth(`/api/v2/seeds`, {
 			method: 'POST',
@@ -312,7 +326,7 @@ export const useApi = () => {
 		return response?.json();
 	};
 
-	const seedService = { createSeed };
+	const seedService = { createSeed, useSeedBySurveyCode };
 
 	return {
 		fetchWithAuth,

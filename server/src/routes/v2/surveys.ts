@@ -4,7 +4,6 @@ import express, { NextFunction, Response } from 'express';
 import Survey, { ISurvey } from '@/database/survey/mongoose/survey.model';
 import {
 	generateUniqueChildSurveyCodes,
-	generateUniqueSurveyCode,
 	getParentSurveyCode
 } from '@/database/survey/survey.controller';
 import {

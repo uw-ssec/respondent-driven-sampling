@@ -47,9 +47,16 @@ const Survey = () => {
 			? surveyService.useSurveyBySurveyCode(surveyCodeInUrl)
 			: {};
 
+	// If surveyCodeInUrl exists, it should be conntected to EITHER a parent survey or a seed. Check for both.
+
 	// Conditionally fetch parent survey (only when surveyCodeInUrl exists)
 	const { data: parentSurvey, isLoading: parentLoading } = surveyCodeInUrl
 		? surveyService.useParentOfSurveyCode(surveyCodeInUrl)
+		: {};
+	
+	// Conditionally fetch seed (only when surveyCodeInUrl exists)
+	const { data: seed, isLoading: seedLoading } = surveyCodeInUrl
+		? seedService.useSeedBySurveyCode(surveyCodeInUrl)
 		: {};
 
 	// Conditionally fetch survey by object id (only when surveyObjectIdInUrl exists)
@@ -194,6 +201,7 @@ const Survey = () => {
 		locations &&
 		(!surveyCodeInUrl || !surveyByRefLoading) &&
 		!parentLoading &&
+		!seedLoading &&
 		!surveyByObjectIdLoading;
 
 	// Single, clean useEffect for survey initialization
@@ -209,6 +217,7 @@ const Survey = () => {
 			surveyCodeInUrl,
 			surveyByRefCode,
 			parentSurvey,
+			seed,
 			ability
 		);
 		if (!validation.isValid) {
@@ -277,6 +286,7 @@ const Survey = () => {
 		locationsLoading ||
 		(surveyCodeInUrl && surveyByRefLoading) ||
 		parentLoading ||
+		seedLoading ||
 		surveyByObjectIdLoading;
 
 	if (isLoading) return <p>Loading survey...</p>;
