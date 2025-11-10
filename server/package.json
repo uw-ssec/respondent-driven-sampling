@@ -12,7 +12,8 @@
 		"test:coverage": "jest --coverage",
 		"clean": "rimraf build",
 		"lint": "eslint . --ext js,ts",
-		"lint:fix": "eslint . --ext js,ts --fix"
+		"lint:fix": "eslint . --ext js,ts --fix",
+		"super-admin": "tsx --env-file=.env ../scripts/superAdminCRUD.tsx"
 	},
 	"keywords": [],
 	"author": "",
