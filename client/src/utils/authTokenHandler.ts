@@ -38,6 +38,8 @@ export function hasAuthToken(): boolean {
 	return token != null && token !== '';
 }
 
+// REVIEW: Do we need these helper functions anymore?
+// REVIEW: use auth context instead of these helper functions?
 export function getRole(): string {
 	const decodedAuthToken = getDecodedAuthToken();
 	if (decodedAuthToken == null || decodedAuthToken.role == null) return '';

@@ -6,13 +6,14 @@ import { Survey as SurveyComponent } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
+import { SYSTEM_SURVEY_CODE } from '@/constants';
 import { useAuthContext } from '@/contexts';
 import { useAbility, useApi } from '@/hooks';
-import { SYSTEM_SURVEY_CODE } from '@/constants';
 // Global Zustand store managing state of survey components
 import { useSurveyStore } from '@/stores';
-import { initializeSurvey, validateReferralCode } from './utils/surveyUtils';
 import { useGeolocated } from 'react-geolocated';
+
+import { initializeSurvey, validateReferralCode } from './utils/surveyUtils';
 
 // This component is responsible for rendering the survey and handling its logic
 // It uses the SurveyJS library to create and manage the survey
@@ -48,12 +49,11 @@ const Survey = () => {
 			: {};
 
 	// If surveyCodeInUrl exists, it should be conntected to EITHER a parent survey or a seed. Check for both.
-
 	// Conditionally fetch parent survey (only when surveyCodeInUrl exists)
 	const { data: parentSurvey, isLoading: parentLoading } = surveyCodeInUrl
 		? surveyService.useParentOfSurveyCode(surveyCodeInUrl)
 		: {};
-	
+
 	// Conditionally fetch seed (only when surveyCodeInUrl exists)
 	const { data: seed, isLoading: seedLoading } = surveyCodeInUrl
 		? seedService.useSeedBySurveyCode(surveyCodeInUrl)
@@ -134,8 +134,7 @@ const Survey = () => {
 					// Add survey code to request if it exists
 					if (surveyCodeInUrl) {
 						req.surveyCode = surveyCodeInUrl;
-					}
-					else {
+					} else {
 						// Generate a new fallback seed to link to the survey
 						const seed = await seedService.createSeed({
 							locationObjectId: surveyData.responses.location,
@@ -158,6 +157,7 @@ const Survey = () => {
 					setSurveyCode(result.data.surveyCode);
 				}
 			} catch (error) {
+				// TODO: handle error (e.g., show notification as toast messages)
 				console.error('Autosave failed:', error);
 			}
 		});
@@ -171,7 +171,7 @@ const Survey = () => {
 
 			try {
 				const result = await surveyService.updateSurvey(
-					getObjectId()!,
+					getObjectId() as string,
 					{
 						responses: surveyData.responses,
 						isCompleted: true
@@ -184,12 +184,13 @@ const Survey = () => {
 					return;
 				}
 
-				if (result && result.data.childSurveyCodes) {
+				if (result?.data?.childSurveyCodes) {
 					setChildSurveyCodes(result.data.childSurveyCodes);
 					navigate('/qrcode');
 					return;
 				}
 			} catch (error) {
+				// TODO: handle error (e.g., show notification)
 				console.error('Error saving survey:', error);
 			}
 		});
@@ -295,7 +296,9 @@ const Survey = () => {
 	return (
 		<>
 			<div style={{ padding: '20px' }}>
-				{surveyRef.current && <SurveyComponent model={surveyRef.current} />}
+				{surveyRef.current && (
+					<SurveyComponent model={surveyRef.current} />
+				)}
 				<div
 					style={{
 						display: 'flex',

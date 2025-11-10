@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			permissions: [],
 			lastestLocationObjectId: '',
 			isLoggedIn: true,
-			// REVIEW: where are we using isLoading?
+			// TODO: Verification needed for consistency.
 			isLoading: true
 		};
 	});
@@ -188,7 +188,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	);
 };
 
-// REVIEW: Why is this here? Move to a separate file? What does useAuth do?
 export const useAuthContext = () => {
 	const context = useContext(AuthContext);
 	if (!context) {

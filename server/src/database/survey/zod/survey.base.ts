@@ -2,11 +2,10 @@ import { Types } from 'mongoose';
 import { z } from 'zod';
 
 import Survey from '@/database/survey/mongoose/survey.model';
-
 import {
 	GENERATED_SURVEY_CODES_LENGTH,
 	SURVEY_CODE_LENGTH
-} from '../../utils/constants';
+} from '@/database/utils/constants';
 
 // Base field definitions - reusable across all survey schemas
 export const baseSurveySchema = z

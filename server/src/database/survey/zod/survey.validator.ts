@@ -3,6 +3,7 @@ import { baseSurveySchema } from '@/database/survey/zod/survey.base';
 import { SYSTEM_SURVEY_CODE } from '@/database/utils/constants';
 
 export const createSurveySchema = baseSurveySchema
+	// fields the client should send when creating a survey.
 	.pick({
 		surveyCode: true,
 		parentSurveyCode: true,
@@ -19,12 +20,16 @@ export const createSurveySchema = baseSurveySchema
 		isCompleted: true
 	})
 	.refine(
-		data => !data.parentSurveyCode || data.parentSurveyCode === SYSTEM_SURVEY_CODE,
+		data =>
+			!data.parentSurveyCode ||
+			data.parentSurveyCode === SYSTEM_SURVEY_CODE,
 		{
-			message: 'Cannot create a survey with a pre-defined parentSurveyCode unless it is a system-generated survey code seed.',
+			message:
+				'Cannot create a survey with a pre-defined parentSurveyCode unless it is a system-generated survey code seed.',
 			path: ['parentSurveyCode']
 		}
 	)
+	// enforcing no additional properties in object schemas
 	.strict()
 	.meta({ model: Survey });
 

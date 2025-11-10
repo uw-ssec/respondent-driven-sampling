@@ -116,19 +116,19 @@ export const useApi = () => {
 		const response = await fetchWithAuth(
 			`/api/v2/surveys/${surveyObjectId}`
 		);
-		return (await response?.json())?.data || null;
+		return (await response?.json())?.data ?? null;
 	};
 
 	const fetchSurveys = async () => {
 		const response = await fetchWithAuth(`/api/v2/surveys`);
-		return (await response?.json())?.data || [];
+		return (await response?.json())?.data ?? [];
 	};
 
 	const fetchSurveyBySurveyCode = async (surveyCode: string) => {
 		const response = await fetchWithAuth(
 			`/api/v2/surveys?surveyCode=${surveyCode}`
 		);
-		return (await response?.json())?.data[0] || null;
+		return (await response?.json())?.data[0] ?? null;
 	};
 
 	const createSurvey = async (surveyData: object) => {
@@ -314,7 +314,7 @@ export const useApi = () => {
 		const response = await fetchWithAuth(
 			`/api/v2/seeds?surveyCode=${surveyCode}`
 		);
-		return (await response?.json())?.data[0] || null;
+		return (await response?.json())?.data[0] ?? null;
 	};
 
 	const createSeed = async (seedData: object) => {

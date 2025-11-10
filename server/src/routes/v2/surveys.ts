@@ -1,10 +1,11 @@
 import { accessibleBy } from '@casl/mongoose';
 import express, { NextFunction, Response } from 'express';
 
+import Seed from '@/database/seed/mongoose/seed.model';
 import Survey, { ISurvey } from '@/database/survey/mongoose/survey.model';
 import {
 	generateUniqueChildSurveyCodes,
-	getParentSurveyCode
+	getParentSurveySurveyCodeUsingSurveyCode
 } from '@/database/survey/survey.controller';
 import {
 	createSurveySchema,
@@ -16,7 +17,6 @@ import { auth } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { AuthenticatedRequest } from '@/types/auth';
-import Seed from '@/database/seed/mongoose/seed.model';
 
 const router = express.Router();
 
@@ -165,13 +165,16 @@ router.patch(
 				{
 					$and: [
 						{ _id: req.params.objectId },
+						// CASL helper that injects permission-based query conditions. This ensures the survey matches the user's permission rules (like IS_CREATED_BY_SELF, HAS_SAME_LOCATION, or WAS_CREATED_TODAY).
 						accessibleBy(req.authorization).ofType(
 							Survey.modelName
 						),
+						// preventing updates to already-deleted surveys.
 						{ deletedAt: null }
 					]
 				},
 				req.body,
+				// return the updated document
 				{ new: true }
 			);
 			if (!result) {
@@ -214,8 +217,16 @@ router.post(
 		// Different permissions based on creation with or without referral
 		// Check permission based on the action type based on query param `new`
 		if (req.body.surveyCode === null) {
-			if (!req.authorization?.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY)) {
-				return res.status(403).json({ message: 'Please provide a referral code to create a survey.' });
+			if (
+				!req.authorization?.can(
+					ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL,
+					SUBJECTS.SURVEY
+				)
+			) {
+				return res.status(403).json({
+					message:
+						'Please provide a referral code to create a survey.'
+				});
 			}
 		} else {
 			if (!req.authorization?.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY)) {
@@ -231,7 +242,9 @@ router.post(
 
 			if (surveyData.parentSurveyCode === SYSTEM_SURVEY_CODE) {
 				// System code indicates that survey code should map to an existing seed
-				const seed = await Seed.findOne({ surveyCode: surveyData.surveyCode });
+				const seed = await Seed.findOne({
+					surveyCode: surveyData.surveyCode
+				});
 				if (!seed) {
 					// Seed not found
 					const err = errors.SEED_CODE_NOT_FOUND;
@@ -239,25 +252,22 @@ router.post(
 						message: err.message
 					});
 				}
-				else {
-					// Seed found, set locationObjectId to the seed's locationObjectId
-					surveyData.locationObjectId = seed.locationObjectId as any;
-				}
-			}
-			else {
+			} else {
+				// No parent survey code provided (we know this because of zod schema validation), try to find parent survey
 				// If survey code is provided, try to find parent survey
-				const parentSurveyCode = await getParentSurveyCode(
-					surveyData.surveyCode
-				);
-				if (parentSurveyCode) {
+				const parentSurveySurveyCode =
+					await getParentSurveySurveyCodeUsingSurveyCode(
+						surveyData.surveyCode
+					);
+				if (parentSurveySurveyCode) {
 					// Found parent survey
-					surveyData.parentSurveyCode = parentSurveyCode;
+					surveyData.parentSurveyCode = parentSurveySurveyCode;
 				} else {
 					// Parent survey not found, try to find a seed
-					const seed = await Seed.findOne({ surveyCode: surveyData.surveyCode });
+					const seed = await Seed.findOne({
+						surveyCode: surveyData.surveyCode
+					});
 					if (seed) {
-						// Seed found, set locationObjectId to the seed's locationObjectId
-						surveyData.locationObjectId = seed.locationObjectId as any;
 						surveyData.parentSurveyCode = SYSTEM_SURVEY_CODE;
 					}
 

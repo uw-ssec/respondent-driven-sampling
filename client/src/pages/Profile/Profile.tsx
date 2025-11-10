@@ -19,7 +19,9 @@ export default function AdminEditProfile() {
 	const { id } = useParams();
 	const [message, setMessage] = useState('');
 	const [error, _setError] = useState('');
-	const { data: user, mutate } = userService.useUser(id) || {};
+
+	// REVIEW: Let's use auth context, such that you first refresh the auth context for this user, and then fetch the user data from the context.
+	const { data: user, mutate } = userService.useUser(id) ?? {};
 
 	const canEditField = (field: string) => {
 		if (!user) return false; // wait until user is fetched

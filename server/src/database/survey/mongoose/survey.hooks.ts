@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 
-import { SYSTEM_SURVEY_CODE } from '@/database/utils/constants';
 import Seed from '@/database/seed/mongoose/seed.model';
+import { SYSTEM_SURVEY_CODE } from '@/database/utils/constants';
 import { errors } from '@/database/utils/errors';
 import {
 	locationExistsValidationHook,
@@ -12,6 +12,7 @@ import {
 export const uniquenessValidationHook = async function (this: any, next: any) {
 	// Return if not a new document
 	if (!this.isNew) next();
+
 	try {
 		const currentDocumentChildSurveyCodes = this.childSurveyCodes;
 
@@ -101,7 +102,9 @@ export const immutabilityValidationHook = async function (
 // Pre-save hook to enforce that a seed exists for the survey code if the parent survey code is a system code
 export const seedExistsValidationHook = async function (this: any, next: any) {
 	if (this.parentSurveyCode === SYSTEM_SURVEY_CODE) {
-		const existingSeed = await Seed.findOne({ surveyCode: this.surveyCode });
+		const existingSeed = await Seed.findOne({
+			surveyCode: this.surveyCode
+		});
 		if (!existingSeed) {
 			next(errors.SEED_CODE_NOT_FOUND);
 		}

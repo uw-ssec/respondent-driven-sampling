@@ -4,11 +4,14 @@ import { combine, persist } from 'zustand/middleware';
 type SurveyState = {
 	employeeId: string;
 	employeeName: string;
+	// REVIEW: Let's do userObjectId instead of employeeId everywhere.
+	// REVIEW: Similary for name.
 	userObjectId: string;
 	surveyData: {
 		objectId?: string | null;
 		parentSurveyCode?: string | null;
 		responses?: any;
+		// REVIEW: Can we be more specific with other properties?
 		[key: string]: any;
 		childSurveyCodes?: string[];
 	} | null;
@@ -47,23 +50,23 @@ export const useSurveyStore = create(
 					set({ employeeName }),
 				setSurveyData: (surveyData: any | null) => set({ surveyData }),
 				setParentSurveyCode: (parentSurveyCode: string | null) => {
-					const currentData = get().surveyData || {};
+					const currentData = get().surveyData ?? {};
 					set({ surveyData: { ...currentData, parentSurveyCode } });
 				},
 				setSurveyCode: (surveyCode: string | null) => {
-					const currentData = get().surveyData || {};
+					const currentData = get().surveyData ?? {};
 					set({ surveyData: { ...currentData, surveyCode } });
 				},
 				getSurveyCode: () => get().surveyData?.surveyCode || null,
 				getParentSurveyCode: () =>
-					get().surveyData?.parentSurveyCode || null,
+					get().surveyData?.parentSurveyCode ?? null,
 				setObjectId: (objectId: string | null) => {
-					const currentData = get().surveyData || {};
+					const currentData = get().surveyData ?? {};
 					set({ surveyData: { ...currentData, objectId } });
 				},
-				getObjectId: () => get().surveyData?.objectId || null,
+				getObjectId: () => get().surveyData?.objectId ?? null,
 				setChildSurveyCodes: (childSurveyCodes: string[]) => {
-					const currentData = get().surveyData || {};
+					const currentData = get().surveyData ?? {};
 					set({ surveyData: { ...currentData, childSurveyCodes } });
 				},
 				clearSession: () => {

@@ -114,6 +114,7 @@ export type Action = (typeof ACTION_ENUM)[number];
 export type Subject = (typeof SUBJECT_ENUM)[number];
 export type Condition = (typeof CONDITION_ENUM)[number];
 
+// REVIEW: Not being used right now, but this is a type for when we want to check permissions on a subject that doesn't exist in the database (i.e. not a Mongoose model)
 export type Query = ReturnType<(typeof CONDITION_QUERIES)[Condition]> | object;
 // here, ForcedSubject is a type used when checking auth in our routes (i.e. building a dummy subject intead of just passing in a string)
 export type Ability = MongoAbility<
