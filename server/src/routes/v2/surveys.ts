@@ -17,6 +17,7 @@ import { auth } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { AuthenticatedRequest } from '@/types/auth';
+import Seed from '@/database/seed/mongoose/seed.model';
 
 const router = express.Router();
 
@@ -229,8 +230,22 @@ router.post(
 			surveyData.childSurveyCodes =
 				await generateUniqueChildSurveyCodes();
 
-			// Resolve parent survey code
-			if (surveyData.surveyCode) {
+			if (surveyData.parentSurveyCode === SYSTEM_SURVEY_CODE) {
+				// System code indicates that survey code should map to an existing seed
+				const seed = await Seed.findOne({ surveyCode: surveyData.surveyCode });
+				if (!seed) {
+					// Seed not found
+					const err = errors.SEED_CODE_NOT_FOUND;
+					return res.status(err.status).json({
+						message: err.message
+					});
+				}
+				else {
+					// Seed found, set locationObjectId to the seed's locationObjectId
+					surveyData.locationObjectId = seed.locationObjectId as any;
+				}
+			}
+			else {
 				// If survey code is provided, try to find parent survey
 				const parentSurveyCode = await getParentSurveyCode(
 					surveyData.surveyCode
@@ -239,15 +254,22 @@ router.post(
 					// Found parent survey
 					surveyData.parentSurveyCode = parentSurveyCode;
 				} else {
-					// Parent survey not found
-					const err = errors.PARENT_SURVEY_NOT_FOUND;
-					return res.status(err.status).json({
-						message: err.message
-					});
+					// Parent survey not found, try to find a seed
+					const seed = await Seed.findOne({ surveyCode: surveyData.surveyCode });
+					if (seed) {
+						// Seed found, set locationObjectId to the seed's locationObjectId
+						surveyData.locationObjectId = seed.locationObjectId as any;
+						surveyData.parentSurveyCode = SYSTEM_SURVEY_CODE;
+					}
+
+					// No parent survey or seed found, return error
+					else {
+						const err = errors.PARENT_SURVEY_NOT_FOUND;
+						return res.status(err.status).json({
+							message: err.message
+						});
+					}
 				}
-			} else {
-				surveyData.parentSurveyCode = SYSTEM_SURVEY_CODE;
-				surveyData.surveyCode = await generateUniqueSurveyCode();
 			}
 
 			// Attempt to create the survey

@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto';
 import Survey from '@/database/survey/mongoose/survey.model';
+import Seed from '@/database/seed/mongoose/seed.model';
 import { errors } from '@/database/utils/errors';
 
 /**
@@ -66,13 +67,16 @@ export async function generateUniqueSurveyCode(): Promise<string> {
 
 /**
  * Checks if a survey code is unique within the database by verifying it doesn't exist
- * as a main survey code or as a child survey code in any existing survey
+ * as a main survey code, parent survey code, or child survey code in any existing survey
+ * or as a seed code in any existing seed
  * @param code - The survey code to check for uniqueness
  * @returns boolean - true if the code is unique, false if it already exists
  */
 async function isUniqueSurveyCode(code: string): Promise<boolean> {
 	return (
 		(await Survey.findOne({ surveyCode: code })) === null &&
-		(await Survey.findOne({ childSurveyCodes: { $in: [code] } })) === null
+		(await Survey.findOne({ childSurveyCodes: { $in: [code] } })) === null &&
+		(await Survey.findOne({ parentSurveyCode: code })) === null &&
+		(await Seed.findOne({ surveyCode: code })) === null
 	);
 }

@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose';
 
 import { SYSTEM_SURVEY_CODE } from '@/database/utils/constants';
+import Seed from '@/database/seed/mongoose/seed.model';
 import { errors } from '@/database/utils/errors';
 import {
 	locationExistsValidationHook,
@@ -39,19 +40,10 @@ export const chronologicalValidationHook = async function (
 	if (!this.isNew) next();
 
 	try {
-		// If the survey is a system / seed survey, skip the chronological ordering check
 		const currentDocumentParentCode = this.parentSurveyCode as string;
-		if (currentDocumentParentCode === SYSTEM_SURVEY_CODE) {
-			// Check if the survey code exists in any other survey's childSurveyCodes
-			const existingSurveyWithCode = await this.constructor.findOne({
-				childSurveyCodes: { $in: [this.surveyCode] }
-			});
 
-			if (existingSurveyWithCode) {
-				next(
-					errors.SYSTEM_GENERATED_SURVEY_CODE_FOUND_IN_PREVIOUS_CHILD_CODES
-				);
-			}
+		// If the survey is a system / seed survey, skip the chronological ordering check
+		if (currentDocumentParentCode === SYSTEM_SURVEY_CODE) {
 			next();
 		}
 
@@ -106,11 +98,23 @@ export const immutabilityValidationHook = async function (
 	next();
 };
 
+// Pre-save hook to enforce that a seed exists for the survey code if the parent survey code is a system code
+export const seedExistsValidationHook = async function (this: any, next: any) {
+	if (this.parentSurveyCode === SYSTEM_SURVEY_CODE) {
+		const existingSeed = await Seed.findOne({ surveyCode: this.surveyCode });
+		if (!existingSeed) {
+			next(errors.SEED_CODE_NOT_FOUND);
+		}
+	}
+	next();
+};
+
 // Function to register all hooks on a schema
 export const injectSurveyHooks = (schema: Schema) => {
 	schema.pre('save', uniquenessValidationHook);
 	schema.pre('save', chronologicalValidationHook);
 	schema.pre('save', immutabilityValidationHook);
+	schema.pre('save', seedExistsValidationHook);
 	schema.pre('save', locationExistsValidationHook('locationObjectId'));
 	schema.pre('save', userExistsValidationHook('createdByUserObjectId'));
 };

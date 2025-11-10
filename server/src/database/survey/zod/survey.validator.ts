@@ -1,9 +1,11 @@
 import Survey from '@/database/survey/mongoose/survey.model';
 import { baseSurveySchema } from '@/database/survey/zod/survey.base';
+import { SYSTEM_SURVEY_CODE } from '@/database/utils/constants';
 
 export const createSurveySchema = baseSurveySchema
 	.pick({
 		surveyCode: true,
+		parentSurveyCode: true,
 		createdByUserObjectId: true,
 		locationObjectId: true,
 		responses: true,
@@ -12,10 +14,17 @@ export const createSurveySchema = baseSurveySchema
 	})
 	.partial({
 		// Optional fields
-		surveyCode: true,
+		parentSurveyCode: true,
 		coordinates: true,
 		isCompleted: true
 	})
+	.refine(
+		data => !data.parentSurveyCode || data.parentSurveyCode === SYSTEM_SURVEY_CODE,
+		{
+			message: 'Cannot create a survey with a pre-defined parentSurveyCode unless it is a system-generated survey code seed.',
+			path: ['parentSurveyCode']
+		}
+	)
 	.strict()
 	.meta({ model: Survey });
 
