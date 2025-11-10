@@ -25,7 +25,7 @@ const verifySid = process.env.TWILIO_VERIFY_SID as string;
 const client = twilio(accountSid, authToken);
 const verifyService = client.verify.v2.services(verifySid);
 
-// TODO: Implement Zod validation schemas for request bodies
+// REVIEW: Implement Zod validation schemas for request bodies and delete stale APIs.
 
 // ─── Send OTP for SIGNUP ─────────────────────────────────────────────
 router.post(

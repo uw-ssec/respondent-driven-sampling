@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 
 const router = express.Router();
 
-// REVIEW: Old?
+// REVIEW: Old? Delete?
 
 //Sends static messages
 

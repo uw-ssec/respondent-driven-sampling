@@ -6,12 +6,14 @@ import { Survey as SurveyComponent } from 'survey-react-ui';
 
 import 'survey-core/defaultV2.min.css';
 
+import { SYSTEM_SURVEY_CODE } from '@/constants';
 import { useAuthContext } from '@/contexts';
 import { useAbility, useApi } from '@/hooks';
 // Global Zustand store managing state of survey components
 import { useSurveyStore } from '@/stores';
-import { initializeSurvey, validateReferralCode } from './utils/surveyUtils';
 import { useGeolocated } from 'react-geolocated';
+
+import { initializeSurvey, validateReferralCode } from './utils/surveyUtils';
 
 // This component is responsible for rendering the survey and handling its logic
 // It uses the SurveyJS library to create and manage the survey
@@ -21,7 +23,7 @@ import { useGeolocated } from 'react-geolocated';
 // It uses the useEffect hook to manage side effects, such as fetching data and updating state
 // It uses the useGeolocated hook to get the user's geolocation
 const Survey = () => {
-	const { surveyService, locationService } = useApi();
+	const { surveyService, locationService, seedService } = useApi();
 	const [searchParams] = useSearchParams();
 	const surveyCodeInUrl = searchParams.get('ref');
 	const { id: surveyObjectIdInUrl } = useParams();
@@ -46,9 +48,15 @@ const Survey = () => {
 			? surveyService.useSurveyBySurveyCode(surveyCodeInUrl)
 			: {};
 
+	// If surveyCodeInUrl exists, it should be conntected to EITHER a parent survey or a seed. Check for both.
 	// Conditionally fetch parent survey (only when surveyCodeInUrl exists)
 	const { data: parentSurvey, isLoading: parentLoading } = surveyCodeInUrl
 		? surveyService.useParentOfSurveyCode(surveyCodeInUrl)
+		: {};
+
+	// Conditionally fetch seed (only when surveyCodeInUrl exists)
+	const { data: seed, isLoading: seedLoading } = surveyCodeInUrl
+		? seedService.useSeedBySurveyCode(surveyCodeInUrl)
 		: {};
 
 	// Conditionally fetch survey by object id (only when surveyObjectIdInUrl exists)
@@ -59,6 +67,7 @@ const Survey = () => {
 	const {
 		getObjectId,
 		setObjectId,
+		setSurveyCode,
 		getParentSurveyCode,
 		setParentSurveyCode,
 		setSurveyData,
@@ -125,6 +134,16 @@ const Survey = () => {
 					// Add survey code to request if it exists
 					if (surveyCodeInUrl) {
 						req.surveyCode = surveyCodeInUrl;
+					} else {
+						// Generate a new fallback seed to link to the survey
+						const seed = await seedService.createSeed({
+							locationObjectId: surveyData.responses.location,
+							isFallback: true
+						});
+						// Set the survey code as the fallback seed code
+						// Set the parent survey code as the system survey code seed
+						req.surveyCode = seed.data.surveyCode;
+						req.parentSurveyCode = SYSTEM_SURVEY_CODE;
 					}
 					result = await surveyService.createSurvey(req);
 				} else {
@@ -134,8 +153,11 @@ const Survey = () => {
 				}
 				if (result) {
 					setObjectId(result.data._id);
+					setParentSurveyCode(result.data.parentSurveyCode);
+					setSurveyCode(result.data.surveyCode);
 				}
 			} catch (error) {
+				// TODO: handle error (e.g., show notification as toast messages)
 				console.error('Autosave failed:', error);
 			}
 		});
@@ -149,7 +171,7 @@ const Survey = () => {
 
 			try {
 				const result = await surveyService.updateSurvey(
-					getObjectId()!,
+					getObjectId() as string,
 					{
 						responses: surveyData.responses,
 						isCompleted: true
@@ -162,12 +184,13 @@ const Survey = () => {
 					return;
 				}
 
-				if (result && result.data.childSurveyCodes) {
+				if (result?.data?.childSurveyCodes) {
 					setChildSurveyCodes(result.data.childSurveyCodes);
 					navigate('/qrcode');
 					return;
 				}
 			} catch (error) {
+				// TODO: handle error (e.g., show notification)
 				console.error('Error saving survey:', error);
 			}
 		});
@@ -179,6 +202,7 @@ const Survey = () => {
 		locations &&
 		(!surveyCodeInUrl || !surveyByRefLoading) &&
 		!parentLoading &&
+		!seedLoading &&
 		!surveyByObjectIdLoading;
 
 	// Single, clean useEffect for survey initialization
@@ -194,6 +218,7 @@ const Survey = () => {
 			surveyCodeInUrl,
 			surveyByRefCode,
 			parentSurvey,
+			seed,
 			ability
 		);
 		if (!validation.isValid) {
@@ -262,6 +287,7 @@ const Survey = () => {
 		locationsLoading ||
 		(surveyCodeInUrl && surveyByRefLoading) ||
 		parentLoading ||
+		seedLoading ||
 		surveyByObjectIdLoading;
 
 	if (isLoading) return <p>Loading survey...</p>;
@@ -270,7 +296,9 @@ const Survey = () => {
 	return (
 		<>
 			<div style={{ padding: '20px' }}>
-				{surveyRef.current && <SurveyComponent model={surveyRef.current} />}
+				{surveyRef.current && (
+					<SurveyComponent model={surveyRef.current} />
+				)}
 				<div
 					style={{
 						display: 'flex',

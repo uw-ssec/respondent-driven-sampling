@@ -56,7 +56,7 @@ can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
 
 ### Survey Referral Chain System
 
-**Core Concept**: Each survey has `surveyCode` (its own ID) and `parentSurveyCode` (referrer). Upon creation, generates 3 unique `childSurveyCodes` for participants to refer others.
+**Core Concept**: Each survey has `surveyCode` (its own ID that got scanned) and `parentSurveyCode` (referrer). Upon creation, generates 3 unique `childSurveyCodes` for participants to refer others.
 
 **Key Controller Functions** (`server/src/database/survey/survey.controller.ts`):
 
@@ -66,7 +66,7 @@ can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
 **QR Code Workflow**:
 
 1. Survey completion → QR page (`client/src/pages/QrPage/`) displays `childSurveyCodes`
-2. Participant scans code → `ApplyReferral` page sets `parentSurveyCode` for new survey
+2. Participant scans code → `ApplyReferral` page sets `surveyCode` for new survey
 
 ## Development Workflows
 
