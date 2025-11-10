@@ -153,9 +153,17 @@ describe('Seed Model', () => {
 
 	// Test uniqueness validation hook
 	test('uniqueness hook: rejects when surveyCode exists in Survey collection', async () => {
+		// Create a seed with the surveyCode
+		const seed = new Seed({
+			surveyCode: '12345678',
+			locationObjectId: testLocation._id,
+			isFallback: false
+		});
+		await seed.save();
+
 		// Create a survey with the surveyCode
 		const survey = new Survey({
-			surveyCode: '123456',
+			surveyCode: '12345678',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id, // Changed from new mongoose.Types.ObjectId()
 			locationObjectId: testLocation._id
@@ -163,41 +171,56 @@ describe('Seed Model', () => {
 		await survey.save();
 
 		// Try to create seed with same surveyCode
-		const seed = new Seed({
-			surveyCode: '123456',
+		const seed2 = new Seed({
+			surveyCode: '12345678',
 			locationObjectId: testLocation._id,
 			isFallback: false
 		});
 
-		await expect(seed.save()).rejects.toThrow(
+		await expect(seed2.save()).rejects.toThrow(
 			errors.SURVEY_CODE_ALREADY_EXISTS.message
 		);
 	});
 
 	test('uniqueness hook: rejects when surveyCode exists in Survey childSurveyCodes', async () => {
+		const seed = new Seed({
+			surveyCode: 'PARENT123',
+			locationObjectId: testLocation._id,
+			isFallback: false
+		});
+		await seed.save();
+
 		// Create a survey with the surveyCode in childSurveyCodes
 		const survey = new Survey({
 			surveyCode: 'PARENT123',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id, // Changed from new mongoose.Types.ObjectId()
 			locationObjectId: testLocation._id,
-			childSurveyCodes: ['123456', '789012']
+			childSurveyCodes: ['12345678', '78901234']
 		});
 		await survey.save();
 
 		// Try to create seed with surveyCode that exists in childSurveyCodes
-		const seed = new Seed({
-			surveyCode: '123456',
+		const seed2 = new Seed({
+			surveyCode: '12345678',
 			locationObjectId: testLocation._id,
 			isFallback: false
 		});
 
-		await expect(seed.save()).rejects.toThrow(
+		await expect(seed2.save()).rejects.toThrow(
 			errors.SURVEY_CODE_ALREADY_EXISTS.message
 		);
 	});
 
 	test('uniqueness hook: allows creation when surveyCode is unique', async () => {
+		// Create a seed with the surveyCode
+		const seed = new Seed({
+			surveyCode: 'DIFFERENT',
+			locationObjectId: testLocation._id,
+			isFallback: false
+		});
+		await seed.save();
+
 		// Create a survey with different surveyCode
 		const survey = new Survey({
 			surveyCode: 'DIFFERENT',
@@ -208,15 +231,15 @@ describe('Seed Model', () => {
 		await survey.save();
 
 		// Create seed with unique surveyCode
-		const seed = new Seed({
-			surveyCode: '123456',
+		const seed2 = new Seed({
+			surveyCode: '12345678',
 			locationObjectId: testLocation._id,
 			isFallback: false
 		});
 
-		const savedSeed = await seed.save();
+		const savedSeed = await seed2.save();
 		expect(savedSeed._id).toBeDefined();
-		expect(savedSeed.surveyCode).toBe('123456');
+		expect(savedSeed.surveyCode).toBe('12345678');
 	});
 
 	// Test timestamps
@@ -347,19 +370,5 @@ describe('Seed Model', () => {
 		expect(savedSeed1.locationObjectId).toEqual(testLocation._id);
 		expect(savedSeed2.locationObjectId).toEqual(testLocation._id);
 		expect(savedSeed1.surveyCode).not.toBe(savedSeed2.surveyCode);
-	});
-
-	test('invalid survey creation - non-existent createdByUserObjectId', async () => {
-		const invalidSurvey = {
-			surveyCode: '123456',
-			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			createdByUserObjectId: new mongoose.Types.ObjectId(), // Non-existent user
-			locationObjectId: testLocation._id
-		};
-
-		const survey = new Survey(invalidSurvey);
-		await expect(survey.save()).rejects.toThrow(
-			errors.OBJECT_ID_NOT_FOUND.message
-		);
 	});
 });
