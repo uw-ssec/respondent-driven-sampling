@@ -12,7 +12,9 @@
 		"test:coverage": "jest --coverage",
 		"clean": "rimraf build",
 		"lint": "eslint . --ext js,ts",
-		"lint:fix": "eslint . --ext js,ts --fix"
+		"lint:fix": "eslint . --ext js,ts --fix",
+		"generate-seeds": "tsx --env-file=.env ../scripts/generateSeeds.ts",
+		"list-locations": "tsx --env-file=.env ../scripts/listLocations.ts"
 	},
 	"keywords": [],
 	"author": "",
@@ -21,6 +23,8 @@
 	"dependencies": {
 		"@casl/ability": "^6.7.3",
 		"@casl/mongoose": "^8.0.3",
+		"@types/pdfkit": "^0.17.3",
+		"@types/qrcode": "^1.5.6",
 		"bcryptjs": "^3.0.1",
 		"compression": "^1.8.0",
 		"cors": "^2.8.5",
@@ -32,6 +36,8 @@
 		"mongoose": "^8.10.1",
 		"nocache": "^4.0.0",
 		"nodemon": "^3.1.9",
+		"pdfkit": "^0.17.2",
+		"qrcode": "^1.5.4",
 		"swagger-jsdoc": "^6.2.8",
 		"swagger-ui-express": "^5.0.1",
 		"twilio": "^5.6.1",
