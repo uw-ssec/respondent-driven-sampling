@@ -159,7 +159,7 @@ export default function ApplyReferral() {
 						}}
 						className="new-seed-btn"
 					>
-						No referral code? Start new seed
+						No referral code? Start new survey
 					</div>
 				)}
 
