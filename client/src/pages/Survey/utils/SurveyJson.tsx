@@ -1332,7 +1332,7 @@ const specialQuestionsPage = {
 			visibleIf: "{eviction_type} = 'Soft'"
 		},
 		{
-			type: 'dropdown',
+			type: 'tagbox',
 			name: 'shelter_priorities',
 			title: 'If you were to seek out a shelter program, what top shelter features would be most important to you? (Please select up to 5)',
 			choices: [
