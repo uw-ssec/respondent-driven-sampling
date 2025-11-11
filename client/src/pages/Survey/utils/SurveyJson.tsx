@@ -540,7 +540,7 @@ const demographicsPage = {
 			isRequired: false,
 			visible: false
 		},
-				{
+		{
 			type: 'checkbox',
 			name: 'race_ethnicity',
 			title: 'Which of the following best describes your race and/or ethnicity? (Note, you may report more than one group.)',
@@ -577,7 +577,7 @@ const demographicsPage = {
 		{
 			type: 'radiogroup',
 			name: 'va_health_eligible',
-			title: 'Have you ever recieved health care of other benefits from a Veterans Administration (VA) center?',
+			title: 'Have you ever received health care of other benefits from a Veterans Administration (VA) center?',
 			choices: ['Yes', 'No', 'Do not know'],
 			isRequired: false
 		}
@@ -698,10 +698,6 @@ const householdPage = {
 					type: 'text',
 					name: 'hh_member_tribal_id',
 					title: 'Does {panel.hh_member_initials} have a Tribal Affiliation? If so, what is their Tribal Affiliation?',
-					choices: [], // TODO
-					hasOther: true,
-					otherText: 'Other (please specify)',
-					searchEnabled: true,
 					isRequired: false
 				},
 				{

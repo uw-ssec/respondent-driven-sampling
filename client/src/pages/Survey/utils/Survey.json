@@ -555,7 +555,6 @@
             "Middle Eastern or North African",
             "Native Hawaiian or Pacific Islander",
             "White",
-            "Other (please specify)",
             "Choose not to answer",
             "Do not know"
           ],
@@ -589,7 +588,7 @@
         {
           "type": "radiogroup",
           "name": "va_health_eligible",
-          "title": "Have you ever recieved health care of other benefits from a Veterans Administration (VA) center?",
+          "title": "Have you ever received health care of other benefits from a Veterans Administration (VA) center?",
           "choices": [
             "Yes",
             "No",
@@ -729,7 +728,6 @@
                 "Middle Eastern or North African",
                 "Native Hawaiian or Pacific Islander",
                 "White",
-                "Other (please specify)",
                 "Choose not to answer",
                 "Do not know"
               ]
