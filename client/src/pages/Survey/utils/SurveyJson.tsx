@@ -1,5 +1,3 @@
-
-
 type Choice =
 	| string
 	| {
@@ -237,7 +235,8 @@ const personalLivingSituationPage = {
 			],
 			showNoneItem: true,
 			isRequired: true,
-			visibleIf: "{sleeping_situation} notempty and !{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
+			visibleIf:
+				"{sleeping_situation} notempty and !{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
 		}
 	],
 	visibleIf: "{consent_given} = 'Yes'"
