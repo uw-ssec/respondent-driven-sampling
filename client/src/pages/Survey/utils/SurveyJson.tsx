@@ -1,16 +1,25 @@
-export const generateSurveyJson = (locations: any[]) => {
+type Choice =
+	| string
+	| {
+			value: string;
+			text: string;
+	  };
+
+export const generateSurveyJson = (locations: Choice[]) => {
 	const preScreenPage = generateVolunteerPreScreenPage(locations);
 
 	return {
 		title: 'Homelessness Experience Survey',
-		showProgressBar: 'top',
-		progressBarType: 'buttons',
+		showProgressBar: true,
+		progressBarLocation: 'top',
+		progressBarShowPageTitles: true,
 		pages: [
 			preScreenPage,
 			consentPage,
 			surveyValidationPage,
 			personalLivingSituationPage,
-			networkPage,
+			networkPage1,
+			networkPage2,
 			livingSituationPage,
 			demographicsPage,
 			healthPage,
@@ -19,11 +28,12 @@ export const generateSurveyJson = (locations: any[]) => {
 			youthSpecialQuestionsPage,
 			surveyDeduplicationPage,
 			outroPage
-		]
+		],
+		partialSendEnabled: true
 	};
 };
 
-export const generateEditSurveyJson = (locationChoices: any[]) => {
+export const generateEditSurveyJson = (locationChoices: Choice[]) => {
 	const preScreenPage = generateVolunteerPreScreenPage(locationChoices);
 
 	return {
@@ -35,7 +45,7 @@ export const generateEditSurveyJson = (locationChoices: any[]) => {
 };
 
 // PRE-SCREENING
-const generateVolunteerPreScreenPage = (locationChoices: any[]) => {
+const generateVolunteerPreScreenPage = (locationChoices: Choice[]) => {
 	return {
 		name: 'volunteer-pre-screen',
 		title: 'Pre-Screening Questions - Volunteer Only',
@@ -191,14 +201,12 @@ const personalLivingSituationPage = {
 			name: 'sleeping_situation',
 			title: 'Where did you stay last night?',
 			choices: sleepingSituationChoices,
-			hasOther: true,
+			showOtherItem: true,
 			otherText: 'Other (please specify)',
-			colCount: 2,
-			maxSelectedChoices: 1,
 			isRequired: true
 		},
 		{
-			type: 'dropdown',
+			type: 'checkbox',
 			name: 'vehicle_amenities',
 			title: 'Does your vehicle have access to any of the following needs?',
 			choices: [
@@ -208,14 +216,14 @@ const personalLivingSituationPage = {
 				'Ability to bathe',
 				'Ability to cook hot food'
 			],
-			hasSelectAll: true,
+			showNoneItem: true,
 			separateSpecialChoices: true,
 			isRequired: true,
 			visibleIf:
-				"{sleeping_situation} = 'small_vehicle' or {sleeping_situation} = 'large_vehicle'"
+				"{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
 		},
 		{
-			type: 'dropdown',
+			type: 'checkbox',
 			name: 'personal_amenities',
 			title: 'Do you generally have access to any of the following needs?',
 			choices: [
@@ -225,17 +233,18 @@ const personalLivingSituationPage = {
 				'Ability to bathe',
 				'Ability to cook hot food'
 			],
-			hasSelectAll: true,
+			showNoneItem: true,
 			isRequired: true,
-			visibleIf: '{sleeping_situation} notempty'
+			visibleIf:
+				"{sleeping_situation} notempty and !{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
 		}
 	],
 	visibleIf: "{consent_given} = 'Yes'"
 };
 
 // SECTION 3.0
-const networkPage = {
-	name: 'network_questions',
+const networkPage1 = {
+	name: 'network_questions_p1',
 	title: 'Network Module',
 	elements: [
 		{
@@ -244,7 +253,15 @@ const networkPage = {
 			title: 'Other than any family living with you, how many people do you closely know who are also unhoused or experiencing homelessness today?',
 			inputType: 'number',
 			validators: [{ type: 'numeric', minValue: 0 }]
-		},
+		}
+	],
+	visibleIf: "{consent_given} = 'Yes'"
+};
+
+const networkPage2 = {
+	name: 'network_questions_p2',
+	title: 'Network Module',
+	elements: [
 		{
 			type: 'html',
 			name: 'network_instruction',
@@ -269,37 +286,28 @@ const networkPage = {
 						'Friend',
 						'Acquaintance',
 						'Partner (husband/wife, fiancé/fiancée, boyfriend/girlfriend, etc.)',
-						'Immediate family (parent/father/mother, sibling/brother/sister, child/song/daughter',
+						'Immediate family (parent/father/mother, sibling/brother/sister, child/son/daughter)',
 						'Extended family (cousin, nephew/niece, uncle/aunt, grandparent/grandfather/grandmother)',
-						'Neighbor (people you live near'
+						'Neighbor (people you live near)'
 					],
-					hasOther: true,
+					showOtherItem: true,
 					otherText: 'Other (please specify)',
-					searchEnabled: true,
 					placeholder: 'Select relationship...'
 				},
 				{
 					type: 'dropdown',
 					name: 'sleeping_situation',
 					title: 'Where do they currently sleep?',
-					choices: [
-						...sleepingSituationChoices,
-						{ value: 'deceased', text: 'Deceased' }
-					],
-					colCount: 2,
-					hasOther: true,
+					choices: sleepingSituationChoices,
+					showOtherItem: true,
 					otherText: 'Other (please specify)'
 				}
 			],
-			panelCount: 0,
-			minPanelCount: 0,
+			displayMode: 'tab',
 			maxPanelCount: 50,
-			panelAddText: '+ Add another person',
-			panelRemoveText: 'Remove',
-			renderMode: 'list',
-			templateTitle: 'Person #{panelIndex}',
-			allowAddPanel: true,
-			allowRemovePanel: true
+			addPanelText: '+ Add another person',
+			removePanelText: 'Remove',
+			templateTitle: 'Person #{panelIndex}'
 		}
 	],
 	visibleIf: "{consent_given} = 'Yes'"
@@ -323,12 +331,12 @@ const livingSituationPage = {
 				'Choose not to answer',
 				'Do not know'
 			],
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'radiogroup',
 			name: 'num_episodes',
-			title: 'Including this time, how many different times have you been homelss in the past 3 years, that is since January 2026?',
+			title: 'Including this time, how many different times have you been homeless in the past 3 years, that is since January 2026?',
 			choices: [
 				'1 time',
 				'2 times',
@@ -337,43 +345,36 @@ const livingSituationPage = {
 				'Choose not to answer',
 				'Do not know'
 			],
-			isRequired: true
+			isRequired: false
 		},
 		{
-			type: 'panel',
+			type: 'multipletext',
 			name: 'overall_lot_homeless',
 			title: 'If you added up all the time you have spent experiencing homelessness in the past 3 years, about how long would that be?',
-			elements: [
+			items: [
 				{
-					type: 'text',
-					name: 'overall_lot_homeless_number',
-					title: 'Number of days/months/years',
+					name: 'overall_lot_homeless_days',
 					inputType: 'number',
-					validators: [{ type: 'integer', minValue: 1 }],
-					startWithNewLine: false,
-					width: '100px'
+					title: 'Days'
 				},
 				{
-					type: 'dropdown',
-					name: 'overall_lot_homeless_unit',
-					title: 'Unit (days/months/years)',
-					choices: [
-						{ value: 'days', text: 'Days' },
-						{ value: 'months', text: 'Months' },
-						{ value: 'years', text: 'Years' }
-					],
-					startWithNewLine: false,
-					width: '150px'
+					name: 'overall_lot_homeless_months',
+					inputType: 'number',
+					title: 'Months'
+				},
+				{
+					name: 'overall_lot_homeless_years',
+					inputType: 'number',
+					title: 'Years'
 				}
-			],
-			isRequired: true
+			]
 		},
 		{
 			type: 'radiogroup',
 			name: 'shelter_svcs',
 			title: 'In the past 3 years, have you enrolled in an Emergency Shelter or received any other form of housing assistance from an organization that serves people experiencing homelessness? (Includes referrals, vouchers, hygiene support, etc.)',
 			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'html',
@@ -424,7 +425,7 @@ const livingSituationPage = {
 			maxPanelCount: 50,
 			panelAddText: '+ Add another service',
 			panelRemoveText: 'Remove',
-			renderMode: 'list',
+			displayMode: 'list',
 			templateTitle: 'Service #{panelIndex}',
 			allowAddPanel: true,
 			allowRemovePanel: true,
@@ -454,16 +455,31 @@ const genderChoices = [
 	'Do not know'
 ];
 
+// const raceChoices = [
+// 	'American Indian',
+// 	'Alaskan Native or Indigenous',
+// 	'Asian or Asian American',
+// 	'Black, African American, or African',
+// 	'Hispanic/Latina/e/o',
+// 	'Middle Eastern or North African',
+// 	'Native Hawaiian or Pacific Islander',
+// 	'White',
+// 	'Other (please specify)',
+// 	'Choose not to answer',
+// 	'Do not know'
+// ];
+
+// Updated US census standards
+// https://www.census.gov/about/our-research/race-ethnicity/standards-updates.html
+// https://www.federalregister.gov/documents/2024/03/29/2024-06469/revisions-to-ombs-statistical-policy-directive-no-15-standards-for-maintaining-collecting-and
 const raceChoices = [
-	'American Indian',
-	'Alaskan Native or Indigenous',
-	'Asian or Asian American',
-	'Black, African American, or African',
-	'Hispanic/Latina/e/o',
+	'American Indian or Alaska Native',
+	'Asian',
+	'Black or African American',
+	'Hispanic or Latino',
 	'Middle Eastern or North African',
 	'Native Hawaiian or Pacific Islander',
 	'White',
-	'Other (please specify)',
 	'Choose not to answer',
 	'Do not know'
 ];
@@ -480,7 +496,7 @@ const demographicsPage = {
 			visibleIf: "{is_adult} = 'No'"
 		},
 		{
-			type: 'dropdown',
+			type: 'radiogroup',
 			name: 'age_group',
 			title: 'How old are you?',
 			choices: [
@@ -494,43 +510,48 @@ const demographicsPage = {
 				'Choose not to answer',
 				'Do not know'
 			],
-			isRequired: true
+			isRequired: false
 		},
 		{
-			type: 'tagbox',
+			type: 'checkbox',
 			name: 'gender_id',
 			title: 'Which of the following best describes your gender? (Select all that apply)',
 			choices: genderChoices,
-			isRequired: true,
-			hasOther: true,
-			otherText: 'Other (please specify)',
-			searchEnabled: true
+			isRequired: false,
+			showOtherItem: true,
+			otherText: 'Other (please specify)'
 		},
 		{
 			type: 'radiogroup',
 			name: 'ethnicity',
 			title: 'Are you Hispanic/ Latina/e/o?',
 			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: true
+			isRequired: false,
+			visible: false
 		},
 		{
-			type: 'tagbox',
+			type: 'checkbox',
 			name: 'racial_id',
 			title: 'Which of the following best describes your racial identity? (Select all that apply)',
 			choices: raceChoices,
-			hasOther: true,
+			showOtherItem: true,
 			otherText: 'Other (please specify)',
-			isRequired: true,
-			searchEnabled: true
+			isRequired: false,
+			visible: false
 		},
 		{
-			type: 'tagbox',
-			name: 'tribal_affil',
-			title: 'Do you have a Tribal Affiliation? If so, what is it?',
-			choices: [], // TODO
-			hasOther: true,
+			type: 'checkbox',
+			name: 'race_ethnicity',
+			title: 'Which of the following best describes your race and/or ethnicity? (Note, you may report more than one group.)',
+			choices: raceChoices,
+			showOtherItem: true,
 			otherText: 'Other (please specify)',
-			searchEnabled: true
+			isRequired: false
+		},
+		{
+			type: 'text',
+			name: 'tribal_affil',
+			title: 'Do you have a Tribal Affiliation? If so, what is it?'
 		},
 		{
 			type: 'html',
@@ -539,7 +560,7 @@ const demographicsPage = {
 			visibleIf: "{is_adult} = 'No'"
 		},
 		{
-			type: 'dropdown',
+			type: 'radiogroup',
 			name: 'veteran_status',
 			title: 'Are you or a member of your immediate family a veteran?',
 			choices: [
@@ -550,14 +571,14 @@ const demographicsPage = {
 				'Choose not to answer',
 				'Do not know'
 			],
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'radiogroup',
 			name: 'va_health_eligible',
-			title: 'Have you ever recieved health care of other benefits from a Veterans Administration (VA) center?',
+			title: 'Have you ever received health care of other benefits from a Veterans Administration (VA) center?',
 			choices: ['Yes', 'No', 'Do not know'],
-			isRequired: true
+			isRequired: false
 		}
 	],
 	visibleIf: "{consent_given} = 'Yes'"
@@ -573,28 +594,28 @@ const healthPage = {
 			name: 'fleeing_dv',
 			title: 'Are you currently experiencing homelessness because you are/were fleeing domestic violence, dating violence, sexual assault, or stalking?',
 			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: true
+			isRequired: false
 		},
 		{
-			type: 'dropdown',
+			type: 'radiogroup',
 			name: 'disabled',
 			title: 'Do you identify as having a disability?',
 			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: true
+			isRequired: false
 		},
 		{
-			type: 'dropdown',
+			type: 'radiogroup',
 			name: 'mental_health',
 			title: 'Do you identify as having a severe mental illness?',
 			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: true
+			isRequired: false
 		},
 		{
-			type: 'dropdown',
+			type: 'radiogroup',
 			name: 'substance_use',
 			title: 'Do you identify as having a substance use disorder?',
 			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: true
+			isRequired: false
 		}
 	],
 	visibleIf: "{consent_given} = 'Yes'"
@@ -627,7 +648,7 @@ const householdPage = {
 							regex: '^[A-Za-z]{1,4}$'
 						}
 					],
-					isRequired: true
+					isRequired: false
 				},
 				{
 					type: 'dropdown',
@@ -642,7 +663,7 @@ const householdPage = {
 						'Non-married partner',
 						'Other non-family member'
 					],
-					isRequired: true
+					isRequired: false
 				},
 				{
 					type: 'dropdown',
@@ -653,93 +674,78 @@ const householdPage = {
 						'18 - 24 years old',
 						'25 years or older'
 					],
-					isRequired: true
+					isRequired: false
 				},
 				{
 					type: 'tagbox',
 					name: 'hh_member_gender_id',
-					title: 'Which of the following best describes the gender of {panel.initials}?',
+					title: 'Which of the following best describes the gender of {panel.hh_member_initials}?',
 					choices: genderChoices,
 					searchEnabled: true,
-					isRequired: true
+					isRequired: false
 				},
 				{
-					type: 'dropdown',
-					name: 'hh_member_ethnicity',
-					title: 'Is {panel.initials} Hispanic/Latina/e/o?',
-					choices: [
-						'Yes',
-						'No',
-						'Choose not to answer',
-						'Do not know'
-					],
-					isRequired: true
-				},
-				{
-					type: 'tagbox',
-					name: 'hh_member_racial_id',
-					title: 'Which of the following best describes the racial identity of {panel.initials}?',
+					type: 'checkbox',
+					name: 'hh_member_race_ethnicity',
+					title: 'Which of the following best describes the race and/or ethnicity of {panel.hh_member_initials}? (Note, you may report more than one group.)',
 					choices: raceChoices,
 					searchEnabled: true,
-					isRequired: true
+					isRequired: false,
+					visible: true
 				},
 				{
-					type: 'tagbox',
+					type: 'text',
 					name: 'hh_member_tribal_id',
-					title: 'Does {panel.initials} have a Tribal Affiliation? If so, what is their Tribal Affiliation?',
-					choices: [], // TODO
-					hasOther: true,
-					otherText: 'Other (please specify)',
-					searchEnabled: true,
-					isRequired: true
+					title: 'Does {panel.hh_member_initials} have a Tribal Affiliation? If so, what is their Tribal Affiliation?',
+					isRequired: false
 				},
 				{
-					type: 'dropdown',
+					type: 'radiogroup',
 					name: 'hh_member_vet_status',
-					title: 'Is {panel.initials} a veteran?',
+					title: 'Is {panel.hh_member_initials} a veteran?',
 					choices: [
 						'Yes',
 						'No',
 						'Choose not to answer',
 						'Do not know'
 					],
-					isRequired: true
+					isRequired: false
 				},
 				{
-					type: 'dropdown',
+					type: 'radiogroup',
 					name: 'hh_member_disability',
-					title: 'Does {panel.initials} identify as having a disability?',
+					title: 'Does {panel.hh_member_initials} identify as having a disability?',
 					choices: [
 						'Yes',
 						'No',
 						'Choose not to answer',
 						'Do not know'
 					],
-					isRequired: true
+					isRequired: false
 				},
 				{
-					type: 'dropdown',
+					type: 'radiogroup',
 					name: 'hh_member_smi',
-					title: 'Does {panel.initials} identify as having a severe mental illness?',
+					title: 'Does {panel.hh_member_initials} identify as having a severe mental illness?',
 					choices: [
 						'Yes',
 						'No',
 						'Choose not to answer',
 						'Do not know'
 					],
-					isRequired: true
+					isRequired: false
 				},
 				{
-					type: 'dropdown',
+					type: 'radiogroup',
 					name: 'hh_member_sud',
-					title: 'Does {panel.initials} identify as having a substance use disorder?',
+					title: 'Does {panel.hh_member_initials} identify as having a substance use disorder?',
 					choices: [
 						'Yes',
 						'No',
 						'Choose not to answer',
 						'Do not know'
 					],
-					isRequired: true
+					isRequired: false
 				}
 			],
 			panelCount: 0,
@@ -747,8 +753,8 @@ const householdPage = {
 			maxPanelCount: 10,
 			panelAddText: '+ Add household member',
 			panelRemoveText: 'Remove',
-			renderMode: 'list',
-			templateTitle: 'Household Member: {panel.initials}',
+			displayMode: 'tab',
+			templateTitle: 'Household Member: {panel.hh_member_initials}',
 			allowAddPanel: true,
 			allowRemovePanel: true
 		}
@@ -838,13 +844,12 @@ const specialQuestionsPage = {
 				'Choose not to answer',
 				'Do not know'
 			],
-			hasOther: true,
+			showOtherItem: true,
 			otherText: 'Other (please specify)',
-			searchEnabled: true,
-			isRequired: true
+			isRequired: false
 		},
 		{
-			type: 'dropdown',
+			type: 'checkbox',
 			name: 'mode_of_transpo',
 			title: 'What transportation did you use to come to {location}?',
 			choices: [
@@ -855,10 +860,9 @@ const specialQuestionsPage = {
 				'Bicycle / Bike',
 				'Walking'
 			],
-			hasOther: true,
+			showOtherItem: true,
 			otherText: 'Other (please specify)',
-			searchEnabled: true,
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'panel',
@@ -905,7 +909,7 @@ const specialQuestionsPage = {
 				text: 'Please enter an integer value in miles'
 			},
 			searchEnabled: true,
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'html',
@@ -1248,7 +1252,7 @@ const specialQuestionsPage = {
 			]
 		},
 		{
-			type: 'checklist',
+			type: 'dropdown',
 			name: 'precipitating_events',
 			title: 'What events or conditions contributed to you becoming homeless at this time?',
 			choices: [
@@ -1273,11 +1277,11 @@ const specialQuestionsPage = {
 				'Choose not to answer',
 				'Do not know'
 			],
-			choicesOrder: 'random',
+			choicesOrder: 'none',
 			hasOther: true,
 			otherText: 'Other (please specify)',
 			searchEnabled: true,
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'dropdown',
@@ -1323,7 +1327,7 @@ const specialQuestionsPage = {
 			visibleIf: "{eviction_type} = 'Soft'"
 		},
 		{
-			type: 'checklist',
+			type: 'tagbox',
 			name: 'shelter_priorities',
 			title: 'If you were to seek out a shelter program, what top shelter features would be most important to you? (Please select up to 5)',
 			choices: [
@@ -1345,11 +1349,11 @@ const specialQuestionsPage = {
 				'Support for mental health conditions',
 				'On-site health services such as a nurse'
 			],
-			choicesOrder: 'random',
+			choicesOrder: 'none',
 			hasOther: true,
 			otherText: 'Other (please specify)',
 			searchEnabled: true,
-			isRequired: true,
+			isRequired: false,
 			maxSelectedChoices: 5
 		},
 		{
@@ -1357,7 +1361,7 @@ const specialQuestionsPage = {
 			name: 'pet_animal',
 			title: 'Do you have a pet or animal companion?',
 			choices: ['Yes', 'No', 'Choose not to answer'],
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'paneldynamic',
@@ -1371,21 +1375,21 @@ const specialQuestionsPage = {
 					choices: ['Cat', 'Dog', 'Pocket pet / rodent', 'Other'],
 					hasOther: true,
 					otherText: 'Specify other animal type',
-					isRequired: true
+					isRequired: false
 				},
 				{
 					type: 'radiogroup',
 					name: 'pet_animal_weight',
 					title: 'Approximate Weight',
 					choices: ['40 lbs or less', 'More than 40 lbs'],
-					isRequired: true
+					isRequired: false
 				},
 				{
 					type: 'radiogroup',
 					name: 'pet_animal_vet_care',
 					title: 'Seen vet care in last 3 years (such as for wellness visits, vaccines, or an illness)?',
 					choices: ['Yes', 'No'],
-					isRequired: true
+					isRequired: false
 				},
 				{
 					type: 'radiogroup',
@@ -1396,7 +1400,7 @@ const specialQuestionsPage = {
 						'1-3 years',
 						'More than 3 years'
 					],
-					isRequired: true
+					isRequired: false
 				}
 			],
 			panelCount: 0,
@@ -1431,21 +1435,21 @@ const youthSpecialQuestionsPage = {
 				'Choose not to answer',
 				'Do not know'
 			],
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'dropdown',
 			name: 'youth_q2',
 			title: 'Place holder for Youth specific question 2',
 			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'dropdown',
 			name: 'youth_q3',
 			title: 'Place holder for Youth specific question 3',
 			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: true
+			isRequired: false
 		}
 	],
 	visibleIf: "{is_adult} = 'No' AND {consent_given} = 'Yes'"
