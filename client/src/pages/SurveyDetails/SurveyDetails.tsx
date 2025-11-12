@@ -1,6 +1,8 @@
+import { QRCodeCanvas } from 'qrcode.react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import '@/styles/SurveyDetailsCss.css';
+import '@/styles/complete.css';
 
 import { useApi } from '@/hooks/useApi';
 
@@ -8,7 +10,7 @@ export default function SurveyDetails() {
 	const { id } = useParams();
 	const { surveyService } = useApi();
 	const { data: survey, isLoading: loading } =
-		surveyService.useSurveyWithUser(id || '') || {};
+		surveyService.useSurveyWithUser(id ?? '') || {};
 	const navigate = useNavigate();
 
 	// Renaming the json names
@@ -52,7 +54,10 @@ export default function SurveyDetails() {
 	if (loading) return <p>Loading...</p>;
 	if (!survey) return <p>Survey not found.</p>;
 
-	console.log('survey from details', survey);
+	// Trigger browser printing
+	const handlePrint = () => {
+		window.print();
+	};
 
 	// Function to handle logout
 	return (
@@ -81,9 +86,7 @@ export default function SurveyDetails() {
 					<h3>Referral Information</h3>
 					<p>
 						<strong>Referred By Code:</strong>{' '}
-						{survey.parentSurveyCode
-							? survey.parentSurveyCode
-							: 'N/A'}
+						{survey.parentSurveyCode ?? 'N/A'}
 					</p>
 
 					<p>
@@ -106,6 +109,39 @@ export default function SurveyDetails() {
 					) : (
 						<p>N/A</p>
 					)}
+					{/* Display QR Codes */}
+					<div className="print-area">
+						<div className="qr-code-container">
+							{survey.childSurveyCodes &&
+							survey.childSurveyCodes.length > 0 ? (
+								survey.childSurveyCodes.map(
+									(code: string, index: number) => {
+										const qrUrl = `${window.location.origin}/survey?ref=${code}`;
+										return (
+											<div key={index} className="qr-box">
+												<QRCodeCanvas
+													value={qrUrl}
+													size={120}
+													level="M"
+												/>
+												<p className="qr-code-text">
+													{index + 1}. Referral Code:{' '}
+													{code}
+												</p>
+											</div>
+										);
+									}
+								)
+							) : (
+								<p>No referral codes available.</p>
+							)}
+						</div>
+					</div>
+					<div className="qr-buttons">
+						<button className="generate-btn" onClick={handlePrint}>
+							Print QR Codes
+						</button>
+					</div>
 				</div>
 
 				{/* Survey Responses */}
