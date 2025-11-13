@@ -14,15 +14,9 @@ function getTokenSecret(): string {
 // Generates the JSON Web Token to be used by the client, a client having a valid JWT
 // means that they should be atleast a volunteer in role and must have been approved
 // by an admin.
-export function generateAuthToken(
-	firstName: string,
-	role: string,
-	userObjectId: string
-): string {
+export function generateAuthToken(userObjectId: string): string {
 	return jwt.sign(
 		{
-			firstName: firstName,
-			role: role,
 			userObjectId: userObjectId
 		},
 		getTokenSecret(),

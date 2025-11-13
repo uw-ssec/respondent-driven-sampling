@@ -3,8 +3,6 @@ import { useAuthStore } from '@/stores';
 import { jwtDecode } from 'jwt-decode';
 
 interface JwtPayload {
-	firstName: string;
-	role: string;
 	userObjectId: string;
 }
 

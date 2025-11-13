@@ -122,11 +122,7 @@ router.post(
 				locationObjectId
 			});
 			await newUser.save();
-			const token = generateAuthToken(
-				newUser.firstName,
-				newUser.role,
-				newUser.id
-			);
+			const token = generateAuthToken(newUser.id);
 
 			res.json({
 				message: 'Signup successful!',
@@ -170,7 +166,7 @@ router.post(
 				});
 				return;
 			}
-			const token = generateAuthToken(user.firstName, user.role, user.id);
+			const token = generateAuthToken(user.id);
 
 			res.json({
 				message: 'Login successful!',

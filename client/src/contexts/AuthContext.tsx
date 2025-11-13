@@ -82,11 +82,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 		return {
 			token,
-			firstName: decoded.firstName,
+			firstName: '',
 			lastName: '',
 			email: '',
 			phone: '',
-			userRole: decoded.role,
+			userRole: '',
 			userObjectId: decoded.userObjectId,
 			permissions: [],
 			locationObjectId: '',
