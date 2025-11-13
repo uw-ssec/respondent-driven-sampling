@@ -5,6 +5,7 @@ import compression from 'compression';
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
+import morgan from 'morgan';
 import nocache from 'nocache';
 
 import { setupSwagger } from '@/config/swagger';
@@ -25,6 +26,8 @@ const __dirname = path.dirname(__filename);
 await connectDB();
 
 const app = express();
+
+app.use(morgan('combined'));
 
 // SECURITY FIRST - Apply security middleware before any other middleware
 // This ensures all requests are protected from the start
