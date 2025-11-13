@@ -1,165 +1,185 @@
 /* CSS for Completed Survey Page */
 body {
-    font-family: 'Montserrat', sans-serif;
-    height: 100%;
-    margin: 0;
-    padding: 0;
+	font-family: 'Montserrat', sans-serif;
+	height: 100%;
+	margin: 0;
+	padding: 0;
 }
 
 /* Ensure the body takes full height */
 .completed-survey-page {
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    min-height: 100vh;
-    overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	min-height: 100vh;
+	overflow-y: auto;
 }
 
 /* Center the completed survey container */
 .completed-survey-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 2rem;
-    box-sizing: border-box;
-    background-color: #f7f7f7;
-    flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 2rem;
+	box-sizing: border-box;
+	background-color: #f7f7f7;
+	flex: 1;
 }
 
 /* Style the title */
 .completed-survey-container h2 {
-    font-size: 1.5rem;
-    color: #3E236E;
-    margin-bottom: 0.75rem;
+	font-size: 1.5rem;
+	color: #3e236e;
+	margin-bottom: 0.75rem;
 }
 
 /* Style the description */
 .generate-btn {
-    background-color: #3E236E;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    padding: 1rem 2rem;
-    font-size: 18px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    font-family: 'Montserrat', sans-serif;
+	background-color: #3e236e;
+	color: #ffffff;
+	border: none;
+	border-radius: 8px;
+	padding: 1rem 2rem;
+	font-size: 18px;
+	font-weight: 800;
+	cursor: pointer;
+	transition:
+		background-color 0.3s,
+		transform 0.2s;
+	font-family: 'Montserrat', sans-serif;
 }
 
 .qr-code-container {
-  display: flex;
-  flex-direction: row; /* ✅ horizontal layout */
-  justify-content: center;
-  align-items: flex-start;
-  gap: 40px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  background-color: #f0f0f0;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  width: fit-content;
-  margin-top: 20px;
+	display: flex;
+	flex-direction: row; /* ✅ horizontal layout */
+	justify-content: center;
+	align-items: flex-start;
+	gap: 40px;
+	flex-wrap: wrap;
+	margin-bottom: 20px;
+	background-color: #f0f0f0;
+	padding: 40px;
+	border-radius: 10px;
+	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+	width: fit-content;
+	margin-top: 20px;
 }
-
 
 /* Style the QR code placeholders */
 .qr-placeholder {
-    width: 300px; /* Increased width of each QR placeholder */
-    height: 300px; /* Increased height of each QR placeholder */
-    background-color: #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: #555;
-    border: 2px dashed #999;
-    border-radius: 8px; /* Rounded corners for placeholders */
+	width: 300px; /* Increased width of each QR placeholder */
+	height: 300px; /* Increased height of each QR placeholder */
+	background-color: #ddd;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: bold;
+	color: #555;
+	border: 2px dashed #999;
+	border-radius: 8px; /* Rounded corners for placeholders */
 }
 
 /* Add hover effect */
 .qr-placeholder::after {
-    content: "QR Code";
+	content: 'QR Code';
 }
 
 /* Responsive Adjustments */
 @media (max-width: 1024px) {
-    .completed-survey-container h2 {
-        font-size: 1.4rem;
-    }
-    .generate-btn {
-        padding: 0.75rem 1.5rem;
-        font-size: 17px;
-    }
+	.completed-survey-container h2 {
+		font-size: 1.4rem;
+	}
+	.generate-btn {
+		padding: 0.75rem 1.5rem;
+		font-size: 17px;
+	}
 }
 
 /* Mobile Adjustments */
 @media (max-width: 600px) {
-    .completed-survey-container h2 {
-        font-size: 1.3rem;
-    }
-    .generate-btn {
-        padding: 0.75rem 1.5rem;
-        font-size: 16px;
-    }
+	.completed-survey-container h2 {
+		font-size: 1.3rem;
+	}
+	.generate-btn {
+		padding: 0.75rem 1.5rem;
+		font-size: 16px;
+	}
 }
 
 /* Hide everything except QR codes during print */
 @media print {
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    height: 100% !important;
-  }
+	/* Define page size and margins */
+	@page {
+		size: letter portrait;
+		margin: 20mm 15mm;
+	}
 
-  body * {
-    visibility: hidden;
-  }
+	html,
+	body {
+		margin: 0 !important;
+		padding: 0 !important;
+		height: 100% !important;
+	}
 
-  .print-area, .print-area * {
-    visibility: visible;
-  }
+	body * {
+		visibility: hidden;
+	}
 
-  .print-area {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-  }
+	.print-area,
+	.print-area * {
+		visibility: visible;
+	}
 
-  .qr-code-container {
-    margin: 0 auto;
-    padding: 0;
-    background: white;
-    box-shadow: none;
-    width: fit-content;
-    display: block !important;
-  }
+	.print-area {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+	}
 
-  .qr-box {
-    display: block !important;
-    page-break-before: auto !important;
-    break-before: auto !important;
-    page-break-after: always !important;
-    break-after: always !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    margin: 0 auto 1rem auto;
-    padding: 0;
-    margin-top: 10mm;
-    text-align: center;
-  }  
-  
+	.qr-code-container {
+		margin: 0 auto;
+		padding: 0;
+		background: white;
+		box-shadow: none;
+		width: fit-content;
+		display: block !important;
+	}
 
-  .qr-code-text {
-    font-size: 9.2px;
-    margin: 4px 0 0 0;
-    padding: 0;
-    line-height: 1;
-  }  
+	.qr-box {
+		display: block !important;
+		page-break-before: auto !important;
+		break-before: auto !important;
+		page-break-after: always !important;
+		break-after: always !important;
+		page-break-inside: avoid !important;
+		break-inside: avoid !important;
+		margin: 0 auto;
+		padding: 60mm 0 0 0;
+		text-align: center;
+		min-height: 100vh;
+		display: flex !important;
+		flex-direction: column;
+		align-items: center;
+		justify-content: flex-start;
+	}
+
+	.qr-box canvas {
+		width: 150px !important;
+		height: 150px !important;
+		margin-bottom: 10mm;
+	}
+
+	.qr-code-text {
+		font-size: 12pt;
+		font-family: 'Montserrat', Arial, sans-serif;
+		margin: 0;
+		padding: 0;
+		line-height: 1.4;
+		color: #000;
+	}
 }

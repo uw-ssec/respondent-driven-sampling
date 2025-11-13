@@ -12,6 +12,7 @@ import mongoose from 'mongoose';
 import { ROLES } from '../../../../permissions/constants';
 import Location from '../../../location/mongoose/location.model';
 import User from '../../../user/mongoose/user.model';
+import Seed from '../../../seed/mongoose/seed.model';
 import {
 	HubType,
 	LocationType,
@@ -42,6 +43,7 @@ describe('Survey Model', () => {
 		await Survey.deleteMany({});
 		await Location.deleteMany({});
 		await User.deleteMany({});
+		await Seed.deleteMany({});
 
 		// Create a test location for each test
 		const location = new Location({
@@ -71,10 +73,17 @@ describe('Survey Model', () => {
 
 	// Test schema validation (using system survey code as parent to avoid parent checks)
 	test('valid survey creation (basic)', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: '12345678',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const validSurvey = {
-			surveyCode: '123456',
+			surveyCode: '12345678',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
-			childSurveyCodes: ['111111', '222222', '333333'],
+			childSurveyCodes: ['11111111', '22222222', '33333333'],
 			responses: { question1: 'answer1', question2: 'answer2' },
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
@@ -89,7 +98,7 @@ describe('Survey Model', () => {
 		const savedSurvey = await survey.save();
 
 		expect(savedSurvey._id).toBeDefined();
-		expect(savedSurvey.surveyCode).toBe('123456');
+		expect(savedSurvey.surveyCode).toBe('12345678');
 		expect(savedSurvey.parentSurveyCode).toBe(SYSTEM_SURVEY_CODE);
 		expect(savedSurvey.childSurveyCodes).toHaveLength(3);
 		expect(savedSurvey.responses).toEqual(validSurvey.responses);
@@ -110,8 +119,15 @@ describe('Survey Model', () => {
 	});
 
 	test('invalid survey - non-existent locationObjectId', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: '12345678',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const invalidSurvey = {
-			surveyCode: '123456',
+			surveyCode: '12345678',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: new mongoose.Types.ObjectId() // Non-existent location
@@ -125,8 +141,15 @@ describe('Survey Model', () => {
 	});
 
 	test('invalid survey - non-existent createdByUserObjectId', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: '12345678',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const invalidSurvey = {
-			surveyCode: '123456',
+			surveyCode: '12345678',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: new mongoose.Types.ObjectId(), // Non-existent user
 			locationObjectId: testLocation._id
@@ -141,8 +164,15 @@ describe('Survey Model', () => {
 
 	// Test uniqueness constraints
 	test('duplicate surveyCode should fail', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: '12345678',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const surveyData = {
-			surveyCode: '123456',
+			surveyCode: '12345678',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
@@ -159,20 +189,33 @@ describe('Survey Model', () => {
 	});
 
 	test('childSurveyCodes interdocument uniqueness', async () => {
+		// Create seeds first
+		const seed1 = new Seed({
+			surveyCode: '12345678',
+			locationObjectId: testLocation._id
+		});
+		await seed1.save();
+
+		const seed2 = new Seed({
+			surveyCode: '78901234',
+			locationObjectId: testLocation._id
+		});
+		await seed2.save();
+
 		const surveyData1 = {
-			surveyCode: '123456',
+			surveyCode: '12345678',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
-			childSurveyCodes: ['111111', '222222', '333333']
+			childSurveyCodes: ['11111111', '22222222', '33333333']
 		};
 
 		const surveyData2 = {
-			surveyCode: '789012',
+			surveyCode: '78901234',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
-			childSurveyCodes: ['111111', '444444', '555555']
+			childSurveyCodes: ['11111111', '44444444', '55555555']
 		};
 
 		// Create first survey
@@ -187,8 +230,15 @@ describe('Survey Model', () => {
 
 	// Test timestamps
 	test('automatic timestamps', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: '12345678',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const surveyData = {
-			surveyCode: '123456',
+			surveyCode: '12345678',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
@@ -216,8 +266,15 @@ describe('Survey Model', () => {
 
 	// Test default values
 	test('default values are set correctly', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: '12345678',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const surveyData = {
-			surveyCode: '123456',
+			surveyCode: '12345678',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
@@ -234,6 +291,13 @@ describe('Survey Model', () => {
 
 	// Chronological ordering hook tests
 	test('chronology: child created after parent passes', async () => {
+		// Create seed for parent
+		const seedParent = new Seed({
+			surveyCode: 'PARENT1',
+			locationObjectId: testLocation._id
+		});
+		await seedParent.save();
+
 		const parent = new Survey({
 			surveyCode: 'PARENT1',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
@@ -257,6 +321,13 @@ describe('Survey Model', () => {
 	});
 
 	test('chronology: rejects when parent createdAt is in the future', async () => {
+		// Create seed for parent
+		const seedParent = new Seed({
+			surveyCode: 'PARENT2',
+			locationObjectId: testLocation._id
+		});
+		await seedParent.save();
+
 		const parent = new Survey({
 			surveyCode: 'PARENT2',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
@@ -289,7 +360,7 @@ describe('Survey Model', () => {
 	test('chronology: rejects when parent not found', async () => {
 		const child = new Survey({
 			surveyCode: 'CHILD3A',
-			parentSurveyCode: '999999',
+			parentSurveyCode: '99999999',
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id
 		});
@@ -301,13 +372,20 @@ describe('Survey Model', () => {
 
 	// Immutable field tests
 	test('immutable: cannot update surveyCode after creation', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: 'ORIGINAL',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
-			childSurveyCodes: ['111111', '222222', '333333']
+			childSurveyCodes: ['11111111', '22222222', '33333333']
 		});
 		const savedSurvey = await survey.save();
 
@@ -319,13 +397,20 @@ describe('Survey Model', () => {
 	});
 
 	test('immutable: cannot update parentSurveyCode after creation', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: 'ORIGINAL2',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL2',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
-			childSurveyCodes: ['444444', '555555', '666666']
+			childSurveyCodes: ['44444444', '55555555', '66666666']
 		});
 		const savedSurvey = await survey.save();
 
@@ -337,31 +422,45 @@ describe('Survey Model', () => {
 	});
 
 	test('immutable: cannot update childSurveyCodes after creation', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: 'ORIGINAL3',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL3',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
-			childSurveyCodes: ['777777', '888888', '999999']
+			childSurveyCodes: ['77777777', '88888888', '99999999']
 		});
 		const savedSurvey = await survey.save();
 
 		// Try to update immutable field
-		savedSurvey.childSurveyCodes = ['NEW111', 'NEW222', 'NEW333'];
+		savedSurvey.childSurveyCodes = ['NEW11111', 'NEW22222', 'NEW33333'];
 		await expect(savedSurvey.save()).rejects.toThrow(
 			errors.IMMUTABLE_FIELD_VIOLATION.message
 		);
 	});
 
 	test('immutable: cannot update createdByUserObjectId after creation', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: 'ORIGINAL4',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL4',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
-			childSurveyCodes: ['AAA111', 'BBB222', 'CCC333']
+			childSurveyCodes: ['AAA11111', 'BBB22222', 'CCC33333']
 		});
 		const savedSurvey = await survey.save();
 
@@ -374,13 +473,20 @@ describe('Survey Model', () => {
 	});
 
 	test('immutable: cannot update locationObjectId after creation', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: 'ORIGINAL5',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL5',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
-			childSurveyCodes: ['DDD444', 'EEE555', 'FFF666']
+			childSurveyCodes: ['DDD44444', 'EEE55555', 'FFF66666']
 		});
 		const savedSurvey = await survey.save();
 
@@ -392,13 +498,20 @@ describe('Survey Model', () => {
 	});
 
 	test('immutable: cannot update coordinates after creation', async () => {
+		// Create seed first
+		const seed = new Seed({
+			surveyCode: 'ORIGINAL6',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const survey = new Survey({
 			surveyCode: 'ORIGINAL6',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
-			childSurveyCodes: ['GGG777', 'HHH888', 'III999'],
+			childSurveyCodes: ['GGG77777', 'HHH88888', 'III99999'],
 			coordinates: { latitude: 40.7128, longitude: -74.006 }
 		});
 		const savedSurvey = await survey.save();
@@ -411,13 +524,20 @@ describe('Survey Model', () => {
 	});
 
 	test('mutable: can update responses and isCompleted after creation', async () => {
+
+		const seed = new Seed({
+			surveyCode: 'MUTABLE1',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
 		const survey = new Survey({
 			surveyCode: 'MUTABLE1',
 			parentSurveyCode: SYSTEM_SURVEY_CODE,
 			createdByUserObjectId: testUser._id,
 			locationObjectId: testLocation._id,
 			responses: { question1: 'answer1' },
-			childSurveyCodes: ['JJJ000', 'KKK111', 'LLL222'],
+			childSurveyCodes: ['JJJ00000', 'KKK11111', 'LLL22222'],
 			isCompleted: false
 		});
 		const savedSurvey = await survey.save();
@@ -447,6 +567,18 @@ describe('Survey Model', () => {
 		});
 		const savedLocation2 = await location2.save();
 
+		const seed = new Seed({
+			surveyCode: 'SURVEY1',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
+		const seed2 = new Seed({
+			surveyCode: 'SURVEY2',
+			locationObjectId: savedLocation2._id
+		});
+		await seed2.save();
+
 		// Ensure testUser exists and is saved
 		expect(testUser._id).toBeDefined();
 		expect(testLocation._id).toBeDefined();
@@ -471,5 +603,37 @@ describe('Survey Model', () => {
 		expect(savedSurvey1.locationObjectId).toEqual(testLocation._id);
 		expect(savedSurvey2.locationObjectId).toEqual(savedLocation2._id);
 		expect(savedSurvey1.surveyCode).not.toBe(savedSurvey2.surveyCode);
+	});
+
+	test('cannot create two surveys using the same seed code', async () => {
+		// Create a seed
+		const seed = new Seed({
+			surveyCode: 'SHARED1',
+			locationObjectId: testLocation._id
+		});
+		await seed.save();
+
+		// Create first survey using the seed code
+		const survey1 = new Survey({
+			surveyCode: 'SHARED1',
+			parentSurveyCode: SYSTEM_SURVEY_CODE,
+			createdByUserObjectId: testUser._id,
+			locationObjectId: testLocation._id,
+			childSurveyCodes: ['CODE1AAA', 'CODE1BBB', 'CODE1CCC']
+		});
+		const savedSurvey1 = await survey1.save();
+		expect(savedSurvey1._id).toBeDefined();
+
+		// Try to create a second survey using the same seed code (should fail)
+		const survey2 = new Survey({
+			surveyCode: 'SHARED1', // Same seed code as survey1
+			parentSurveyCode: SYSTEM_SURVEY_CODE,
+			createdByUserObjectId: testUser._id,
+			locationObjectId: testLocation._id,
+			childSurveyCodes: ['CODE2AAA', 'CODE2BBB', 'CODE2CCC']
+		});
+
+		// Should fail because surveyCode must be unique
+		await expect(survey2.save()).rejects.toThrow();
 	});
 });

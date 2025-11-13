@@ -63,3 +63,6 @@ desktop.ini
 # Specific to this project
 .temp/
 .tmp/
+
+# Generated seed PDFs
+scripts/seeds/

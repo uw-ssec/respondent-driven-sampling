@@ -7,12 +7,13 @@ import {
 	readSurveySchema,
 	updateSurveySchema
 } from '../survey.validator';
+import Seed from '../../../seed/mongoose/seed.model';
 
 const validObjectId = new Types.ObjectId().toString();
 const validLocationObjectId = new Types.ObjectId().toString();
 
 const validCreateData = {
-	surveyCode: '123456',
+	surveyCode: '12345678',
 	createdByUserObjectId: validObjectId,
 	responses: { question1: 'answer1', question2: 'answer2' },
 	isCompleted: false,
@@ -60,7 +61,7 @@ describe('Survey Type Validation Schemas', () => {
 			expect(result.success).toBe(false);
 			if (!result.success) {
 				expect(result.error.issues[0].message).toContain(
-					'exactly 6 characters'
+					'exactly 8 characters'
 				);
 			}
 		});
@@ -93,17 +94,47 @@ describe('Survey Type Validation Schemas', () => {
 			}
 		});
 
-		test('should accept minimal required fields', () => {
-			const minimalData = {
-				createdByUserObjectId: validObjectId,
-				locationObjectId: validLocationObjectId,
-				responses: { question1: 'answer1', question2: 'answer2' }
-			};
+	test('should accept minimal required fields', () => {
+		const minimalData = {
+			surveyCode: '12345678',
+			createdByUserObjectId: validObjectId,
+			locationObjectId: validLocationObjectId,
+			responses: { question1: 'answer1', question2: 'answer2' }
+		};
 
-			const result = createSurveySchema.safeParse(minimalData);
-			expect(result.success).toBe(true);
-		});
+		const result = createSurveySchema.safeParse(minimalData);
+		expect(result.success).toBe(true);
 	});
+
+	test('should accept parentSurveyCode when it is SYSTEM_SURVEY_CODE', () => {
+		const seedSurveyData = {
+			...validCreateData,
+			parentSurveyCode: SYSTEM_SURVEY_CODE
+		};
+
+		const result = createSurveySchema.safeParse(seedSurveyData);
+		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(result.data.parentSurveyCode).toBe(SYSTEM_SURVEY_CODE);
+		}
+	});
+
+	test('should reject parentSurveyCode when it is not SYSTEM_SURVEY_CODE', () => {
+		const nonSeedSurveyData = {
+			...validCreateData,
+			parentSurveyCode: 'ABCD1234' // Regular survey code
+		};
+
+		const result = createSurveySchema.safeParse(nonSeedSurveyData);
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues[0].message).toContain(
+				'Cannot create a survey with a pre-defined parentSurveyCode'
+			);
+			expect(result.error.issues[0].path).toEqual(['parentSurveyCode']);
+		}
+	});
+});
 
 	describe('updateSurveySchema', () => {
 		const validUpdateData = {
@@ -172,7 +203,7 @@ describe('Survey Type Validation Schemas', () => {
 				createdByUserObjectId: validObjectId,
 				locationObjectId: validLocationObjectId,
 				isCompleted: true,
-				parentSurveyCode: '123456',
+				parentSurveyCode: '12345678',
 				createdAt: new Date('2023-01-01'),
 				updatedAt: new Date('2023-01-02')
 			};

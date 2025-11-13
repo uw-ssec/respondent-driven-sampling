@@ -19,6 +19,7 @@
 		"noUnusedParameters": true,
 		"paths": {
 			"@/permissions/*": ["../server/src/permissions/*"],
+			"@/constants": ["../server/src/database/utils/constants"],
 			"@/*": ["./src/*"]
 		}
 	},

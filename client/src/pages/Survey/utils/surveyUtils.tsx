@@ -10,16 +10,24 @@ export const validateReferralCode = (
 	surveyCodeInUrl: string | null,
 	surveyByRefCode: any,
 	parentSurvey: any,
+	seed: any,
 	ability: any
 ) => {
 	// Run validation if there's a code present
 	if (surveyCodeInUrl) {
-		// if there is no parent survey, or this survey code is already completed, return false
-		if (!parentSurvey || surveyByRefCode?.isCompleted) {
+		// if there is no parent survey or seed connected to this survey code, return false
+		if (!parentSurvey && !seed) {
 			return {
 				isValid: false,
 				message: 'Invalid survey code. Please try again.'
 			};
+		}
+		// If the survey is already completed, return false
+		if (surveyByRefCode?.isCompleted) {
+			return {
+				isValid: false,
+				message: 'This survey has already been completed.'
+			}
 		}
 	} else {
 		// No referral code - check permissions to see if they can create w/o referral

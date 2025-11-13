@@ -79,12 +79,12 @@ function applyAdminPermissions(builder: AbilityBuilder<Ability>, ctx: Context) {
 		SUBJECTS.USER,
 		hasRole(['VOLUNTEER', 'MANAGER', 'ADMIN'])
 	);
-	// admins can update location and role of volunteers and managers
+	// admins can update location and role of volunteers, managers, and admins
 	builder.can(
 		ACTIONS.CASL.UPDATE,
 		SUBJECTS.USER,
 		[...FIELDS.USER.LOCATION, ...FIELDS.USER.ROLE],
-		hasRole(['VOLUNTEER', 'MANAGER'])
+		hasRole(['VOLUNTEER', 'MANAGER', 'ADMIN'])
 	);
 	// admins can update own profile AND own location
 	builder.can(
@@ -104,6 +104,10 @@ function applyAdminPermissions(builder: AbilityBuilder<Ability>, ctx: Context) {
 		...isToday('createdAt')
 	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
+
+	// admins can read all seeds
+	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SEED);
+	builder.can(ACTIONS.CASL.READ, SUBJECTS.SEED);
 }
 
 function applyManagerPermissions(
@@ -119,13 +123,10 @@ function applyManagerPermissions(
 		...isToday('createdAt')
 	});
 	// managers can pre-approve/create volunteers at their location
-	builder.can(
-		ACTIONS.CASL.CREATE,
-		SUBJECTS.USER, {
-			...hasRole(['VOLUNTEER']),
-			...hasSameLocation(ctx.latestLocationObjectId),
-		}
-	);
+	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.USER, {
+		...hasRole(['VOLUNTEER']),
+		...hasSameLocation(ctx.latestLocationObjectId)
+	});
 	// can only edit own profile
 	builder.can(
 		ACTIONS.CASL.UPDATE,
@@ -145,6 +146,10 @@ function applyManagerPermissions(
 		...isToday('createdAt')
 	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
+
+	// admins can read all seeds
+	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SEED);
+	builder.can(ACTIONS.CASL.READ, SUBJECTS.SEED);
 }
 
 function applyVolunteerPermissions(
@@ -173,6 +178,10 @@ function applyVolunteerPermissions(
 		...isToday('createdAt')
 	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
+
+	// admins can read all seeds
+	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SEED);
+	builder.can(ACTIONS.CASL.READ, SUBJECTS.SEED);
 }
 
 function applyCustomPermissions(
