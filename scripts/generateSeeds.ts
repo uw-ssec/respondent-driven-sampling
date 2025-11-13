@@ -57,7 +57,6 @@ async function generateQRCodeBuffer(surveyCode: string, baseUrl: string, qrSize:
 	return Buffer.from(qrDataUrl.split(',')[1], 'base64');
 }
 
-
 async function addQRCodePage(
 	doc: any,
 	surveyCode: string,
