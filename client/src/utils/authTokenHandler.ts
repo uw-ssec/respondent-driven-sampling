@@ -1,5 +1,5 @@
 // This file provides helper functions to manage JWTs used in authentication.
-import { useAuthStore, useSurveyStore } from '@/stores';
+import { useAuthStore } from '@/stores';
 import { jwtDecode } from 'jwt-decode';
 
 interface JwtPayload {
@@ -36,43 +36,4 @@ export function hasAuthToken(): boolean {
 	// We can relogin on a failed API call if expired.
 	const token = getAuthToken();
 	return token != null && token !== '';
-}
-
-// REVIEW: Do we need these helper functions anymore?
-// REVIEW: use auth context instead of these helper functions?
-export function getRole(): string {
-	const decodedAuthToken = getDecodedAuthToken();
-	if (decodedAuthToken == null || decodedAuthToken.role == null) return '';
-	return decodedAuthToken.role;
-}
-
-export function getFirstName(): string {
-	const decodedAuthToken = getDecodedAuthToken();
-	if (decodedAuthToken == null || decodedAuthToken.firstName == null)
-		return '';
-	return decodedAuthToken.firstName;
-}
-
-export function getObjectId(): string {
-	const decodedAuthToken = getDecodedAuthToken();
-	if (decodedAuthToken == null || decodedAuthToken.userObjectId == null)
-		return '';
-	return decodedAuthToken.userObjectId;
-}
-
-export function initializeSurveyStore() {
-	const {
-		setEmployeeId,
-		setEmployeeName,
-		setParentSurveyCode,
-		setObjectId,
-		setChildSurveyCodes
-	} = useSurveyStore.getState();
-	const objectId = getObjectId();
-	const employeeName = getFirstName();
-	setEmployeeId(objectId);
-	setEmployeeName(employeeName);
-	setParentSurveyCode(null);
-	setChildSurveyCodes([]);
-	setObjectId(null);
 }
