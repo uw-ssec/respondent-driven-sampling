@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { useAuthContext } from '@/contexts';
 import { useAbility, useApi } from '@/hooks';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { subject } from '@casl/ability';
@@ -19,30 +20,37 @@ export default function AdminEditProfile() {
 	const { id } = useParams();
 	const [message, setMessage] = useState('');
 	const [error, _setError] = useState('');
-
-	// REVIEW: Let's use auth context, such that you first refresh the auth context for this user, and then fetch the user data from the context.
-	const { data: user, mutate } = userService.useUser(id) ?? {};
+	const {
+		locationObjectId,
+		firstName,
+		lastName,
+		userObjectId,
+		userRole,
+		email,
+		phone,
+		setEmail,
+		setPhone,
+		setLocationObjectId,
+		setUserRole
+	} = useAuthContext();
 
 	const canEditField = (field: string) => {
-		if (!user) return false; // wait until user is fetched
 		return ability.can(
 			ACTIONS.CASL.UPDATE,
-			subject(SUBJECTS.USER, user),
+			subject(SUBJECTS.USER, { _id: userObjectId }),
 			field
 		);
 	};
 
 	const handleSave = async () => {
-		if (!user) return;
-
 		try {
 			const updatePayload: Record<string, any> = {};
 
-			if (canEditField('role')) updatePayload.role = user.role;
-			if (canEditField('email')) updatePayload.email = user.email;
-			if (canEditField('phone')) updatePayload.phone = user.phone;
+			if (canEditField('role')) updatePayload.role = userRole;
+			if (canEditField('email')) updatePayload.email = email;
+			if (canEditField('phone')) updatePayload.phone = phone;
 			if (canEditField('locationObjectId'))
-				updatePayload.locationObjectId = user.locationObjectId;
+				updatePayload.locationObjectId = locationObjectId;
 
 			const updatedUser = await userService.updateUser(
 				id!,
@@ -53,7 +61,6 @@ export default function AdminEditProfile() {
 				setMessage(
 					updatedUser.message || 'Profile updated successfully!'
 				);
-				mutate?.(); // refetch the user
 			} else {
 				setMessage(updatedUser.message || 'Failed to update profile.');
 			}
@@ -70,7 +77,20 @@ export default function AdminEditProfile() {
 			}
 		}
 
-		mutate?.({ ...user, [field]: value }, false);
+		switch (field) {
+			case 'email':
+				setEmail(value);
+				break;
+			case 'phone':
+				setPhone(value);
+				break;
+			case 'locationObjectId':
+				setLocationObjectId(value);
+				break;
+			case 'role':
+				setUserRole(value);
+				break;
+		}
 	};
 
 	return (
@@ -86,8 +106,7 @@ export default function AdminEditProfile() {
 			}}
 		>
 			<Typography variant="h5" component="h2" gutterBottom sx={{ mb: 3 }}>
-				Profile for{' '}
-				{`${user?.firstName || 'User'} ${user?.lastName || ''}`}
+				Profile for {`${firstName || 'User'} ${lastName || ''}`}
 			</Typography>
 
 			{error ? (
@@ -98,7 +117,7 @@ export default function AdminEditProfile() {
 						<FormInput
 							label="Email"
 							type="email"
-							value={user?.email || ''}
+							value={email || ''}
 							onChange={e =>
 								handleChange('email', e.target.value)
 							}
@@ -108,7 +127,7 @@ export default function AdminEditProfile() {
 
 						<PhoneInput
 							label="Phone Number"
-							value={user?.phone || ''}
+							value={phone || ''}
 							onChange={e =>
 								handleChange('phone', e.target.value)
 							}
@@ -117,7 +136,7 @@ export default function AdminEditProfile() {
 						/>
 
 						<RoleSelect
-							value={user?.role || ''}
+							value={userRole || ''}
 							onChange={e =>
 								handleChange('role', e.target.value as string)
 							}
@@ -126,7 +145,7 @@ export default function AdminEditProfile() {
 						/>
 
 						<LocationSelect
-							value={user?.locationObjectId || ''}
+							value={locationObjectId || ''}
 							onChange={e =>
 								handleChange(
 									'locationObjectId',

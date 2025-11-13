@@ -16,8 +16,12 @@ import {
 interface AuthState {
 	token: string;
 	firstName: string;
+	lastName: string;
 	userObjectId: string;
 	userRole: string;
+	email: string;
+	phone: string;
+	locationObjectId: string;
 	lastestLocationObjectId: string;
 	permissions: {
 		action: Action;
@@ -32,7 +36,11 @@ interface AuthContextValue extends AuthState {
 	setToken: (token: string) => void;
 	setUserObjectId: (userObjectId: string) => void;
 	setFirstName: (firstName: string) => void;
+	setLastName: (lastName: string) => void;
 	setUserRole: (userRole: string) => void;
+	setEmail: (email: string) => void;
+	setPhone: (phone: string) => void;
+	setLocationObjectId: (locationObjectId: string) => void;
 	setLastestLocationObjectId: (lastestLocationObjectId: string) => void;
 	setPermissions: (
 		permissions: {
@@ -51,8 +59,12 @@ function getDefaultAuthState(): AuthState {
 	return {
 		token: '',
 		firstName: '',
+		lastName: '',
 		userObjectId: '',
 		userRole: '',
+		email: '',
+		phone: '',
+		locationObjectId: '',
 		lastestLocationObjectId: '',
 		permissions: [],
 		isLoggedIn: false,
@@ -71,9 +83,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		return {
 			token,
 			firstName: decoded.firstName,
+			lastName: '',
+			email: '',
+			phone: '',
 			userRole: decoded.role,
 			userObjectId: decoded.userObjectId,
 			permissions: [],
+			locationObjectId: '',
 			lastestLocationObjectId: '',
 			isLoggedIn: true,
 			// TODO: Verification needed for consistency.
@@ -129,7 +145,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				...prev,
 				userObjectId: user.data._id,
 				firstName: user.data.firstName,
+				lastName: user.data.lastName,
 				userRole: user.data.role,
+				email: user.data.email,
+				phone: user.data.phone,
+				locationObjectId: user.data.locationObjectId,
 				lastestLocationObjectId: latestLocationObjectId,
 				permissions: user.data.permissions,
 				isLoggedIn: true,
@@ -153,8 +173,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		setState(prev => ({ ...prev, firstName }));
 	};
 
+	const setLastName = (lastName: string) => {
+		setState(prev => ({ ...prev, lastName }));
+	};
+
 	const setUserRole = (userRole: string) => {
 		setState(prev => ({ ...prev, userRole }));
+	};
+
+	const setEmail = (email: string) => {
+		setState(prev => ({ ...prev, email }));
+	};
+
+	const setPhone = (phone: string) => {
+		setState(prev => ({ ...prev, phone }));
+	};
+
+	const setLocationObjectId = (locationObjectId: string) => {
+		setState(prev => ({ ...prev, locationObjectId }));
 	};
 
 	const setLastestLocationObjectId = (lastestLocationObjectId: string) => {
@@ -176,7 +212,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		setToken,
 		setUserObjectId,
 		setFirstName,
+		setLastName,
 		setUserRole,
+		setEmail,
+		setPhone,
+		setLocationObjectId,
 		setLastestLocationObjectId,
 		setPermissions,
 		clearSession,
