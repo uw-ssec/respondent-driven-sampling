@@ -20,7 +20,7 @@ import {
 import {
 	hasRole,
 	hasSameLocation,
-	isCreatedBySelf,
+	//isCreatedBySelf,
 	isSelf,
 	isToday
 } from '@/permissions/utils';
@@ -138,13 +138,15 @@ function applyManagerPermissions(
 
 	// Survey actions
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY);
+	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY);
 	// can only read/update surveys created by themselves at their own location today
-	builder.can([ACTIONS.CASL.READ, ACTIONS.CASL.UPDATE], SUBJECTS.SURVEY, {
-		...isCreatedBySelf(ctx.userObjectId),
-		...hasSameLocation(ctx.latestLocationObjectId),
-		...isToday('createdAt')
-	});
+	// NOTE: disabling because apply-referral page needs to read surveys created by others
+	// builder.can([ACTIONS.CASL.READ, ACTIONS.CASL.UPDATE], SUBJECTS.SURVEY, {
+	// 	...isCreatedBySelf(ctx.userObjectId),
+	// 	...hasSameLocation(ctx.latestLocationObjectId),
+	// 	...isToday('createdAt')
+	// });
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 
 	// admins can read all seeds
@@ -171,12 +173,14 @@ function applyVolunteerPermissions(
 	// Survey actions
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY);
+	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
 	// can only read & update surveys created by themselves at their own location today
-	builder.can([ACTIONS.CASL.READ, ACTIONS.CASL.UPDATE], SUBJECTS.SURVEY, {
-		...isCreatedBySelf(ctx.userObjectId),
-		...hasSameLocation(ctx.latestLocationObjectId),
-		...isToday('createdAt')
-	});
+	// NOTE: disabling because apply-referral page needs to read surveys created by others
+	// builder.can([ACTIONS.CASL.READ, ACTIONS.CASL.UPDATE], SUBJECTS.SURVEY, {
+	// 	...isCreatedBySelf(ctx.userObjectId),
+	// 	...hasSameLocation(ctx.latestLocationObjectId),
+	// 	...isToday('createdAt')
+	// });
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 
 	// admins can read all seeds
