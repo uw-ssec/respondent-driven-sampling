@@ -14,7 +14,7 @@ import {
 	RoleSelect
 } from '@/components/forms';
 
-export default function AdminEditProfile() {
+export default function Profile() {
 	const ability = useAbility();
 	const { userService } = useApi();
 	const { id } = useParams();

@@ -19,7 +19,7 @@ The RDS App is a secure, accessible, and open-source web application that stream
 | Hosting     | Azure Web Service                |
 | QR Scanning | Html5QrcodeScanner, QRCodeCanvas |
 
-## Directory
+## Directory (old)
 
 ```plaintext
 client/                   # Client-facing React application
@@ -196,24 +196,24 @@ The items listed below are features our team has identified out of scope for the
 
 **App Features**
 
-- Auto-populate location using GPS location coordinates
-- Widget for staff to comment on survey responses
-- Integration with Homeless Management Information System (HMIS) database system
-- Volunteer scheduling dashboard for administrators
-- Automated SMS gift card distribution
-- Resume unfinished survey feature
-- Admin ability to edit survey questions
-- Volunteer ability to edit survey responses
-- Survey analytics dashboard
+-   Auto-populate location using GPS location coordinates
+-   Widget for staff to comment on survey responses
+-   Integration with Homeless Management Information System (HMIS) database system
+-   Volunteer scheduling dashboard for administrators
+-   Automated SMS gift card distribution
+-   Resume unfinished survey feature
+-   Admin ability to edit survey questions
+-   Volunteer ability to edit survey responses
+-   Survey analytics dashboard
 
 **Testing**
 
-- Dynamic Application Security Testing (DAST)
+-   Dynamic Application Security Testing (DAST)
 
 **User Experience**
 -Step-by-step user training guide
 
-- Setup wizard
+-   Setup wizard
 
 ## Contributors
 
