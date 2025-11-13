@@ -57,6 +57,7 @@ async function generateQRCodeBuffer(surveyCode: string, baseUrl: string, qrSize:
 	return Buffer.from(qrDataUrl.split(',')[1], 'base64');
 }
 
+
 async function addQRCodePage(
 	doc: any,
 	surveyCode: string,
@@ -69,33 +70,136 @@ async function addQRCodePage(
 	}
 
 	const pageWidth = doc.page.width;
-	const pageHeight = doc.page.height;
-	const qrSize = 200;
+	const margin = 50;
+	const contentWidth = pageWidth - (margin * 2);
+	
+	let currentY = margin;
 
-	// Generate and position QR code
-	const qrBuffer = await generateQRCodeBuffer(surveyCode, baseUrl, qrSize);
+	// Title
+	doc.fontSize(18)
+		.font('Helvetica-Bold')
+		.text('Understanding Unsheltered Homelessness', margin, currentY, {
+			align: 'center',
+			width: contentWidth
+		});
+	
+	currentY += 40;
+
+	// Instructions
+	doc.fontSize(12)
+		.font('Helvetica')
+		.text(
+			'Bring this coupon to one of the locations below to complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and to receive a ',
+			margin,
+			currentY,
+			{
+				align: 'left',
+				width: contentWidth,
+				continued: true
+			}
+		)
+		.font('Helvetica-Bold')
+		.text('$20', { continued: true })
+		.font('Helvetica')
+		.text(' Gift Card.');
+
+	currentY += 50;
+
+	doc.fontSize(12)
+		.font('Helvetica')
+		.text(
+			'Our locations are accessible with free parking and bike racks unless marked otherwise.',
+			margin,
+			currentY,
+			{
+				align: 'left',
+				width: contentWidth
+			}
+		);
+
+	currentY += 25;
+
+	doc.text('Pets and service animals welcome.', margin, currentY, {
+		align: 'left',
+		width: contentWidth
+	});
+
+	currentY += 50;
+
+	// QR Code and Referral Code
+	const qrSize = 100;
 	const qrX = (pageWidth - qrSize) / 2;
-	const qrY = (pageHeight - qrSize) / 2 - 50;
-
-	doc.image(qrBuffer, qrX, qrY, {
+	
+	const qrBuffer = await generateQRCodeBuffer(surveyCode, baseUrl, qrSize);
+	doc.image(qrBuffer, qrX, currentY, {
 		width: qrSize,
 		height: qrSize
 	});
 
-	// Add referral code text
-	doc.fontSize(20)
+	currentY += qrSize + 15;
+
+	doc.fontSize(16)
 		.font('Helvetica-Bold')
-		.text(`Referral Code: ${surveyCode}`, 0, qrY + qrSize + 30, {
+		.text(`Referral Code: ${surveyCode}`, margin, currentY, {
 			align: 'center',
-			width: pageWidth
+			width: contentWidth
 		});
 
-	// Add location text
+	currentY += 50;
+
+	// Locations section
 	doc.fontSize(12)
+		.font('Helvetica-Bold')
+		.text('Locations', margin, currentY, {
+			align: 'left',
+			width: contentWidth
+		});
+
+	currentY += 20;
+
+	doc.fontSize(11)
 		.font('Helvetica')
-		.text(`Location: ${locationName}`, 0, pageHeight - 80, {
+		.text('• Highline United Methodist Church', margin + 10, currentY, {
+			align: 'left',
+			width: contentWidth - 10
+		});
+
+	currentY += 15;
+
+	doc.text('  13015 1st AVE S, Burien, WA 98168', margin + 10, currentY, {
+		align: 'left',
+		width: contentWidth - 10
+	});
+
+	currentY += 20;
+
+	doc.text('• Interview Hours:', margin + 10, currentY, {
+		align: 'left',
+		width: contentWidth - 10
+	});
+
+	currentY += 15;
+
+	doc.text('  Monday - Friday (11/17 - 11/21)', margin + 10, currentY, {
+		align: 'left',
+		width: contentWidth - 10
+	});
+
+	currentY += 15;
+
+	doc.text('  10am to 3pm', margin + 10, currentY, {
+		align: 'left',
+		width: contentWidth - 10
+	});
+
+	currentY += 50;
+
+	// Contact info
+	doc.fontSize(10)
+		.font('Helvetica')
+		.text('For questions, please call +1 (833) 393-1621', margin, currentY, {
 			align: 'center',
-			width: pageWidth
+			width: contentWidth
 		});
 }
 
