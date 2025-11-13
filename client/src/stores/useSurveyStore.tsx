@@ -2,42 +2,35 @@ import { create } from 'zustand';
 import { combine, persist } from 'zustand/middleware';
 
 type SurveyState = {
-	employeeId: string;
-	employeeName: string;
-	// REVIEW: Let's do userObjectId instead of employeeId everywhere.
-	// REVIEW: Similary for name.
 	userObjectId: string;
 	surveyData: {
 		objectId?: string | null;
 		parentSurveyCode?: string | null;
 		responses?: any;
-		// REVIEW: Can we be more specific with other properties?
-		[key: string]: any;
 		childSurveyCodes?: string[];
+		surveyCode?: string | null;
 	} | null;
 };
 
 type SurveyActions = {
-	setEmployeeId: (id: string) => void;
-	setEmployeeName: (name: string) => void;
+	setUserObjectId: (userObjectId: string) => void;
+	getUserObjectId: () => string;
 	setSurveyData: (data: any | null) => void;
-	setParentSurveyCode: (code: string | null) => void; // Helper to set parentSurveyCode within surveyData
-	getParentSurveyCode: () => string | null; // Helper to get parentSurveyCode from surveyData
-	setObjectId: (id: string | null) => void; // Helper to set objectId within surveyData
-	getObjectId: () => string | null; // Helper to get objectId from surveyData
-	setSurveyCode: (code: string | null) => void; // Helper to set surveyCode within surveyData
-	getSurveyCode: () => string | null; // Helper to get surveyCode from surveyData
-	setChildSurveyCodes: (codes: string[]) => void; // Helper to set childSurveyCodes within surveyData
-	clearSession: () => void; // Clear all survey data (for logout)
-	clearSurvey: () => void; // Clear survey-specific data (for navigating away from survey)
+	setParentSurveyCode: (code: string | null) => void;
+	getParentSurveyCode: () => string | null;
+	setObjectId: (id: string | null) => void;
+	getObjectId: () => string | null;
+	setSurveyCode: (code: string | null) => void;
+	getSurveyCode: () => string | null;
+	setChildSurveyCodes: (codes: string[]) => void;
+	clearSession: () => void;
+	clearSurvey: () => void;
 };
 
 export const useSurveyStore = create(
 	persist(
 		combine<SurveyState, SurveyActions>(
 			{
-				employeeId: '',
-				employeeName: '',
 				surveyData: null,
 				userObjectId: ''
 			},
@@ -45,9 +38,6 @@ export const useSurveyStore = create(
 				setUserObjectId: (userObjectId: string) =>
 					set({ userObjectId }),
 				getUserObjectId: () => get().userObjectId,
-				setEmployeeId: (employeeId: string) => set({ employeeId }),
-				setEmployeeName: (employeeName: string) =>
-					set({ employeeName }),
 				setSurveyData: (surveyData: any | null) => set({ surveyData }),
 				setParentSurveyCode: (parentSurveyCode: string | null) => {
 					const currentData = get().surveyData ?? {};
@@ -70,7 +60,7 @@ export const useSurveyStore = create(
 					set({ surveyData: { ...currentData, childSurveyCodes } });
 				},
 				clearSession: () => {
-					set({ employeeId: '', employeeName: '', surveyData: null });
+					set({ userObjectId: '', surveyData: null });
 					useSurveyStore.persist.clearStorage();
 				},
 				clearSurvey: () => {
