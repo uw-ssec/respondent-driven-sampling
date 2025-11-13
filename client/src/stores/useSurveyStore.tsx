@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { combine, persist } from 'zustand/middleware';
 
 type SurveyState = {
-	userObjectId: string;
 	surveyData: {
 		objectId?: string | null;
 		parentSurveyCode?: string | null;
@@ -13,8 +12,6 @@ type SurveyState = {
 };
 
 type SurveyActions = {
-	setUserObjectId: (userObjectId: string) => void;
-	getUserObjectId: () => string;
 	setSurveyData: (data: any | null) => void;
 	setParentSurveyCode: (code: string | null) => void;
 	getParentSurveyCode: () => string | null;
@@ -32,12 +29,8 @@ export const useSurveyStore = create(
 		combine<SurveyState, SurveyActions>(
 			{
 				surveyData: null,
-				userObjectId: ''
 			},
 			(set, get) => ({
-				setUserObjectId: (userObjectId: string) =>
-					set({ userObjectId }),
-				getUserObjectId: () => get().userObjectId,
 				setSurveyData: (surveyData: any | null) => set({ surveyData }),
 				setParentSurveyCode: (parentSurveyCode: string | null) => {
 					const currentData = get().surveyData ?? {};
@@ -60,7 +53,7 @@ export const useSurveyStore = create(
 					set({ surveyData: { ...currentData, childSurveyCodes } });
 				},
 				clearSession: () => {
-					set({ userObjectId: '', surveyData: null });
+					set({ surveyData: null });
 					useSurveyStore.persist.clearStorage();
 				},
 				clearSurvey: () => {
