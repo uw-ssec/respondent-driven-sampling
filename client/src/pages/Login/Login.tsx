@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { initializeSurveyStore } from '@/utils/authTokenHandler';
+import { useSurveyStore } from '@/stores';
 import { Box, Button, Paper, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 export default function Login() {
 	const { handleLogin } = useAuth();
 	const navigate = useNavigate();
+	const { clearSession } = useSurveyStore();
 	// const [email, setEmail] = useState('');
 	const [phone, setPhone] = useState('');
 	const [otp, setOtp] = useState('');
@@ -83,7 +84,7 @@ export default function Login() {
 			if (response.ok) {
 				// Successful login and store user data
 				await handleLogin(data.token);
-				initializeSurveyStore();
+				clearSession(); // Clear any previous survey data from storage
 				navigate(data.redirectTo);
 			} else {
 				setErrorMessage(data.message);

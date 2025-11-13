@@ -3,7 +3,7 @@ import { useAuthContext } from '@/contexts';
 import { useSurveyStore } from '@/stores/useSurveyStore';
 import {
 	deleteAuthToken,
-	getObjectId,
+	getDecodedAuthToken,
 	saveAuthToken
 } from '@/utils/authTokenHandler';
 
@@ -18,8 +18,10 @@ export const useAuth = () => {
 
 	const handleLogin = async (token: string) => {
 		saveAuthToken(token);
-		const userObjectId = getObjectId();
-		await fetchUserContext(userObjectId);
+		const userObjectId = getDecodedAuthToken()?.userObjectId;
+		if (userObjectId) {
+			await fetchUserContext(userObjectId);
+		}
 	};
 
 	const handleLogout = () => {

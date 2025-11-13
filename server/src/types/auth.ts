@@ -15,8 +15,6 @@ export interface AuthenticatedRequest extends Request {
 
 export interface JWTPayload extends JwtPayload {
 	userObjectId: string;
-	role: string;
-	firstName: string;
 }
 
 export interface OTPRequest {
