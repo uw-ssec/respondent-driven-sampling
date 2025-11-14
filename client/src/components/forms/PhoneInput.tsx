@@ -1,6 +1,7 @@
 import { TextField, TextFieldProps } from '@mui/material';
 
 import { PermissionTooltip } from './PermissionTooltip';
+import { useState } from 'react';
 
 interface PhoneInputProps extends Omit<TextFieldProps, 'variant' | 'type'> {
 	canEdit?: boolean;
@@ -11,9 +12,17 @@ export const PhoneInput = ({
 	canEdit = true,
 	showTooltip = false,
 	value,
+	helperText,
 	onChange,
+	onBlur,
 	...props
 }: PhoneInputProps) => {
+	const [touched, setTouched] = useState(false);
+
+	const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		setTouched(true);
+		onBlur?.(e);
+	};
 
 	const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (!onChange) return;
@@ -40,12 +49,22 @@ export const PhoneInput = ({
 		onChange(syntheticEvent as React.ChangeEvent<HTMLInputElement>);
 	};
 
+	const hasError = (touched && (!value || (typeof value === 'string' && !value.trim())));
+
+
 	const input = (
 		<TextField
 			{...props}
 			type="tel"
 			value={value ?? ''}
+			error={hasError}
+			helperText={
+				hasError && touched && (!value || (typeof value === 'string' && !value.trim()))
+					? 'This field is required'
+					: helperText
+			}
 			onChange={handlePhoneChange}
+			onBlur={handleBlur}
 			disabled={!canEdit}
 			variant="outlined"
 			fullWidth
