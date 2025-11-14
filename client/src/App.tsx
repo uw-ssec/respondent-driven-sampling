@@ -22,6 +22,7 @@ import {
 } from 'react-router-dom';
 import { ProtectedRoute } from '@/components';
 import { muiTheme } from '@/theme/muiTheme';
+import { isTokenValid } from '@/utils/authTokenHandler';
 
 function App() {
 	return (
@@ -30,10 +31,7 @@ function App() {
 				<CssBaseline />
 				<Router>
 					<Routes>
-						<Route
-							path="/"
-							element={<Navigate replace to="/login" />}
-						/>
+						<Route path="/" element={<Navigate replace to={isTokenValid() ? '/dashboard' : '/login'} />} />
 						<Route path="/login" element={<Login />} />
 						<Route
 							path="/survey/:id/continue"
