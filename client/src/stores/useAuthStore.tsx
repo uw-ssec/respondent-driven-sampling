@@ -9,7 +9,7 @@ type AuthStore = {
 
 export const useAuthStore = create<AuthStore>()(
 	persist(
-		(set) => ({
+		set => ({
 			token: '',
 			setToken: (token: string) => set({ token }),
 			clearToken: () => set({ token: '' })
@@ -17,14 +17,14 @@ export const useAuthStore = create<AuthStore>()(
 		{
 			name: 'auth-storage',
 			storage: {
-				getItem: (name) => {
+				getItem: name => {
 					const value = sessionStorage.getItem(name);
 					return value ? JSON.parse(value) : null;
 				},
 				setItem: (name, value) => {
 					sessionStorage.setItem(name, JSON.stringify(value));
 				},
-				removeItem: (name) => {
+				removeItem: name => {
 					sessionStorage.removeItem(name);
 				}
 			}

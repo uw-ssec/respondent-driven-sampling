@@ -4,15 +4,15 @@ import twilio from 'twilio';
 import { z } from 'zod';
 
 import User from '@/database/user/mongoose/user.model';
-import { ApprovalStatus } from '@/database/utils/constants';
-import { generateAuthToken } from '@/utils/authTokenHandler';
-import { validate } from '@/middleware/validate';
 import {
 	sendOtpLoginSchema,
 	sendOtpSignupSchema,
 	verifyOtpLoginSchema,
 	verifyOtpSignupSchema
 } from '@/database/user/zod/auth.validator';
+import { ApprovalStatus } from '@/database/utils/constants';
+import { validate } from '@/middleware/validate';
+import { generateAuthToken } from '@/utils/authTokenHandler';
 
 const router = express.Router();
 

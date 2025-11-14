@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { TextField, TextFieldProps } from '@mui/material';
 
 import { PermissionTooltip } from './PermissionTooltip';
@@ -20,13 +21,19 @@ export const FormInput = ({
 }: FormInputProps) => {
 	const [touched, setTouched] = useState(false);
 
-	const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+	const handleBlur = (
+		e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+	) => {
 		setTouched(true);
 		onBlur?.(e);
 	};
 
 	// Show error if required and value is empty, but only after field has been touched
-	const hasError = error || (touched && required && (!value || (typeof value === 'string' && !value.trim())));
+	const hasError =
+		error ||
+		(touched &&
+			required &&
+			(!value || (typeof value === 'string' && !value.trim())));
 
 	const input = (
 		<TextField
@@ -36,7 +43,10 @@ export const FormInput = ({
 			error={hasError}
 			onBlur={handleBlur}
 			helperText={
-				hasError && touched && required && (!value || (typeof value === 'string' && !value.trim()))
+				hasError &&
+				touched &&
+				required &&
+				(!value || (typeof value === 'string' && !value.trim()))
 					? 'This field is required'
 					: helperText
 			}

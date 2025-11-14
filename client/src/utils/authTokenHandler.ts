@@ -39,7 +39,7 @@ export function hasAuthToken(): boolean {
 export function isTokenValid(): boolean {
 	const token = getAuthToken();
 	if (!token) return false;
-	
+
 	try {
 		const decoded = jwtDecode<JwtPayload & { exp?: number }>(token);
 		// Check if token has expiration and if it's expired

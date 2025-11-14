@@ -1,7 +1,8 @@
+import { useState } from 'react';
+
 import { TextField, TextFieldProps } from '@mui/material';
 
 import { PermissionTooltip } from './PermissionTooltip';
-import { useState } from 'react';
 
 interface PhoneInputProps extends Omit<TextFieldProps, 'variant' | 'type'> {
 	canEdit?: boolean;
@@ -19,7 +20,9 @@ export const PhoneInput = ({
 }: PhoneInputProps) => {
 	const [touched, setTouched] = useState(false);
 
-	const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+	const handleBlur = (
+		e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+	) => {
 		setTouched(true);
 		onBlur?.(e);
 	};
@@ -49,8 +52,8 @@ export const PhoneInput = ({
 		onChange(syntheticEvent as React.ChangeEvent<HTMLInputElement>);
 	};
 
-	const hasError = (touched && (!value || (typeof value === 'string' && !value.trim())));
-
+	const hasError =
+		touched && (!value || (typeof value === 'string' && !value.trim()));
 
 	const input = (
 		<TextField
@@ -59,7 +62,9 @@ export const PhoneInput = ({
 			value={value ?? ''}
 			error={hasError}
 			helperText={
-				hasError && touched && (!value || (typeof value === 'string' && !value.trim()))
+				hasError &&
+				touched &&
+				(!value || (typeof value === 'string' && !value.trim()))
 					? 'This field is required'
 					: helperText
 			}

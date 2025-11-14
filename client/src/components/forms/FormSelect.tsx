@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import {
 	FormControl,
 	FormHelperText,
@@ -43,7 +44,12 @@ export const FormSelect = ({
 	const hasError = error || (touched && required && !value);
 
 	const selectControl = (
-		<FormControl fullWidth error={hasError} required={required} disabled={!canEdit}>
+		<FormControl
+			fullWidth
+			error={hasError}
+			required={required}
+			disabled={!canEdit}
+		>
 			<InputLabel id={labelId}>{label}</InputLabel>
 			<Select
 				{...props}
@@ -67,7 +73,9 @@ export const FormSelect = ({
 			{hasError && touched && required && !value && (
 				<FormHelperText>This field is required</FormHelperText>
 			)}
-			{helperText && !hasError && <FormHelperText>{helperText}</FormHelperText>}
+			{helperText && !hasError && (
+				<FormHelperText>{helperText}</FormHelperText>
+			)}
 		</FormControl>
 	);
 

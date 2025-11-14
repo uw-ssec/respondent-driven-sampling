@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { useSurveyStore } from '@/stores';
+import { deleteAuthToken, isTokenValid } from '@/utils/authTokenHandler';
 import {
 	Alert,
 	Box,
@@ -12,10 +13,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/hooks/useAuth';
-import {
-	deleteAuthToken,
-	isTokenValid
-} from '@/utils/authTokenHandler';
 
 export default function Login() {
 	const { handleLogin } = useAuth();

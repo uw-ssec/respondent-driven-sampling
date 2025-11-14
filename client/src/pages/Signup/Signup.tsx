@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { deleteAuthToken, isTokenValid } from '@/utils/authTokenHandler';
 import { Alert, Box, Button, Link, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,10 +10,6 @@ import {
 	PhoneInput,
 	RoleSelect
 } from '@/components/forms';
-import {
-	deleteAuthToken,
-	isTokenValid
-} from '@/utils/authTokenHandler';
 
 export default function Signup() {
 	const navigate = useNavigate();
@@ -78,7 +75,9 @@ export default function Signup() {
 			} else {
 				// Extract individual error messages from validation errors
 				if (data.errors && Array.isArray(data.errors)) {
-					const messages = data.errors.map((err: { message: string }) => err.message);
+					const messages = data.errors.map(
+						(err: { message: string }) => err.message
+					);
 					setErrorMessages(messages);
 				} else {
 					setErrorMessages([data.message || 'Failed to send OTP']);
@@ -107,7 +106,9 @@ export default function Signup() {
 			} else {
 				// Extract individual error messages from validation errors
 				if (data.errors && Array.isArray(data.errors)) {
-					const messages = data.errors.map((err: { message: string }) => err.message);
+					const messages = data.errors.map(
+						(err: { message: string }) => err.message
+					);
 					setErrorMessages(messages);
 				} else {
 					setErrorMessages([data.message || 'Failed to verify OTP']);
@@ -117,7 +118,6 @@ export default function Signup() {
 			setErrorMessages(['Failed to verify OTP']);
 		}
 	};
-
 
 	return (
 		<Box
@@ -158,12 +158,17 @@ export default function Signup() {
 				{signupSuccess && pendingApproval ? (
 					<Stack spacing={2.5}>
 						<Alert severity="info" sx={{ mb: 2 }}>
-							Your account has been created successfully! However, your account
-							is pending approval from an administrator.
+							Your account has been created successfully! However,
+							your account is pending approval from an
+							administrator.
 						</Alert>
-						<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-							Once your account has been approved, please log back in to access
-							the application.
+						<Typography
+							variant="body2"
+							color="text.secondary"
+							sx={{ mb: 2 }}
+						>
+							Once your account has been approved, please log back
+							in to access the application.
 						</Typography>
 						<Button
 							variant="contained"

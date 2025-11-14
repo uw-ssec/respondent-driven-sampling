@@ -32,4 +32,3 @@ export const verifyOtpLoginSchema = createUserSchema
 		code: otpCodeSchema
 	})
 	.strict();
-
