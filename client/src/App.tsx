@@ -1,17 +1,20 @@
+import { ProtectedRoute } from '@/components';
 import { AuthProvider } from '@/contexts';
 import {
-	Survey,
-	SurveyDetails,
-	SurveyEntryDashboard,
-	QrPage,
+	ApplyReferral,
 	LandingPage,
 	Login,
+	NewUser,
 	Profile,
-	ApplyReferral,
+	QrPage,
 	Signup,
 	StaffDashboard,
-	NewUser
+	Survey,
+	SurveyDetails,
+	SurveyEntryDashboard
 } from '@/pages';
+import { muiTheme } from '@/theme/muiTheme';
+import { isTokenValid } from '@/utils/authTokenHandler';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import {
@@ -20,8 +23,6 @@ import {
 	BrowserRouter as Router,
 	Routes
 } from 'react-router-dom';
-import { ProtectedRoute } from '@/components';
-import { muiTheme } from '@/theme/muiTheme';
 
 function App() {
 	return (
@@ -32,7 +33,14 @@ function App() {
 					<Routes>
 						<Route
 							path="/"
-							element={<Navigate replace to="/login" />}
+							element={
+								<Navigate
+									replace
+									to={
+										isTokenValid() ? '/dashboard' : '/login'
+									}
+								/>
+							}
 						/>
 						<Route path="/login" element={<Login />} />
 						<Route

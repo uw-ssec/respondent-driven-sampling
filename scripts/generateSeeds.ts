@@ -11,7 +11,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { createRequire } from 'module';
-import mongoose from 'mongoose';
 
 // Get current directory
 const __filename = fileURLToPath(import.meta.url);
@@ -21,6 +20,7 @@ const __dirname = dirname(__filename);
 const serverRequire = createRequire(path.join(__dirname, '../server/package.json'));
 const QRCode = serverRequire('qrcode');
 const PDFDocument = serverRequire('pdfkit');
+const mongoose = serverRequire('mongoose');
 const logoPath = path.join(__dirname, 'assets/logo.png');
 
 // ===== PDF Generation Helper Functions =====
@@ -41,7 +41,7 @@ function generateTimestampFilename(locationName: string, outputDir: string): str
 		String(now.getDate()).padStart(2, '0'),
 		String(now.getHours()).padStart(2, '0'),
 		String(now.getMinutes()).padStart(2, '0'),
-		String(now.getSeconds()).padStart(2, '0')
+		String(now.getSeconds()).padStart(2, '0'),
 	].join('');
 	const sanitizedLocationName = locationName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
 	const filename = `seeds-${sanitizedLocationName}-${timestamp}.pdf`;
@@ -53,7 +53,7 @@ async function generateQRCodeBuffer(surveyCode: string, qrSize: number): Promise
 	const qrDataUrl = await QRCode.toDataURL(surveyCode, {
 		width: qrSize,
 		margin: 1,
-		errorCorrectionLevel: 'M'
+		errorCorrectionLevel: 'M',
 	});
 	return Buffer.from(qrDataUrl.split(',')[1], 'base64');
 }
@@ -70,8 +70,8 @@ async function addQRCodePage(
 
 	const pageWidth = doc.page.width;
 	const margin = 50;
-	const contentWidth = pageWidth - (margin * 2);
-	
+	const contentWidth = pageWidth - margin * 2;
+
 	let currentY = margin;
 
 	if (fs.existsSync(logoPath)) {
@@ -83,13 +83,11 @@ async function addQRCodePage(
 	}
 
 	// Title
-	doc.fontSize(18)
-		.font('Helvetica-Bold')
-		.text('Understanding Unsheltered Homelessness', margin, currentY, {
-			align: 'center',
-			width: contentWidth
-		});
-	
+	doc.fontSize(18).font('Helvetica-Bold').text('Understanding Unsheltered Homelessness', margin, currentY, {
+		align: 'center',
+		width: contentWidth,
+	});
+
 	currentY += 40;
 
 	// Instructions
@@ -102,8 +100,8 @@ async function addQRCodePage(
 			{
 				align: 'left',
 				width: contentWidth,
-				continued: true
-			}
+				continued: true,
+			},
 		)
 		.font('Helvetica-Bold')
 		.text('$20', { continued: true })
@@ -120,15 +118,15 @@ async function addQRCodePage(
 			currentY,
 			{
 				align: 'left',
-				width: contentWidth
-			}
+				width: contentWidth,
+			},
 		);
 
 	currentY += 25;
 
 	doc.text('Pets and service animals welcome.', margin, currentY, {
 		align: 'left',
-		width: contentWidth
+		width: contentWidth,
 	});
 
 	currentY += 50;
@@ -140,27 +138,23 @@ async function addQRCodePage(
 	const qrBuffer = await generateQRCodeBuffer(surveyCode, qrSize);
 	doc.image(qrBuffer, qrX, currentY, {
 		width: qrSize,
-		height: qrSize
+		height: qrSize,
 	});
 
 	currentY += qrSize + 15;
 
-	doc.fontSize(16)
-		.font('Helvetica-Bold')
-		.text(`Referral Code: ${surveyCode}`, margin, currentY, {
-			align: 'center',
-			width: contentWidth
-		});
+	doc.fontSize(16).font('Helvetica-Bold').text(`Referral Code: ${surveyCode}`, margin, currentY, {
+		align: 'center',
+		width: contentWidth,
+	});
 
 	currentY += 50;
 
 	// Locations section
-	doc.fontSize(12)
-		.font('Helvetica-Bold')
-		.text('Locations', margin, currentY, {
-			align: 'left',
-			width: contentWidth
-		});
+	doc.fontSize(12).font('Helvetica-Bold').text('Locations', margin, currentY, {
+		align: 'left',
+		width: contentWidth,
+	});
 
 	currentY += 20;
 
@@ -168,46 +162,44 @@ async function addQRCodePage(
 		.font('Helvetica')
 		.text('• Highline United Methodist Church', margin + 10, currentY, {
 			align: 'left',
-			width: contentWidth - 10
+			width: contentWidth - 10,
 		});
 
 	currentY += 15;
 
 	doc.text('  13015 1st AVE S, Burien, WA 98168', margin + 10, currentY, {
 		align: 'left',
-		width: contentWidth - 10
+		width: contentWidth - 10,
 	});
 
 	currentY += 20;
 
 	doc.text('• Interview Dates and Hours:', margin + 10, currentY, {
 		align: 'left',
-		width: contentWidth - 10
+		width: contentWidth - 10,
 	});
 
 	currentY += 15;
 
 	doc.text('  Monday - Friday (11/17 - 11/21)', margin + 10, currentY, {
 		align: 'left',
-		width: contentWidth - 10
+		width: contentWidth - 10,
 	});
 
 	currentY += 15;
 
 	doc.text('  10am to 3pm', margin + 10, currentY, {
 		align: 'left',
-		width: contentWidth - 10
+		width: contentWidth - 10,
 	});
 
 	currentY += 50;
 
 	// Contact info
-	doc.fontSize(10)
-		.font('Helvetica')
-		.text('For questions, please call +1 (833) 393-1621', margin, currentY, {
-			align: 'center',
-			width: contentWidth
-		});
+	doc.fontSize(10).font('Helvetica').text('For questions, please call +1 (833) 393-1621', margin, currentY, {
+		align: 'center',
+		width: contentWidth,
+	});
 }
 
 async function generatePDF(seeds: any[], locationName: string): Promise<void> {
@@ -217,7 +209,7 @@ async function generatePDF(seeds: any[], locationName: string): Promise<void> {
 	// Create PDF document
 	const doc = new PDFDocument({
 		size: 'LETTER',
-		margin: 50
+		margin: 50,
 	});
 
 	const stream = fs.createWriteStream(filepath);
@@ -248,7 +240,7 @@ function isValidObjectId(identifier: string): boolean {
 
 async function findLocationByIdentifier(locationIdentifier: string, Location: any): Promise<any> {
 	const isObjectId = isValidObjectId(locationIdentifier);
-	
+
 	let location;
 	if (isObjectId) {
 		console.log(`Looking up location with ObjectId: "${locationIdentifier}"...`);
@@ -257,30 +249,24 @@ async function findLocationByIdentifier(locationIdentifier: string, Location: an
 		console.log(`Looking up location with hubName: "${locationIdentifier}"...`);
 		location = await Location.findOne({ hubName: locationIdentifier });
 	}
-	
+
 	if (!location) {
 		const idType = isObjectId ? 'ObjectId' : 'hubName';
 		throw new Error(`Location with ${idType} "${locationIdentifier}" not found`);
 	}
-	
+
 	console.log(`Found location: ${location.hubName} (${location._id}) ✓\n`);
 	return location;
 }
 
-async function createSeed(
-	surveyCode: string,
-	locationId: any,
-	Seed: any,
-	index: number,
-	total: number
-): Promise<any> {
+async function createSeed(surveyCode: string, locationId: any, Seed: any, index: number, total: number): Promise<any> {
 	try {
 		const seed = await Seed.create({
 			surveyCode,
 			locationObjectId: locationId,
-			isFallback: false
+			isFallback: false,
 		});
-		
+
 		console.log(`  [${index + 1}/${total}] Created seed: ${seed.surveyCode} (${seed._id})`);
 		return seed;
 	} catch (error) {
@@ -293,17 +279,17 @@ async function generateSeedsForLocation(
 	location: any,
 	count: number,
 	Seed: any,
-	generateUniqueSurveyCode: () => Promise<string>
+	generateUniqueSurveyCode: () => Promise<string>,
 ): Promise<any[]> {
 	console.log(`Generating ${count} seed(s)...\n`);
 	const createdSeeds: any[] = [];
-	
+
 	for (let i = 0; i < count; i++) {
 		const surveyCode = await generateUniqueSurveyCode();
 		const seed = await createSeed(surveyCode, location._id, Seed, i, count);
 		createdSeeds.push(seed);
 	}
-	
+
 	return createdSeeds;
 }
 
@@ -320,7 +306,7 @@ async function generateSeeds(locationIdentifier: string, count: number): Promise
 	const Seed = (await import('../server/src/database/seed/mongoose/seed.model.js')).default;
 	const { generateUniqueSurveyCode } = await import('../server/src/database/survey/survey.controller.js');
 	const connectDB = (await import('../server/src/database/index.js')).default;
-	
+
 	try {
 		console.log('Connecting to database...');
 		await connectDB();
@@ -328,12 +314,11 @@ async function generateSeeds(locationIdentifier: string, count: number): Promise
 
 		const location = await findLocationByIdentifier(locationIdentifier, Location);
 		const createdSeeds = await generateSeedsForLocation(location, count, Seed, generateUniqueSurveyCode);
-		
+
 		printSeedsSummary(createdSeeds, location.hubName);
-		
+
 		console.log('\n📄 Generating PDF with QR codes...');
 		await generatePDF(createdSeeds, location.hubName);
-
 	} catch (error) {
 		console.error('\n✗ Error:', error instanceof Error ? error.message : error);
 		process.exit(1);
@@ -364,4 +349,3 @@ if (isNaN(count) || count <= 0) {
 
 // Run the script
 generateSeeds(locationIdentifier, count);
-

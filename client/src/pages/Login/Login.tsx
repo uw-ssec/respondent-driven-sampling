@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
 
 import { useSurveyStore } from '@/stores';
-import { Box, Button, Paper, TextField, Typography } from '@mui/material';
+import { deleteAuthToken, isTokenValid } from '@/utils/authTokenHandler';
+import {
+	Alert,
+	Box,
+	Button,
+	Paper,
+	TextField,
+	Typography
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +18,16 @@ export default function Login() {
 	const { handleLogin } = useAuth();
 	const navigate = useNavigate();
 	const { clearSession } = useSurveyStore();
+
+	// Redirect if user already has a valid token
+	useEffect(() => {
+		if (isTokenValid()) {
+			navigate('/dashboard');
+		} else {
+			// Token is invalid or expired, clean it up
+			deleteAuthToken();
+		}
+	}, [navigate]);
 	// const [email, setEmail] = useState('');
 	const [phone, setPhone] = useState('');
 	const [otp, setOtp] = useState('');
@@ -267,22 +285,14 @@ export default function Login() {
 				)}
 
 				{errorMessage && (
-					<Typography
-						variant="body2"
-						color="error.main"
-						sx={{ mt: 1 }}
-					>
+					<Alert severity="error" sx={{ mt: 2 }}>
 						{errorMessage}
-					</Typography>
+					</Alert>
 				)}
 				{successMessage && (
-					<Typography
-						variant="body2"
-						color="success.main"
-						sx={{ mt: 1, fontWeight: 500 }}
-					>
+					<Alert severity="success" sx={{ mt: 2 }}>
 						{successMessage}
-					</Typography>
+					</Alert>
 				)}
 			</Paper>
 		</Box>

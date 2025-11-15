@@ -13,19 +13,25 @@ export const baseUserSchema = z
 	.object({
 		firstName: z.string().min(1, 'First name is required'),
 		lastName: z.string().min(1, 'Last name is required'),
-		email: z.email(),
+		email: z.email({ message: 'Please provide a valid email address' }),
 		phone: z
 			.string()
-			.length(12, 'Phone number must be exactly 12 characters (+1 and 10 digits)')
-			.regex(/^\+1\d{10}$/, 'Phone number must be in format +1XXXXXXXXXX, only digits'),
-		role: z.enum(ROLE_ENUM),
-		approvalStatus: z.enum(ApprovalStatus),
+			.regex(
+				/^\+1\d{10}$/,
+				'Please provide a valid 10-digit phone number with country code (+1XXXXXXXXXX)'
+			),
+		role: z.enum(ROLE_ENUM, {
+			message: 'Please provide a valid role'
+		}),
+		approvalStatus: z.enum(ApprovalStatus, {
+			message: 'Invalid approval status'
+		}),
 		approvedByUserObjectId: z
 			.string()
-			.refine(Types.ObjectId.isValid, 'Invalid user objectId'),
+			.refine(Types.ObjectId.isValid, 'Please provide a valid user ID'),
 		locationObjectId: z
 			.string()
-			.refine(Types.ObjectId.isValid, 'Invalid location objectId'),
+			.refine(Types.ObjectId.isValid, 'Please provide a valid location'),
 		permissions: z.array(
 			z.object({
 				action: z.enum(ACTION_ENUM),
