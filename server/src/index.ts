@@ -11,8 +11,6 @@ import nocache from 'nocache';
 import { setupSwagger } from '@/config/swagger';
 import connectDB from '@/database/index';
 import authRoutes from '@/routes/v1/auth';
-import pageRoutes from '@/routes/v1/pages';
-import surveyRoutes from '@/routes/v1/surveys';
 import locationsRoutesV2 from '@/routes/v2/locations';
 import seedsRoutesV2 from '@/routes/v2/seeds';
 import surveyRoutesV2 from '@/routes/v2/surveys';
@@ -151,8 +149,6 @@ setupSwagger(app);
 
 // Apply routes with security wrapper
 app.use('/api/auth', securityWrapper(authRoutes));
-app.use('/api/pages', securityWrapper(pageRoutes));
-app.use('/api/surveys', securityWrapper(surveyRoutes));
 app.use('/api/v2/surveys', securityWrapper(surveyRoutesV2));
 app.use('/api/v2/seeds', securityWrapper(seedsRoutesV2));
 app.use('/api/v2/locations', securityWrapper(locationsRoutesV2));
