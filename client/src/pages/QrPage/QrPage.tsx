@@ -1,8 +1,12 @@
+import { useRef } from 'react';
+
 import { useSurveyStore } from '@/stores';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useNavigate } from 'react-router-dom';
 
 import '@/styles/complete.css';
+
+import { printQrCodePdf } from '@/utils/qrCodeUtils';
 
 // Description: Displays referral QR codes and allows them to be printing
 
@@ -10,10 +14,11 @@ export default function QrPage() {
 	const navigate = useNavigate();
 	const { surveyData } = useSurveyStore();
 	const childSurveyCodes = surveyData?.childSurveyCodes || [];
+	const qrRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-	// Trigger browser printing
+	// Print PDF with custom paper size (62mm width)
 	const handlePrint = () => {
-		window.print();
+		printQrCodePdf(qrRefs.current, childSurveyCodes);
 	};
 
 	return (
@@ -28,11 +33,17 @@ export default function QrPage() {
 						{childSurveyCodes.length > 0 ? (
 							childSurveyCodes.map(
 								(code: string, index: number) => {
-									const qrUrl = `${window.location.origin}/survey?ref=${code}`;
+									const qrSurveyCode = code;
 									return (
-										<div key={index} className="qr-box">
+										<div
+											key={index}
+											className="qr-box"
+											ref={el => {
+												qrRefs.current[index] = el;
+											}}
+										>
 											<QRCodeCanvas
-												value={qrUrl}
+												value={qrSurveyCode}
 												size={120}
 												level="M"
 											/>

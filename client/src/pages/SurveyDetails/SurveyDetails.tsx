@@ -1,8 +1,12 @@
+import { useRef } from 'react';
+
 import { QRCodeCanvas } from 'qrcode.react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import '@/styles/SurveyDetailsCss.css';
 import '@/styles/complete.css';
+
+import { printQrCodePdf } from '@/utils/qrCodeUtils';
 
 import { useApi } from '@/hooks/useApi';
 
@@ -12,6 +16,7 @@ export default function SurveyDetails() {
 	const { data: survey, isLoading: loading } =
 		surveyService.useSurveyWithUser(id ?? '') || {};
 	const navigate = useNavigate();
+	const qrRefs = useRef<(HTMLDivElement | null)[]>([]);
 
 	// Renaming the json names
 	// TODO: verify these are the correct names for FA25 survey
@@ -54,9 +59,12 @@ export default function SurveyDetails() {
 	if (loading) return <p>Loading...</p>;
 	if (!survey) return <p>Survey not found.</p>;
 
-	// Trigger browser printing
+	// Generate PDF with custom paper size (62mm width)
 	const handlePrint = () => {
-		window.print();
+		if (!survey?.childSurveyCodes || survey.childSurveyCodes.length === 0) {
+			return;
+		}
+		printQrCodePdf(qrRefs.current, survey.childSurveyCodes);
 	};
 
 	// Function to handle logout
@@ -116,11 +124,17 @@ export default function SurveyDetails() {
 							survey.childSurveyCodes.length > 0 ? (
 								survey.childSurveyCodes.map(
 									(code: string, index: number) => {
-										const qrUrl = `${window.location.origin}/survey?ref=${code}`;
+										const qrSurveyCode = code;
 										return (
-											<div key={index} className="qr-box">
+											<div
+												key={index}
+												className="qr-box"
+												ref={el => {
+													qrRefs.current[index] = el;
+												}}
+											>
 												<QRCodeCanvas
-													value={qrUrl}
+													value={qrSurveyCode}
 													size={120}
 													level="M"
 												/>
