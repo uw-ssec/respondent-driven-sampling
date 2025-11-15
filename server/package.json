@@ -13,7 +13,7 @@
 		"clean": "rimraf build",
 		"lint": "eslint . --ext js,ts",
 		"lint:fix": "eslint . --ext js,ts --fix",
-		"super-admin": "tsx --env-file=.env ../scripts/superAdminCRUD.tsx"
+		"super-admin": "tsx --env-file=.env ../scripts/superAdminCRUD.tsx",
 		"generate-seeds": "tsx --env-file=.env ../scripts/generateSeeds.ts"
 	},
 	"keywords": [],
