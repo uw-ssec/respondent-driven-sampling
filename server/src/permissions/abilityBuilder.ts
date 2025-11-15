@@ -138,9 +138,10 @@ function applyManagerPermissions(
 
 	// Survey actions
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY);
-	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
+	builder.can([ACTIONS.CASL.READ, ACTIONS.CASL.UPDATE], SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY);
 	// can only read/update surveys created by themselves at their own location today
+	// TODO: re-enable this once we have custom validation endpoints	
 	// NOTE: disabling because apply-referral page needs to read surveys created by others
 	// builder.can([ACTIONS.CASL.READ, ACTIONS.CASL.UPDATE], SUBJECTS.SURVEY, {
 	// 	...isCreatedBySelf(ctx.userObjectId),
@@ -173,9 +174,10 @@ function applyVolunteerPermissions(
 	// Survey actions
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY);
-	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
+	builder.can([ACTIONS.CASL.READ, ACTIONS.CASL.UPDATE], SUBJECTS.SURVEY);
 	// can only read & update surveys created by themselves at their own location today
 	// NOTE: disabling because apply-referral page needs to read surveys created by others
+	// TODO: re-enable this once we have custom validation endpoints
 	// builder.can([ACTIONS.CASL.READ, ACTIONS.CASL.UPDATE], SUBJECTS.SURVEY, {
 	// 	...isCreatedBySelf(ctx.userObjectId),
 	// 	...hasSameLocation(ctx.latestLocationObjectId),
