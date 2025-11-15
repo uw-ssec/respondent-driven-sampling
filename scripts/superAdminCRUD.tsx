@@ -31,11 +31,9 @@
  *     Example: npm run super-admin -- restore 5551234567
  */
 
-import mongoose from 'mongoose';
-
 // ===== Validation Helper Functions =====
 
-function isValidObjectId(identifier: string): boolean {
+function isValidObjectId(identifier: string, mongoose: any): boolean {
 	return mongoose.Types.ObjectId.isValid(identifier) && /^[0-9a-fA-F]{24}$/.test(identifier);
 }
 
@@ -62,8 +60,8 @@ function normalizePhone(phone: string): string {
 
 // ===== Lookup Helper Functions =====
 
-async function findUserByIdentifier(identifier: string, User: any): Promise<any> {
-	const isObjectId = isValidObjectId(identifier);
+async function findUserByIdentifier(identifier: string, User: any, mongoose: any): Promise<any> {
+	const isObjectId = isValidObjectId(identifier, mongoose);
 	const isEmail = isValidEmail(identifier);
 	const isPhone = isValidPhone(identifier);
 
@@ -114,7 +112,8 @@ async function createSuperAdmin(
 	locationId: string,
 	User: any,
 	Location: any,
-	createUserSchema: any
+	createUserSchema: any,
+	mongoose: any
 ): Promise<void> {
 	console.log('\n📝 Creating new Super Admin...\n');
 
@@ -209,10 +208,10 @@ async function listSuperAdmins(User: any, Location: any, includeDeleted: boolean
 	}
 }
 
-async function getSuperAdmin(identifier: string, User: any, Location: any): Promise<void> {
+async function getSuperAdmin(identifier: string, User: any, Location: any, mongoose: any): Promise<void> {
 	console.log('\n🔍 Fetching Super Admin details...\n');
 
-	const user = await findUserByIdentifier(identifier, User);
+	const user = await findUserByIdentifier(identifier, User, mongoose);
 
 	if (user.role !== 'SUPER_ADMIN') {
 		throw new Error(`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`);
@@ -254,11 +253,12 @@ async function updateSuperAdmin(
 	},
 	User: any,
 	Location: any,
-	updateUserSchema: any
+	updateUserSchema: any,
+	mongoose: any
 ): Promise<void> {
 	console.log('\n✏️  Updating Super Admin...\n');
 
-	const user = await findUserByIdentifier(identifier, User);
+	const user = await findUserByIdentifier(identifier, User, mongoose);
 
 	if (user.role !== 'SUPER_ADMIN') {
 		throw new Error(`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`);
@@ -326,11 +326,12 @@ async function updateSuperAdmin(
 async function deleteSuperAdmin(
 	identifier: string,
 	hardDelete: boolean,
-	User: any
+	User: any,
+	mongoose: any
 ): Promise<void> {
 	console.log(`\n🗑️  ${hardDelete ? 'Permanently deleting' : 'Soft deleting'} Super Admin...\n`);
 
-	const user = await findUserByIdentifier(identifier, User);
+	const user = await findUserByIdentifier(identifier, User, mongoose);
 
 	if (user.role !== 'SUPER_ADMIN') {
 		throw new Error(`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`);
@@ -366,10 +367,10 @@ async function deleteSuperAdmin(
 
 // ===== RESTORE Operation =====
 
-async function restoreSuperAdmin(identifier: string, User: any): Promise<void> {
+async function restoreSuperAdmin(identifier: string, User: any, mongoose: any): Promise<void> {
 	console.log('\n♻️  Restoring Super Admin...\n');
 
-	const user = await findUserByIdentifier(identifier, User);
+	const user = await findUserByIdentifier(identifier, User, mongoose);
 
 	if (user.role !== 'SUPER_ADMIN') {
 		throw new Error(`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`);
@@ -396,6 +397,7 @@ async function restoreSuperAdmin(identifier: string, User: any): Promise<void> {
 // ===== Main Script Logic =====
 
 async function main(): Promise<void> {
+	const mongoose = (await import('../server/node_modules/mongoose/index.js')).default;
 	const User = (await import('../server/src/database/user/mongoose/user.model.js')).default;
 	const Location = (await import('../server/src/database/location/mongoose/location.model.js')).default;
 	const connectDB = (await import('../server/src/database/index.js')).default;
@@ -421,7 +423,7 @@ async function main(): Promise<void> {
 					console.error('Error: create requires 5 arguments: <firstName> <lastName> <email> <phone> <locationId>');
 					process.exit(1);
 				}
-				await createSuperAdmin(args[1], args[2], args[3], args[4], args[5], User, Location, createUserSchema);
+				await createSuperAdmin(args[1], args[2], args[3], args[4], args[5], User, Location, createUserSchema, mongoose);
 				break;
 
 			case 'list':
@@ -434,7 +436,7 @@ async function main(): Promise<void> {
 				console.error('Error: get requires 1 argument: <email|phone|objectId>');
 				process.exit(1);
 			}
-			await getSuperAdmin(args[1], User, Location);
+			await getSuperAdmin(args[1], User, Location, mongoose);
 			break;
 
 			case 'update': {
@@ -490,7 +492,7 @@ async function main(): Promise<void> {
 					process.exit(1);
 				}
 
-				await updateSuperAdmin(identifier, updates, User, Location, updateUserSchema);
+				await updateSuperAdmin(identifier, updates, User, Location, updateUserSchema, mongoose);
 				break;
 			}
 
@@ -500,7 +502,7 @@ async function main(): Promise<void> {
 				process.exit(1);
 			}
 			const hardDelete = args.includes('--hard');
-			await deleteSuperAdmin(args[1], hardDelete, User);
+			await deleteSuperAdmin(args[1], hardDelete, User, mongoose);
 			break;
 
 		case 'restore':
@@ -508,7 +510,7 @@ async function main(): Promise<void> {
 				console.error('Error: restore requires 1 argument: <email|phone|objectId>');
 				process.exit(1);
 			}
-			await restoreSuperAdmin(args[1], User);
+			await restoreSuperAdmin(args[1], User, mongoose);
 			break;
 
 			default:
