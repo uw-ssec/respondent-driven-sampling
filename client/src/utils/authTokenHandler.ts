@@ -35,3 +35,22 @@ export function hasAuthToken(): boolean {
 	const token = getAuthToken();
 	return token != null && token !== '';
 }
+
+export function isTokenValid(): boolean {
+	const token = getAuthToken();
+	if (!token) return false;
+
+	try {
+		const decoded = jwtDecode<JwtPayload & { exp?: number }>(token);
+		// Check if token has expiration and if it's expired
+		if (decoded.exp) {
+			const currentTime = Math.floor(Date.now() / 1000);
+			return decoded.exp > currentTime;
+		}
+		// If no expiration date, treat as invalid for security
+		return false;
+	} catch (error) {
+		// Token is invalid or malformed
+		return false;
+	}
+}

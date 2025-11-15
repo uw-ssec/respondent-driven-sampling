@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { saveAuthToken } from '@/utils/authTokenHandler';
+import { deleteAuthToken, isTokenValid } from '@/utils/authTokenHandler';
 import { Alert, Box, Button, Link, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,6 +13,16 @@ import {
 
 export default function Signup() {
 	const navigate = useNavigate();
+
+	// Redirect if user already has a valid token
+	useEffect(() => {
+		if (isTokenValid()) {
+			navigate('/dashboard');
+		} else {
+			// Token is invalid or expired, clean it up
+			deleteAuthToken();
+		}
+	}, [navigate]);
 	const [userData, setUserData] = useState({
 		firstName: '',
 		lastName: '',
@@ -23,8 +33,10 @@ export default function Signup() {
 	});
 	const [otp, setOtp] = useState('');
 	const [otpSent, setOtpSent] = useState(false);
-	const [errorMessage, setErrorMessage] = useState('');
+	const [errorMessages, setErrorMessages] = useState<string[]>([]);
 	const [countdown, setCountdown] = useState(0);
+	const [pendingApproval, setPendingApproval] = useState(false);
+	const [signupSuccess, setSignupSuccess] = useState(false);
 
 	useEffect(() => {
 		let timer: string | number | NodeJS.Timeout | undefined;
@@ -49,29 +61,35 @@ export default function Signup() {
 	};
 
 	const sendOtp = async () => {
-		setErrorMessage('');
+		setErrorMessages([]);
 		try {
 			const response = await fetch('/api/auth/send-otp-signup', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					phone: userData.phone,
-					email: userData.email
-				})
+				body: JSON.stringify(userData)
 			});
 			const data = await response.json();
 			if (response.ok) {
 				setOtpSent(true);
 				setCountdown(60);
 			} else {
-				setErrorMessage(data.message);
+				// Extract individual error messages from validation errors
+				if (data.errors && Array.isArray(data.errors)) {
+					const messages = data.errors.map(
+						(err: { message: string }) => err.message
+					);
+					setErrorMessages(messages);
+				} else {
+					setErrorMessages([data.message || 'Failed to send OTP']);
+				}
 			}
 		} catch {
-			setErrorMessage('Failed to send OTP');
+			setErrorMessages(['Failed to send OTP']);
 		}
 	};
 
 	const verifyOtp = async () => {
+		setErrorMessages([]);
 		try {
 			const response = await fetch('/api/auth/verify-otp-signup', {
 				method: 'POST',
@@ -80,13 +98,24 @@ export default function Signup() {
 			});
 			const data = await response.json();
 			if (response.ok) {
-				saveAuthToken(data.token);
-				navigate(data.redirectTo);
+				// New users always need approval, show pending message that instructs user to sign in again once approved
+				setSignupSuccess(true);
+				setPendingApproval(true);
+				setOtpSent(false);
+				setOtp('');
 			} else {
-				setErrorMessage(data.message);
+				// Extract individual error messages from validation errors
+				if (data.errors && Array.isArray(data.errors)) {
+					const messages = data.errors.map(
+						(err: { message: string }) => err.message
+					);
+					setErrorMessages(messages);
+				} else {
+					setErrorMessages([data.message || 'Failed to verify OTP']);
+				}
 			}
 		} catch {
-			setErrorMessage('Failed to verify OTP');
+			setErrorMessages(['Failed to verify OTP']);
 		}
 	};
 
@@ -119,10 +148,38 @@ export default function Signup() {
 					textAlign="center"
 					sx={{ mb: 3 }}
 				>
-					{otpSent ? 'Verify OTP' : 'Welcome! Sign Up Here!'}
+					{signupSuccess
+						? 'Signup Successful!'
+						: otpSent
+							? 'Verify OTP'
+							: 'Welcome! Sign Up Here!'}
 				</Typography>
 
-				{!otpSent ? (
+				{signupSuccess && pendingApproval ? (
+					<Stack spacing={2.5}>
+						<Alert severity="info" sx={{ mb: 2 }}>
+							Your account has been created successfully! However,
+							your account is pending approval from an
+							administrator.
+						</Alert>
+						<Typography
+							variant="body2"
+							color="text.secondary"
+							sx={{ mb: 2 }}
+						>
+							Once your account has been approved, please log back
+							in to access the application.
+						</Typography>
+						<Button
+							variant="contained"
+							fullWidth
+							onClick={() => navigate('/login')}
+							sx={{ mt: 2 }}
+						>
+							Go to Login
+						</Button>
+					</Stack>
+				) : !otpSent ? (
 					<Stack spacing={2.5}>
 						<Box sx={{ display: 'flex', gap: 2 }}>
 							<FormInput
@@ -235,7 +292,7 @@ export default function Signup() {
 									setOtpSent(false);
 									setOtp('');
 									setCountdown(0);
-									setErrorMessage('');
+									setErrorMessages([]);
 								}}
 								sx={{ cursor: 'pointer' }}
 							>
@@ -245,10 +302,14 @@ export default function Signup() {
 					</Stack>
 				)}
 
-				{errorMessage && (
-					<Alert severity="error" sx={{ mt: 2 }}>
-						{errorMessage}
-					</Alert>
+				{errorMessages.length > 0 && (
+					<Stack spacing={1} sx={{ mt: 2 }}>
+						{errorMessages.map((error, index) => (
+							<Alert key={index} severity="error">
+								{error}
+							</Alert>
+						))}
+					</Stack>
 				)}
 			</Box>
 		</Box>
