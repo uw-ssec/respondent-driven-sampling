@@ -1,6 +1,5 @@
 #!/usr/bin/env tsx
 /**
- * NOTE: Make sure to set CLIENT_URL in .env to the correct deployment URL
  * Script to generate N seeds for a given location
  * Usage: npm run generate-seeds -- <hubName|objectId> <count>
  * Example: npm run generate-seeds -- "Main Hub" 10
@@ -49,9 +48,9 @@ function generateTimestampFilename(locationName: string, outputDir: string): str
 	return path.join(outputDir, filename);
 }
 
-async function generateQRCodeBuffer(surveyCode: string, baseUrl: string, qrSize: number): Promise<Buffer> {
-	const qrUrl = `${baseUrl}/survey?ref=${surveyCode}`;
-	const qrDataUrl = await QRCode.toDataURL(qrUrl, {
+async function generateQRCodeBuffer(surveyCode: string, qrSize: number): Promise<Buffer> {
+	// Encode only the referral code (no URL) so QR codes work across any deployment
+	const qrDataUrl = await QRCode.toDataURL(surveyCode, {
 		width: qrSize,
 		margin: 1,
 		errorCorrectionLevel: 'M',
@@ -63,8 +62,7 @@ async function addQRCodePage(
 	doc: any,
 	surveyCode: string,
 	locationName: string,
-	baseUrl: string,
-	isFirstPage: boolean,
+	isFirstPage: boolean
 ): Promise<void> {
 	if (!isFirstPage) {
 		doc.addPage();
@@ -136,8 +134,8 @@ async function addQRCodePage(
 	// QR Code and Referral Code
 	const qrSize = 100;
 	const qrX = (pageWidth - qrSize) / 2;
-
-	const qrBuffer = await generateQRCodeBuffer(surveyCode, baseUrl, qrSize);
+	
+	const qrBuffer = await generateQRCodeBuffer(surveyCode, qrSize);
 	doc.image(qrBuffer, qrX, currentY, {
 		width: qrSize,
 		height: qrSize,
@@ -219,7 +217,7 @@ async function generatePDF(seeds: any[], locationName: string): Promise<void> {
 
 	// Generate one page per seed
 	for (let i = 0; i < seeds.length; i++) {
-		await addQRCodePage(doc, seeds[i].surveyCode, locationName, baseUrl, i === 0);
+		await addQRCodePage(doc, seeds[i].surveyCode, locationName, i === 0);
 	}
 
 	doc.end();
@@ -329,15 +327,6 @@ async function generateSeeds(locationIdentifier: string, count: number): Promise
 		console.log('\nDatabase connection closed.');
 		process.exit(0);
 	}
-}
-
-// Require CLIENT_URL to be set
-const baseUrl = process.env.CLIENT_URL;
-if (!baseUrl) {
-	console.error('\n✗ Error: CLIENT_URL environment variable is not set');
-	console.error('   Please set CLIENT_URL in your .env file before running this script.');
-	console.error('   Example: CLIENT_URL=https://your-domain.com\n');
-	process.exit(1);
 }
 
 // Parse command line arguments

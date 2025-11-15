@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Html5Qrcode } from 'html5-qrcode';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +18,39 @@ export default function ApplyReferral() {
 	const [isScanning, setIsScanning] = useState(false); // Track scanning state
 	const scannerRef = useRef<Html5Qrcode | null>(null);
 	const readerRef = useRef<HTMLDivElement | null>(null);
+
+	// Function to handle successful QR code scan
+	const onScanSuccess = useCallback((decodedText: string) => {
+		if (scannerRef.current) {
+			scannerRef.current
+				.stop()
+				.then(() => {
+					scannerRef.current?.clear();
+					console.log('Scanner stopped after successful scan.');
+				})
+				.catch(error =>
+					console.error('Failed to stop scanner:', error)
+				);
+		}
+		setIsScanning(false);
+
+		// Extract referral code from scanned text
+		const code = decodedText.trim();
+
+		if (!code) {
+			alert('Invalid QR Code. Could not extract referral code.');
+			return;
+		}
+
+		// Clear any existing survey data and navigate to survey with the referral code
+		clearSurvey();
+		navigate(`/survey?ref=${code}`);
+	}, []);
+
+	// Function to handle QR code scan failure
+	const onScanFailure = useCallback((error: string) => {
+		console.warn(`QR Code scan error: ${error}`);
+	}, []);
 
 	// Effect to initialize the QR scanner
 	// This effect runs when the component mounts and when isScanning changes
@@ -67,36 +100,7 @@ export default function ApplyReferral() {
 				}
 			}
 		};
-	}, [isScanning]);
-
-	// Function to handle successful QR code scan
-	const onScanSuccess = (decodedText: string) => {
-		if (scannerRef.current) {
-			scannerRef.current
-				.stop()
-				.then(() => {
-					scannerRef.current?.clear();
-					console.log('Scanner stopped after successful scan.');
-				})
-				.catch(error =>
-					console.error('Failed to stop scanner:', error)
-				);
-		}
-		setIsScanning(false);
-
-		// Check if the scanned text is a valid URL
-		try {
-			const url = new URL(decodedText);
-			window.location.href = url.href; // Redirect user to the scanned URL
-		} catch (error) {
-			alert('Invalid QR Code. Please scan a valid link.');
-		}
-	};
-
-	// Function to handle QR code scan failure
-	const onScanFailure = (error: string) => {
-		console.warn(`QR Code scan error: ${error}`);
-	};
+	}, [isScanning, onScanSuccess, onScanFailure]);
 
 	// Function to handle referral code submission
 	const handleStartSurvey = async () => {
