@@ -451,40 +451,40 @@ const shelterServicesPage = {
 					cellType: 'dropdown',
 					choices: [
 						{
-							value: '1 ',
-							text: ' Street Outreach'
+							value: '1',
+							text: 'Street Outreach'
 						},
 						{
-							value: '2 ',
-							text: ' Diversion'
+							value: '2',
+							text: 'Diversion'
 						},
 						{
-							value: '3 ',
-							text: ' Emergency Shelter'
+							value: '3',
+							text: 'Emergency Shelter'
 						},
 						{
-							value: '4 ',
-							text: ' Temporary Housing'
+							value: '4',
+							text: 'Temporary Housing'
 						},
 						{
-							value: '5 ',
-							text: ' Coordinated Entry'
+							value: '5',
+							text: 'Coordinated Entry'
 						},
 						{
-							value: '6 ',
-							text: ' Severe Weather Shelter'
+							value: '6',
+							text: 'Severe Weather Shelter'
 						},
 						{
-							value: '7 ',
-							text: ' Day Center'
+							value: '7',
+							text: 'Day Center'
 						},
 						{
-							value: '8 ',
-							text: ' Food bank'
+							value: '8',
+							text: 'Food bank'
 						},
 						{
-							value: '9 ',
-							text: ' Case Management'
+							value: '9',
+							text: 'Case Management'
 						}
 					],
 					showOtherItem: true
