@@ -125,6 +125,7 @@ function addTemplatePage(doc: any): void {
         .rect(qrX, currentY, qrSize, qrSize)
         .dash(5, { space: 5 })
         .stroke();
+    doc.undash();
 
     doc.fontSize(10)
         .font('Helvetica-Oblique')
