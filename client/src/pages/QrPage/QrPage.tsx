@@ -13,7 +13,7 @@ import { printQrCodePdf } from '@/utils/qrCodeUtils';
 export default function QrPage() {
 	const navigate = useNavigate();
 	const { surveyData } = useSurveyStore();
-	const childSurveyCodes = surveyData?.childSurveyCodes || [];
+	const childSurveyCodes = surveyData?.childSurveyCodes ?? [];
 	const qrRefs = useRef<(HTMLDivElement | null)[]>([]);
 
 	// Print PDF with custom paper size (62mm width)

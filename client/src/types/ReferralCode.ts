@@ -1,3 +1,3 @@
-export interface ReferralCode {
-	code: string;
-}
+// export interface ReferralCode {
+// 	code: string;
+// }

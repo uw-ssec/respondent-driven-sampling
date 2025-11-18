@@ -2,12 +2,7 @@ import { Types } from 'mongoose';
 import { z } from 'zod';
 
 import { ApprovalStatus } from '@/database/utils/constants';
-import {
-	ACTION_ENUM,
-	CONDITION_ENUM,
-	ROLE_ENUM,
-	SUBJECT_ENUM
-} from '@/permissions/constants';
+import { ROLE_ENUM } from '@/permissions/constants';
 
 export const baseUserSchema = z
 	.object({
@@ -31,13 +26,6 @@ export const baseUserSchema = z
 			.refine(Types.ObjectId.isValid, 'Please provide a valid user ID'),
 		locationObjectId: z
 			.string()
-			.refine(Types.ObjectId.isValid, 'Please provide a valid location'),
-		permissions: z.array(
-			z.object({
-				action: z.enum(ACTION_ENUM),
-				subject: z.enum(SUBJECT_ENUM),
-				condition: z.enum(CONDITION_ENUM).optional() // Mongoose handles default, which is empty array
-			})
-		)
+			.refine(Types.ObjectId.isValid, 'Please provide a valid location')
 	})
 	.strict();

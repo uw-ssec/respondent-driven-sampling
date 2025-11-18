@@ -16,7 +16,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v2/users:
+ * /api/users:
  *   get:
  *     summary: Get all users
  *     description: Retrieve all users with optional query filters and permission-based access control
@@ -61,7 +61,7 @@ router.get(
 
 /**
  * @swagger
- * /api/v2/users/{objectId}:
+ * /api/users/{objectId}:
  *   get:
  *     summary: Get user by ID
  *     description: Retrieve a specific user by its ObjectId
@@ -116,7 +116,7 @@ router.get(
 
 /**
  * @swagger
- * /api/v2/users:
+ * /api/users:
  *   post:
  *     summary: Create user
  *     description: Create a new user with the provided data
@@ -156,7 +156,7 @@ router.post(
 
 /**
  * @swagger
- * /api/v2/users/{objectId}:
+ * /api/users/{objectId}:
  *   patch:
  *     summary: Update user
  *     description: Update a specific user by its ObjectId
@@ -237,7 +237,7 @@ router.patch(
 
 /**
  * @swagger
- * /api/v2/users/{objectId}:
+ * /api/users/{objectId}:
  *   delete:
  *     summary: Soft delete user
  *     description: Soft delete a specific user by setting deletedAt timestamp (user is not permanently removed)

@@ -4,6 +4,8 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { useApi } from '@/hooks';
 import { Box, Paper, TablePagination, Typography } from '@mui/material';
 
+import { SurveyDocument } from '@/types/Survey';
+
 import {
 	FilterDialog,
 	SurveyEntryDashboardControls,
@@ -55,12 +57,14 @@ export default function SurveyEntryDashboard() {
 		if (!surveys) return [];
 		if (userRole === 'VOLUNTEER') {
 			return surveys.filter(
-				(survey: any) => survey.createdByUserObjectId == userObjectId
+				(survey: SurveyDocument) =>
+					survey.createdByUserObjectId == userObjectId
 			);
 		}
 		if (userRole === 'MANAGER') {
 			return surveys.filter(
-				(survey: any) => survey.locationObjectId === locationObjectId
+				(survey: SurveyDocument) =>
+					survey.locationObjectId === locationObjectId
 			);
 		}
 		// SUPER_ADMIN and ADMIN can see all surveys
@@ -81,7 +85,7 @@ export default function SurveyEntryDashboard() {
 
 	const columns = [
 		{ key: 'createdAt', label: 'Date & Time', sortable: true, width: 120 },
-		{ key: 'employeeId', label: 'Employee ID', sortable: true, width: 120 },
+		// { key: 'employeeId', label: 'Employee ID', sortable: true, width: 120 },
 		{
 			key: 'employeeName',
 			label: 'Employee Name',

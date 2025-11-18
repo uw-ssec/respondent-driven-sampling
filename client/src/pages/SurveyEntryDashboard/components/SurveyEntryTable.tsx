@@ -8,7 +8,7 @@ import {
 	TableSortLabel
 } from '@mui/material';
 
-import { Survey } from '@/types/Survey';
+import { SurveyDocument } from '@/types/Survey';
 
 import SurveyEntryDashboardRow from './SurveyEntryDashboardRow';
 
@@ -20,7 +20,7 @@ interface Column {
 }
 
 interface SurveyEntryTableProps {
-	surveys: Survey[];
+	surveys: SurveyDocument[];
 	isLoading: boolean;
 	columns: Column[];
 	sortConfig: {

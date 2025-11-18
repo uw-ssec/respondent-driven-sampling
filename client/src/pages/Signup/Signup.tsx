@@ -80,7 +80,7 @@ export default function Signup() {
 					);
 					setErrorMessages(messages);
 				} else {
-					setErrorMessages([data.message || 'Failed to send OTP']);
+					setErrorMessages([data.message ?? 'Failed to send OTP']);
 				}
 			}
 		} catch {
@@ -111,7 +111,7 @@ export default function Signup() {
 					);
 					setErrorMessages(messages);
 				} else {
-					setErrorMessages([data.message || 'Failed to verify OTP']);
+					setErrorMessages([data.message ?? 'Failed to verify OTP']);
 				}
 			}
 		} catch {
