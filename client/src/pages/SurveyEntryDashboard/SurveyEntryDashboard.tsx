@@ -19,7 +19,7 @@ import {
 
 export default function SurveyEntryDashboard() {
 	const { surveyService } = useApi();
-	const { userObjectId, userRole } = useAuthContext();
+	const { userObjectId, userRole, locationObjectId } = useAuthContext();
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [searchTerm, setSearchTerm] = useState('');
 	const [viewAll, setViewAll] = useState(false);
@@ -53,14 +53,19 @@ export default function SurveyEntryDashboard() {
 	// Data processing pipeline
 	const filteredSurveysByUserObjectId = useMemo(() => {
 		if (!surveys) return [];
-		if (userRole === 'VOLUNTEER' || userRole === 'MANAGER') {
+		if (userRole === 'VOLUNTEER') {
 			return surveys.filter(
 				(survey: any) => survey.createdByUserObjectId == userObjectId
 			);
 		}
+		if (userRole === 'MANAGER') {
+			return surveys.filter(
+				(survey: any) => survey.locationObjectId === locationObjectId
+			);
+		}
+		// SUPER_ADMIN and ADMIN can see all surveys
 		return surveys;
-	}, [surveys, userObjectId, userRole]);
-
+	}, [surveys, userObjectId, userRole, locationObjectId]);
 	const filteredSurveys = filterSurveysByDate(
 		filteredSurveysByUserObjectId,
 		viewAll,
