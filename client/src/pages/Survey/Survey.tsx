@@ -4,7 +4,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Model } from 'survey-core';
 import { Survey as SurveyComponent } from 'survey-react-ui';
 
-import 'survey-core/defaultV2.min.css';
+import 'survey-core/survey-core.min.css';
 
 import { SYSTEM_SURVEY_CODE } from '@/constants';
 import { useAuthContext } from '@/contexts';

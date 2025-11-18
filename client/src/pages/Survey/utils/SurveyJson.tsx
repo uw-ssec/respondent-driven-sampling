@@ -1,3 +1,5 @@
+
+
 type Choice =
 	| string
 	| {
@@ -17,17 +19,24 @@ export const generateSurveyJson = (locations: Choice[]) => {
 			preScreenPage,
 			consentPage,
 			surveyValidationPage,
+			giftCardPage,
 			personalLivingSituationPage,
 			networkPage1,
 			networkPage2,
-			livingSituationPage,
+			durationHomelessnessPage,
+			shelterServicesPage,
 			demographicsPage,
 			healthPage,
 			householdPage,
 			specialQuestionsPage,
-			youthSpecialQuestionsPage,
 			surveyDeduplicationPage,
 			outroPage
+		],
+		triggers: [
+			{
+				type: 'complete',
+				expression: "{consent_given} = 'No' or {is_adult} = 'No'"
+			}
 		],
 		partialSendEnabled: true
 	};
@@ -52,15 +61,16 @@ const generateVolunteerPreScreenPage = (locationChoices: Choice[]) => {
 		elements: [
 			{
 				type: 'html',
-				name: 'pre-screen-note',
-				html: '<div><strong>These questions are for volunteers only. Please do not ask the respondent!</strong></div>'
+				name: 'question3',
+				html: '<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0;"><strong>Instructions:</strong> These questions are for volunteers only. Please do not ask the respondent.</div>'
 			},
 			{
 				type: 'dropdown',
 				name: 'location',
 				title: 'Please select location:',
 				choices: locationChoices,
-				isRequired: true
+				isRequired: true,
+				showNoneItem: true
 			}
 		]
 	};
@@ -126,15 +136,22 @@ const consentPage = {
 			name: 'consent-note',
 			html: `<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>
             <br />
-<p>As part of work with the King County Regional Homelessness Authority (KCRHA), I’d like to ask you some questions we’re required to ask and collect for our funders about unsheltered homelessness in our region.</p>
+<p>As part of work with the <strong>University of Washington</strong> in preparation for <strong>King County Regional Homelessness Authority (KCRHA) 2026 PIT Count</strong>, I'd like to ask you some questions we're required to ask and collect for <strong>KCRHA's</strong> funders about unsheltered homelessness in our region.</p>
 <p>Your participation is voluntary and will not affect any services you or your family are seeking or currently receiving. We are surveying many people and will put all responses together, so it will not be possible to identify you from the information you provide here.</p>
-<p>As a token of appreciation for your time, we will give you a $20 preloaded debit card, $40 for families with minor children at the end.</p>
-<p>Would you be willing to talk with me for about 30 min?</p>`
+<p>As a token of appreciation for your time, we will give you a <strong>$20 pre-loaded debit card</strong>.</p>
+<p>Would you be willing to talk with me for about <strong>30 minutes</strong>?</p>`
 		},
 		{
 			type: 'radiogroup',
 			name: 'consent_given',
-			title: 'Did the subject orally consent to participate?',
+			title: 'Do you consent to participate in this survey?',
+			choices: ['Yes', 'No'],
+			isRequired: true
+		},
+		{
+			type: 'radiogroup',
+			name: 'is_adult',
+			title: 'Are you 18 years old or older?',
 			choices: ['Yes', 'No'],
 			isRequired: true
 		}
@@ -142,22 +159,11 @@ const consentPage = {
 };
 
 // SECTION 1.0
+// SECTION 1.1
 const surveyValidationPage = {
 	name: 'survey-validation',
 	title: 'Survey Validation',
 	elements: [
-		{
-			type: 'html',
-			name: 'consent-instructions',
-			html: '<div><strong>Please ask the respondent if they are above the age of 18. The survey will end if they are not at least 18 years old.</strong></div>'
-		},
-		{
-			type: 'radiogroup',
-			name: 'is_adult',
-			title: 'Is the respondent at least 18 years old?',
-			choices: ['Yes', 'No'],
-			isRequired: true
-		},
 		{
 			type: 'text',
 			name: 'first_two_letters_fname',
@@ -186,7 +192,49 @@ const surveyValidationPage = {
 			type: 'text',
 			name: 'date_of_birth',
 			title: "Enter the respondent's date of birth",
-			inputType: 'date'
+			inputType: 'date',
+			minValueExpression: "today(-36525)",  // 100 years ago (accounting for leap years)
+ 			maxValueExpression: "today(-6574)"     // 18 years ago (accounting for leap years)
+		}
+	]
+};
+// SECTION 1.2
+const giftCardPage = {
+	name: 'giftCards',
+	title: 'Gift Cards',
+	elements: [
+		{
+			type: 'checkbox',
+			name: 'email_phone_consent',
+			title: 'Do you consent to receive your gift cards via SMS or email?',
+			choices: [
+				{
+					value: 'email',
+					text: 'Email address'
+				},
+				{
+					value: 'phone',
+					text: 'Phone number'
+				}
+			],
+			showNoneItem: true
+		},
+		{
+			type: 'text',
+			name: 'email',
+			visibleIf: "{email_phone_consent} contains 'email'",
+			title: "What's your email address?",
+			inputType: 'email'
+		},
+		{
+			type: 'text',
+			name: 'phone',
+			visibleIf: "{email_phone_consent} contains 'phone'",
+			title: "What's your phone number?",
+			maskType: 'pattern',
+			maskSettings: {
+			  pattern: '+9(999)-999-99-99'
+			}
 		}
 	]
 };
@@ -203,7 +251,7 @@ const personalLivingSituationPage = {
 			choices: sleepingSituationChoices,
 			showOtherItem: true,
 			otherText: 'Other (please specify)',
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'checkbox',
@@ -218,7 +266,7 @@ const personalLivingSituationPage = {
 			],
 			showNoneItem: true,
 			separateSpecialChoices: true,
-			isRequired: true,
+			isRequired: false,
 			visibleIf:
 				"{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
 		},
@@ -234,12 +282,10 @@ const personalLivingSituationPage = {
 				'Ability to cook hot food'
 			],
 			showNoneItem: true,
-			isRequired: true,
-			visibleIf:
-				"{sleeping_situation} notempty and !{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
+			isRequired: false,
+			visibleIf: "{sleeping_situation} notempty and !{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
 		}
-	],
-	visibleIf: "{consent_given} = 'Yes'"
+	]
 };
 
 // SECTION 3.0
@@ -251,11 +297,10 @@ const networkPage1 = {
 			type: 'text',
 			name: 'non_family_network_size',
 			title: 'Other than any family living with you, how many people do you closely know who are also unhoused or experiencing homelessness today?',
-			inputType: 'number',
-			validators: [{ type: 'numeric', minValue: 0 }]
-		}
-	],
-	visibleIf: "{consent_given} = 'Yes'"
+		inputType: 'number',
+		validators: [{ type: 'numeric', minValue: 0, maxValue: 100 }]
+	}
+	]
 };
 
 const networkPage2 = {
@@ -265,23 +310,23 @@ const networkPage2 = {
 		{
 			type: 'html',
 			name: 'network_instruction',
-			html: '<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0;"><strong>Instructions:</strong> Please fill in information for each person below. You can add or remove rows as needed.</div>'
+			html: '<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0;"><strong>Instructions:</strong> Please fill in information for each person below. You can add or remove tabs as needed.</div>'
 		},
 		{
 			type: 'paneldynamic',
 			name: 'non_family_network',
-			title: 'Network Connections',
+			title: 'Outside of your family living with you, please list the first name, pseudonym/nickname/street name or initials of the person and their relation (e.g. friend, family, etc) of people you personally know who are unhoused or experiencing homelessness. \nPlease answer for as many people as you know.',
 			templateElements: [
 				{
 					type: 'text',
-					name: 'name_pseudo',
-					title: 'Name/Nickname',
+					name: 'network_person_name',
+					title: 'Name/Nickname/Initials',
 					placeholder: 'Name or nickname'
 				},
 				{
 					type: 'dropdown',
 					name: 'relationship',
-					title: 'Relationship',
+					title: 'What is your relationship to {panel.network_person_name}?',
 					choices: [
 						'Friend',
 						'Acquaintance',
@@ -296,8 +341,8 @@ const networkPage2 = {
 				},
 				{
 					type: 'dropdown',
-					name: 'sleeping_situation',
-					title: 'Where do they currently sleep?',
+					name: 'network_sleeping_situation',
+					title: 'Where does {panel.network_person_name} currently sleep?',
 					choices: sleepingSituationChoices,
 					showOtherItem: true,
 					otherText: 'Other (please specify)'
@@ -305,17 +350,16 @@ const networkPage2 = {
 			],
 			displayMode: 'tab',
 			maxPanelCount: 50,
-			addPanelText: '+ Add another person',
-			removePanelText: 'Remove',
-			templateTitle: 'Person #{panelIndex}'
+			panelAddText: '+ Add new person',
+			panelRemoveText: 'Remove',
+			templateTitle: 'Person: {panel.network_person_name}'
 		}
-	],
-	visibleIf: "{consent_given} = 'Yes'"
+	]
 };
 
-const livingSituationPage = {
-	name: 'living_situation',
-	title: 'Living Situation',
+const durationHomelessnessPage = {
+	name: 'duration_homelessness',
+	title: 'Duration of Homelessness',
 	elements: [
 		{
 			type: 'radiogroup',
@@ -336,7 +380,7 @@ const livingSituationPage = {
 		{
 			type: 'radiogroup',
 			name: 'num_episodes',
-			title: 'Including this time, how many different times have you been homeless in the past 3 years, that is since January 2026?',
+			title: 'Including this time, how many different times have you been homeless in the past 3 years, that is since November 2022?',
 			choices: [
 				'1 time',
 				'2 times',
@@ -351,11 +395,12 @@ const livingSituationPage = {
 			type: 'multipletext',
 			name: 'overall_lot_homeless',
 			title: 'If you added up all the time you have spent experiencing homelessness in the past 3 years, about how long would that be?',
+			description: "Feel free to enter any variations of the respondent's answer. For example: 1.5 years, 18 months, 1 year and 6 months.",
 			items: [
 				{
 					name: 'overall_lot_homeless_days',
 					inputType: 'number',
-					title: 'Days'
+					title: 'Years'
 				},
 				{
 					name: 'overall_lot_homeless_months',
@@ -365,74 +410,113 @@ const livingSituationPage = {
 				{
 					name: 'overall_lot_homeless_years',
 					inputType: 'number',
-					title: 'Years'
+					title: 'Days'
 				}
+			]
+		}
+	]
+};
+
+// Housing Assistance Services
+const shelterServicesPage = {
+	name: 'shelter_services_panel',
+	title: 'Housing Assistance Services',
+	elements: [
+		{
+			type: 'radiogroup',
+			name: 'shelter_services',
+			title: 'In the past 3 years, have you enrolled in an Emergency Shelter or received any other form of housing assistance from an organization that serves people experiencing homelessness? (Includes referrals, vouchers, hygiene support, etc.)',
+			choices: [
+				'Yes',
+				'No',
+				'Choose not to answer',
+				'Do not know'
 			]
 		},
 		{
-			type: 'radiogroup',
-			name: 'shelter_svcs',
-			title: 'In the past 3 years, have you enrolled in an Emergency Shelter or received any other form of housing assistance from an organization that serves people experiencing homelessness? (Includes referrals, vouchers, hygiene support, etc.)',
-			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: false
-		},
-		{
-			type: 'html',
-			name: 'shelter_svcs_instruction',
-			html: '<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0;"><strong>INTERVIEWER: If \'Yes\', fill out the table below as much as possible</strong></div>',
-			visibleIf: "{shelter_svcs} = 'Yes'"
-		},
-		{
-			type: 'paneldynamic',
-			name: 'shelter_svcs_table',
+			type: 'matrixdynamic',
+			name: 'shelter_services_details',
+			visibleIf: "{shelter_services} = 'Yes'",
 			title: 'Housing Assistance Services',
-			templateElements: [
+			description: 'Fill out the table below as much as possible.\\nIn case a respondent received a service multiple times, only include the last service received.',
+			validators: [
 				{
-					type: 'text',
-					name: 'shelter_svcs_date',
-					title: 'Date of Last Service Received',
-					inputType: 'month',
-					validators: [
-						{
-							type: 'regex',
-							text: 'Please enter date in MM/YYYY format (e.g., 03/2024)',
-							regex: '^(0[1-9]|1[0-2])\\/20[2-9][0-9]$'
-						}
-					]
-				},
-				{
-					type: 'radiogroup',
-					name: 'shelter_svcs_type',
-					title: 'Type of Service Received',
-					choices: [
-						'Street Outreach',
-						'Diversion',
-						'Emergency Shelter',
-						'Temporary Housing',
-						'Coordinated Entry',
-						'Severe Weather Shelter [Seasonal]',
-						'Day Center',
-						'Food bank',
-						'Case Management'
-					],
-					colCount: 2,
-					hasOther: true,
-					otherText: 'Other (please specify)'
+					type: 'expression'
 				}
 			],
-			panelCount: 0,
-			minPanelCount: 0,
-			maxPanelCount: 50,
-			panelAddText: '+ Add another service',
-			panelRemoveText: 'Remove',
-			displayMode: 'list',
-			templateTitle: 'Service #{panelIndex}',
-			allowAddPanel: true,
-			allowRemovePanel: true,
-			visibleIf: "{shelter_svcs} = 'Yes'"
+			columns: [
+				{
+					name: 'shelter_service_type',
+					title: 'Type  of Last Service Received',
+					cellType: 'dropdown',
+					choices: [
+						{
+							value: '1',
+							text: 'Street Outreach'
+						},
+						{
+							value: '2',
+							text: 'Diversion'
+						},
+						{
+							value: '3',
+							text: 'Emergency Shelter'
+						},
+						{
+							value: '4',
+							text: 'Temporary Housing'
+						},
+						{
+							value: '5',
+							text: 'Coordinated Entry'
+						},
+						{
+							value: '6',
+							text: 'Severe Weather Shelter'
+						},
+						{
+							value: '7',
+							text: 'Day Center'
+						},
+						{
+							value: '8',
+							text: 'Food bank'
+						},
+						{
+							value: '9',
+							text: 'Case Management'
+						}
+					],
+					showOtherItem: true
+				},
+				{
+					name: 'shelter_service_year',
+					title: 'Date of Service Received (Month/Year)',
+					cellType: 'text',
+					maskType: 'datetime',
+					maskSettings: {
+						pattern: 'mm/yyyy',
+						min: '1950-01-01',
+						max: '2025-12-15'
+					}
+				}
+			],
+			choices: [
+				'Street Outreach',
+				'Diversion',
+				'Emergency Shelter',
+				'Temporary Housing',
+				'Coordinated Entry',
+				'Severe Weather Shelter ',
+				'Day Center',
+				'Food bank',
+				'Case Management'
+			],
+			rowCount: 3,
+			addRowText: 'Add Service',
+			removeRowText: 'Remove'
 		}
-	],
-	visibleIf: "{consent_given} = 'Yes'"
+	]
 };
 
 // TODO
@@ -455,19 +539,6 @@ const genderChoices = [
 	'Do not know'
 ];
 
-// const raceChoices = [
-// 	'American Indian',
-// 	'Alaskan Native or Indigenous',
-// 	'Asian or Asian American',
-// 	'Black, African American, or African',
-// 	'Hispanic/Latina/e/o',
-// 	'Middle Eastern or North African',
-// 	'Native Hawaiian or Pacific Islander',
-// 	'White',
-// 	'Other (please specify)',
-// 	'Choose not to answer',
-// 	'Do not know'
-// ];
 
 // Updated US census standards
 // https://www.census.gov/about/our-research/race-ethnicity/standards-updates.html
@@ -542,7 +613,8 @@ const demographicsPage = {
 		{
 			type: 'checkbox',
 			name: 'race_ethnicity',
-			title: 'Which of the following best describes your race and/or ethnicity? (Note, you may report more than one group.)',
+			title: 'Which of the following best describes your race and/or ethnicity? ',
+			description: 'Note, you may report more than one group.',
 			choices: raceChoices,
 			showOtherItem: true,
 			otherText: 'Other (please specify)',
@@ -580,8 +652,7 @@ const demographicsPage = {
 			choices: ['Yes', 'No', 'Do not know'],
 			isRequired: false
 		}
-	],
-	visibleIf: "{consent_given} = 'Yes'"
+	]
 };
 
 // SECTION 3.2
@@ -617,8 +688,7 @@ const healthPage = {
 			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
 			isRequired: false
 		}
-	],
-	visibleIf: "{consent_given} = 'Yes'"
+	]
 };
 
 // SECTION 4.0
@@ -677,7 +747,7 @@ const householdPage = {
 					isRequired: false
 				},
 				{
-					type: 'tagbox',
+					type: 'radiogroup',
 					name: 'hh_member_gender_id',
 					title: 'Which of the following best describes the gender of {panel.hh_member_initials}?',
 					choices: genderChoices,
@@ -696,8 +766,7 @@ const householdPage = {
 				{
 					type: 'text',
 					name: 'hh_member_tribal_id',
-					title: 'Does {panel.hh_member_initials} have a Tribal Affiliation? If so, what is their Tribal Affiliation?',
-					isRequired: false
+					title: 'Does {panel.hh_member_initials} have a Tribal Affiliation? If so, what is their Tribal Affiliation?'
 				},
 				{
 					type: 'radiogroup',
@@ -758,8 +827,7 @@ const householdPage = {
 			allowAddPanel: true,
 			allowRemovePanel: true
 		}
-	],
-	visibleIf: "{consent_given} = 'Yes'"
+	]
 };
 
 // SECTION 5.0
@@ -768,89 +836,56 @@ const specialQuestionsPage = {
 	title: 'Special Questions',
 	elements: [
 		{
-			type: 'html',
-			name: 'place_of_origin_reference',
-			html: `
-                <div style="background-color: #f8f9fa; padding: 15px; margin: 10px 0; border: 1px solid #dee2e6; border-radius: 4px;">
-                    <h4 style="margin-top: 0;">Location Reference Guide</h4>
-                    
-                    <ul style="line-height: 1.8;">
-                        <li><strong>Snoqualmie Valley</strong><br/>
-                            Snoqualmie; North Bend; Carnation; Duvall; Preston; Riverpoint; Skykomish</li>
-                        
-                        <li><strong>North King County</strong><br/>
-                            Shoreline; Lake Forest Park; Bothell; Kenmore; Lake City; Woodinville</li>
-                        
-                        <li><strong>East King County</strong><br/>
-                            Kirkland; Redmond; Bellevue; Mercer Island; Sammamish; Beaux Arts Village; Issaquah; Clyde Hill; Yarrow Point; Medina</li>
-                        
-                        <li><strong>South King County</strong><br/>
-                            Tukwila; Burien; Renton; Kent; Auburn; SeaTac; Federal Way; Pacific; Algona; Normandy Park; Des Moines; Newcastle; Milton</li>
-                        
-                        <li><strong>South East King County</strong><br/>
-                            Maple Valley; Black Diamond; Enumclaw; Covington</li>
-                        
-                        <li><strong>Unincorporated King County</strong><br/>
-                            Bryn Mawr Skyway; White Center; South Park; Fairwood; East Renton Highlands; Cottage Lake; Fall City; Hobart; Union Hill</li>
-                        
-                        <li><strong>Seattle Metro/ Vashon-Murray Island</strong><br/>
-                            Seattle Neighborhood A; Seattle Neighborhood B; Seattle Neighborhood C; Seattle Neighborhood D; Seattle Neighborhood E; Seattle Neighborhood F; Seattle Neighborhood G; Vashon-Murray Island<br/>
-                            <em>(select neighborhood on map below and enter as Seattle ___)</em></li>
-                    </ul>
-                    
-                    <div style="margin-top: 15px; text-align: center;">
-                        <img src="[MAP_IMAGE_URL_PLACEHOLDER]" alt="Seattle Neighborhood Map" style="max-width: 100%; height: auto; border: 1px solid #ccc;"/>
-                    </div>
-                </div>
-            `
+			type: 'radiogroup',
+			name: 'pit24',
+			title: 'Did you participate in Point-in-Time County (PIT) survey in 2024?',
+			choices: [
+				{
+					value: 'Item 1',
+					text: 'Yes'
+				},
+				{
+					value: 'Item 2',
+					text: 'No'
+				},
+				{
+					value: 'Item 3',
+					text: 'Do not know'
+				},
+				{
+					value: 'Item 4',
+					text: 'Choose not to answer'
+				}
+			]
 		},
 		{
 			type: 'dropdown',
-			name: 'place_of_origin',
+			name: 'travel_location',
 			title: 'Where did you travel from today? (Town or City)',
 			choices: [
-				'Snoqualmie',
-				'North Bend',
-				'Carnation',
-				'Duvall',
-				'Preston',
 				'Tukwila',
 				'Burien',
 				'Renton',
 				'Kent',
 				'Auburn',
-				'Seatac',
+				'SeaTac',
 				'Federal Way',
 				'Pacific',
 				'Algona',
 				'Normandy Park',
 				'Des Moines',
 				'Newcastle',
-				'Fairwood (unincorporated)',
-				'East federal Way (unincorporated)',
-				'Maple Valley',
-				'Black Diamond',
-				'Enumclaw',
-				'Covington',
-				'Skyway',
-				'White Center',
-				'Seattle A',
-				'Seattle B',
-				'Seattle C',
-				'Seattle D',
-				'Seattle E',
-				'Seattle F',
-				'Seattle G',
-				'Choose not to answer',
-				'Do not know'
+				'Milton',
+				'Seattle'
 			],
 			showOtherItem: true,
-			otherText: 'Other (please specify)',
-			isRequired: false
+			showNoneItem: true,
+			noneText: 'Do not know',
+			otherText: 'Other (please specify)'
 		},
 		{
 			type: 'checkbox',
-			name: 'mode_of_transpo',
+			name: 'travel_transport',
 			title: 'What transportation did you use to come to {location}?',
 			choices: [
 				'Bus',
@@ -870,364 +905,222 @@ const specialQuestionsPage = {
 			title: 'How long did it take you to travel to get to {location}?',
 			elements: [
 				{
-					type: 'text',
+					type: 'slider',
 					name: 'travel_time_hours',
 					title: 'Hours',
-					inputType: 'number',
-					placeholder: '0',
-					validators: [
-						{ type: 'numeric', minValue: 0, maxValue: 23 }
-					],
-					startWithNewLine: false,
-					width: '100px'
+					min: 0,
+					max: 10,
+					step: 1
 				},
 				{
-					type: 'text',
+					type: 'slider',
 					name: 'travel_time_minutes',
 					title: 'Minutes',
-					inputType: 'number',
-					placeholder: '0',
-					validators: [
-						{ type: 'numeric', minValue: 0, maxValue: 59 }
-					],
-					startWithNewLine: false,
-					width: '100px'
+					min: 0,
+					max: 60,
+					step: 5
 				}
 			]
 		},
 		{
-			type: 'dropdown',
-			name: 'travel_dist',
+			type: 'checkbox',
+			name: 'travel_distance',
 			title: 'About how many miles did you travel to {location}?',
-			choices: ['Less than half a mile', 'Half a mile to 1 mile'],
-			hasOther: true,
-			otherText: 'Other (please specify in integer miles)',
-			otherPlaceHolder: 'Enter integer value',
-			otherValidator: {
-				type: 'regex',
-				regex: '^[0-9]+$',
-				text: 'Please enter an integer value in miles'
-			},
-			searchEnabled: true,
-			isRequired: false
-		},
-		{
-			type: 'html',
-			name: 'last_stable_loc_instruction',
-			html: `<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0;"><strong>Have the respondent review the list below and select the appropriate response for last stable location.</strong></div>
-            <ul style="line-height: 1.8;">
-             <li>Algona</li>
-             <li>Auburn</li>
-             <li>Bear Creek/Sammamish (Unincorporated)</li>
-             <li>Beaux Arts</li>
-             <li>Bellevue</li>
-             <li>Black Diamond</li>
-             <li>Bothell</li>
-             <li>Burien</li>
-             <li>Carnation</li>
-             <li>Choose not to answer</li>
-             <li>Clyde hill</li>
-             <li>Covington</li>
-             <li>Data not collected</li>
-             <li>Des Moines</li>
-             <li>Do not know</li>
-             <li>Duvall</li>
-             <li>East Federal Way (Unincorporated)</li>
-             <li>East Renton (Unincorporated)</li>
-             <li>Enumclaw</li>
-             <li>Fairwood (Unincorporated)</li>
-             <li>Federal Way</li>
-             <li>Four Creeks/Tiger Mountain (Unincorporated)</li>
-             <li>Hunts Point</li>
-             <li>Issaquah</li>
-             <li>Kenmore</li>
-             <li>Kent</li>
-             <li>Kirkland</li>
-             <li>Lake Forest Park</li>
-             <li>Maple Valley</li>
-             <li>Medina</li>
-             <li>Mercer Island</li>
-             <li>Milton</li>
-             <li>Newcastle</li>
-             <li>Normandy Park</li>
-             <li>North Bend</li>
-             <li>North Highline (Unincorporated)</li>
-             <li>Pacific</li>
-             <li>Renton</li>
-             <li>Sammamish</li>
-             <li>Sea Tac</li>
-             <li>Seattle</li>
-             <li>Shoreline</li>
-             <li>Skykomish</li>
-             <li>Snoqualmie</li>
-             <li>Redmond</li>
-             <li>Snoqualmie Valley/Northeast</li>
-             <li>King County (Unincorporated)</li>
-             <li>Southeast King County (Unincorporated)</li>
-             <li>Tukwila</li>
-             <li>Unincorporated King County Other (includes any community not otherwise listed) - </li>
-             <li>Bryn Mawr Skyway</li>
-             <li>White Center</li>
-             <li>South Park</li>
-             <li>Fairwood</li>
-             <li>East Renton Highlands</li>
-             <li>Cottage Lake</li>
-             <li>Fall City</li>
-             <li>Hobart</li>
-             <li>Union Hill</li>
-             <li>Alabama</li>
-             <li>Alaska</li>
-             <li>Arizona</li>
-             <li>Arkansas</li>
-             <li>California</li>
-             <li>Colorado</li>
-             <li>Connecticut</li>
-             <li>Delaware</li>
-             <li>Florida</li>
-             <li>Georgia</li>
-             <li>Hawaii</li>
-             <li>Idaho</li>
-             <li>Illinois</li>
-             <li>Indiana</li>
-             <li>Iowa</li>
-             <li>Kansas</li>
-             <li>Kentucky</li>
-             <li>Louisiana</li>
-             <li>Maine</li>
-             <li>Maryland</li>
-             <li>Massachusetts</li>
-             <li>Michigan</li>
-             <li>Minnesota</li>
-             <li>Mississippi</li>
-             <li>Missouri</li>
-             <li>Montana</li>
-             <li>Nebraska</li>
-             <li>Nevada</li>
-             <li>New Hampshire</li>
-             <li>New Jersey</li>
-             <li>New Mexico</li>
-             <li>New York</li>
-             <li>North Carolina</li>
-             <li>North Dakota</li>
-             <li>Ohio</li>
-             <li>Oklahoma</li>
-             <li>Oregon</li>
-             <li>Pennsylvania</li>
-             <li>Rhode Island</li>
-             <li>South Carolina</li>
-             <li>South Dakota</li>
-             <li>Tennessee</li>
-             <li>Texas</li>
-             <li>Utah</li>
-             <li>Vermont</li>
-             <li>Virginia</li>
-             <li>West Virginia</li>
-             <li>Wisconsin</li>
-             <li>Wyoming</li>
-             <li>Vashon/Maury Island</li>
-             <li>West Hill (Unincorporated)</li>
-             <li>Woodinville</li>
-             <li>Yarrow Point</li>
-             <li>Washington State (outside of King County) -</li>
-             <li>Adams</li>
-             <li>Asotin</li>
-             <li>Benton</li>
-             <li>Chelan</li>
-             <li>Clallam</li>
-             <li>Clark</li>
-             <li>Columbia</li>
-             <li>Cowlitz</li>
-             <li>Douglas</li>
-             <li>Ferry</li>
-             <li>Franklin</li>
-             <li>Garfield</li>
-             <li>Grant</li>
-             <li>Grays Harbor</li>
-             <li>Island</li>
-             <li>Jefferson</li>
-             <li>Kitsap</li>
-             <li>Kittititas</li>
-             <li>Klickitat</li>
-             <li>Lewis</li>
-             <li>Lincoln</li>
-             <li>Mason</li>
-             <li>Okanogan</li>
-             <li>Pacific</li>
-             <li>Pend Orellie</li>
-             <li>Pierce</li>
-             <li>San Juan (County)</li>
-             <li>Skagit</li>
-             <li>Skamania</li>
-             <li>Snohomish</li>
-             <li>Spokane</li>
-             <li>Stevens</li>
-             <li>Thurston</li>
-             <li>Wahkiakum</li>
-             <li>Walla Walla (County)</li>
-             <li>Whatcom</li>
-             <li>Whitman</li>
-             <li>Yakima (County)</li>
-             <li>Outside the United States</li>
-             </ul>
-            `
-		},
-		{
-			type: 'dropdown',
-			name: 'last_stable_loc',
-			title: 'Where did you live the last time you had stable housing such as an apartment or a house?',
 			choices: [
-				'Algona',
-				'Auburn',
-				'Bear Creek/Sammamish (Unincorporated)',
-				'Beaux Arts',
-				'Bellevue',
-				'Black Diamond',
-				'Bothell',
-				'Burien',
-				'Carnation',
-				'Choose not to answer',
-				'Clyde hill',
-				'Covington',
-				'Data not collected',
-				'Des Moines',
-				'Do not know',
-				'Duvall',
-				'East Federal Way (Unincorporated)',
-				'East Renton (Unincorporated)',
-				'Enumclaw',
-				'Fairwood (Unincorporated)',
-				'Federal Way',
-				'Four Creeks/Tiger Mountain (Unincorporated)',
-				'Hunts Point',
-				'Issaquah',
-				'Kenmore',
-				'Kent',
-				'Kirkland',
-				'Lake Forest Park',
-				'Maple Valley',
-				'Medina',
-				'Mercer Island',
-				'Milton',
-				'Newcastle',
-				'Normandy Park',
-				'North Bend',
-				'North Highline (Unincorporated)',
-				'Pacific',
-				'Renton',
-				'Sammamish',
-				'Sea Tac',
-				'Seattle',
-				'Shoreline',
-				'Skykomish',
-				'Snoqualmie',
-				'Redmond',
-				'Snoqualmie Valley/Northeast',
-				'King County (Unincorporated)',
-				'Southeast King County (Unincorporated)',
-				'Tukwila',
-				'Unincorporated King County Other (includes any community not otherwise listed) -',
-				'Bryn Mawr Skyway',
-				'White Center',
-				'South Park',
-				'Fairwood',
-				'East Renton Highlands',
-				'Cottage Lake',
-				'Fall City',
-				'Hobart',
-				'Union Hill',
-				'Alabama',
-				'Alaska',
-				'Arizona',
-				'Arkansas',
-				'California',
-				'Colorado',
-				'Connecticut',
-				'Delaware',
-				'Florida',
-				'Georgia',
-				'Hawaii',
-				'Idaho',
-				'Illinois',
-				'Indiana',
-				'Iowa',
-				'Kansas',
-				'Kentucky',
-				'Louisiana',
-				'Maine',
-				'Maryland',
-				'Massachusetts',
-				'Michigan',
-				'Minnesota',
-				'Mississippi',
-				'Missouri',
-				'Montana',
-				'Nebraska',
-				'Nevada',
-				'New Hampshire',
-				'New Jersey',
-				'New Mexico',
-				'New York',
-				'North Carolina',
-				'North Dakota',
-				'Ohio',
-				'Oklahoma',
-				'Oregon',
-				'Pennsylvania',
-				'Rhode Island',
-				'South Carolina',
-				'South Dakota',
-				'Tennessee',
-				'Texas',
-				'Utah',
-				'Vermont',
-				'Virginia',
-				'West Virginia',
-				'Wisconsin',
-				'Wyoming',
-				'Vashon/Maury Island',
-				'West Hill (Unincorporated)',
-				'Woodinville',
-				'Yarrow Point',
-				'Washington State (outside of King County) -',
-				'Adams',
-				'Asotin',
-				'Benton',
-				'Chelan',
-				'Clallam',
-				'Clark',
-				'Columbia',
-				'Cowlitz',
-				'Douglas',
-				'Ferry',
-				'Franklin',
-				'Garfield',
-				'Grant',
-				'Grays Harbor',
-				'Island',
-				'Jefferson',
-				'Kitsap',
-				'Kittititas',
-				'Klickitat',
-				'Lewis',
-				'Lincoln',
-				'Mason',
-				'Okanogan',
-				'Pacific',
-				'Pend Orellie',
-				'Pierce',
-				'San Juan (County)',
-				'Skagit',
-				'Skamania',
-				'Snohomish',
-				'Spokane',
-				'Stevens',
-				'Thurston',
-				'Wahkiakum',
-				'Walla Walla (County)',
-				'Whatcom',
-				'Whitman',
-				'Yakima (County)',
-				'Outside the United States'
+				'Less than half a mile',
+				'Half a mile to 1 mile'
+			],
+			showOtherItem: true,
+			otherPlaceholder: 'Enter integer value',
+			otherText: 'Other (please specify in integer miles)'
+		},
+		{
+			type: 'panel',
+			name: 'last_stable_panel',
+			elements: [
+				{
+					type: 'radiogroup',
+					name: 'last_stable_loc',
+					title: 'Where did you live the last time you had stable housing such as an apartment or a house?',
+					choices: [
+						'King County',
+						'Washington State (Outside of King County)',
+						'United States (Outside of Washington State)',
+						'Outside of the United States',
+						'Choose not to answer',
+						'Do not know'
+					]
+				},
+				{
+					type: 'dropdown',
+					name: 'last_stable_loc_city',
+					visibleIf: "{last_stable_loc} = 'King County'",
+					title: 'Which city in King County was it?',
+					choices: [
+						'Algona',
+						'Auburn',
+						'Bear Creek/Sammamish (Unincorporated)',
+						'Beaux Arts',
+						'Bellevue',
+						'Black Diamond',
+						'Bothell',
+						'Burien',
+						'Carnation',
+						'Clyde hill',
+						'Covington',
+						'Des Moines',
+						'Duvall',
+						'East Federal Way (Unincorporated)',
+						'East Renton (Unincorporated)',
+						'Enumclaw',
+						'Fairwood (Unincorporated)',
+						'Federal Way',
+						'Four Creeks/Tiger Mountain (Unincorporated)',
+						'Hunts Point',
+						'Issaquah',
+						'Kenmore',
+						'Kent',
+						'Kirkland',
+						'Lake Forest Park',
+						'Maple Valley',
+						'Medina',
+						'Mercer Island',
+						'Milton',
+						'Newcastle',
+						'Normandy Park',
+						'North Bend',
+						'North Highline (Unincorporated)',
+						'Pacific',
+						'Renton',
+						'Sammamish',
+						'Sea Tac',
+						'Seattle',
+						'Shoreline',
+						'Skykomish',
+						'Snoqualmie',
+						'Redmond',
+						'Snoqualmie Valley/Northeast',
+						'King County (Unincorporated)',
+						'Southeast King County (Unincorporated)',
+						'Tukwila',
+						'Unincorporated King County Other (includes any community not otherwise listed) -',
+						'Bryn Mawr Skyway',
+						'White Center',
+						'South Park',
+						'Fairwood',
+						'East Renton Highlands',
+						'Cottage Lake',
+						'Fall City',
+						'Hobart',
+						'Union Hill',
+						'Vashon/Maury Island',
+						'West Hill (Unincorporated)',
+						'Woodinville',
+						'Yarrow Point'
+					]
+				},
+				{
+					type: 'dropdown',
+					name: 'last_stable_loc_county',
+					visibleIf: "{last_stable_loc} = 'Washington State (Outside of King County)'",
+					title: 'Which county in Washington State was it?',
+					choices: [
+						'Adams',
+						'Asotin',
+						'Benton',
+						'Chelan',
+						'Clallam',
+						'Clark',
+						'Columbia',
+						'Cowlitz',
+						'Douglas',
+						'Ferry',
+						'Franklin',
+						'Garfield',
+						'Grant',
+						'Grays Harbor',
+						'Island',
+						'Jefferson',
+						'Kitsap',
+						'Kittititas',
+						'Klickitat',
+						'Lewis',
+						'Lincoln',
+						'Mason',
+						'Okanogan',
+						'Pend Orellie',
+						'Pierce',
+						'San Juan (County)',
+						'Skagit',
+						'Skamania',
+						'Snohomish',
+						'Spokane',
+						'Stevens',
+						'Thurston',
+						'Wahkiakum',
+						'Walla Walla (County)',
+						'Whatcom',
+						'Whitman',
+						'Yakima (County)'
+					]
+				},
+				{
+					type: 'dropdown',
+					name: 'last_stable_loc_state',
+					visibleIf: "{last_stable_loc} = 'United States (Outside of Washington State)'",
+					title: 'Which  state in the United States?',
+					choices: [
+						'Alabama',
+						'Alaska',
+						'Arizona',
+						'Arkansas',
+						'California',
+						'Colorado',
+						'Connecticut',
+						'Delaware',
+						'Florida',
+						'Georgia',
+						'Hawaii',
+						'Idaho',
+						'Illinois',
+						'Indiana',
+						'Iowa',
+						'Kansas',
+						'Kentucky',
+						'Louisiana',
+						'Maine',
+						'Maryland',
+						'Massachusetts',
+						'Michigan',
+						'Minnesota',
+						'Mississippi',
+						'Missouri',
+						'Montana',
+						'Nebraska',
+						'Nevada',
+						'New Hampshire',
+						'New Jersey',
+						'New Mexico',
+						'New York',
+						'North Carolina',
+						'North Dakota',
+						'Ohio',
+						'Oklahoma',
+						'Oregon',
+						'Pennsylvania',
+						'Rhode Island',
+						'South Carolina',
+						'South Dakota',
+						'Tennessee',
+						'Texas',
+						'Utah',
+						'Vermont',
+						'Virginia',
+						'West Virginia',
+						'Wisconsin',
+						'Wyoming'
+					]
+				}
 			]
 		},
 		{
@@ -1252,7 +1145,7 @@ const specialQuestionsPage = {
 			]
 		},
 		{
-			type: 'dropdown',
+			type: 'tagbox',
 			name: 'precipitating_events',
 			title: 'What events or conditions contributed to you becoming homeless at this time?',
 			choices: [
@@ -1277,46 +1170,14 @@ const specialQuestionsPage = {
 				'Choose not to answer',
 				'Do not know'
 			],
-			choicesOrder: 'none',
-			hasOther: true,
-			otherText: 'Other (please specify)',
-			searchEnabled: true,
-			isRequired: false
-		},
-		{
-			type: 'dropdown',
-			name: 'eviction_type',
-			title: 'Was it a hard (law enforcement) or soft (removal of belongings) eviction?',
-			choices: ['Hard', 'Soft', 'Choose not to answer', 'Do not know'],
-			visibleIf: "{precipitating_events} contains 'Eviction'"
-		},
-		{
-			type: 'dropdown',
-			name: 'TODO_eviction_lead_to_homelessness',
-			title: 'Did it lead to your most recent experience of homelessness?',
-			choices: ['Yes', 'No'],
-			visibleIf: "{eviction_type} = 'Hard'" // TODO verify
-		},
-		{
-			type: 'dropdown',
-			name: 'TODO_eviction_court_ordered',
-			title: 'Were you court ordered?',
-			choices: ['Yes', 'No'],
-			visibleIf: "{eviction_type} = 'Hard'" // TODO verify
-		},
-		{
-			type: 'dropdown',
-			name: 'TODO_eviction_law_enforcement_involved',
-			title: 'Was the law enforcement involved?',
-			choices: ['Yes', 'No'],
-			visibleIf: "{eviction_type} = 'Hard'" // TODO verify
+			showOtherItem: true,
+			otherText: 'Other (please specify)'
 		},
 		{
 			type: 'text',
 			name: 'year_evicted',
+			visibleIf: "{precipitating_events} contains 'Eviction'",
 			title: 'What year were you evicted?',
-			inputType: 'number',
-			placeholder: 'YYYY',
 			validators: [
 				{
 					type: 'numeric',
@@ -1324,7 +1185,22 @@ const specialQuestionsPage = {
 					maxValue: 2026
 				}
 			],
-			visibleIf: "{eviction_type} = 'Soft'"
+			inputType: 'number',
+			placeholder: 'YYYY'
+		},
+		{
+			type: 'radiogroup',
+			name: 'eviction_type',
+			visibleIf: "{precipitating_events} contains 'Eviction'",
+			title: 'Was the law enforcement involved?',
+			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know']
+		},
+		{
+			type: 'radiogroup',
+			name: 'eviction_court_ordered',
+			visibleIf: "{eviction_type} = 'Yes'",
+			title: 'Were you ordered to court?',
+			choices: ['Yes', 'No']
 		},
 		{
 			type: 'tagbox',
@@ -1349,11 +1225,8 @@ const specialQuestionsPage = {
 				'Support for mental health conditions',
 				'On-site health services such as a nurse'
 			],
-			choicesOrder: 'none',
-			hasOther: true,
+			showOtherItem: true,
 			otherText: 'Other (please specify)',
-			searchEnabled: true,
-			isRequired: false,
 			maxSelectedChoices: 5
 		},
 		{
@@ -1369,90 +1242,73 @@ const specialQuestionsPage = {
 			title: 'Pet Information',
 			templateElements: [
 				{
-					type: 'dropdown',
+					type: 'text',
+					name: 'pet_name',
+					title: 'Pet Name (optional)',
+					placeholder: 'e.g., Fluffy'
+				},
+				{
+					type: 'radiogroup',
 					name: 'pet_animal_type',
 					title: 'Type of Animal',
-					choices: ['Cat', 'Dog', 'Pocket pet / rodent', 'Other'],
-					hasOther: true,
-					otherText: 'Specify other animal type',
-					isRequired: false
+					choices: [
+						'Cat',
+						'Dog',
+						'Pocket pet / rodent',
+						'Choose not to answer'
+					],
+					showOtherItem: true,
+					otherText: 'Specify other animal type'
 				},
 				{
 					type: 'radiogroup',
 					name: 'pet_animal_weight',
-					title: 'Approximate Weight',
-					choices: ['40 lbs or less', 'More than 40 lbs'],
-					isRequired: false
+					title: 'Approximate Weight of {panel.pet_name}',
+					choices: [
+						'40 lbs or less',
+						'More than 40 lbs',
+						{
+							value: 'More than 41 lbs',
+							text: 'Choose not to answer'
+						}
+					]
 				},
 				{
 					type: 'radiogroup',
 					name: 'pet_animal_vet_care',
-					title: 'Seen vet care in last 3 years (such as for wellness visits, vaccines, or an illness)?',
-					choices: ['Yes', 'No'],
-					isRequired: false
+					title: 'Has {panel.pet_name} seen vet care in last 3 years (such as for wellness visits, vaccines, or an illness)?',
+					choices: [
+						'Yes',
+						'No',
+						{
+							value: 'Item 1',
+							text: 'Choose not to answer'
+						}
+					]
 				},
 				{
 					type: 'radiogroup',
 					name: 'pet_medical_needs',
-					title: 'How long have you been responsible for this animal?',
+					title: 'How long have you been responsible for {panel.pet_name}?',
 					choices: [
 						'Less than 1 year',
 						'1-3 years',
-						'More than 3 years'
-					],
-					isRequired: false
+						'More than 3 years',
+						{
+							value: 'More than 4 years',
+							text: 'Choose not to answer'
+						}
+					]
 				}
 			],
-			panelCount: 0,
-			minPanelCount: 0,
+			displayMode: 'tab',
 			maxPanelCount: 10,
-			panelAddText: '+ Add another pet',
+			panelAddText: '+ Add new pet',
 			panelRemoveText: 'Remove',
-			renderMode: 'list',
-			templateTitle: 'Pet #{panelIndex}',
-			allowAddPanel: true,
-			allowRemovePanel: true,
+			templateTitle: 'Pet: {panel.pet_name}',
 			visibleIf: "{pet_animal} = 'Yes'"
 		}
-	],
-	visibleIf: "{consent_given} = 'Yes'"
-};
-
-// SECTION 5.1
-const youthSpecialQuestionsPage = {
-	name: 'youth_special_questions',
-	title: 'Youth Special Questions',
-	elements: [
-		{
-			type: 'dropdown',
-			name: 'youth_school_work',
-			title: 'Do you go to school or work?',
-			choices: [
-				'School',
-				'Work',
-				'Both School AND Work',
-				'No',
-				'Choose not to answer',
-				'Do not know'
-			],
-			isRequired: false
-		},
-		{
-			type: 'dropdown',
-			name: 'youth_q2',
-			title: 'Place holder for Youth specific question 2',
-			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: false
-		},
-		{
-			type: 'dropdown',
-			name: 'youth_q3',
-			title: 'Place holder for Youth specific question 3',
-			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: false
-		}
-	],
-	visibleIf: "{is_adult} = 'No' AND {consent_given} = 'Yes'"
+	]
 };
 
 // SECTION 6.0
@@ -1462,9 +1318,9 @@ const surveyDeduplicationPage = {
 	elements: [
 		{
 			type: 'dropdown',
-			name: 'survey_deduplication',
-			title: 'After completing this survey, do you believe you’ve completed this before?',
-			choices: ['Yes', 'No'],
+			name: 'deduplication',
+			title: "After completing this survey, do you believe you have completed this before?",
+			choices: ['Yes', 'No', 'Do not know'],
 			isRequired: true
 		}
 	]
