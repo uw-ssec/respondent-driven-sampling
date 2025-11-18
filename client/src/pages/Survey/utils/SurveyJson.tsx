@@ -747,7 +747,7 @@ const householdPage = {
 					isRequired: false
 				},
 				{
-					type: 'tagbox',
+					type: 'radiogroup',
 					name: 'hh_member_gender_id',
 					title: 'Which of the following best describes the gender of {panel.hh_member_initials}?',
 					choices: genderChoices,
@@ -1196,7 +1196,7 @@ const specialQuestionsPage = {
 			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know']
 		},
 		{
-			type: 'dropdown',
+			type: 'radiogroup',
 			name: 'eviction_court_ordered',
 			visibleIf: "{eviction_type} = 'Yes'",
 			title: 'Were you ordered to court?',
@@ -1248,7 +1248,7 @@ const specialQuestionsPage = {
 					placeholder: 'e.g., Fluffy'
 				},
 				{
-					type: 'dropdown',
+					type: 'radiogroup',
 					name: 'pet_animal_type',
 					title: 'Type of Animal',
 					choices: [
