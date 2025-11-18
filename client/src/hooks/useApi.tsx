@@ -4,6 +4,10 @@ import { getAuthToken } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
 import useSWR, { mutate } from 'swr';
 
+import { LocationDocument } from '@/types/Locations';
+import { SurveyDocument } from '@/types/Survey';
+import { UserDocument } from '@/types/User';
+
 import { useAuth } from './useAuth';
 
 export const useAuthErrorHandler = (onLogout: () => void) => {
@@ -50,31 +54,30 @@ export const useApi = () => {
 
 	const useUser = (userObjectId: string | undefined) => {
 		if (!userObjectId) return null;
-		return useSWR(
-			userObjectId ? `/api/v2/users/${userObjectId}` : null,
-			() => fetchUser(userObjectId)
+		return useSWR(userObjectId ? `/api/users/${userObjectId}` : null, () =>
+			fetchUser(userObjectId)
 		);
 	};
 
 	const useUsers = () => {
-		return useSWR(`/api/v2/users`, () => fetchUsers());
+		return useSWR(`/api/users`, () => fetchUsers());
 	};
 
 	const fetchUser = async (userObjectId: string) => {
-		const response = await fetchWithAuth(`/api/v2/users/${userObjectId}`);
-		return (await response?.json())?.data || null;
+		const response = await fetchWithAuth(`/api/users/${userObjectId}`);
+		return (await response?.json())?.data ?? null;
 	};
 
 	const fetchUsers = async () => {
-		const response = await fetchWithAuth(`/api/v2/users`);
-		return (await response?.json())?.data || [];
+		const response = await fetchWithAuth(`/api/users`);
+		return (await response?.json())?.data ?? [];
 	};
 
 	const approveUser = async (
 		userObjectId: string,
 		approvalStatus: string
 	) => {
-		const response = await fetchWithAuth(`/api/v2/users/${userObjectId}`, {
+		const response = await fetchWithAuth(`/api/users/${userObjectId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ approvalStatus })
@@ -83,7 +86,7 @@ export const useApi = () => {
 	};
 
 	const updateUser = async (userObjectId: string, userData: object) => {
-		const response = await fetchWithAuth(`/api/v2/users/${userObjectId}`, {
+		const response = await fetchWithAuth(`/api/users/${userObjectId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(userData)
@@ -92,7 +95,7 @@ export const useApi = () => {
 	};
 
 	const createUser = async (userData: object) => {
-		const response = await fetchWithAuth(`/api/v2/users`, {
+		const response = await fetchWithAuth(`/api/users`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(userData)
@@ -109,30 +112,28 @@ export const useApi = () => {
 	};
 
 	const useSurveys = () => {
-		return useSWR(`/api/v2/surveys`, () => fetchSurveys());
+		return useSWR(`/api/surveys`, () => fetchSurveys());
 	};
 
 	const fetchSurvey = async (surveyObjectId: string) => {
-		const response = await fetchWithAuth(
-			`/api/v2/surveys/${surveyObjectId}`
-		);
+		const response = await fetchWithAuth(`/api/surveys/${surveyObjectId}`);
 		return (await response?.json())?.data ?? null;
 	};
 
 	const fetchSurveys = async () => {
-		const response = await fetchWithAuth(`/api/v2/surveys`);
+		const response = await fetchWithAuth(`/api/surveys`);
 		return (await response?.json())?.data ?? [];
 	};
 
 	const fetchSurveyBySurveyCode = async (surveyCode: string) => {
 		const response = await fetchWithAuth(
-			`/api/v2/surveys?surveyCode=${surveyCode}`
+			`/api/surveys?surveyCode=${surveyCode}`
 		);
 		return (await response?.json())?.data[0] ?? null;
 	};
 
 	const createSurvey = async (surveyData: object) => {
-		const response = await fetchWithAuth(`/api/v2/surveys`, {
+		const response = await fetchWithAuth(`/api/surveys`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(surveyData)
@@ -140,31 +141,28 @@ export const useApi = () => {
 		const result = await response?.json();
 
 		// Invalidate surveys list cache
-		mutate(`/api/v2/surveys`);
+		mutate(`/api/surveys`);
 		// Also invalidate the survey-by-code cache if this survey has a code
 		if (result?.data?.surveyCode) {
-			mutate(`/api/v2/surveys?surveyCode=${result.data.surveyCode}`);
+			mutate(`/api/surveys?surveyCode=${result.data.surveyCode}`);
 		}
 
 		return result;
 	};
 
 	const updateSurvey = async (surveyObjectId: string, surveyData: object) => {
-		const response = await fetchWithAuth(
-			`/api/v2/surveys/${surveyObjectId}`,
-			{
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(surveyData)
-			}
-		);
+		const response = await fetchWithAuth(`/api/surveys/${surveyObjectId}`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(surveyData)
+		});
 		const result = await response?.json();
 
 		// Invalidate related caches to ensure fresh data on next fetch
-		mutate(`/api/v2/surveys/${surveyObjectId}`);
+		mutate(`/api/surveys/${surveyObjectId}`);
 		// Also invalidate the survey-by-code cache if this survey has a code
 		if (result?.data?.surveyCode) {
-			mutate(`/api/v2/surveys?surveyCode=${result.data.surveyCode}`);
+			mutate(`/api/surveys?surveyCode=${result.data.surveyCode}`);
 		}
 
 		return result;
@@ -172,14 +170,14 @@ export const useApi = () => {
 
 	const fetchParentOfSurveyCode = async (surveyCode: string) => {
 		const parentSurvey = await fetchWithAuth(
-			`/api/v2/surveys?childSurveyCodes=${surveyCode}`
+			`/api/surveys?childSurveyCodes=${surveyCode}`
 		);
-		return (await parentSurvey?.json())?.data[0] || null;
+		return (await parentSurvey?.json())?.data[0] ?? null;
 	};
 
 	const useSurvey = (surveyObjectId: string) => {
 		return useSWR(
-			surveyObjectId ? `/api/v2/surveys/${surveyObjectId}` : null,
+			surveyObjectId ? `/api/surveys/${surveyObjectId}` : null,
 			() => fetchSurvey(surveyObjectId)
 		);
 	};
@@ -189,35 +187,38 @@ export const useApi = () => {
 			data: surveys,
 			isLoading: surveysLoading,
 			mutate: mutateSurveys
-		} = useSurveys() || {};
-		const { data: users, isLoading: usersLoading } = useUsers() || {};
+		} = useSurveys() ?? {};
+		const { data: users, isLoading: usersLoading } = useUsers() ?? {};
 		const { data: locations, isLoading: locationsLoading } =
-			useLocations() || {};
+			useLocations() ?? {};
 
 		// Create user lookup map
-		const userMap = new Map(
-			users?.map((user: any) => [user._id, user]) || []
+		const userMap: Map<string, UserDocument> = new Map(
+			users?.map((user: UserDocument) => [user._id, user]) ?? []
 		);
 
 		// Create location lookup map
-		const locationMap = new Map(
-			locations?.map((location: any) => [
+		const locationMap: Map<string, LocationDocument> = new Map(
+			locations?.map((location: LocationDocument) => [
 				location._id,
 				location.hubName
-			]) || []
+			]) ?? []
 		);
 
 		// Enrich surveys with user data
 		const enrichedSurveys =
-			surveys?.map((survey: any) => ({
+			surveys?.map((survey: SurveyDocument) => ({
 				...survey,
-				employeeName: userMap.get(survey.createdByUserObjectId)
-					? `${(userMap.get(survey.createdByUserObjectId) as any)?.firstName} ${(userMap.get(survey.createdByUserObjectId) as any)?.lastName}`
+				employeeName: userMap.get(
+					survey.createdByUserObjectId as string
+				)
+					? `${userMap.get(survey.createdByUserObjectId as string)?.firstName ?? ''} ${userMap.get(survey.createdByUserObjectId as string)?.lastName ?? ''}`
 					: 'Unknown',
 				employeeId: survey.createdByUserObjectId,
 				locationName:
-					locationMap.get(survey.locationObjectId) || 'Unknown'
-			})) || [];
+					locationMap.get(survey.locationObjectId as string) ??
+					'Unknown'
+			})) ?? [];
 
 		return {
 			data: enrichedSurveys,
@@ -228,22 +229,24 @@ export const useApi = () => {
 
 	const useSurveyWithUser = (surveyObjectId: string) => {
 		return useSWR(
-			surveyObjectId ? `/api/v2/surveys/${surveyObjectId}` : null,
+			surveyObjectId ? `/api/surveys/${surveyObjectId}` : null,
 			() => fetchSurveyWithUser(surveyObjectId)
 		);
 	};
 
 	const fetchSurveyWithUser = async (surveyObjectId: string) => {
 		const surveyResponse = await fetchWithAuth(
-			`/api/v2/surveys/${surveyObjectId}`
+			`/api/surveys/${surveyObjectId}`
 		);
 		if (surveyResponse?.ok) {
-			const survey = (await surveyResponse?.json()).data || null;
+			const surveyJson = await surveyResponse.json();
+			const survey = surveyJson?.data ?? null;
 			const userResponse = await fetchWithAuth(
-				`/api/v2/users/${survey.createdByUserObjectId}`
+				`/api/users/${survey.createdByUserObjectId}`
 			);
 			if (userResponse?.ok) {
-				const user = (await userResponse?.json()).data || null;
+				const userJson = await userResponse.json();
+				const user = userJson?.data ?? null;
 				return {
 					...survey,
 					employeeName: user.firstName + ' ' + user.lastName,
@@ -261,7 +264,7 @@ export const useApi = () => {
 
 	const useSurveyBySurveyCode = (surveyCode: string | null) => {
 		return useSWR(
-			surveyCode ? `/api/v2/surveys?surveyCode=${surveyCode}` : null,
+			surveyCode ? `/api/surveys?surveyCode=${surveyCode}` : null,
 			() => fetchSurveyBySurveyCode(surveyCode!),
 			{
 				revalidateOnMount: true, // Always fetch fresh data on mount
@@ -273,9 +276,7 @@ export const useApi = () => {
 
 	const useParentOfSurveyCode = (surveyCode: string | null) => {
 		return useSWR(
-			surveyCode
-				? `/api/v2/surveys?childSurveyCodes=${surveyCode}`
-				: null,
+			surveyCode ? `/api/surveys?childSurveyCodes=${surveyCode}` : null,
 			() => fetchParentOfSurveyCode(surveyCode!)
 		);
 	};
@@ -293,11 +294,11 @@ export const useApi = () => {
 	};
 
 	const useLocations = () => {
-		return useSWR(`/api/v2/locations`, () => fetchLocations());
+		return useSWR(`/api/locations`, () => fetchLocations());
 	};
 
 	const fetchLocations = async () => {
-		const response = await fetchWithAuth(`/api/v2/locations`);
+		const response = await fetchWithAuth(`/api/locations`);
 		return (await response?.json())?.data || null;
 	};
 
@@ -305,20 +306,20 @@ export const useApi = () => {
 
 	const useSeedBySurveyCode = (surveyCode: string | null) => {
 		return useSWR(
-			surveyCode ? `/api/v2/seeds?surveyCode=${surveyCode}` : null,
+			surveyCode ? `/api/seeds?surveyCode=${surveyCode}` : null,
 			() => fetchSeedBySurveyCode(surveyCode!)
 		);
 	};
 
 	const fetchSeedBySurveyCode = async (surveyCode: string) => {
 		const response = await fetchWithAuth(
-			`/api/v2/seeds?surveyCode=${surveyCode}`
+			`/api/seeds?surveyCode=${surveyCode}`
 		);
 		return (await response?.json())?.data[0] ?? null;
 	};
 
 	const createSeed = async (seedData: object) => {
-		const response = await fetchWithAuth(`/api/v2/seeds`, {
+		const response = await fetchWithAuth(`/api/seeds`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(seedData)

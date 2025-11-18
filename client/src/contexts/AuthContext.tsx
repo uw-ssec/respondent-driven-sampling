@@ -92,7 +92,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			locationObjectId: '',
 			lastestLocationObjectId: '',
 			isLoggedIn: true,
-			// TODO: Verification needed for consistency.
 			isLoading: true
 		};
 	});
@@ -100,7 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	/*
 	The `useEffect` hook runs once when the component mounts (indicated by the empty dependency array `[]`). This is the authentication context initialization logic that determines whether to load user data or immediately mark the auth state as ready.
 
-	**The conditional logic branch works as follows**: If both `state.token` and `state.userObjectId` exist (meaning the user has a valid JWT token and MongoDB user ID stored in localStorage via Zustand), the effect calls `fetchUserContext()` to retrieve the full user profile from the backend. This happens when a user refreshes the page or returns to the app with an existing session. The function will make an API call to `/api/v2/users/:id`, validate the token via the auth middleware, and populate the context with user details like name, role, and permissions.
+	**The conditional logic branch works as follows**: If both `state.token` and `state.userObjectId` exist (meaning the user has a valid JWT token and MongoDB user ID stored in localStorage via Zustand), the effect calls `fetchUserContext()` to retrieve the full user profile from the backend. This happens when a user refreshes the page or returns to the app with an existing session. The function will make an API call to `/api/users/:id`, validate the token via the auth middleware, and populate the context with user details like name, role, and permissions.
 
 	**If either value is missing**, the effect takes a different path: it immediately sets `isLoading: false` without making any API calls. This signals to the rest of the application that there's no active session to restore, allowing login/registration screens to render immediately instead of showing a loading spinner while waiting for a user fetch that would fail anyway.
 
@@ -121,7 +120,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			const token = getAuthToken();
 
 			// fetch user
-			const userResponse = await fetch(`/api/v2/users/${userObjectId}`, {
+			const userResponse = await fetch(`/api/users/${userObjectId}`, {
 				headers: {
 					Authorization: `Bearer ${token}`
 				}
@@ -130,7 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 			// fetch user's surveys to get latest location
 			const surveysResponse = await fetch(
-				`/api/v2/surveys?createdByUserObjectId=${userObjectId}`,
+				`/api/surveys?createdByUserObjectId=${userObjectId}`,
 				{
 					headers: {
 						Authorization: `Bearer ${token}`

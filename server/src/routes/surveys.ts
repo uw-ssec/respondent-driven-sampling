@@ -22,7 +22,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v2/surveys:
+ * /api/surveys:
  *   get:
  *     summary: Get all surveys
  *     description: Retrieve all surveys with optional query filters
@@ -66,7 +66,7 @@ router.get(
 
 /**
  * @swagger
- * /api/v2/surveys/{objectId}:
+ * /api/surveys/{objectId}:
  *   get:
  *     summary: Get survey by ID
  *     description: Retrieve a specific survey by its ObjectId
@@ -128,7 +128,7 @@ router.get(
 
 /**
  * @swagger
- * /api/v2/surveys/{objectId}:
+ * /api/surveys/{objectId}:
  *   patch:
  *     summary: Update survey
  *     description: Update a specific survey by its ObjectId
@@ -200,7 +200,7 @@ router.patch(
 
 /**
  * @swagger
- * /api/v2/surveys:
+ * /api/surveys:
  *   post:
  *     summary: Create survey
  *     description: Create a new survey
@@ -302,7 +302,7 @@ router.post(
 
 /**
  * @swagger
- * /api/v2/surveys/{objectId}:
+ * /api/surveys/{objectId}:
  *   delete:
  *     summary: Delete survey
  *     description: Delete a specific survey by its ObjectId

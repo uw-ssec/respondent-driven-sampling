@@ -1,3 +1,5 @@
+import { UserDocument } from '@/types/User';
+
 interface StaffMember {
 	id: string;
 	employeeId: string;
@@ -82,15 +84,15 @@ export const paginateStaff = (
  * Transform users data to staff members format
  */
 export const transformUsersToStaff = (
-	users: any[] | undefined
+	users: UserDocument[] | undefined
 ): StaffMember[] => {
 	if (!users) return [];
 
-	return users.map((user: any) => ({
+	return users.map((user: UserDocument) => ({
 		id: user._id,
-		employeeId: user._id || 'N/A',
+		employeeId: user._id ?? 'N/A',
 		name: `${user.firstName} ${user.lastName}`,
 		position: user.role,
-		approvalStatus: user.approvalStatus || 'PENDING'
+		approvalStatus: user.approvalStatus ?? 'PENDING'
 	}));
 };

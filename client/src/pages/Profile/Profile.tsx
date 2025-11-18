@@ -59,10 +59,10 @@ export default function Profile() {
 
 			if (updatedUser.data) {
 				setMessage(
-					updatedUser.message || 'Profile updated successfully!'
+					updatedUser.message ?? 'Profile updated successfully!'
 				);
 			} else {
-				setMessage(updatedUser.message || 'Failed to update profile.');
+				setMessage(updatedUser.message ?? 'Failed to update profile.');
 			}
 		} catch (error) {
 			console.error('Error updating profile:', error);
@@ -106,7 +106,7 @@ export default function Profile() {
 			}}
 		>
 			<Typography variant="h5" component="h2" gutterBottom sx={{ mb: 3 }}>
-				Profile for {`${firstName || 'User'} ${lastName || ''}`}
+				Profile for {`${firstName ?? 'User'} ${lastName ?? ''}`}
 			</Typography>
 
 			{error ? (
@@ -117,7 +117,7 @@ export default function Profile() {
 						<FormInput
 							label="Email"
 							type="email"
-							value={email || ''}
+							value={email ?? ''}
 							onChange={e =>
 								handleChange('email', e.target.value)
 							}
@@ -127,7 +127,7 @@ export default function Profile() {
 
 						<PhoneInput
 							label="Phone Number"
-							value={phone || ''}
+							value={phone ?? ''}
 							onChange={e =>
 								handleChange('phone', e.target.value)
 							}
@@ -136,7 +136,7 @@ export default function Profile() {
 						/>
 
 						<RoleSelect
-							value={userRole || ''}
+							value={userRole ?? ''}
 							onChange={e =>
 								handleChange('role', e.target.value as string)
 							}
@@ -145,7 +145,7 @@ export default function Profile() {
 						/>
 
 						<LocationSelect
-							value={locationObjectId || ''}
+							value={locationObjectId ?? ''}
 							onChange={e =>
 								handleChange(
 									'locationObjectId',

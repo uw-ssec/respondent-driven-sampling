@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { Survey } from '@/types/Survey';
+import { SurveyDocument } from '@/types/Survey';
 
 export const toPacificDateOnlyString = (input: string | number | Date) => {
 	const d = input instanceof Date ? input : new Date(input);
@@ -11,9 +10,9 @@ export const toPacificDateOnlyString = (input: string | number | Date) => {
 		day: '2-digit'
 	};
 	const parts = new Intl.DateTimeFormat('en-US', opts).formatToParts(d);
-	const y = parts.find(p => p.type === 'year')?.value || '';
-	const m = parts.find(p => p.type === 'month')?.value || '';
-	const day = parts.find(p => p.type === 'day')?.value || '';
+	const y = parts.find(p => p.type === 'year')?.value ?? '';
+	const m = parts.find(p => p.type === 'month')?.value ?? '';
+	const day = parts.find(p => p.type === 'day')?.value ?? '';
 	return `${y}-${m}-${day}`;
 };
 
@@ -34,13 +33,13 @@ export const getNestedValue = (obj: any, path: string) => {
  * Filter surveys by date or return all if viewAll is true
  */
 export const filterSurveysByDate = (
-	surveys: Survey[] | undefined,
+	surveys: SurveyDocument[] | undefined,
 	viewAll: boolean,
 	selectedDate: Date
-): Survey[] => {
+): SurveyDocument[] => {
 	if (!surveys) return [];
 
-	return surveys.filter((s: Survey) => {
+	return surveys.filter((s: SurveyDocument) => {
 		if (viewAll) return true;
 		const surveyDate = toPacificDateOnlyString(s.createdAt);
 		const selDate = toPacificDateOnlyString(selectedDate);
@@ -52,9 +51,9 @@ export const filterSurveysByDate = (
  * Sort surveys based on the provided sort configuration
  */
 export const sortSurveys = (
-	surveys: Survey[],
+	surveys: SurveyDocument[],
 	sortConfig: { key: string | null; direction: 'asc' | 'desc' }
-): Survey[] => {
+): SurveyDocument[] => {
 	if (!sortConfig.key) return [...surveys];
 
 	return [...surveys].sort((a, b) => {
@@ -69,8 +68,8 @@ export const sortSurveys = (
 				: bValue - aValue;
 		}
 
-		const aStr = (aValue || '').toString().toLowerCase();
-		const bStr = (bValue || '').toString().toLowerCase();
+		const aStr = (aValue ?? '').toString().toLowerCase();
+		const bStr = (bValue ?? '').toString().toLowerCase();
 
 		return sortConfig.direction === 'asc'
 			? aStr.localeCompare(bStr)
@@ -82,9 +81,9 @@ export const sortSurveys = (
  * Search surveys by term across multiple fields
  */
 export const searchSurveys = (
-	surveys: Survey[],
+	surveys: SurveyDocument[],
 	searchTerm: string
-): Survey[] => {
+): SurveyDocument[] => {
 	if (!searchTerm) return surveys;
 
 	const lowerSearchTerm = searchTerm.toLowerCase();
@@ -111,10 +110,10 @@ export const searchSurveys = (
  * Paginate surveys array
  */
 export const paginateSurveys = (
-	surveys: Survey[],
+	surveys: SurveyDocument[],
 	currentPage: number,
 	itemsPerPage: number
-): Survey[] => {
+): SurveyDocument[] => {
 	const startIndex = currentPage * itemsPerPage;
 	const endIndex = startIndex + itemsPerPage;
 	return surveys.slice(startIndex, endIndex);

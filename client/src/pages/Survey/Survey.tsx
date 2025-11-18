@@ -9,13 +9,12 @@ import 'survey-core/survey-core.min.css';
 import { SYSTEM_SURVEY_CODE } from '@/constants';
 import { useAuthContext } from '@/contexts';
 import { useAbility, useApi } from '@/hooks';
-//import { ACTIONS, SUBJECTS } from '@/permissions/constants';
-// Global Zustand store managing state of survey components
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { useSurveyStore } from '@/stores';
-//import { subject } from '@casl/ability';
 import { useGeolocated } from 'react-geolocated';
+import toast from 'react-hot-toast';
 
-import { initializeSurvey, validateReferralCode } from './utils/surveyUtils';
+import { initializeSurvey } from './utils/surveyUtils';
 
 // This component is responsible for rendering the survey and handling its logic
 // It uses the SurveyJS library to create and manage the survey
@@ -59,9 +58,9 @@ const Survey = () => {
 		: {};
 
 	// Conditionally fetch seed (only when surveyCodeInUrl exists)
-	const { data: seed, isLoading: seedLoading } = surveyCodeInUrl
-		? seedService.useSeedBySurveyCode(surveyCodeInUrl)
-		: {};
+	// const { data: seed, isLoading: seedLoading } = surveyCodeInUrl
+	// 	? seedService.useSeedBySurveyCode(surveyCodeInUrl)
+	// 	: {};
 
 	// Conditionally fetch survey by object id (only when surveyObjectIdInUrl exists)
 	const { data: surveyByObjectId, isLoading: surveyByObjectIdLoading } =
@@ -206,7 +205,6 @@ const Survey = () => {
 		locations &&
 		(!surveyCodeInUrl || !surveyByRefLoading) &&
 		!parentLoading &&
-		!seedLoading &&
 		!surveyByObjectIdLoading;
 
 	// Single, clean useEffect for survey initialization
@@ -217,21 +215,7 @@ const Survey = () => {
 		// Wait for all data to be ready
 		if (!isDataReady) return;
 
-		if (surveyByRefCode) {
-			if (
-				userObjectId &&
-				(userRole === 'VOLUNTEER' || userRole === 'MANAGER') &&
-				surveyByRefCode.createdByUserObjectId !== userObjectId
-			) {
-				alert(
-					'You do not have permission to access this survey because you are not the creator. Please enter a valid referral code.'
-				);
-				navigate('/apply-referral');
-				//window.location.reload(); // Forces a full page reload to reset state
-				return;
-			}
-		}
-
+		// The UI should try to never actually reach this point, because surveys get filtered in SurveyEntryDashboard based on permissions.
 		if (surveyByObjectId) {
 			if (
 				userObjectId &&
@@ -247,30 +231,18 @@ const Survey = () => {
 			}
 		}
 
-		// Validate referral code and permissions
-		const validation = validateReferralCode(
-			surveyCodeInUrl,
-			surveyByRefCode,
-
-			parentSurvey,
-			seed,
-			ability
-		);
-		if (!validation.isValid) {
-			alert(validation.message);
-			navigate(validation.redirect);
-			//window.location.reload(); // Forces a full page reload to reset state
+		if (
+			!ability.can(
+				ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL,
+				SUBJECTS.SURVEY
+			)
+		) {
+			toast.error(
+				'You do not have permission to create a survey without a referral code.'
+			);
+			navigate('/apply-referral');
 			return;
 		}
-
-		// here
-		// console.log('ABILITY');
-		// console.log(
-		// 	ability.can(
-		// 		ACTIONS.CASL.UPDATE,
-		// 		subject(SUBJECTS.SURVEY, surveyByRefCode)
-		// 	)
-		// );
 
 		// Initialize the survey
 		const { survey, existingData } = initializeSurvey(
@@ -291,7 +263,7 @@ const Survey = () => {
 		if (existingData) {
 			setSurveyData(existingData.surveyData);
 			setObjectId(existingData.objectId);
-			setParentSurveyCode(existingData.parentSurveyCode);
+			setParentSurveyCode(existingData.parentSurveyCode as string);
 		} else {
 			setSurveyData(survey.data);
 			setParentSurveyCode(parentSurvey?.surveyCode);
@@ -332,7 +304,7 @@ const Survey = () => {
 		locationsLoading ||
 		(surveyCodeInUrl && surveyByRefLoading) ||
 		parentLoading ||
-		seedLoading ||
+		// seedLoading ||
 		surveyByObjectIdLoading;
 
 	if (isLoading) return <p>Loading survey...</p>;
