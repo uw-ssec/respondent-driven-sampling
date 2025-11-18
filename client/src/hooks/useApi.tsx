@@ -208,18 +208,21 @@ export const useApi = () => {
 
 		// Enrich surveys with user data
 		const enrichedSurveys =
-			surveys?.map((survey: SurveyDocument) => ({
-				...survey,
-				employeeName: userMap.get(
+			surveys?.map((survey: SurveyDocument) => {
+				const user = userMap.get(
 					survey.createdByUserObjectId as string
-				)
-					? `${userMap.get(survey.createdByUserObjectId as string)?.firstName ?? ''} ${userMap.get(survey.createdByUserObjectId as string)?.lastName ?? ''}`
-					: 'Unknown',
-				employeeId: survey.createdByUserObjectId,
-				locationName:
-					locationMap.get(survey.locationObjectId as string) ??
-					'Unknown'
-			})) ?? [];
+				);
+				return {
+					...survey,
+					employeeName: user
+						? `${user.firstName ?? ''} ${user.lastName ?? ''}`
+						: 'Unknown',
+					employeeId: survey.createdByUserObjectId,
+					locationName:
+						locationMap.get(survey.locationObjectId as string) ??
+						'Unknown'
+				};
+			}) ?? [];
 
 		return {
 			data: enrichedSurveys,
@@ -300,7 +303,7 @@ export const useApi = () => {
 
 	const fetchLocations = async () => {
 		const response = await fetchWithAuth(`/api/locations`);
-		return (await response?.json())?.data || null;
+		return (await response?.json())?.data ?? null;
 	};
 
 	const locationService = { fetchLocations, useLocations };

@@ -41,7 +41,7 @@ export const FormSelect = ({
 	};
 
 	// Show error if required and value is empty, but only after field has been touched
-	const hasError = error ?? (touched && required && !value);
+	const hasError = error || (touched && required && !value);
 
 	const selectControl = (
 		<FormControl

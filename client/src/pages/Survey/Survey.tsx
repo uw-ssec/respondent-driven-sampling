@@ -232,6 +232,7 @@ const Survey = () => {
 		}
 
 		if (
+			!surveyCodeInUrl &&
 			!ability.can(
 				ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL,
 				SUBJECTS.SURVEY

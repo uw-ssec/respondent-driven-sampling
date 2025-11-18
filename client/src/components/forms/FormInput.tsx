@@ -30,7 +30,7 @@ export const FormInput = ({
 
 	// Show error if required and value is empty, but only after field has been touched
 	const hasError =
-		error ??
+		error ||
 		(touched &&
 			required &&
 			(!value || (typeof value === 'string' && !value.trim())));

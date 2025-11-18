@@ -61,7 +61,7 @@ router.post(
 						'This survey has already been used. If you have access to it, visit Survey Entry Dashboard to view it.'
 				});
 			}
-			res.json({
+			res.status(200).json({
 				isValid: true,
 				message: 'Referral code is valid'
 			});
