@@ -648,7 +648,7 @@ const demographicsPage = {
 		{
 			type: 'radiogroup',
 			name: 'va_health_eligible',
-			title: 'Have you ever recieved health care of other benefits from a Veterans Administration (VA) center?',
+			title: 'Have you ever received health care of other benefits from a Veterans Administration (VA) center?',
 			choices: ['Yes', 'No', 'Do not know'],
 			isRequired: false
 		}
