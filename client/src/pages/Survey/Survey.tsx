@@ -220,7 +220,7 @@ const Survey = () => {
 		if (surveyByRefCode) {
 			if (
 				userObjectId &&
-				userRole === 'VOLUNTEER' &&
+				(userRole === 'VOLUNTEER' || userRole === 'MANAGER') &&
 				surveyByRefCode.createdByUserObjectId !== userObjectId
 			) {
 				alert(
@@ -235,7 +235,7 @@ const Survey = () => {
 		if (surveyByObjectId) {
 			if (
 				userObjectId &&
-				userRole === 'VOLUNTEER' &&
+				(userRole === 'VOLUNTEER' || userRole === 'MANAGER') &&
 				surveyByObjectId.createdByUserObjectId !== userObjectId
 			) {
 				alert(
