@@ -359,7 +359,7 @@ const networkPage2 = {
 
 const durationHomelessnessPage = {
 	name: 'duration_homelessness',
-	title: 'Duration of Homelesness',
+	title: 'Duration of Homelessness',
 	elements: [
 		{
 			type: 'radiogroup',
