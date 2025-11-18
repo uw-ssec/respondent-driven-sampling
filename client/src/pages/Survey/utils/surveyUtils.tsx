@@ -1,7 +1,10 @@
+import {
+	generateEditSurveyJson,
+	generateSurveyJson
+} from './SurveyJson';
+import { themeJson } from './surveyTheme';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { Model } from 'survey-core';
-
-import { generateEditSurveyJson, generateSurveyJson } from './SurveyJson';
 
 // Helper function to validate referral code and permissions
 export const validateReferralCode = (
@@ -65,6 +68,9 @@ export const initializeSurvey = (
 		? generateEditSurveyJson(locationChoices)
 		: generateSurveyJson(locationChoices);
 	const survey = new Model(surveyJson);
+	
+	// Apply custom theme
+	survey.applyTheme(themeJson);
 
 	// Populate with existing data from objectId if found
 	if (surveyByObjectId) {
