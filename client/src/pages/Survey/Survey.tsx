@@ -220,7 +220,7 @@ const Survey = () => {
 		if (surveyByRefCode) {
 			if (
 				userObjectId &&
-				userRole === 'VOLUNTEER' &&
+				(userRole === 'VOLUNTEER' || userRole === 'MANAGER') &&
 				surveyByRefCode.createdByUserObjectId !== userObjectId
 			) {
 				alert(
@@ -235,7 +235,7 @@ const Survey = () => {
 		if (surveyByObjectId) {
 			if (
 				userObjectId &&
-				userRole === 'VOLUNTEER' &&
+				(userRole === 'VOLUNTEER' || userRole === 'MANAGER') &&
 				surveyByObjectId.createdByUserObjectId !== userObjectId
 			) {
 				alert(
@@ -251,13 +251,14 @@ const Survey = () => {
 		const validation = validateReferralCode(
 			surveyCodeInUrl,
 			surveyByRefCode,
+
 			parentSurvey,
 			seed,
 			ability
 		);
 		if (!validation.isValid) {
 			alert(validation.message);
-			navigate('/apply-referral');
+			navigate(validation.redirect);
 			window.location.reload(); // Forces a full page reload to reset state
 			return;
 		}
