@@ -251,14 +251,14 @@ const Survey = () => {
 		const validation = validateReferralCode(
 			surveyCodeInUrl,
 			surveyByRefCode,
-			surveyByObjectId,
+
 			parentSurvey,
 			seed,
 			ability
 		);
 		if (!validation.isValid) {
 			alert(validation.message);
-			navigate('/apply-referral');
+			navigate(validation.redirect);
 			window.location.reload(); // Forces a full page reload to reset state
 			return;
 		}

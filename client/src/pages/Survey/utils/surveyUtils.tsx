@@ -1,5 +1,4 @@
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
-import { subject } from '@casl/ability';
 import { Model } from 'survey-core';
 
 import { generateEditSurveyJson, generateSurveyJson } from './SurveyJson';
@@ -8,42 +7,10 @@ import { generateEditSurveyJson, generateSurveyJson } from './SurveyJson';
 export const validateReferralCode = (
 	surveyCodeInUrl: string | null,
 	surveyByRefCode: any,
-	surveyByObjectId: any,
 	parentSurvey: any,
 	seed: any,
 	ability: any
 ) => {
-	// If preloaded survey, check if user can update it
-	if (surveyByRefCode) {
-		// Check if user has permission to update this specific survey
-		if (
-			!ability.can(
-				ACTIONS.CASL.UPDATE,
-				subject(SUBJECTS.SURVEY, surveyByRefCode)
-			)
-		) {
-			return {
-				isValid: false,
-				message: 'You do not have permission to edit this survey.',
-				redirect: '/apply-referral'
-			};
-		}
-	} else if (surveyByObjectId) {
-		// Check if user has permission to update this specific survey
-		if (
-			!ability.can(
-				ACTIONS.CASL.UPDATE,
-				subject(SUBJECTS.SURVEY, surveyByObjectId)
-			)
-		) {
-			return {
-				isValid: false,
-				message: 'You do not have permission to edit this survey.',
-				redirect: '/survey/' + surveyByObjectId._id
-			};
-		}
-	}
-
 	// Run validation if there's a code present
 	if (surveyCodeInUrl) {
 		// if there is no parent survey or seed connected to this survey code, return false

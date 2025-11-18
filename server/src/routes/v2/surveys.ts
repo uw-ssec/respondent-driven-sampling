@@ -51,7 +51,7 @@ router.get(
 					),
 					{ deletedAt: null }
 				]
-			}).sort({ createdAt: -1 }); // always sort most to least recent
+			}).sort({ updatedAt: -1 }); // always sort most to least recent
 
 			// Successfully fetched surveys
 			res.status(200).json({

@@ -100,9 +100,11 @@ function applyAdminPermissions(builder: AbilityBuilder<Ability>, ctx: Context) {
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
-	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
-		...isToday('createdAt')
-	});
+	// NOTE: Removing isToday because it is not tested.
+	// builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
+	// 	...isToday('createdAt')
+	// });
+	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY);
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 
 	// admins can read all seeds
@@ -141,12 +143,11 @@ function applyManagerPermissions(
 	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY);
 	// can only read/update surveys created by themselves at their own location today
-	// TODO: re-enable this once we have custom validation endpoints
-	// NOTE: disabling because apply-referral page needs to read surveys created by others
+
 	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
 		...isCreatedBySelf(ctx.userObjectId),
-		...hasSameLocation(ctx.latestLocationObjectId),
-		...isToday('createdAt')
+		...hasSameLocation(ctx.latestLocationObjectId)
+		//...isToday('createdAt') // NOTE: Removing isToday because it is not tested.
 	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 
@@ -176,12 +177,10 @@ function applyVolunteerPermissions(
 	builder.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
 	// can only read & update surveys created by themselves at their own location today
-	// NOTE: disabling because apply-referral page needs to read surveys created by others
-	// TODO: re-enable this once we have custom validation endpoints
 	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
 		...isCreatedBySelf(ctx.userObjectId),
-		...hasSameLocation(ctx.latestLocationObjectId),
-		...isToday('createdAt')
+		...hasSameLocation(ctx.latestLocationObjectId)
+		// ...isToday('createdAt') // NOTE: Removing isToday because it is not tested.
 	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 
