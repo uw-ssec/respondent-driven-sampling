@@ -1,3 +1,5 @@
+
+
 type Choice =
 	| string
 	| {
@@ -17,6 +19,7 @@ export const generateSurveyJson = (locations: Choice[]) => {
 			preScreenPage,
 			consentPage,
 			surveyValidationPage,
+			giftCardPage,
 			personalLivingSituationPage,
 			networkPage1,
 			networkPage2,
@@ -25,7 +28,6 @@ export const generateSurveyJson = (locations: Choice[]) => {
 			healthPage,
 			householdPage,
 			specialQuestionsPage,
-			youthSpecialQuestionsPage,
 			surveyDeduplicationPage,
 			outroPage
 		],
@@ -126,10 +128,10 @@ const consentPage = {
 			name: 'consent-note',
 			html: `<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>
             <br />
-<p>As part of work with the King County Regional Homelessness Authority (KCRHA), I’d like to ask you some questions we’re required to ask and collect for our funders about unsheltered homelessness in our region.</p>
+<p>As part of work with the **University of Washington** in preparation for **King County Regional Homelessness Authority (KCRHA) 2026 PIT Count**, I'd like to ask you some questions we're required to ask and collect for **KCRHA's** funders about unsheltered homelessness in our region.</p>
 <p>Your participation is voluntary and will not affect any services you or your family are seeking or currently receiving. We are surveying many people and will put all responses together, so it will not be possible to identify you from the information you provide here.</p>
-<p>As a token of appreciation for your time, we will give you a $20 preloaded debit card, $40 for families with minor children at the end.</p>
-<p>Would you be willing to talk with me for about 30 min?</p>`
+<p>As a token of appreciation for your time, we will give you a **$20 pre-loaded debit card**.</p>
+<p>Would you be willing to talk with me for about **30 minutes**?</p>`
 		},
 		{
 			type: 'radiogroup',
@@ -137,15 +139,7 @@ const consentPage = {
 			title: 'Did the subject orally consent to participate?',
 			choices: ['Yes', 'No'],
 			isRequired: true
-		}
-	]
-};
-
-// SECTION 1.0
-const surveyValidationPage = {
-	name: 'survey-validation',
-	title: 'Survey Validation',
-	elements: [
+		},
 		{
 			type: 'html',
 			name: 'consent-instructions',
@@ -157,7 +151,16 @@ const surveyValidationPage = {
 			title: 'Is the respondent at least 18 years old?',
 			choices: ['Yes', 'No'],
 			isRequired: true
-		},
+		}
+	]
+};
+
+// SECTION 1.0
+// SECTION 1.1
+const surveyValidationPage = {
+	name: 'survey-validation',
+	title: 'Survey Validation',
+	elements: [
 		{
 			type: 'text',
 			name: 'first_two_letters_fname',
@@ -190,6 +193,48 @@ const surveyValidationPage = {
 		}
 	]
 };
+// SECTION 1.2
+const giftCardPage = {
+      name: 'gift_cards',
+      title: 'Gift Cards',
+      elements: [
+        {
+          type: 'html',
+          name: 'gift_card_instructions',
+          html: '<div><strong>Please explain to the respondent that we need their contact information to send them additional gift cards when someone comes to take the survey using their referral coupons.</strong></div>'
+        },
+        {
+          type: 'checkbox',
+          name: 'email_phone_consent',
+          title: 'Do you consent to receive your gift cards via SMS and/or email?',
+          choices: [
+            {
+              value: 'email',
+              text: 'Email address'
+            },
+            {
+              value: 'phone',
+              text: 'Phone number'
+            }
+          ],
+          showNoneItem: true
+        },
+        {
+          type: 'text',
+          name: 'email',
+          visibleIf: "{email_phone_consent} contains 'email'",
+          title: "Enter the respondent's email address",
+          inputType: 'email'
+        },
+        {
+          type: 'text',
+          name: 'phone',
+          visibleIf: "{email_phone_consent} contains 'phone'",
+          title: "Enter the respondent's phone number",
+          inputType: 'tel'
+        }
+      ]
+};
 
 // SECTION 2.0
 const personalLivingSituationPage = {
@@ -203,7 +248,7 @@ const personalLivingSituationPage = {
 			choices: sleepingSituationChoices,
 			showOtherItem: true,
 			otherText: 'Other (please specify)',
-			isRequired: true
+			isRequired: false
 		},
 		{
 			type: 'checkbox',
@@ -218,7 +263,7 @@ const personalLivingSituationPage = {
 			],
 			showNoneItem: true,
 			separateSpecialChoices: true,
-			isRequired: true,
+			isRequired: false,
 			visibleIf:
 				"{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
 		},
@@ -234,12 +279,11 @@ const personalLivingSituationPage = {
 				'Ability to cook hot food'
 			],
 			showNoneItem: true,
-			isRequired: true,
-			visibleIf:
-				"{sleeping_situation} notempty and !{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
+			isRequired: false,
+			visibleIf: "{sleeping_situation} notempty and !{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
 		}
 	],
-	visibleIf: "{consent_given} = 'Yes'"
+	visibleIf: "{consent_given} = 'Yes' and {is_adult} = 'Yes'"
 };
 
 // SECTION 3.0
@@ -255,7 +299,7 @@ const networkPage1 = {
 			validators: [{ type: 'numeric', minValue: 0 }]
 		}
 	],
-	visibleIf: "{consent_given} = 'Yes'"
+	visibleIf: "{consent_given} = 'Yes' and {is_adult} = 'Yes'"
 };
 
 const networkPage2 = {
@@ -265,7 +309,7 @@ const networkPage2 = {
 		{
 			type: 'html',
 			name: 'network_instruction',
-			html: '<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0;"><strong>Instructions:</strong> Please fill in information for each person below. You can add or remove rows as needed.</div>'
+			html: '<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0;"><strong>Instructions:</strong> Outside of your family living with you, please list the first name, pseudonym/nickname/street name or initials of the person and their relation (e.g. friend, family, etc) of people you personally know who are unhoused or experiencing homelessness. Please answer for as many people as you know.</div>'
 		},
 		{
 			type: 'paneldynamic',
@@ -310,7 +354,7 @@ const networkPage2 = {
 			templateTitle: 'Person #{panelIndex}'
 		}
 	],
-	visibleIf: "{consent_given} = 'Yes'"
+	visibleIf: "{consent_given} = 'Yes' and {is_adult} = 'Yes'"
 };
 
 const livingSituationPage = {
@@ -355,7 +399,7 @@ const livingSituationPage = {
 				{
 					name: 'overall_lot_homeless_days',
 					inputType: 'number',
-					title: 'Days'
+					title: 'Years'
 				},
 				{
 					name: 'overall_lot_homeless_months',
@@ -365,7 +409,7 @@ const livingSituationPage = {
 				{
 					name: 'overall_lot_homeless_years',
 					inputType: 'number',
-					title: 'Years'
+					title: 'Days'
 				}
 			]
 		},
@@ -432,7 +476,7 @@ const livingSituationPage = {
 			visibleIf: "{shelter_svcs} = 'Yes'"
 		}
 	],
-	visibleIf: "{consent_given} = 'Yes'"
+	visibleIf: "{consent_given} = 'Yes' and {is_adult} = 'Yes'"
 };
 
 // TODO
@@ -539,7 +583,7 @@ const demographicsPage = {
 			isRequired: false,
 			visible: false
 		},
-		{
+				{
 			type: 'checkbox',
 			name: 'race_ethnicity',
 			title: 'Which of the following best describes your race and/or ethnicity? (Note, you may report more than one group.)',
@@ -576,12 +620,12 @@ const demographicsPage = {
 		{
 			type: 'radiogroup',
 			name: 'va_health_eligible',
-			title: 'Have you ever received health care of other benefits from a Veterans Administration (VA) center?',
+			title: 'Have you ever recieved health care of other benefits from a Veterans Administration (VA) center?',
 			choices: ['Yes', 'No', 'Do not know'],
 			isRequired: false
 		}
 	],
-	visibleIf: "{consent_given} = 'Yes'"
+	visibleIf: "{consent_given} = 'Yes' and {is_adult} = 'Yes'"
 };
 
 // SECTION 3.2
@@ -618,7 +662,7 @@ const healthPage = {
 			isRequired: false
 		}
 	],
-	visibleIf: "{consent_given} = 'Yes'"
+	visibleIf: "{consent_given} = 'Yes' and {is_adult} = 'Yes'"
 };
 
 // SECTION 4.0
@@ -697,6 +741,10 @@ const householdPage = {
 					type: 'text',
 					name: 'hh_member_tribal_id',
 					title: 'Does {panel.hh_member_initials} have a Tribal Affiliation? If so, what is their Tribal Affiliation?',
+					choices: [], // TODO
+					hasOther: true,
+					otherText: 'Other (please specify)',
+					searchEnabled: true,
 					isRequired: false
 				},
 				{
@@ -759,7 +807,7 @@ const householdPage = {
 			allowRemovePanel: true
 		}
 	],
-	visibleIf: "{consent_given} = 'Yes'"
+	visibleIf: "{consent_given} = 'Yes' and {is_adult} = 'Yes'"
 };
 
 // SECTION 5.0
@@ -1327,7 +1375,7 @@ const specialQuestionsPage = {
 			visibleIf: "{eviction_type} = 'Soft'"
 		},
 		{
-			type: 'tagbox',
+			type: 'dropdown',
 			name: 'shelter_priorities',
 			title: 'If you were to seek out a shelter program, what top shelter features would be most important to you? (Please select up to 5)',
 			choices: [
@@ -1415,44 +1463,7 @@ const specialQuestionsPage = {
 			visibleIf: "{pet_animal} = 'Yes'"
 		}
 	],
-	visibleIf: "{consent_given} = 'Yes'"
-};
-
-// SECTION 5.1
-const youthSpecialQuestionsPage = {
-	name: 'youth_special_questions',
-	title: 'Youth Special Questions',
-	elements: [
-		{
-			type: 'dropdown',
-			name: 'youth_school_work',
-			title: 'Do you go to school or work?',
-			choices: [
-				'School',
-				'Work',
-				'Both School AND Work',
-				'No',
-				'Choose not to answer',
-				'Do not know'
-			],
-			isRequired: false
-		},
-		{
-			type: 'dropdown',
-			name: 'youth_q2',
-			title: 'Place holder for Youth specific question 2',
-			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: false
-		},
-		{
-			type: 'dropdown',
-			name: 'youth_q3',
-			title: 'Place holder for Youth specific question 3',
-			choices: ['Yes', 'No', 'Choose not to answer', 'Do not know'],
-			isRequired: false
-		}
-	],
-	visibleIf: "{is_adult} = 'No' AND {consent_given} = 'Yes'"
+	visibleIf: "{consent_given} = 'Yes' and {is_adult} = 'Yes'"
 };
 
 // SECTION 6.0
