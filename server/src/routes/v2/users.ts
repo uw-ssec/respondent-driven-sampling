@@ -42,7 +42,9 @@ router.get(
 			const result = await User.find({
 				$and: [
 					req.query,
-					accessibleBy(req.authorization).ofType(User.modelName),
+					accessibleBy(req.authorization, ACTIONS.CASL.READ).ofType(
+						User.modelName
+					),
 					{ deletedAt: null }
 				]
 			});
@@ -95,7 +97,9 @@ router.get(
 		try {
 			const result = await User.findOne({
 				_id: req.params.objectId,
-				...accessibleBy(req.authorization).ofType(User.modelName) // Dynamic filter for handling custom permissions
+				...accessibleBy(req.authorization, ACTIONS.CASL.READ).ofType(
+					User.modelName
+				) // Dynamic filter for handling custom permissions
 			});
 			if (!result) {
 				return res.status(404).json({ message: 'User not found' });

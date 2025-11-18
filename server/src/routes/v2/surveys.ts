@@ -46,7 +46,9 @@ router.get(
 			const result = await Survey.find({
 				$and: [
 					req.query,
-					accessibleBy(req.authorization).ofType(Survey.modelName),
+					accessibleBy(req.authorization, ACTIONS.CASL.READ).ofType(
+						Survey.modelName
+					),
 					{ deletedAt: null }
 				]
 			}).sort({ createdAt: -1 }); // always sort most to least recent
@@ -100,7 +102,9 @@ router.get(
 			const result = await Survey.findOne({
 				$and: [
 					{ _id: req.params.objectId },
-					accessibleBy(req.authorization).ofType(Survey.modelName), // Need to pass in dynamic filter here because access is determined by `createdAt` and `locationObjectId` inside of Survey
+					accessibleBy(req.authorization, ACTIONS.CASL.READ).ofType(
+						Survey.modelName
+					), // Need to pass in dynamic filter here because access is determined by `createdAt` and `locationObjectId` inside of Survey
 					{ deletedAt: null }
 				]
 			});
@@ -166,9 +170,10 @@ router.patch(
 					$and: [
 						{ _id: req.params.objectId },
 						// CASL helper that injects permission-based query conditions. This ensures the survey matches the user's permission rules (like IS_CREATED_BY_SELF, HAS_SAME_LOCATION, or WAS_CREATED_TODAY).
-						accessibleBy(req.authorization).ofType(
-							Survey.modelName
-						),
+						accessibleBy(
+							req.authorization,
+							ACTIONS.CASL.UPDATE
+						).ofType(Survey.modelName),
 						// preventing updates to already-deleted surveys.
 						{ deletedAt: null }
 					]
