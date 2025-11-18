@@ -227,7 +227,7 @@ const Survey = () => {
 					'You do not have permission to access this survey because you are not the creator. Please enter a valid referral code.'
 				);
 				navigate('/apply-referral');
-				window.location.reload(); // Forces a full page reload to reset state
+				//window.location.reload(); // Forces a full page reload to reset state
 				return;
 			}
 		}
@@ -242,7 +242,7 @@ const Survey = () => {
 					'You do not have permission to continue this survey because you are not the creator.'
 				);
 				navigate('/survey-entries');
-				window.location.reload(); // Forces a full page reload to reset state
+				//window.location.reload(); // Forces a full page reload to reset state
 				return;
 			}
 		}
@@ -259,7 +259,7 @@ const Survey = () => {
 		if (!validation.isValid) {
 			alert(validation.message);
 			navigate(validation.redirect);
-			window.location.reload(); // Forces a full page reload to reset state
+			//window.location.reload(); // Forces a full page reload to reset state
 			return;
 		}
 
