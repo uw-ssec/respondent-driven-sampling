@@ -9,8 +9,10 @@ import 'survey-core/defaultV2.min.css';
 import { SYSTEM_SURVEY_CODE } from '@/constants';
 import { useAuthContext } from '@/contexts';
 import { useAbility, useApi } from '@/hooks';
+//import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 // Global Zustand store managing state of survey components
 import { useSurveyStore } from '@/stores';
+//import { subject } from '@casl/ability';
 import { useGeolocated } from 'react-geolocated';
 
 import { initializeSurvey, validateReferralCode } from './utils/surveyUtils';
@@ -33,7 +35,9 @@ const Survey = () => {
 	const surveyRef = useRef<Model | null>(null);
 	const isInitialized = useRef(false);
 	const ability = useAbility();
-	const { userObjectId, lastestLocationObjectId } = useAuthContext();
+
+	const { userObjectId, userRole, lastestLocationObjectId } =
+		useAuthContext();
 
 	// Add a ref to store the original full survey data in edit mode
 	const originalSurveyData = useRef<any>(null);
@@ -213,6 +217,36 @@ const Survey = () => {
 		// Wait for all data to be ready
 		if (!isDataReady) return;
 
+		if (surveyByRefCode) {
+			if (
+				userObjectId &&
+				userRole === 'VOLUNTEER' &&
+				surveyByRefCode.createdByUserObjectId !== userObjectId
+			) {
+				alert(
+					'You do not have permission to access this survey because you are not the creator. Please enter a valid referral code.'
+				);
+				navigate('/apply-referral');
+				window.location.reload(); // Forces a full page reload to reset state
+				return;
+			}
+		}
+
+		if (surveyByObjectId) {
+			if (
+				userObjectId &&
+				userRole === 'VOLUNTEER' &&
+				surveyByObjectId.createdByUserObjectId !== userObjectId
+			) {
+				alert(
+					'You do not have permission to continue this survey because you are not the creator.'
+				);
+				navigate('/survey-entries');
+				window.location.reload(); // Forces a full page reload to reset state
+				return;
+			}
+		}
+
 		// Validate referral code and permissions
 		const validation = validateReferralCode(
 			surveyCodeInUrl,
@@ -224,9 +258,19 @@ const Survey = () => {
 		);
 		if (!validation.isValid) {
 			alert(validation.message);
-			navigate(validation.redirect);
+			navigate('/apply-referral');
+			window.location.reload(); // Forces a full page reload to reset state
 			return;
 		}
+
+		// here
+		// console.log('ABILITY');
+		// console.log(
+		// 	ability.can(
+		// 		ACTIONS.CASL.UPDATE,
+		// 		subject(SUBJECTS.SURVEY, surveyByRefCode)
+		// 	)
+		// );
 
 		// Initialize the survey
 		const { survey, existingData } = initializeSurvey(
