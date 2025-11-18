@@ -2,7 +2,7 @@
 /**
  * Script to generate a blank PDF template for survey referral coupons.
  * This script does not connect to the database or generate real seeds.
- * It creates a single-page PDF with a placeholder for a QR code.
+ * It creates a PDF with one or more pages, each containing a placeholder for a QR code.
  *
  * Usage:
  * 1. Make sure you are in the `server` directory.
