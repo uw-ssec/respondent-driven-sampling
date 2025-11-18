@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
+import { useAuthContext } from '@/contexts/AuthContext';
 import { useApi } from '@/hooks';
 import { Box, Paper, TablePagination, Typography } from '@mui/material';
 
@@ -18,6 +19,7 @@ import {
 
 export default function SurveyEntryDashboard() {
 	const { surveyService } = useApi();
+	const { userObjectId, userRole } = useAuthContext();
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [searchTerm, setSearchTerm] = useState('');
 	const [viewAll, setViewAll] = useState(false);
@@ -49,7 +51,21 @@ export default function SurveyEntryDashboard() {
 	};
 
 	// Data processing pipeline
-	const filteredSurveys = filterSurveysByDate(surveys, viewAll, selectedDate);
+	const filteredSurveysByUserObjectId = useMemo(() => {
+		if (!surveys) return [];
+		if (userRole === 'VOLUNTEER' || userRole === 'MANAGER') {
+			return surveys.filter(
+				(survey: any) => survey.createdByUserObjectId == userObjectId
+			);
+		}
+		return surveys;
+	}, [surveys, userObjectId, userRole]);
+
+	const filteredSurveys = filterSurveysByDate(
+		filteredSurveysByUserObjectId,
+		viewAll,
+		selectedDate
+	);
 	const sortedSurveys = sortSurveys(filteredSurveys, sortConfig);
 	const searchedSurveys = searchSurveys(sortedSurveys, searchTerm);
 	const currentSurveys = paginateSurveys(
