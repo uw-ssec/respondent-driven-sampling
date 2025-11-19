@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { useAuthContext } from '@/contexts';
 import { useApi } from '@/hooks';
 import { Box, Paper, TablePagination, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +24,7 @@ interface StaffMember {
 export default function StaffDashboard() {
 	const navigate = useNavigate();
 	const { userService } = useApi();
+	const { userObjectId } = useAuthContext();
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filterRole, setFilterRole] = useState('');
 	const [currentPage, setCurrentPage] = useState(0); // MUI uses 0-based index
@@ -40,7 +42,11 @@ export default function StaffDashboard() {
 	// Handlers
 	const handleApproval = async (id: string, status: string) => {
 		try {
-			const response = await userService.approveUser(id, status);
+			const response = await userService.approveUser(
+				id,
+				status,
+				userObjectId
+			);
 			if (!response) return;
 			mutate(); // Refresh the list
 		} catch (err) {

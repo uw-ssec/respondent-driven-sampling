@@ -72,12 +72,13 @@ export const useApi = () => {
 
 	const approveUser = async (
 		userObjectId: string,
-		approvalStatus: string
+		approvalStatus: string,
+		approvedByUserObjectId: string
 	) => {
 		const response = await fetchWithAuth(`/api/v2/users/${userObjectId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ approvalStatus })
+			body: JSON.stringify({ approvalStatus, approvedByUserObjectId })
 		});
 		return response?.json();
 	};
