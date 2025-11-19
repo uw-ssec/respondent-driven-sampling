@@ -48,11 +48,9 @@ export const useApi = () => {
 		}
 	};
 
-	const useUser = (userObjectId: string | undefined) => {
-		if (!userObjectId) return null;
-		return useSWR(
-			userObjectId ? `/api/v2/users/${userObjectId}` : null,
-			() => fetchUser(userObjectId)
+	const useUser = (userObjectId: string) => {
+		return useSWR(`/api/v2/users/${userObjectId}`, () =>
+			fetchUser(userObjectId)
 		);
 	};
 
