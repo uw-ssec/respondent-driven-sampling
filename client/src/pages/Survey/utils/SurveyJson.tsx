@@ -19,7 +19,6 @@ export const generateSurveyJson = (locations: Choice[]) => {
 			preScreenPage,
 			consentPage,
 			surveyValidationPage,
-			giftCardPage,
 			personalLivingSituationPage,
 			networkPage1,
 			networkPage2,
@@ -30,6 +29,7 @@ export const generateSurveyJson = (locations: Choice[]) => {
 			householdPage,
 			specialQuestionsPage,
 			surveyDeduplicationPage,
+			giftCardPage,
 			outroPage
 		],
 		triggers: [
@@ -134,12 +134,27 @@ const consentPage = {
 		{
 			type: 'html',
 			name: 'consent-note',
-			html: `<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>
-            <br />
-<p>As part of work with the <strong>University of Washington</strong> in preparation for <strong>King County Regional Homelessness Authority (KCRHA) 2026 PIT Count</strong>, I'd like to ask you some questions we're required to ask and collect for <strong>KCRHA's</strong> funders about unsheltered homelessness in our region.</p>
-<p>Your participation is voluntary and will not affect any services you or your family are seeking or currently receiving. We are surveying many people and will put all responses together, so it will not be possible to identify you from the information you provide here.</p>
-<p>As a token of appreciation for your time, we will give you a <strong>$20 pre-loaded debit card</strong>.</p>
-<p>Would you be willing to talk with me for about <strong>30 minutes</strong>?</p>`
+			html: `<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0;">
+				<strong>Instructions:</strong> Please read the following consent information out loud to the respondent and have them orally give their consent to you.
+			</div>
+			<br />
+			<p>
+				As part of work with the <strong>University of Washington</strong> in preparation for
+				<strong>King County Regional Homelessness Authority (KCRHA) 2026 PIT Count</strong>,
+				I'd like to ask you some questions we're required to ask and collect for <strong>KCRHA's</strong>
+				funders about unsheltered homelessness in our region.
+			</p>
+			<p>
+				Your participation is voluntary and will not affect any services you or your family are seeking or currently receiving.
+				We are surveying many people and will put all responses together, so it will not be possible to identify you
+				from the information you provide here.
+			</p>
+			<p>
+				As a token of appreciation for your time, we will give you a <strong>$20 pre-loaded debit card</strong>.
+			</p>
+			<p>
+				Would you be willing to talk with me for about <strong>30 minutes</strong>?
+			</p>`
 		},
 		{
 			type: 'radiogroup',
@@ -204,6 +219,20 @@ const giftCardPage = {
 	title: 'Gift Cards',
 	elements: [
 		{
+			type: 'html',
+			name: 'referral_instruction',
+			html: `<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0;">
+				<strong>Instructions:</strong> Please read the following information out loud to the respondent.
+			</div>
+			<br />
+			<p>
+				At the end of this survey, we will give you <strong>referral coupons</strong>.
+				Please give them to other people experiencing homelessness.
+				If they come and take our survey using your coupon, we can send you <strong>$5 gift cards</strong> for each completed referral.
+				To receive these gift cards, we need either a <strong>phone number or email address</strong>.
+			</p>`
+		},
+		{
 			type: 'checkbox',
 			name: 'email_phone_consent',
 			title: 'Do you consent to receive your gift cards via SMS or email?',
@@ -233,7 +262,7 @@ const giftCardPage = {
 			title: "What's your phone number?",
 			maskType: 'pattern',
 			maskSettings: {
-			  pattern: '+9(999)-999-99-99'
+			  pattern: '+1(999)-999-99-99'
 			}
 		}
 	]
@@ -283,7 +312,7 @@ const personalLivingSituationPage = {
 			],
 			showNoneItem: true,
 			isRequired: false,
-			visibleIf: "{sleeping_situation} notempty and !{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
+			visibleIf: "{sleeping_situation} notempty and !({sleeping_situation} anyof ['small_vehicle', 'large_vehicle', 'choose_not_to_answer', 'do_not_know'])"
 		}
 	]
 };
@@ -1317,11 +1346,11 @@ const surveyDeduplicationPage = {
 	title: 'Survey Deduplication',
 	elements: [
 		{
-			type: 'dropdown',
+			type: 'checkbox',
 			name: 'deduplication',
 			title: "After completing this survey, do you believe you have completed this before?",
 			choices: ['Yes', 'No', 'Do not know'],
-			isRequired: true
+			isRequired: false
 		}
 	]
 };
