@@ -323,6 +323,13 @@ const networkPage1 = {
 	title: 'Network Module',
 	elements: [
 		{
+			type: 'html',
+			name: 'network_size_instruction',
+			html: `<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0;">
+				<strong>Instructions:</strong> If the respondent says "hundreds" or "too many" emphasize the "personally know" part of the question. They would need to both recognize each other and know some information about each other.
+			</div>`
+		},
+		{
 			type: 'text',
 			name: 'non_family_network_size',
 			title: 'Other than any family living with you, how many people do you closely know who are also unhoused or experiencing homelessness today?',
