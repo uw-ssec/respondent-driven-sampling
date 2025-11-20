@@ -1353,7 +1353,7 @@ const surveyDeduplicationPage = {
 	title: 'Survey Deduplication',
 	elements: [
 		{
-			type: 'checkbox',
+			type: 'radiogroup',
 			name: 'deduplication',
 			title: "After completing this survey, do you believe you have completed this before?",
 			choices: ['Yes', 'No', 'Do not know'],
