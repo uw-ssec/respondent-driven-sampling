@@ -6,6 +6,21 @@ This is a **monolithic React + Node.js application** for homelessness research d
 
 **Research Context**: Volunteers conduct surveys with homeless individuals using QR code-based referral chains. Each survey generates 3 child referral codes, creating a social network sampling structure for population estimation.
 
+## Critical Module Loading Pattern for Scripts
+
+**Problem**: Scripts in `scripts/` directory cannot directly import from `server/node_modules` due to Node.js module resolution.
+
+**Solution**: All scripts use `createRequire` to load dependencies from the server context:
+
+```typescript
+import { createRequire } from 'module';
+const serverRequire = createRequire(path.join(__dirname, '../server/package.json'));
+const mongoose = serverRequire('mongoose');
+const PDFDocument = serverRequire('pdfkit');
+```
+
+**When to use**: Any new script that needs server dependencies (mongoose, pdfkit, qrcode). See `scripts/generateSeeds.ts` and `scripts/superAdminCRUD.tsx` as templates.
+
 ## Architecture & Key Patterns
 
 ### Monorepo Structure
@@ -85,6 +100,20 @@ npm run dev  # Vite dev server
 ```
 
 **Environment Setup**: Copy `server/.env.example` to `server/.env` with MongoDB URI (Azure Cosmos DB), Twilio credentials, JWT secret.
+
+### Running Admin Scripts
+
+**All npm scripts must be run from the `server/` directory**, not project root:
+
+```bash
+cd server
+npm run super-admin -- list                    # List all super admins
+npm run super-admin -- create John Doe john@example.com +15551234567 <locationId>
+npm run generate-seeds -- "Hub Name" 10        # Generate 10 seed QR codes
+npm run generate-coupons -- 5                  # Generate 5 blank coupon pages
+```
+
+Scripts are defined in `server/package.json` and use `tsx --env-file=.env` to load environment variables.
 
 ### Testing
 
