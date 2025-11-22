@@ -4,6 +4,7 @@ import { LocationDocument } from '@/types/Locations';
 import { SurveyDocument } from '@/types/Survey';
 
 import { generateEditSurveyJson, generateSurveyJson } from './SurveyJson';
+import { themeJson } from './surveyTheme';
 
 // Helper function to initialize survey with or without existing data
 export const initializeSurvey = (
@@ -22,6 +23,9 @@ export const initializeSurvey = (
 		? generateEditSurveyJson(locationChoices)
 		: generateSurveyJson(locationChoices);
 	const survey = new Model(surveyJson);
+	
+	// Apply custom theme
+	survey.applyTheme(themeJson);
 
 	// Populate with existing data from objectId if found
 	if (surveyByObjectId) {
