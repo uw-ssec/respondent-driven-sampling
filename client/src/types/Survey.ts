@@ -1,11 +1,8 @@
-import { ReferralCode } from '@/types/ReferralCode';
+import { ISurvey } from '@/database/survey/mongoose/survey.model';
 
-export interface Survey {
-	referralCodes: ReferralCode[];
-	responses: Object;
+export interface SurveyDocument extends ISurvey {
 	_id: string;
 	employeeId: string;
 	employeeName: string;
-	createdAt: string;
-	referredByCode?: string;
+	locationName: string;
 }

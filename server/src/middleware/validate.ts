@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { AuthenticatedRequest } from '@/types/auth';
 
 export function validate(
-	// REVIEW: Can we type this better? Instead of any, how about listing all the zod schemas we have?
 	schema: z.ZodSchema<any>
 ): (req: AuthenticatedRequest, res: Response, next: NextFunction) => void {
 	return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

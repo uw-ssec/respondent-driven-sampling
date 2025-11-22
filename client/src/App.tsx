@@ -17,6 +17,7 @@ import { muiTheme } from '@/theme/muiTheme';
 import { isTokenValid } from '@/utils/authTokenHandler';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
+import { Toaster } from 'react-hot-toast';
 import {
 	Navigate,
 	Route,
@@ -135,6 +136,7 @@ function App() {
 					</Routes>
 				</Router>
 			</ThemeProvider>
+			<Toaster />
 		</AuthProvider>
 	);
 }

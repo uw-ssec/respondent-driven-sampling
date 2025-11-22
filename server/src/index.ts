@@ -10,11 +10,12 @@ import nocache from 'nocache';
 
 import { setupSwagger } from '@/config/swagger';
 import connectDB from '@/database/index';
-import authRoutes from '@/routes/v1/auth';
-import locationsRoutesV2 from '@/routes/v2/locations';
-import seedsRoutesV2 from '@/routes/v2/seeds';
-import surveyRoutesV2 from '@/routes/v2/surveys';
-import usersRoutesV2 from '@/routes/v2/users';
+import authRoutes from '@/routes/auth';
+import locationsRoutes from '@/routes/locations';
+import seedsRoutes from '@/routes/seeds';
+import surveyRoutes from '@/routes/surveys';
+import usersRoutes from '@/routes/users';
+import validateReferralCodeRoute from '@/routes/validateReferralCode';
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -149,10 +150,11 @@ setupSwagger(app);
 
 // Apply routes with security wrapper
 app.use('/api/auth', securityWrapper(authRoutes));
-app.use('/api/v2/surveys', securityWrapper(surveyRoutesV2));
-app.use('/api/v2/seeds', securityWrapper(seedsRoutesV2));
-app.use('/api/v2/locations', securityWrapper(locationsRoutesV2));
-app.use('/api/v2/users', securityWrapper(usersRoutesV2));
+app.use('/api/surveys', securityWrapper(surveyRoutes));
+app.use('/api/seeds', securityWrapper(seedsRoutes));
+app.use('/api/locations', securityWrapper(locationsRoutes));
+app.use('/api/users', securityWrapper(usersRoutes));
+app.use('/api/', securityWrapper(validateReferralCodeRoute));
 
 // Serve static files with security headers
 const clientBuildPath = path.join(__dirname, '../dist');
