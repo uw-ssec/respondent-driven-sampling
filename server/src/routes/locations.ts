@@ -16,7 +16,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v2/locations:
+ * /api/locations:
  *   get:
  *     summary: Get all locations
  *     description: Retrieve all locations with optional query filters
@@ -47,7 +47,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 
 /**
  * @swagger
- * /api/v2/locations/{id}:
+ * /api/locations/{id}:
  *   get:
  *     summary: Get location by ID
  *     description: Retrieve a specific location by its ObjectId
@@ -95,7 +95,7 @@ router.get(
 
 /**
  * @swagger
- * /api/v2/locations:
+ * /api/locations:
  *   post:
  *     summary: Create location
  *     description: Create a new location with the provided data
@@ -155,7 +155,7 @@ router.post(
 
 /**
  * @swagger
- * /api/v2/locations/{objectId}:
+ * /api/locations/{objectId}:
  *   patch:
  *     summary: Update location
  *     description: Update a specific location by its ObjectId
@@ -228,7 +228,7 @@ router.patch(
 
 /**
  * @swagger
- * /api/v2/locations/{objectId}:
+ * /api/locations/{objectId}:
  *   delete:
  *     summary: Delete location
  *     description: Delete a specific location by its ObjectId

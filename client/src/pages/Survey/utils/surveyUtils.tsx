@@ -1,62 +1,19 @@
-import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { Model } from 'survey-core';
+
+import { LocationDocument } from '@/types/Locations';
+import { SurveyDocument } from '@/types/Survey';
 
 import { generateEditSurveyJson, generateSurveyJson } from './SurveyJson';
 
-// Helper function to validate referral code and permissions
-export const validateReferralCode = (
-	surveyCodeInUrl: string | null,
-	surveyByRefCode: any,
-	parentSurvey: any,
-	seed: any,
-	ability: any
-) => {
-	// Run validation if there's a code present
-	if (surveyCodeInUrl) {
-		// if there is no parent survey or seed connected to this survey code, return false
-		if (!parentSurvey && !seed) {
-			return {
-				isValid: false,
-				message: 'This survey code does not exist. Please try again.',
-				redirect: '/apply-referral'
-			};
-		}
-		// If the survey is already completed, return false
-		if (surveyByRefCode?.isCompleted) {
-			return {
-				isValid: false,
-				message: 'This survey has already been completed.',
-				redirect: '/apply-referral'
-			};
-		}
-	} else {
-		// No referral code - check permissions to see if they can create w/o referral
-		if (
-			!ability.can(
-				ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL,
-				SUBJECTS.SURVEY
-			)
-		) {
-			return {
-				isValid: false,
-				message:
-					'You do not have permission to create a survey without a referral code.',
-				redirect: '/apply-referral'
-			};
-		}
-	}
-	return { isValid: true, message: '', redirect: '' };
-};
-
 // Helper function to initialize survey with or without existing data
 export const initializeSurvey = (
-	locations: any[],
-	surveyByRefCode: any,
-	surveyByObjectId: any,
-	parentSurvey: any,
+	locations: LocationDocument[],
+	surveyByRefCode: SurveyDocument | null,
+	surveyByObjectId: SurveyDocument | null,
+	parentSurvey: SurveyDocument | null,
 	isEditMode: boolean = false
 ) => {
-	const locationChoices = locations.map((location: any) => ({
+	const locationChoices = locations.map((location: LocationDocument) => ({
 		value: location._id,
 		text: location.hubName
 	}));

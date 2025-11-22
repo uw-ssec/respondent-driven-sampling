@@ -35,12 +35,13 @@ const userSchema = new Schema(
 			ref: 'Location',
 			required: true
 		},
-		// NOTE: could supplement this with a `fields` field that declares
-		// which fields fall under the perview of the permission. e.g. "read:survey:firstname"
-		// This would add complexity but allow for more granular dynamic permissions management.
-		// Also consider adding a `can` boolean field that indicates awarding or revoking the given permission.
-		// REVIEW: Just sample of what this document will look like if permissions was set.
-		// permissions: [
+		// EXAMPLE OF PERMISSIONS ARRAY: [
+		//   { action: 'CREATE', subject: 'SURVEY', conditions: ['IS_CREATED_BY_SELF'] },
+		//   { action: 'READ', subject: 'USER', conditions: ['HAS_SAME_LOCATION'] }
+		// ]
+		// Refer to permissions/constants.ts for the possible values of action, subject, and conditions
+		// If we want to support complex field permissions OR revoking permissions (can vs. cannot), we will need to update this array
+		// with more fields and update applyCustomPermissions in permissions/abilityBuilder.ts
 		permissions: [
 			{
 				action: { type: String, enum: ACTION_ENUM, required: true },
@@ -53,7 +54,6 @@ const userSchema = new Schema(
 				}
 			}
 		],
-		default: [],
 		deletedAt: { type: Date, default: null, select: false }
 	},
 	{ timestamps: true, strict: 'throw' }

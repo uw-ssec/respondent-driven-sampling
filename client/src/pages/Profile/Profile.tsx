@@ -30,7 +30,7 @@ export default function Profile() {
 	const [error, _setError] = useState('');
 	const { userObjectId } = useAuthContext();
 
-	const { data: userData } = userService.useUser(id as string);
+	const { data: userData } = userService.useUser(id) || {};
 	const [userRole, setUserRole] = useState('');
 	const [approvalStatus, setApprovalStatus] = useState('');
 	const [locationObjectId, setLocationObjectId] = useState('');
@@ -72,10 +72,10 @@ export default function Profile() {
 
 			if (updatedUser.data) {
 				setMessage(
-					updatedUser.message || 'Profile updated successfully!'
+					updatedUser.message ?? 'Profile updated successfully!'
 				);
 			} else {
-				setMessage(updatedUser.message || 'Failed to update profile.');
+				setMessage(updatedUser.message ?? 'Failed to update profile.');
 			}
 		} catch (error) {
 			console.error('Error updating profile:', error);
@@ -122,8 +122,7 @@ export default function Profile() {
 			}}
 		>
 			<Typography variant="h5" component="h2" gutterBottom sx={{ mb: 3 }}>
-				Profile for{' '}
-				{`${userData?.firstName ?? 'User'} ${userData?.lastName ?? ''}`}
+				Profile for {`${userData?.firstName ?? 'User'} ${userData?.lastName ?? ''}`}
 			</Typography>
 
 			{error ? (
@@ -144,7 +143,7 @@ export default function Profile() {
 
 						<PhoneInput
 							label="Phone Number"
-							value={phone || ''}
+							value={phone ?? ''}
 							onChange={e =>
 								handleChange('phone', e.target.value)
 							}
@@ -153,7 +152,7 @@ export default function Profile() {
 						/>
 
 						<RoleSelect
-							value={userRole || ''}
+							value={userRole ?? ''}
 							onChange={e =>
 								handleChange('role', e.target.value as string)
 							}
@@ -204,7 +203,7 @@ export default function Profile() {
 						)}
 
 						<LocationSelect
-							value={locationObjectId || ''}
+							value={locationObjectId ?? ''}
 							onChange={e =>
 								handleChange(
 									'locationObjectId',

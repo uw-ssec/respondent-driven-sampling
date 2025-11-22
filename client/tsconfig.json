@@ -20,6 +20,7 @@
 		"paths": {
 			"@/permissions/*": ["../server/src/permissions/*"],
 			"@/constants": ["../server/src/database/utils/constants"],
+			"@/database/*": ["../server/src/database/*"],
 			"@/*": ["./src/*"]
 		}
 	},

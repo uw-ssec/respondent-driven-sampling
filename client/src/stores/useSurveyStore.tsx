@@ -28,7 +28,7 @@ export const useSurveyStore = create(
 	persist(
 		combine<SurveyState, SurveyActions>(
 			{
-				surveyData: null,
+				surveyData: null
 			},
 			(set, get) => ({
 				setSurveyData: (surveyData: any | null) => set({ surveyData }),
@@ -40,7 +40,7 @@ export const useSurveyStore = create(
 					const currentData = get().surveyData ?? {};
 					set({ surveyData: { ...currentData, surveyCode } });
 				},
-				getSurveyCode: () => get().surveyData?.surveyCode || null,
+				getSurveyCode: () => get().surveyData?.surveyCode ?? null,
 				getParentSurveyCode: () =>
 					get().surveyData?.parentSurveyCode ?? null,
 				setObjectId: (objectId: string | null) => {

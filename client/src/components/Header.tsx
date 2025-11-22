@@ -38,8 +38,11 @@ export function Header() {
 
 	// Close menu when clicking outside
 	useEffect(() => {
-		const handleClickOutside = (event: { target: any }) => {
-			if (menuRef.current && !menuRef.current.contains(event.target)) {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				menuRef.current &&
+				!menuRef.current.contains(event.target as Node)
+			) {
 				setIsProfileMenuOpen(false);
 			}
 		};
