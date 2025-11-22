@@ -15,7 +15,7 @@ import toast from 'react-hot-toast';
 export default function ApplyReferral() {
 	const ability = useAbility();
 	const navigate = useNavigate();
-	const { fetchWithAuth } = useApi();
+	const { surveyService } = useApi();
 	const [referralCode, setReferralCode] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
@@ -49,18 +49,10 @@ export default function ApplyReferral() {
 		// Clear any existing survey data and navigate to survey with the referral code
 		clearSurvey();
 		try {
-			const response = await fetchWithAuth(
-				'/api/validate-referral-code',
-				{
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ code: code })
-				}
-			);
-			const data = await response?.json();
+			const data = await surveyService.fetchReferralCodeValidation(code);
 
-			if (!data.isValid) {
-				setErrorMessage(data.message ?? 'Invalid referral code.');
+			if (!data?.isValid) {
+				setErrorMessage(data?.message ?? 'Invalid referral code.');
 				setLoading(false);
 				return;
 			}
@@ -153,18 +145,11 @@ export default function ApplyReferral() {
 		clearSurvey();
 
 		try {
-			const response = await fetchWithAuth(
-				'/api/validate-referral-code',
-				{
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ code: referralCode })
-				}
-			);
-			const data = await response?.json();
+			const data =
+				await surveyService.fetchReferralCodeValidation(referralCode);
 
-			if (!data.isValid) {
-				setErrorMessage(data.message ?? 'Invalid referral code.');
+			if (!data?.isValid) {
+				setErrorMessage(data?.message ?? 'Invalid referral code.');
 				setLoading(false);
 				return;
 			}

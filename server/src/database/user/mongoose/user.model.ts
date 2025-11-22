@@ -35,6 +35,13 @@ const userSchema = new Schema(
 			ref: 'Location',
 			required: true
 		},
+		// EXAMPLE OF PERMISSIONS ARRAY: [
+		//   { action: 'CREATE', subject: 'SURVEY', conditions: ['IS_CREATED_BY_SELF'] },
+		//   { action: 'READ', subject: 'USER', conditions: ['HAS_SAME_LOCATION'] }
+		// ]
+		// Refer to permissions/constants.ts for the possible values of action, subject, and conditions
+		// If we want to support complex field permissions OR revoking permissions (can vs. cannot), we will need to update this array
+		// with more fields and update applyCustomPermissions in permissions/abilityBuilder.ts
 		permissions: [
 			{
 				action: { type: String, enum: ACTION_ENUM, required: true },

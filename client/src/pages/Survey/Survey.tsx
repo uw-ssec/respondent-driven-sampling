@@ -222,7 +222,7 @@ const Survey = () => {
 				(userRole === 'VOLUNTEER' || userRole === 'MANAGER') &&
 				surveyByObjectId.createdByUserObjectId !== userObjectId
 			) {
-				alert(
+				toast.error(
 					'You do not have permission to continue this survey because you are not the creator.'
 				);
 				navigate('/survey-entries');

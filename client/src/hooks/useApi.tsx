@@ -285,10 +285,19 @@ export const useApi = () => {
 		);
 	};
 
+	// No useSWR wrapper here since it lives in our ApplyReferral handlers (better to fetch directly)
+	const fetchReferralCodeValidation = async (code: string) => {
+		const response = await fetchWithAuth(
+			`/api/validate-referral-code/${code}`
+		);
+		return (await response?.json()) ?? null;
+	};
+
 	const surveyService = {
 		fetchSurveys,
 		createSurvey,
 		updateSurvey,
+		fetchReferralCodeValidation,
 		useSurveys,
 		useSurvey,
 		useSurveysWithUsersAndLocations,
