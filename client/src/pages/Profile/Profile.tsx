@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuthContext } from '@/contexts';
 import { useAbility, useApi } from '@/hooks';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { subject } from '@casl/ability';
-import { Alert, Box, Button, Stack, Typography } from '@mui/material';
+import {
+	Alert,
+	Box,
+	Button,
+	MenuItem,
+	Select,
+	Stack,
+	Typography
+} from '@mui/material';
 import { useParams } from 'react-router-dom';
 
 import {
@@ -20,24 +28,29 @@ export default function Profile() {
 	const { id } = useParams();
 	const [message, setMessage] = useState('');
 	const [error, _setError] = useState('');
-	const {
-		locationObjectId,
-		firstName,
-		lastName,
-		userObjectId,
-		userRole,
-		email,
-		phone,
-		setEmail,
-		setPhone,
-		setLocationObjectId,
-		setUserRole
-	} = useAuthContext();
+	const { userObjectId } = useAuthContext();
+
+	const { data: userData } = userService.useUser(id) || {};
+	const [userRole, setUserRole] = useState('');
+	const [approvalStatus, setApprovalStatus] = useState('');
+	const [locationObjectId, setLocationObjectId] = useState('');
+	const [email, setEmail] = useState('');
+	const [phone, setPhone] = useState('');
+
+	useEffect(() => {
+		if (userData) {
+			setUserRole(userData.role ?? '');
+			setLocationObjectId(userData.locationObjectId ?? '');
+			setEmail(userData.email ?? '');
+			setPhone(userData.phone ?? '');
+			setApprovalStatus(userData.approvalStatus ?? '');
+		}
+	}, [userData]);
 
 	const canEditField = (field: string) => {
 		return ability.can(
 			ACTIONS.CASL.UPDATE,
-			subject(SUBJECTS.USER, { _id: userObjectId }),
+			subject(SUBJECTS.USER, { _id: id }),
 			field
 		);
 	};
@@ -59,10 +72,10 @@ export default function Profile() {
 
 			if (updatedUser.data) {
 				setMessage(
-					updatedUser.message || 'Profile updated successfully!'
+					updatedUser.message ?? 'Profile updated successfully!'
 				);
 			} else {
-				setMessage(updatedUser.message || 'Failed to update profile.');
+				setMessage(updatedUser.message ?? 'Failed to update profile.');
 			}
 		} catch (error) {
 			console.error('Error updating profile:', error);
@@ -90,6 +103,9 @@ export default function Profile() {
 			case 'role':
 				setUserRole(value);
 				break;
+			case 'approvalStatus':
+				setApprovalStatus(value);
+				break;
 		}
 	};
 
@@ -106,7 +122,7 @@ export default function Profile() {
 			}}
 		>
 			<Typography variant="h5" component="h2" gutterBottom sx={{ mb: 3 }}>
-				Profile for {`${firstName || 'User'} ${lastName || ''}`}
+				Profile for {`${userData?.firstName ?? 'User'} ${userData?.lastName ?? ''}`}
 			</Typography>
 
 			{error ? (
@@ -117,7 +133,7 @@ export default function Profile() {
 						<FormInput
 							label="Email"
 							type="email"
-							value={email || ''}
+							value={email ?? ''}
 							onChange={e =>
 								handleChange('email', e.target.value)
 							}
@@ -127,7 +143,7 @@ export default function Profile() {
 
 						<PhoneInput
 							label="Phone Number"
-							value={phone || ''}
+							value={phone ?? ''}
 							onChange={e =>
 								handleChange('phone', e.target.value)
 							}
@@ -136,7 +152,7 @@ export default function Profile() {
 						/>
 
 						<RoleSelect
-							value={userRole || ''}
+							value={userRole ?? ''}
 							onChange={e =>
 								handleChange('role', e.target.value as string)
 							}
@@ -144,8 +160,50 @@ export default function Profile() {
 							showTooltip
 						/>
 
+						{userObjectId !== id && (
+							<Select
+								value={approvalStatus}
+								onChange={e =>
+									handleChange(
+										'approvalStatus',
+										e.target.value
+									)
+								}
+								disabled={!canEditField('approvalStatus')}
+								size="small"
+								sx={{
+									fontSize: '0.75rem',
+									minWidth: 120,
+									// Color code based on status
+									'& .MuiSelect-select': {
+										py: 0.5,
+										fontWeight: 500,
+										color:
+											approvalStatus === 'APPROVED'
+												? '#2e7d32'
+												: approvalStatus === 'REJECTED'
+													? '#d32f2f'
+													: '#0288d1'
+									},
+									// Border color
+									'& .MuiOutlinedInput-notchedOutline': {
+										borderColor:
+											approvalStatus === 'APPROVED'
+												? '#4caf50'
+												: approvalStatus === 'REJECTED'
+													? '#f44336'
+													: '#2196f3'
+									}
+								}}
+							>
+								<MenuItem value="PENDING">Pending</MenuItem>
+								<MenuItem value="APPROVED">Approved</MenuItem>
+								<MenuItem value="REJECTED">Rejected</MenuItem>
+							</Select>
+						)}
+
 						<LocationSelect
-							value={locationObjectId || ''}
+							value={locationObjectId ?? ''}
 							onChange={e =>
 								handleChange(
 									'locationObjectId',

@@ -1,20 +1,19 @@
-// @ts-nocheck
 import {
 	Button,
 	Chip,
 	TableCell,
-	TableRow,
-	Tooltip,
-	Typography
+	TableRow
+	// Tooltip,
+	// Typography
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-import { Survey } from '@/types/Survey';
+import { SurveyDocument } from '@/types/Survey';
 
 import { toPacificDateTimeString } from '../utils/SurveyEntryDashboardUtils';
 
 interface SurveyEntryDashboardRowProps {
-	survey: Survey;
+	survey: SurveyDocument;
 }
 
 export default function SurveyEntryDashboardRow({
@@ -25,7 +24,7 @@ export default function SurveyEntryDashboardRow({
 	return (
 		<TableRow hover sx={{ '&:hover': { backgroundColor: '#f8f8f8' } }}>
 			<TableCell>{toPacificDateTimeString(survey.createdAt)}</TableCell>
-			<TableCell>
+			{/* <TableCell>
 				<Tooltip title={survey.employeeId} arrow>
 					<Typography
 						variant="body2"
@@ -40,7 +39,7 @@ export default function SurveyEntryDashboardRow({
 						{survey.employeeId}
 					</Typography>
 				</Tooltip>
-			</TableCell>
+			</TableCell> */}
 			<TableCell>{survey.employeeName}</TableCell>
 			<TableCell>{survey.locationName ?? 'N/A'}</TableCell>
 			<TableCell>{survey.parentSurveyCode ?? 'N/A'}</TableCell>

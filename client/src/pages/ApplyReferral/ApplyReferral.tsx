@@ -5,28 +5,32 @@ import { useNavigate } from 'react-router-dom';
 
 import '@/styles/ApplyReferral.css';
 
-import { useAbility } from '@/hooks';
+import { SURVEY_CODE_LENGTH } from '@/constants';
+import { useAbility, useApi } from '@/hooks';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { useSurveyStore } from '@/stores';
+import { Alert, TextField } from '@mui/material';
+import toast from 'react-hot-toast';
 
 export default function ApplyReferral() {
 	const ability = useAbility();
 	const navigate = useNavigate();
+	const { surveyService } = useApi();
 	const [referralCode, setReferralCode] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [errorMessage, setErrorMessage] = useState('');
 	const { clearSurvey } = useSurveyStore();
 	const [isScanning, setIsScanning] = useState(false); // Track scanning state
 	const scannerRef = useRef<Html5Qrcode | null>(null);
 	const readerRef = useRef<HTMLDivElement | null>(null);
 
 	// Function to handle successful QR code scan
-	const onScanSuccess = useCallback((decodedText: string) => {
+	const onScanSuccess = useCallback(async (decodedText: string) => {
 		if (scannerRef.current) {
 			scannerRef.current
 				.stop()
 				.then(() => {
 					scannerRef.current?.clear();
-					console.log('Scanner stopped after successful scan.');
 				})
 				.catch(error =>
 					console.error('Failed to stop scanner:', error)
@@ -38,13 +42,32 @@ export default function ApplyReferral() {
 		const code = decodedText.trim();
 
 		if (!code) {
-			alert('Invalid QR Code. Could not extract referral code.');
+			toast.error('Invalid QR Code. Could not extract referral code.');
 			return;
 		}
 
 		// Clear any existing survey data and navigate to survey with the referral code
 		clearSurvey();
-		navigate(`/survey?ref=${code}`);
+		try {
+			const data = await surveyService.fetchReferralCodeValidation(code);
+
+			if (!data?.isValid) {
+				setErrorMessage(data?.message ?? 'Invalid referral code.');
+				setLoading(false);
+				return;
+			}
+
+			// If valid, navigate to the survey page with the referral code
+			navigate(`/survey?ref=${code}`);
+		} catch (error) {
+			console.error('Error validating referral code:', error);
+			setErrorMessage(
+				error instanceof Error
+					? error.message
+					: 'An unexpected error occurred. Please try again.'
+			);
+			setLoading(false);
+		}
 	}, []);
 
 	// Function to handle QR code scan failure
@@ -64,14 +87,14 @@ export default function ApplyReferral() {
 
 			html5QrCode
 				.start(
-					{ facingMode: 'environment' }, // If you want to prefer back camera
+					{ facingMode: 'environment' },
 					config,
 					onScanSuccess,
 					onScanFailure
 				)
 				.catch(err => {
 					console.error('Failed to start scanning:', err);
-					alert(
+					toast.error(
 						'We could not access the camera. Make sure camera permissions are granted.'
 					);
 					setIsScanning(false);
@@ -105,7 +128,14 @@ export default function ApplyReferral() {
 	// Function to handle referral code submission
 	const handleStartSurvey = async () => {
 		if (!referralCode.trim()) {
-			alert('Please enter a referral code.');
+			setErrorMessage('Please enter a referral code.');
+			return;
+		}
+
+		if (referralCode.length !== SURVEY_CODE_LENGTH) {
+			setErrorMessage(
+				`Please enter a valid ${SURVEY_CODE_LENGTH}-character referral code.`
+			);
 			return;
 		}
 
@@ -114,7 +144,27 @@ export default function ApplyReferral() {
 		// Clear any existing survey data from previous attempts
 		clearSurvey();
 
-		navigate(`/survey?ref=${referralCode}`);
+		try {
+			const data =
+				await surveyService.fetchReferralCodeValidation(referralCode);
+
+			if (!data?.isValid) {
+				setErrorMessage(data?.message ?? 'Invalid referral code.');
+				setLoading(false);
+				return;
+			}
+
+			// If valid, navigate to the survey page with the referral code
+			navigate(`/survey?ref=${referralCode}`);
+		} catch (error) {
+			console.error('Error validating referral code:', error);
+			setErrorMessage(
+				error instanceof Error
+					? error.message
+					: 'An unexpected error occurred. Please try again.'
+			);
+			setLoading(false);
+		}
 	};
 
 	// Function to handle cancel button click
@@ -122,9 +172,9 @@ export default function ApplyReferral() {
 		<div className="apply-referral-page">
 			<div className="apply-referral-container">
 				<h2>Apply Referral Code</h2>
-				<p>Enter or scan a QR code to start a new survey.</p>
+				<p>Enter or Scan a QR code to start a new survey.</p>
 
-				<input
+				{/* <input
 					type="text"
 					placeholder="Enter referral code..."
 					value={referralCode}
@@ -132,6 +182,18 @@ export default function ApplyReferral() {
 						setReferralCode(e.target.value.toUpperCase())
 					}
 					className="referral-input"
+				/> */}
+				<TextField
+					type="text"
+					label="Referral Code"
+					placeholder="Enter referral code..."
+					value={referralCode}
+					onChange={e =>
+						setReferralCode(e.target.value.toUpperCase())
+					}
+					fullWidth
+					variant="outlined"
+					sx={{ mb: 2 }}
 				/>
 
 				{/* Start Survey Button */}
@@ -184,6 +246,11 @@ export default function ApplyReferral() {
 				>
 					Cancel
 				</button>
+				{errorMessage && (
+					<Alert severity="error" sx={{ mt: 2 }}>
+						{errorMessage}
+					</Alert>
+				)}
 			</div>
 		</div>
 	);

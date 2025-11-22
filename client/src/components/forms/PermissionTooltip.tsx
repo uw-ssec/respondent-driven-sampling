@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { Tooltip } from '@mui/material';
 
 export const PermissionTooltip = ({

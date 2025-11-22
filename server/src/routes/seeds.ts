@@ -12,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v2/seeds:
+ * /api/seeds:
  *   get:
  *     summary: Get all seeds
  *     description: Retrieve all seeds with optional query filters
@@ -51,7 +51,7 @@ router.get(
 
 /**
  * @swagger
- * /api/v2/seeds/{objectId}:
+ * /api/seeds/{objectId}:
  *   get:
  *     summary: Get seed by ID
  *     description: Retrieve a specific seed by its ObjectId
@@ -101,7 +101,7 @@ router.get(
 
 /**
  * @swagger
- * /api/v2/seeds:
+ * /api/seeds:
  *   post:
  *     summary: Create seed
  *     description: Create a new seed. A unique `surveyCode` is generated server-side; clients provide a `locationObjectId` and optionally `isFallback`.
@@ -168,7 +168,7 @@ router.post(
 
 /**
  * @swagger
- * /api/v2/seeds/{objectId}:
+ * /api/seeds/{objectId}:
  *   delete:
  *     summary: Delete seed
  *     description: Delete a specific seed by its ObjectId
