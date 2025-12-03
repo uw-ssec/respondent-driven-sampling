@@ -176,7 +176,7 @@ async function updateLocation(
 
 	if (!validationResult.success) {
 		const errorMessages = validationResult.error.issues
-			? validationResult.error.issues.map((err) => `${err.path.join('.')}: ${err.message}`).join(', ')
+			? validationResult.error.issues.map((err) => `${err.path.join('.')}: ${err.message}`).join('\n')
 			: validationResult.error.message || 'Unknown validation error';
 		throw new Error(`Validation failed: ${errorMessages}`);
 	}
@@ -365,17 +365,19 @@ Operations:
     Example: npm run location -- get 507f1f77bcf86cd799439011
     Example: npm run location -- get "My Friends Place"
 
-  update <objectId> [options]
+  update <objectId|hubName> [options]
     Update location details. Available options:
       --hubName <name>          Update hub name
       --hubType <type>          Update hub type
       --locationType <type>     Update location type
       --address <address>       Update address
     Example: npm run location -- update 507f1f77bcf86cd799439011 --hubName "New Name" --address "New Address"
+    Example: npm run location -- update "My Friends Place" --hubType CHURCH --address "123 New St"
 
-  delete <objectId>
+  delete <objectId|hubName>
     Delete a location
     Example: npm run location -- delete 507f1f77bcf86cd799439011
+    Example: npm run location -- delete "My Friends Place"
 
 Valid hubType values:
   - ESTABLISHMENT
