@@ -325,7 +325,7 @@ async function main(): Promise<void> {
 
 			case 'delete':
 				if (args.length < 2) {
-					console.error('Error: delete requires 1 argument: <objectId>');
+					console.error('Error: delete requires 1 argument: <objectId|hubName>');
 					process.exit(1);
 				}
 				await deleteLocation(args[1], Location);
