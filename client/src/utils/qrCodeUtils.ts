@@ -98,15 +98,13 @@ export const printQrCodePdf = (
 				printWindow.print();
 				printAttempted = true;
 
-				// Clean up blob URL after print dialog is shown
-				setTimeout(() => {
-					URL.revokeObjectURL(blobUrl);
-				}, 1000);
-			} catch (error) {
-				// If print fails, retry if we haven't exceeded max retries
-				retryCount++;
-
-				if (retryCount < maxRetries) {
+			// Clean up blob URL after print dialog is shown
+			setTimeout(() => {
+				URL.revokeObjectURL(blobUrl);
+			}, 1000);
+		} catch {
+			// If print fails, retry if we haven't exceeded max retries
+			retryCount++;				if (retryCount < maxRetries) {
 					// Exponential backoff
 					const delay = Math.min(500 * retryCount, 4000);
 					setTimeout(attemptPrint, delay);
