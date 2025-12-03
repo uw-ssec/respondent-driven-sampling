@@ -49,7 +49,7 @@ export function isTokenValid(): boolean {
 		}
 		// If no expiration date, treat as invalid for security
 		return false;
-	} catch (error) {
+	} catch {
 		// Token is invalid or malformed
 		return false;
 	}
