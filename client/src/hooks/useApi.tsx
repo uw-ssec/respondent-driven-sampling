@@ -53,9 +53,8 @@ export const useApi = () => {
 	};
 
 	const useUser = (userObjectId: string | undefined) => {
-		if (!userObjectId) return null;
 		return useSWR(userObjectId ? `/api/users/${userObjectId}` : null, () =>
-			fetchUser(userObjectId)
+			userObjectId ? fetchUser(userObjectId) : null
 		);
 	};
 
