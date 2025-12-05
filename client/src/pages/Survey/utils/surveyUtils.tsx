@@ -1,27 +1,31 @@
 import { Model } from 'survey-core';
 
-import { LocationDocument } from '@/types/Locations';
 import { SurveyDocument } from '@/types/Survey';
 
-import { generateEditSurveyJson, generateSurveyJson } from './SurveyJson';
+import surveyJsonData from './survey.json';
 import { themeJson } from './surveyTheme';
 
 // Helper function to initialize survey with or without existing data
 export const initializeSurvey = (
-	locations: LocationDocument[],
 	surveyByRefCode: SurveyDocument | null,
 	surveyByObjectId: SurveyDocument | null,
 	parentSurvey: SurveyDocument | null,
 	isEditMode: boolean = false
 ) => {
-	const locationChoices = locations.map((location: LocationDocument) => ({
-		value: location._id,
-		text: location.hubName
-	}));
+	// Clone the survey JSON to avoid mutating the original
+	const surveyJson = JSON.parse(JSON.stringify(surveyJsonData));
 
-	const surveyJson = isEditMode
-		? generateEditSurveyJson(locationChoices)
-		: generateSurveyJson(locationChoices);
+	if (isEditMode) {
+		// Edit mode only uses first 3 pages: volunteer-pre-screen, consent, survey-validation
+		surveyJson.title = 'Homelessness Experience Survey (Edit Mode)';
+		surveyJson.pages = surveyJson.pages.slice(0, 3);
+		surveyJson.showProgressBar = 'top';
+		surveyJson.progressBarType = 'buttons';
+		// Remove triggers and partialSendEnabled for edit mode
+		delete surveyJson.triggers;
+		delete surveyJson.partialSendEnabled;
+	}
+
 	const survey = new Model(surveyJson);
 	
 	// Apply custom theme
