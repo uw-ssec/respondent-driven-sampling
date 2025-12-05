@@ -1399,7 +1399,6 @@
       "expression": "{consent_given} = 'No' or {is_adult} = 'No'"
     }
   ],
-  "partialSendEnabled": true,
   "showProgressBar": true,
   "progressBarLocation": "top",
   "progressBarShowPageTitles": true
