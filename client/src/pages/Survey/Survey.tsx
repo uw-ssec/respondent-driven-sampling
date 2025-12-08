@@ -296,9 +296,9 @@ const Survey = () => {
 
 	// Loading state (need to fetch all data)
 	const isLoading =
-		(surveyCodeInUrl && surveyByRefLoading) ||
-		parentLoading ||
-		// seedLoading ||
+		(surveyCodeInUrl && surveyByRefLoading) ??
+		parentLoading ??
+		// seedLoading ??
 		surveyByObjectIdLoading;
 
 	if (isLoading) return <p>Loading survey...</p>;

@@ -70,7 +70,7 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 
 	// Get the survey code from the Zustand store
 	const { getSurveyCode } = useSurveyStore();
-	const surveyCode = getSurveyCode() || 'unknown';
+	const surveyCode = getSurveyCode() ?? 'unknown';
 
 	// Fetch Qualtrics URL from server config
 	useEffect(() => {
@@ -79,11 +79,11 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 				const response = await fetch(CONFIG_ENDPOINT);
 				
 				if (!response.ok) {
-					// Handle 500 server configuration error (missing config)
-					if (response.status === 500) {
-						const errorData = await response.json();
-						throw new Error(errorData.message || 'Server configuration error');
-					}
+				// Handle 500 server configuration error (missing config)
+				if (response.status === 500) {
+					const errorData = await response.json();
+					throw new Error(errorData.message ?? 'Server configuration error');
+				}
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
 				
