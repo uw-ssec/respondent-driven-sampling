@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ElementFactory, Question, Serializer } from 'survey-core';
 import { SurveyQuestionElementBase, ReactQuestionFactory } from 'survey-react-ui';
+import { useSurveyStore } from '@/stores';
 
 // Define the custom question model
 export class QuestionQualtricsModel extends Question {
@@ -53,12 +54,9 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [configError, setConfigError] = useState<string | null>(null);
 
-	// Get the survey code from the parent survey's data
-	// Cast to Model to access getValue method
-	const surveyModel = question.survey as any;
-	const surveyCode = surveyModel?.getVariable?.('surveyCode') || 
-		surveyModel?.getValue?.(question.surveyCodeField) ||
-		'unknown';
+	// Get the survey code from the Zustand store
+	const { getSurveyCode } = useSurveyStore();
+	const surveyCode = getSurveyCode() || 'unknown';
 
 	// Fetch Qualtrics URL from server config
 	useEffect(() => {
