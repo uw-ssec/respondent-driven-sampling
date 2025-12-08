@@ -9,7 +9,7 @@ const locationSchema = new Schema(
 		locationType: { type: String, enum: LocationType, required: true },
 		address: { type: String, required: true, unique: true }
 	},
-	{ strict: 'throw' }
+	{ strict: 'throw', timestamps: true }
 );
 
 export type ILocation = InferSchemaType<typeof locationSchema>;

@@ -14,6 +14,7 @@
 		"lint": "eslint . --ext js,ts",
 		"lint:fix": "eslint . --ext js,ts --fix",
 		"super-admin": "tsx --env-file=.env ../scripts/superAdminCRUD.tsx",
+		"location": "tsx --env-file=.env ../scripts/locationCRUD.tsx",
 		"generate-seeds": "tsx --env-file=.env ../scripts/generateSeeds.ts",
 		"generate-coupons": "tsx --env-file=.env ../scripts/generateCoupons.ts"
 	},
