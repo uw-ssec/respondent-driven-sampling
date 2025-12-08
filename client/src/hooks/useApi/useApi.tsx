@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import useSWR, { mutate } from 'swr';
 
 import { LocationDocument } from '@/types/Locations';
+import { SeedDocument } from '@/types/Seed';
 import { SurveyDocument } from '@/types/Survey';
 import { UserDocument } from '@/types/User';
-import { SeedDocument } from '@/types/Seed';
 import { useAuth } from '@/hooks/useAuth';
 
 import { parseAndNormalizeResponse } from './utils';
@@ -69,7 +69,7 @@ export const useApi = () => {
 	) {
 		const { isArray, ...fetchOptions } = options ?? {};
 		const response = await fetchWithAuth(url, fetchOptions);
-		if (!response) return null;
+		if (!response || !response.ok) return null;
 
 		return parseAndNormalizeResponse<T>(response, { isArray }) as any;
 	}
@@ -136,7 +136,9 @@ export const useApi = () => {
 	const fetchSurvey = async (
 		surveyObjectId: string
 	): Promise<SurveyDocument | null> => {
-		return fetchAndNormalize<SurveyDocument>(`/api/surveys/${surveyObjectId}`);
+		return fetchAndNormalize<SurveyDocument>(
+			`/api/surveys/${surveyObjectId}`
+		);
 	};
 
 	const fetchSurveys = async (): Promise<SurveyDocument[]> => {
@@ -261,40 +263,24 @@ export const useApi = () => {
 	};
 
 	const fetchSurveyWithUser = async (surveyObjectId: string) => {
-		// This function needs to check response.ok, so we use fetchWithAuth directly
-		const surveyResponse = await fetchWithAuth(
+		const survey = await fetchAndNormalize<SurveyDocument>(
 			`/api/surveys/${surveyObjectId}`
 		);
-		if (!surveyResponse) {
-			throw new Error('Failed to fetch survey: Authentication error');
-		}
-		if (!surveyResponse?.ok) {
-			throw new Error(
-				'Survey not found or you do not have permission to view it'
-			);
-		}
-		const survey = (await parseAndNormalizeResponse<SurveyDocument>(
-			surveyResponse
-		)) as SurveyDocument | null;
 		if (!survey) {
 			throw new Error(
 				'Survey not found or you do not have permission to view it'
 			);
 		}
-		const user = (await fetchAndNormalize<UserDocument>(
+		const user = await fetchAndNormalize<UserDocument>(
 			`/api/users/${survey.createdByUserObjectId}`
-		)) as UserDocument | null;
-		if (user) {
-			return {
-				...survey,
-				employeeName: user.firstName + ' ' + user.lastName,
-				employeeId: user._id
-			};
-		}
+		);
+
 		return {
 			...survey,
-			employeeName: 'Unknown',
-			employeeId: 'Unknown'
+			employeeName: user
+				? `${user.firstName} ${user.lastName}`
+				: 'Unknown',
+			employeeId: user?._id ?? 'Unknown'
 		};
 	};
 
