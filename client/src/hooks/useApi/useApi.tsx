@@ -55,23 +55,19 @@ export const useApi = () => {
 	};
 
 	// Helper that combines fetchWithAuth and parseAndNormalizeResponse
-	function fetchAndNormalize<T extends Record<string, any>>(
-		url: string,
-		options: RequestInit & { isArray: true }
-	): Promise<T[]>;
-	function fetchAndNormalize<T extends Record<string, any>>(
-		url: string,
-		options?: RequestInit & { isArray?: false }
-	): Promise<T | null>;
+	// include 'isArray' as an option to help with normalization helpers
+	type FetchOptions = RequestInit & { isArray?: boolean };
 	async function fetchAndNormalize<T extends Record<string, any>>(
 		url: string,
-		options?: RequestInit & { isArray?: boolean }
+		options?: FetchOptions
 	) {
-		const { isArray, ...fetchOptions } = options ?? {};
+		const { isArray = false, ...fetchOptions } = options ?? {};
 		const response = await fetchWithAuth(url, fetchOptions);
-		if (!response || !response.ok) return null;
+		if (!response || !response.ok) return isArray ? [] : null;
 
-		return parseAndNormalizeResponse<T>(response, { isArray }) as any;
+		return (await parseAndNormalizeResponse<T>(response, {
+			isArray
+		})) as any;
 	}
 
 	const useUser = (userObjectId: string | undefined) => {
@@ -86,11 +82,15 @@ export const useApi = () => {
 	};
 
 	const fetchUser = async (userObjectId: string) => {
-		return fetchAndNormalize<UserDocument>(`/api/users/${userObjectId}`);
+		return await fetchAndNormalize<UserDocument>(
+			`/api/users/${userObjectId}`
+		);
 	};
 
 	const fetchUsers = async () => {
-		return fetchAndNormalize<UserDocument>(`/api/users`, { isArray: true });
+		return await fetchAndNormalize<UserDocument>(`/api/users`, {
+			isArray: true
+		});
 	};
 
 	const approveUser = async (
@@ -98,15 +98,16 @@ export const useApi = () => {
 		approvalStatus: string,
 		approvedByUserObjectId: string
 	) => {
-		return fetchAndNormalize(`/api/users/${userObjectId}`, {
+		const result = await fetchAndNormalize(`/api/users/${userObjectId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ approvalStatus, approvedByUserObjectId })
 		});
+		return result ?? null;
 	};
 
 	const updateUser = async (userObjectId: string, userData: object) => {
-		return fetchAndNormalize(`/api/users/${userObjectId}`, {
+		return await fetchAndNormalize(`/api/users/${userObjectId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(userData)
@@ -114,7 +115,7 @@ export const useApi = () => {
 	};
 
 	const createUser = async (userData: object) => {
-		return fetchAndNormalize(`/api/users`, {
+		return await fetchAndNormalize(`/api/users`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(userData)
@@ -136,13 +137,13 @@ export const useApi = () => {
 	const fetchSurvey = async (
 		surveyObjectId: string
 	): Promise<SurveyDocument | null> => {
-		return fetchAndNormalize<SurveyDocument>(
+		return await fetchAndNormalize<SurveyDocument>(
 			`/api/surveys/${surveyObjectId}`
 		);
 	};
 
 	const fetchSurveys = async (): Promise<SurveyDocument[]> => {
-		return fetchAndNormalize<SurveyDocument>(`/api/surveys`, {
+		return await fetchAndNormalize<SurveyDocument>(`/api/surveys`, {
 			isArray: true
 		});
 	};
@@ -156,11 +157,11 @@ export const useApi = () => {
 	};
 
 	const createSurvey = async (surveyData: object) => {
-		const result = (await fetchAndNormalize(`/api/surveys`, {
+		const result = await fetchAndNormalize(`/api/surveys`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(surveyData)
-		})) as any;
+		});
 
 		// Invalidate surveys list cache
 		mutate(`/api/surveys`);
@@ -305,7 +306,7 @@ export const useApi = () => {
 
 	// No useSWR wrapper here since it lives in our ApplyReferral handlers (better to fetch directly)
 	const fetchReferralCodeValidation = async (code: string) => {
-		return fetchAndNormalize<{
+		return await fetchAndNormalize<{
 			isValid: boolean;
 			message: string;
 		}>(`/api/validate-referral-code/${code}`);
@@ -329,7 +330,7 @@ export const useApi = () => {
 	};
 
 	const fetchLocations = async () => {
-		return fetchAndNormalize<LocationDocument>(`/api/locations`, {
+		return await fetchAndNormalize<LocationDocument>(`/api/locations`, {
 			isArray: true
 		});
 	};
@@ -352,12 +353,11 @@ export const useApi = () => {
 	};
 
 	const createSeed = async (seedData: object) => {
-		const result = await fetchAndNormalize<SeedDocument>(`/api/seeds`, {
+		return await fetchAndNormalize<SeedDocument>(`/api/seeds`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(seedData)
 		});
-		return result as SeedDocument | null;
 	};
 
 	const seedService = { createSeed, useSeedBySurveyCode };
