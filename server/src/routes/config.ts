@@ -12,10 +12,10 @@ const router = express.Router();
 router.get('/', (_req: Request, res: Response) => {
 	const qualtricsSurveyUrl = process.env.QUALTRICS_SURVEY_URL;
 
-	// Return 503 if required config is missing (helps identify deployment issues)
+	// Return 500 if required config is missing (requires manual intervention)
 	if (!qualtricsSurveyUrl) {
-		return res.status(503).json({
-			error: 'Service configuration incomplete',
+		return res.status(500).json({
+			error: 'Server configuration error',
 			message: 'Qualtrics survey URL not configured on server'
 		});
 	}

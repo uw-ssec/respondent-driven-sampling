@@ -150,7 +150,7 @@ const securityWrapper = (router: express.Router) => {
 setupSwagger(app);
 
 // Apply routes with security wrapper
-app.use('/api/config', configRoutes); // Public config endpoint (no security wrapper needed)
+app.use('/api/config', securityWrapper(configRoutes)); // Public config endpoint (with security headers)
 app.use('/api/auth', securityWrapper(authRoutes));
 app.use('/api/surveys', securityWrapper(surveyRoutes));
 app.use('/api/seeds', securityWrapper(seedsRoutes));

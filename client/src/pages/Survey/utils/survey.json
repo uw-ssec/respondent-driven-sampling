@@ -83,11 +83,11 @@
           "title": "Do you consent to receive your gift cards via SMS or email?",
           "choices": [
             {
-              "value": "Item 1",
+              "value": "email",
               "text": "Email address"
             },
             {
-              "value": "Item 2",
+              "value": "phone",
               "text": "Phone number"
             }
           ],
@@ -96,14 +96,14 @@
         {
           "type": "text",
           "name": "email",
-          "visibleIf": "{email_phone_consent} contains 'Item 1'",
+          "visibleIf": "{email_phone_consent} contains 'email'",
           "title": "What's your email address?",
           "inputType": "email"
         },
         {
           "type": "text",
           "name": "phone",
-          "visibleIf": "{email_phone_consent} contains 'Item 2'",
+          "visibleIf": "{email_phone_consent} contains 'phone'",
           "title": "What's your phone number?",
           "inputType": "tel"
         }

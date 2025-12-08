@@ -79,10 +79,10 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 				const response = await fetch(CONFIG_ENDPOINT);
 				
 				if (!response.ok) {
-					// Handle 503 service unavailable (missing config)
-					if (response.status === 503) {
+					// Handle 500 server configuration error (missing config)
+					if (response.status === 500) {
 						const errorData = await response.json();
-						throw new Error(errorData.message || 'Service configuration incomplete');
+						throw new Error(errorData.message || 'Server configuration error');
 					}
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
@@ -126,8 +126,9 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 				if (isEndOfSurvey) {
 					// Mark as completed and auto-advance to next page
 					question.qualtricsCompleted = true;
-					if (question.survey) {
-						// TypeScript doesn't recognize nextPage() on ISurvey interface
+					
+					// Safely call nextPage() with type guard
+					if (question.survey && typeof (question.survey as any).nextPage === 'function') {
 						(question.survey as any).nextPage();
 					}
 				}
