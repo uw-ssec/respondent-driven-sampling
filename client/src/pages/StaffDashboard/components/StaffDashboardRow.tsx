@@ -23,6 +23,7 @@ interface StaffMember {
 
 interface StaffDashboardRowProps {
 	member: StaffMember;
+	// REVIEW: can we type this?
 	userData: any; // The full user object for CASL permission checks
 	onApproval: (id: string, status: string) => void;
 	onEdit: (id: string) => void;
@@ -54,7 +55,6 @@ export default function StaffDashboardRow({
 		)
 	);
 
-	console.log(userData)
 	const canDelete = ability.can(
 		ACTIONS.CASL.DELETE,
 		subject(SUBJECTS.USER, userData)

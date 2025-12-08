@@ -1,6 +1,8 @@
 // Returns a Mongo query filter that checks if the value of the given field is today
 // Made fieldName variable in case we want to have different checks for `updatedAt`/`createdAt`/`deletedAt`/etc.
 // Defaults to Pacific timezone for usage in Seattle
+// REVIEW: Write tests for this function to verify correctness across DST changes
+// REVIEW:
 export function isToday(
 	fieldName: string,
 	timezone: string = 'America/Los_Angeles'

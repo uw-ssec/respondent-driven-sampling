@@ -72,7 +72,7 @@ export const useApi = () => {
 
 	const useUser = (userObjectId: string | undefined) => {
 		if (!userObjectId) return null;
-		return useSWR(userObjectId ? `/api/users/${userObjectId}` : null, () =>
+		return useSWR(`/api/users/${userObjectId}`, () =>
 			fetchUser(userObjectId)
 		);
 	};
@@ -88,6 +88,7 @@ export const useApi = () => {
 	};
 
 	const fetchUsers = async () => {
+		// REVIEW: is this UserDocument[] ?
 		return await fetchAndNormalize<UserDocument>(`/api/users`, {
 			isArray: true
 		});
@@ -115,7 +116,7 @@ export const useApi = () => {
 	};
 
 	const createUser = async (userData: object) => {
-		return await fetchAndNormalize(`/api/users`, {
+		return await fetchAndNormalize<UserDocument>(`/api/users`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(userData)
@@ -134,6 +135,7 @@ export const useApi = () => {
 		return useSWR(`/api/surveys`, () => fetchSurveys());
 	};
 
+	// REVIEW: Consistently type all other Promise[s].
 	const fetchSurvey = async (
 		surveyObjectId: string
 	): Promise<SurveyDocument | null> => {
@@ -143,6 +145,7 @@ export const useApi = () => {
 	};
 
 	const fetchSurveys = async (): Promise<SurveyDocument[]> => {
+		// REVIEW: is this SurveyDocument[] ?
 		return await fetchAndNormalize<SurveyDocument>(`/api/surveys`, {
 			isArray: true
 		});
