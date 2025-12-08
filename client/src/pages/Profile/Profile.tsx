@@ -30,7 +30,7 @@ export default function Profile() {
 	const [error, _setError] = useState('');
 	const { userObjectId } = useAuthContext();
 
-	const { data: userData } = userService.useUser(id) || {};
+	const { data: userData } = userService.useUser(id) ?? {};
 	const [userRole, setUserRole] = useState('');
 	const [approvalStatus, setApprovalStatus] = useState('');
 	const [locationObjectId, setLocationObjectId] = useState('');

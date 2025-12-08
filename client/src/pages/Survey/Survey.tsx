@@ -89,7 +89,7 @@ const Survey = () => {
 
 		const pushHistoryState = (pageNo: number) => {
 			const currentState = window.history.state;
-			if (!currentState || currentState.pageNo !== pageNo) {
+			if (!currentState?.pageNo || currentState.pageNo !== pageNo) {
 				window.history.pushState(
 					{ pageNo },
 					'',
@@ -125,13 +125,13 @@ const Survey = () => {
 			try {
 				let result = null;
 				if (getObjectId() === null) {
-					const req: any = {
-						createdByUserObjectId: userObjectId,
-						locationObjectId:
-							surveyData.responses.location ||
-							lastestLocationObjectId,
-						responses: surveyData.responses
-					};
+				const req: any = {
+					createdByUserObjectId: userObjectId,
+					locationObjectId:
+						surveyData.responses.location ??
+						lastestLocationObjectId,
+					responses: surveyData.responses
+				};
 					// Add survey code to request if it exists
 					if (surveyCodeInUrl) {
 						req.surveyCode = surveyCodeInUrl;
