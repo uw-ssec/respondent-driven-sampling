@@ -1,11 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ElementFactory, Question, Serializer } from 'survey-core';
 import { SurveyQuestionElementBase, ReactQuestionFactory } from 'survey-react-ui';
 import { useSurveyStore } from '@/stores';
 
-// Define the custom question model
+// Constants
+const QUALTRICS_END_MESSAGES = ['endOfSurvey'] as const;
+const DEFAULT_IFRAME_HEIGHT = '80vh';
+const MIN_IFRAME_HEIGHT = '600px';
+const CONFIG_ENDPOINT = '/api/config';
+
+interface ConfigResponse {
+	qualtricsSurveyUrl: string | null;
+}
+
+/**
+ * Custom SurveyJS question model for embedding Qualtrics surveys.
+ * This question type embeds a Qualtrics survey via iframe and listens
+ * for completion signals to automatically advance to the next page.
+ */
 export class QuestionQualtricsModel extends Question {
-	getType() {
+	getType(): string {
 		return 'qualtrics';
 	}
 
@@ -22,7 +36,7 @@ export class QuestionQualtricsModel extends Question {
 	set qualtricsCompleted(val: boolean) {
 		this.setPropertyValue('qualtricsCompleted', val);
 		if (val) {
-			// Set the question value to mark it as answered
+			// Mark question as answered with completion metadata
 			this.value = { completed: true, completedAt: new Date().toISOString() };
 		}
 	}
@@ -62,21 +76,29 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 	useEffect(() => {
 		const fetchConfig = async () => {
 			try {
-				const response = await fetch('/api/config');
+				const response = await fetch(CONFIG_ENDPOINT);
+				
 				if (!response.ok) {
-					throw new Error('Failed to fetch config');
+					// Handle 503 service unavailable (missing config)
+					if (response.status === 503) {
+						const errorData = await response.json();
+						throw new Error(errorData.message || 'Service configuration incomplete');
+					}
+					throw new Error(`HTTP error! status: ${response.status}`);
 				}
-				const config = await response.json();
+				
+				const config: ConfigResponse = await response.json();
 				if (config.qualtricsSurveyUrl) {
-					// Append surveyCode as query parameter
+					// Append surveyCode as query parameter for tracking
 					const url = `${config.qualtricsSurveyUrl}?surveyCode=${encodeURIComponent(surveyCode)}`;
 					setQualtricsUrl(url);
 				} else {
 					setConfigError('Qualtrics survey URL not configured on server.');
 				}
 			} catch (error) {
-				console.error('Error fetching config:', error);
-				setConfigError('Failed to load configuration from server.');
+				const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+				console.error('Error fetching config:', errorMessage);
+				setConfigError(errorMessage);
 			} finally {
 				setIsLoading(false);
 			}
@@ -84,40 +106,63 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 		fetchConfig();
 	}, [surveyCode]);
 
-	// Listen for postMessage from Qualtrics
-	useEffect(() => {
-		if (!qualtricsUrl) return;
+	// Memoized handler for Qualtrics postMessage events
+	const handleQualtricsMessage = useCallback(
+		(event: MessageEvent) => {
+			if (!qualtricsUrl) return;
 
-		const handleMessage = (event: MessageEvent) => {
 			try {
 				const qualtricsOrigin = new URL(qualtricsUrl).origin;
-				
-				if (event.origin === qualtricsOrigin) {
-					if (
-						event.data === 'QualtricsEOS' ||
-						event.data === 'surveyComplete' ||
-						event.data?.type === 'surveyComplete' ||
-						event.data?.status === 'complete'
-					) {
-						question.qualtricsCompleted = true;
+
+				// Verify message origin matches Qualtrics domain
+				if (event.origin !== qualtricsOrigin) return;
+
+				// Check if this is the final end-of-survey message
+				// (not intermediate page change messages like 'QualtricsEOS')
+				const isEndOfSurvey =
+					QUALTRICS_END_MESSAGES.includes(event.data) ||
+					event.data?.message === 'endOfSurvey';
+
+				if (isEndOfSurvey) {
+					// Mark as completed and auto-advance to next page
+					question.qualtricsCompleted = true;
+					if (question.survey) {
+						// TypeScript doesn't recognize nextPage() on ISurvey interface
+						(question.survey as any).nextPage();
 					}
 				}
 			} catch (error) {
-				console.error('Error parsing Qualtrics message:', error);
+				console.error('Error handling Qualtrics message:', error);
 			}
-		};
+		},
+		[qualtricsUrl, question]
+	);
 
-		window.addEventListener('message', handleMessage);
-		return () => window.removeEventListener('message', handleMessage);
-	}, [qualtricsUrl, question]);
+	// Listen for postMessage from Qualtrics iframe
+	useEffect(() => {
+		if (!qualtricsUrl) return;
+
+		window.addEventListener('message', handleQualtricsMessage);
+		return () => window.removeEventListener('message', handleQualtricsMessage);
+	}, [qualtricsUrl, handleQualtricsMessage]);
 
 	if (configError) {
 		return (
-			<div style={{ padding: '20px', textAlign: 'center' }}>
-				<p style={{ color: 'red' }}>
-					Error: {configError}
-					<br />
-					Please set QUALTRICS_SURVEY_URL in your server environment variables.
+			<div
+				role="alert"
+				style={{
+					padding: '20px',
+					textAlign: 'center',
+					backgroundColor: '#fee',
+					borderRadius: '8px',
+					margin: '20px 0'
+				}}
+			>
+				<p style={{ color: '#c33', margin: 0 }}>
+					<strong>Configuration Error:</strong> {configError}
+				</p>
+				<p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
+					Please ensure QUALTRICS_SURVEY_URL is set in your server environment variables.
 				</p>
 			</div>
 		);
@@ -125,37 +170,47 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 
 	if (isLoading || !qualtricsUrl) {
 		return (
-			<div style={{ padding: '20px', textAlign: 'center' }}>
+			<div
+				role="status"
+				style={{
+					padding: '20px',
+					textAlign: 'center',
+					minHeight: MIN_IFRAME_HEIGHT
+				}}
+			>
 				<p>Loading Qualtrics survey...</p>
 			</div>
 		);
 	}
 
 	return (
-		<div style={{ width: '100%', minHeight: '600px', position: 'relative' }}>
+		<div style={{ width: '100%', minHeight: MIN_IFRAME_HEIGHT, position: 'relative' }}>
 			<iframe
 				src={qualtricsUrl}
 				title="Qualtrics Survey"
 				style={{
 					width: '100%',
-					height: '80vh',
-					minHeight: '600px',
+					height: DEFAULT_IFRAME_HEIGHT,
+					minHeight: MIN_IFRAME_HEIGHT,
 					border: '1px solid #ddd',
 					borderRadius: '8px'
 				}}
 				allow="geolocation"
+				aria-label="Embedded Qualtrics survey"
 			/>
-			
-			{/* Instruction text */}
-			<div style={{ 
-				marginTop: '20px', 
-				textAlign: 'center',
-				padding: '10px',
-				backgroundColor: '#f5f5f5',
-				borderRadius: '8px'
-			}}>
+
+			{/* Helper text - auto-advance happens on completion */}
+			<div
+				style={{
+					marginTop: '20px',
+					textAlign: 'center',
+					padding: '10px',
+					backgroundColor: '#f5f5f5',
+					borderRadius: '8px'
+				}}
+			>
 				<p style={{ marginBottom: '0', color: '#666', fontSize: '14px' }}>
-					After completing the Qualtrics survey above, click <strong>Next</strong> below.
+					The survey will automatically advance when you complete the questions above.
 				</p>
 			</div>
 		</div>
