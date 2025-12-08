@@ -1,4 +1,5 @@
 export { default as Survey } from './Survey/Survey';
+export { default as QualtricsFlow } from './Survey/QualtricsFlow';
 export { default as SurveyDetails } from './SurveyDetails/SurveyDetails';
 export { default as SurveyEntryDashboard } from './SurveyEntryDashboard/SurveyEntryDashboard';
 export { default as QrPage } from './QrPage/QrPage';

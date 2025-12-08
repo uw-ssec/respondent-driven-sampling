@@ -15,6 +15,8 @@ import { useGeolocated } from 'react-geolocated';
 import toast from 'react-hot-toast';
 
 import { initializeSurvey } from './utils/surveyUtils';
+// Register custom Qualtrics question type
+import './components/QualtricsQuestion';
 
 // This component is responsible for rendering the survey and handling its logic
 // It uses the SurveyJS library to create and manage the survey
