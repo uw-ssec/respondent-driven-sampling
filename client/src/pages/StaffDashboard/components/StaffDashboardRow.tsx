@@ -38,19 +38,23 @@ export default function StaffDashboardRow({
 }: StaffDashboardRowProps) {
 	const ability = useAbility();
 
-	// Convert createdAt to a Date object for CASL comparison
-	userData.createdAt = new Date(userData.createdAt);
-
 	// Check permissions for this specific user (checking profile and role fields)
 	// TODO: this maybe should be a permission on whether or not the user can read these fields
 	// and then this logic would wrap the 'Update' button instead on Profile page...
-	const canEdit = [...FIELDS.USER.PROFILE, ...FIELDS.USER.ROLE].some(field =>
+	const canEdit = [
+		...FIELDS.USER.PROFILE,
+		...FIELDS.USER.ROLE,
+		...FIELDS.USER.APPROVAL,
+		...FIELDS.USER.LOCATION
+	].some(field =>
 		ability.can(
 			ACTIONS.CASL.UPDATE,
 			subject(SUBJECTS.USER, userData),
 			field
 		)
 	);
+
+	console.log(userData)
 	const canDelete = ability.can(
 		ACTIONS.CASL.DELETE,
 		subject(SUBJECTS.USER, userData)

@@ -8,6 +8,8 @@ import {
 	Alert,
 	Box,
 	Button,
+	FormControl,
+	InputLabel,
 	MenuItem,
 	Select,
 	Stack,
@@ -40,7 +42,7 @@ export default function Profile() {
 	useEffect(() => {
 		if (userData) {
 			setUserRole(userData.role ?? '');
-			setLocationObjectId(userData.locationObjectId ?? '');
+			setLocationObjectId(String(userData.locationObjectId ?? ''));
 			setEmail(userData.email ?? '');
 			setPhone(userData.phone ?? '');
 			setApprovalStatus(userData.approvalStatus ?? '');
@@ -48,9 +50,10 @@ export default function Profile() {
 	}, [userData]);
 
 	const canEditField = (field: string) => {
+		if (!userData) return false;
 		return ability.can(
 			ACTIONS.CASL.UPDATE,
-			subject(SUBJECTS.USER, { _id: id }),
+			subject(SUBJECTS.USER, userData),
 			field
 		);
 	};
@@ -64,18 +67,18 @@ export default function Profile() {
 			if (canEditField('phone')) updatePayload.phone = phone;
 			if (canEditField('locationObjectId'))
 				updatePayload.locationObjectId = locationObjectId;
+			if (canEditField('approvalStatus'))
+				updatePayload.approvalStatus = approvalStatus;
 
 			const updatedUser = await userService.updateUser(
 				id!,
 				updatePayload
 			);
 
-			if (updatedUser.data) {
-				setMessage(
-					updatedUser.message ?? 'Profile updated successfully!'
-				);
+			if (updatedUser) {
+				setMessage('Profile updated successfully!');
 			} else {
-				setMessage(updatedUser.message ?? 'Failed to update profile.');
+				setMessage('Failed to update profile.');
 			}
 		} catch (error) {
 			console.error('Error updating profile:', error);
@@ -122,7 +125,8 @@ export default function Profile() {
 			}}
 		>
 			<Typography variant="h5" component="h2" gutterBottom sx={{ mb: 3 }}>
-				Profile for {`${userData?.firstName ?? 'User'} ${userData?.lastName ?? ''}`}
+				Profile for{' '}
+				{`${userData?.firstName ?? 'User'} ${userData?.lastName ?? ''}`}
 			</Typography>
 
 			{error ? (
@@ -161,45 +165,63 @@ export default function Profile() {
 						/>
 
 						{userObjectId !== id && (
-							<Select
-								value={approvalStatus}
-								onChange={e =>
-									handleChange(
-										'approvalStatus',
-										e.target.value
-									)
-								}
+							<FormControl
+								fullWidth
 								disabled={!canEditField('approvalStatus')}
-								size="small"
-								sx={{
-									fontSize: '0.75rem',
-									minWidth: 120,
-									// Color code based on status
-									'& .MuiSelect-select': {
-										py: 0.5,
-										fontWeight: 500,
-										color:
-											approvalStatus === 'APPROVED'
-												? '#2e7d32'
-												: approvalStatus === 'REJECTED'
-													? '#d32f2f'
-													: '#0288d1'
-									},
-									// Border color
-									'& .MuiOutlinedInput-notchedOutline': {
-										borderColor:
-											approvalStatus === 'APPROVED'
-												? '#4caf50'
-												: approvalStatus === 'REJECTED'
-													? '#f44336'
-													: '#2196f3'
-									}
-								}}
 							>
-								<MenuItem value="PENDING">Pending</MenuItem>
-								<MenuItem value="APPROVED">Approved</MenuItem>
-								<MenuItem value="REJECTED">Rejected</MenuItem>
-							</Select>
+								<InputLabel id="approval-status-label">
+									Approval Status
+								</InputLabel>
+								<Select
+									labelId="approval-status-label"
+									label="Approval Status"
+									value={approvalStatus}
+									onChange={e =>
+										handleChange(
+											'approvalStatus',
+											e.target.value
+										)
+									}
+									disabled={!canEditField('approvalStatus')}
+									variant="outlined"
+									sx={{
+										backgroundColor: !canEditField(
+											'approvalStatus'
+										)
+											? '#f5f5f5'
+											: 'white',
+										// Color code based on status
+										'& .MuiSelect-select': {
+											fontWeight: 500,
+											color:
+												approvalStatus === 'APPROVED'
+													? '#2e7d32'
+													: approvalStatus ===
+														  'REJECTED'
+														? '#d32f2f'
+														: '#0288d1'
+										},
+										// Border color
+										'& .MuiOutlinedInput-notchedOutline': {
+											borderColor:
+												approvalStatus === 'APPROVED'
+													? '#4caf50'
+													: approvalStatus ===
+														  'REJECTED'
+														? '#f44336'
+														: '#2196f3'
+										}
+									}}
+								>
+									<MenuItem value="PENDING">Pending</MenuItem>
+									<MenuItem value="APPROVED">
+										Approved
+									</MenuItem>
+									<MenuItem value="REJECTED">
+										Rejected
+									</MenuItem>
+								</Select>
+							</FormControl>
 						)}
 
 						<LocationSelect

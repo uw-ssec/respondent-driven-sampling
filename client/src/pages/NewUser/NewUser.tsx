@@ -36,7 +36,7 @@ export default function NewUser() {
 			if (createdUser) {
 				setMessage(createdUser.message ?? 'User created successfully!');
 			} else {
-				setMessage(createdUser?.message ?? 'Failed to create user.');
+				setMessage('Failed to create user.');
 			}
 		} catch (error) {
 			console.error('Error creating user:', error);
