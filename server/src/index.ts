@@ -50,7 +50,7 @@ app.use(
 			fontSrc: ["'self'"],
 			objectSrc: ["'none'"],
 			mediaSrc: ["'self'"],
-			frameSrc: ["'none'"],
+			frameSrc: ["'self'", 'https://*.qualtrics.com'],
 			sandbox: ['allow-forms', 'allow-scripts', 'allow-same-origin'],
 			reportUri: '/report-violation',
 			reportTo: 'report-endpoint',
@@ -91,7 +91,7 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 	// Ensuring these headers are explicitly set on every response
 	res.setHeader(
 		'Content-Security-Policy',
-		"default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+		"default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-src 'self' https://*.qualtrics.com"
 	);
 	res.setHeader('X-Frame-Options', 'DENY');
 	res.setHeader(
@@ -133,7 +133,7 @@ const securityWrapper = (router: express.Router) => {
 		// Set security headers before passing to router
 		res.setHeader(
 			'Content-Security-Policy',
-			"default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+			"default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-src 'self' https://*.qualtrics.com"
 		);
 		res.setHeader('X-Frame-Options', 'DENY');
 		res.setHeader(
@@ -165,7 +165,7 @@ app.use(
 		setHeaders: (res: Response) => {
 			res.setHeader(
 				'Content-Security-Policy',
-				"default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+				"default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-src 'self' https://*.qualtrics.com"
 			);
 			res.setHeader('X-Frame-Options', 'DENY');
 			res.setHeader(
@@ -191,7 +191,7 @@ app.get('*', (req: Request, res: Response) => {
 	// Set security headers
 	res.setHeader(
 		'Content-Security-Policy',
-		"default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+		"default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-src 'self' https://*.qualtrics.com"
 	);
 	res.setHeader('X-Frame-Options', 'DENY');
 	res.setHeader(
