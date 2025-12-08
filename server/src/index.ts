@@ -11,6 +11,7 @@ import nocache from 'nocache';
 import { setupSwagger } from '@/config/swagger';
 import connectDB from '@/database/index';
 import authRoutes from '@/routes/auth';
+import configRoutes from '@/routes/config';
 import locationsRoutes from '@/routes/locations';
 import seedsRoutes from '@/routes/seeds';
 import surveyRoutes from '@/routes/surveys';
@@ -149,6 +150,7 @@ const securityWrapper = (router: express.Router) => {
 setupSwagger(app);
 
 // Apply routes with security wrapper
+app.use('/api/config', securityWrapper(configRoutes)); // Public config endpoint (with security headers)
 app.use('/api/auth', securityWrapper(authRoutes));
 app.use('/api/surveys', securityWrapper(surveyRoutes));
 app.use('/api/seeds', securityWrapper(seedsRoutes));

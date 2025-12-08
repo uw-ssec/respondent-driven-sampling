@@ -1,4 +1,66 @@
-## Overview 
+## Qualtrics Integration Setup
+
+This application embeds Qualtrics surveys as part of the survey flow. To configure Qualtrics integration for deployment:
+
+### 1. Server Configuration
+
+Add the Qualtrics survey URL to your server environment variables:
+
+```bash
+# In server/.env or Azure App Service configuration
+QUALTRICS_SURVEY_URL=https://your-qualtrics-domain.qualtrics.com/jfe/form/SV_yourSurveyId
+```
+
+### 2. Qualtrics Survey Configuration
+
+In your Qualtrics survey, add the following JavaScript to the **End of Survey** section to enable auto-advance:
+
+1. Go to **Survey Flow** → **End of Survey** element
+2. Click **Customize** → **JavaScript**
+3. Add this code:
+
+```javascript
+Qualtrics.SurveyEngine.addOnload(function() {
+    // This code runs when survey completes
+});
+
+Qualtrics.SurveyEngine.addOnReady(function() {
+    // Listen for survey completion
+    var that = this;
+    this.questionclick = function(event, element) {
+        if (element.type === 'submit') {
+            // Survey is complete, notify parent window
+            window.parent.postMessage('endOfSurvey', '*');
+        }
+    };
+});
+
+Qualtrics.SurveyEngine.addOnUnload(function() {
+    // Send completion signal on final page unload
+    window.parent.postMessage('endOfSurvey', '*');
+});
+```
+
+### 3. Embedded Data Setup
+
+Configure an **Embedded Data** field to receive the survey code:
+
+1. Go to **Survey Flow**
+2. Add an **Embedded Data** element at the beginning
+3. Create a field named: `surveyCode`
+4. This will automatically receive the survey code from the application URL
+
+### 4. How It Works
+
+- The application embeds your Qualtrics survey in an iframe
+- Survey code is passed as a URL parameter: `?surveyCode=ABC12345`
+- When participants complete the Qualtrics survey, the JavaScript sends a `postMessage` signal
+- The application automatically advances to the next page (gift cards)
+- Survey responses are stored in Qualtrics, referral chain tracking in MongoDB
+
+---
+
+## Overview
 
 Adding Qualtrics. The RDS App is a secure, accessible, and open-source web application that streamlines data collection for homelessness research using **Respondent-Driven Sampling (RDS)**. Developed in collaboration with the University of Washington iSchool and the King County Regional Homelessness Authority (KCRHA), this app enables volunteers and administrators to collect accurate survey data, track referrals, and generate population estimates more effectively than traditional Point-In-Time (PIT) counts.
 

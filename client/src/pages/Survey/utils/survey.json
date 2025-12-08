@@ -1,0 +1,117 @@
+{
+  "title": "Homelessness Experience Survey",
+  "pages": [
+    {
+      "name": "volunteer-pre-screen",
+      "title": "Pre-Screening Questions - Volunteer Only",
+      "elements": [
+        {
+          "type": "html",
+          "name": "question3",
+          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>Instructions:</strong> These questions are for volunteers only. Please do not ask the respondent.</div>"
+        },
+        {
+          "type": "dropdown",
+          "name": "location",
+          "title": "Please select location:",
+          "isRequired": true,
+          "choicesByUrl": {
+            "url": "/api/locations",
+            "path": "data",
+            "valueName": "_id",
+            "titleName": "hubName"
+          },
+          "showNoneItem": true
+        }
+      ]
+    },
+    {
+      "name": "consent",
+      "title": "Consent Confirmation",
+      "elements": [
+        {
+          "type": "html",
+          "name": "consent-note",
+          "html": "<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>\n            <br />\n<p>As part of work with the King County Regional Homelessness Authority (KCRHA), I'd like to ask you some questions we're required to ask and collect for our funders about unsheltered homelessness in our region.</p>\n<p>Your participation is voluntary and will not affect any services you or your family are seeking or currently receiving. We are surveying many people and will put all responses together, so it will not be possible to identify you from the information you provide here.</p>\n<p>As a token of appreciation for your time, we will give you a $20 preloaded debit card, $40 for families with minor children at the end.</p>\n<p>Would you be willing to talk with me for about 30 min?</p>"
+        },
+        {
+          "type": "radiogroup",
+          "name": "consent_given",
+          "title": "Do you consent to participate in this survey?",
+          "isRequired": true,
+          "choices": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "type": "radiogroup",
+          "name": "is_adult",
+          "title": "Are you 18 years old or older?",
+          "isRequired": true,
+          "choices": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "qualtrics-survey",
+      "title": "Main Survey",
+      "visibleIf": "{consent_given} = 'Yes' and {is_adult} = 'Yes'",
+      "elements": [
+        {
+          "type": "html",
+          "name": "qualtrics-instruction",
+          "html": "<div style=\"background-color: #e8f4fd; padding: 15px; margin-bottom: 20px; border-radius: 8px;\"><strong>Instructions:</strong> Please complete the survey below. When finished, click the \"Continue to Next Section\" button at the bottom.</div>"
+        },
+        {
+          "type": "qualtrics",
+          "name": "qualtrics_embed",
+          "title": "Complete the survey below:"
+        }
+      ]
+    },
+    {
+      "name": "giftCards",
+      "title": "Gift Cards",
+      "elements": [
+        {
+          "type": "checkbox",
+          "name": "email_phone_consent",
+          "title": "Do you consent to receive your gift cards via SMS or email?",
+          "choices": [
+            {
+              "value": "email",
+              "text": "Email address"
+            },
+            {
+              "value": "phone",
+              "text": "Phone number"
+            }
+          ],
+          "showNoneItem": true
+        },
+        {
+          "type": "text",
+          "name": "email",
+          "visibleIf": "{email_phone_consent} contains 'email'",
+          "title": "What's your email address?",
+          "inputType": "email"
+        },
+        {
+          "type": "text",
+          "name": "phone",
+          "visibleIf": "{email_phone_consent} contains 'phone'",
+          "title": "What's your phone number?",
+          "inputType": "tel"
+        }
+      ]
+    }
+  ],
+  "showQuestionNumbers": "off",
+  "completeText": "Submit Survey",
+  "showProgressBar": "top",
+  "progressBarType": "pages"
+}
