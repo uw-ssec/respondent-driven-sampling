@@ -12,7 +12,7 @@ import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { printQrCodePdf } from '@/utils/qrCodeUtils';
 import { subject } from '@casl/ability';
 
-import { useApi } from '@/hooks/useApi/useApi';
+import { useApi } from '@/hooks/useApi';
 
 export default function SurveyDetails() {
 	const { id } = useParams();

@@ -132,7 +132,7 @@ const Survey = () => {
 					const req: any = {
 						createdByUserObjectId: userObjectId,
 						locationObjectId:
-							surveyData.responses.location ||
+							surveyData.responses.location ??
 							lastestLocationObjectId,
 						responses: surveyData.responses
 					};
