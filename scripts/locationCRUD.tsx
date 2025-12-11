@@ -8,6 +8,10 @@
  *   create <hubName> <hubType> <locationType> <address>
  *     Example: npm run location -- create "Main Hub" ESTABLISHMENT ROOFTOP "123 Main St, City, State 12345"
  *
+ *   import <yamlFilePath>
+ *     Bulk import locations from a YAML file
+ *     Example: npm run location -- import locations.yaml
+ *
  *   list
  *     Example: npm run location -- list
  *
@@ -25,10 +29,12 @@
  *     Example: npm run location -- delete 507f1f77bcf86cd799439011
  */
 
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { createRequire } from "module";
+
 // Get current directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,6 +44,7 @@ const serverRequire = createRequire(
 );
 
 const mongoose = serverRequire("mongoose");
+const { parse: parseYaml } = serverRequire("yaml");
 
 // ===== Validation Helper Functions =====
 
@@ -127,6 +134,132 @@ async function createLocation(
   console.log(`  Hub Type: ${location.hubType}`);
   console.log(`  Location Type: ${location.locationType}`);
   console.log(`  Address: ${location.address}`);
+}
+
+// ===== IMPORT Operation (Bulk Create from YAML) =====
+
+interface LocationInput {
+  hubName: string;
+  hubType: string;
+  locationType: string;
+  address: string;
+}
+
+interface ImportResult {
+  success: LocationInput[];
+  failed: { location: LocationInput; error: string }[];
+}
+
+async function importLocations(
+  filePath: string,
+  Location: any,
+  createLocationSchema: any,
+): Promise<void> {
+  console.log("\n📁 Importing locations from YAML file...\n");
+
+  // Resolve file path (support both absolute and relative paths)
+  const resolvedPath = path.isAbsolute(filePath)
+    ? filePath
+    : path.resolve(process.cwd(), filePath);
+
+  // Check if file exists
+  if (!fs.existsSync(resolvedPath)) {
+    throw new Error(`File not found: ${resolvedPath}`);
+  }
+
+  // Read and parse YAML file
+  const fileContent = fs.readFileSync(resolvedPath, "utf-8");
+  let data: any;
+
+  try {
+    data = parseYaml(fileContent);
+  } catch (error) {
+    throw new Error(
+      `Failed to parse YAML file: ${error instanceof Error ? error.message : error}`,
+    );
+  }
+
+  // Validate structure - expect { locations: [...] } or just an array
+  let locations: LocationInput[];
+
+  if (Array.isArray(data)) {
+    locations = data;
+  } else if (data && Array.isArray(data.locations)) {
+    locations = data.locations;
+  } else {
+    throw new Error(
+      "Invalid YAML structure. Expected an array of locations or an object with a 'locations' array.",
+    );
+  }
+
+  if (locations.length === 0) {
+    console.log("No locations found in the YAML file.");
+    return;
+  }
+
+  console.log(`Found ${locations.length} location(s) to import.\n`);
+
+  const results: ImportResult = {
+    success: [],
+    failed: [],
+  };
+
+  // Process each location
+  for (let i = 0; i < locations.length; i++) {
+    const locationData = locations[i];
+    const index = i + 1;
+
+    try {
+      // Validate using Zod schema
+      const validationResult = createLocationSchema.safeParse({
+        hubName: locationData.hubName,
+        hubType: locationData.hubType,
+        locationType: locationData.locationType,
+        address: locationData.address,
+      });
+
+      if (!validationResult.success) {
+        const errorMessages = validationResult.error.issues
+          ? validationResult.error.issues
+              .map((err: any) => `${err.path.join(".")}: ${err.message}`)
+              .join("; ")
+          : validationResult.error.message || "Unknown validation error";
+        throw new Error(errorMessages);
+      }
+
+      const validatedData = validationResult.data;
+
+      // Create location in database
+      await Location.create({
+        hubName: validatedData.hubName,
+        hubType: validatedData.hubType,
+        locationType: validatedData.locationType,
+        address: validatedData.address,
+      });
+
+      results.success.push(locationData);
+      console.log(`  ✓ [${index}/${locations.length}] Created: ${locationData.hubName}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      results.failed.push({ location: locationData, error: errorMessage });
+      console.log(
+        `  ✗ [${index}/${locations.length}] Failed: ${locationData.hubName || "Unknown"} - ${errorMessage}`,
+      );
+    }
+  }
+
+  // Print summary
+  console.log("\n" + "=".repeat(50));
+  console.log("Import Summary:");
+  console.log(`  ✓ Successfully created: ${results.success.length}`);
+  console.log(`  ✗ Failed: ${results.failed.length}`);
+
+  if (results.failed.length > 0) {
+    console.log("\nFailed locations:");
+    for (const { location, error } of results.failed) {
+      console.log(`  - ${location.hubName || "Unknown"}: ${error}`);
+    }
+  }
 }
 
 // ===== READ Operations =====
@@ -292,6 +425,15 @@ async function main(): Promise<void> {
         );
         break;
 
+      case "import":
+        if (args.length < 2) {
+          console.error("Error: import requires 1 argument: <yamlFilePath>");
+          console.error("  Example: npm run location -- import locations.yaml");
+          process.exit(1);
+        }
+        await importLocations(args[1], Location, createLocationSchema);
+        break;
+
       case "list":
         await listLocations(Location);
         break;
@@ -400,6 +542,29 @@ Operations:
     Hub Types: ESTABLISHMENT, STREET_ADDRESS, PREMISE, CHURCH, LOCALITY
     Location Types: ROOFTOP, APPROXIMATE
     Example: npm run location -- create "Main Hub" ESTABLISHMENT ROOFTOP "123 Main St, City, State 12345"
+
+  import <yamlFilePath>
+    Bulk import locations from a YAML file
+    The YAML file should contain an array of locations or an object with a 'locations' key.
+    Example: npm run location -- import locations.yaml
+    Example: npm run location -- import /absolute/path/to/locations.yaml
+
+    YAML file format (array style):
+      - hubName: "Main Hub"
+        hubType: ESTABLISHMENT
+        locationType: ROOFTOP
+        address: "123 Main St, City, State 12345"
+      - hubName: "Secondary Hub"
+        hubType: PREMISE
+        locationType: APPROXIMATE
+        address: "456 Oak Ave, Town, State 67890"
+
+    YAML file format (object style):
+      locations:
+        - hubName: "Main Hub"
+          hubType: ESTABLISHMENT
+          locationType: ROOFTOP
+          address: "123 Main St, City, State 12345"
 
   list
     List all locations
