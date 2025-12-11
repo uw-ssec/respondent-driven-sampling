@@ -1,10 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { useAuthContext } from '@/contexts/AuthContext';
 import { useApi } from '@/hooks';
 import { Box, Paper, TablePagination, Typography } from '@mui/material';
-
-import { SurveyDocument } from '@/types/Survey';
 
 import {
 	FilterDialog,
@@ -21,7 +18,6 @@ import {
 
 export default function SurveyEntryDashboard() {
 	const { surveyService } = useApi();
-	const { userObjectId, userRole, locationObjectId } = useAuthContext();
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [searchTerm, setSearchTerm] = useState('');
 	const [viewAll, setViewAll] = useState(false);
@@ -52,26 +48,8 @@ export default function SurveyEntryDashboard() {
 		}));
 	};
 
-	// Data processing pipeline
-	const filteredSurveysByUserObjectId = useMemo(() => {
-		if (!surveys) return [];
-		if (userRole === 'VOLUNTEER') {
-			return surveys.filter(
-				(survey: SurveyDocument) =>
-					survey.createdByUserObjectId == userObjectId
-			);
-		}
-		if (userRole === 'MANAGER') {
-			return surveys.filter(
-				(survey: SurveyDocument) =>
-					survey.locationObjectId === locationObjectId
-			);
-		}
-		// SUPER_ADMIN and ADMIN can see all surveys
-		return surveys;
-	}, [surveys, userObjectId, userRole, locationObjectId]);
 	const filteredSurveys = filterSurveysByDate(
-		filteredSurveysByUserObjectId,
+		surveys ?? [],
 		viewAll,
 		selectedDate
 	);

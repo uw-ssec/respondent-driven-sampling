@@ -14,6 +14,8 @@ import { useSurveyStore } from '@/stores';
 import { useGeolocated } from 'react-geolocated';
 import toast from 'react-hot-toast';
 
+import { SurveyDocument } from '@/types/Survey';
+
 import { initializeSurvey } from './utils/surveyUtils';
 
 // This component is responsible for rendering the survey and handling its logic
@@ -130,7 +132,7 @@ const Survey = () => {
 					const req: any = {
 						createdByUserObjectId: userObjectId,
 						locationObjectId:
-							surveyData.responses.location ||
+							surveyData.responses.location ??
 							lastestLocationObjectId,
 						responses: surveyData.responses
 					};
@@ -145,7 +147,7 @@ const Survey = () => {
 						});
 						// Set the survey code as the fallback seed code
 						// Set the parent survey code as the system survey code seed
-						req.surveyCode = seed.data.surveyCode;
+						req.surveyCode = seed?.surveyCode as string;
 						req.parentSurveyCode = SYSTEM_SURVEY_CODE;
 					}
 					result = await surveyService.createSurvey(req);
@@ -155,9 +157,9 @@ const Survey = () => {
 					});
 				}
 				if (result) {
-					setObjectId(result.data._id);
-					setParentSurveyCode(result.data.parentSurveyCode);
-					setSurveyCode(result.data.surveyCode);
+					setObjectId(result._id);
+					setParentSurveyCode(result.parentSurveyCode);
+					setSurveyCode(result.surveyCode);
 				}
 			} catch (error) {
 				// TODO: handle error (e.g., show notification as toast messages)
@@ -187,8 +189,8 @@ const Survey = () => {
 					return;
 				}
 
-				if (result?.data?.childSurveyCodes) {
-					setChildSurveyCodes(result.data.childSurveyCodes);
+				if (result && result.childSurveyCodes) {
+					setChildSurveyCodes(result.childSurveyCodes);
 					navigate('/qrcode');
 					return;
 				}
@@ -248,9 +250,9 @@ const Survey = () => {
 		// Initialize the survey
 		const { survey, existingData } = initializeSurvey(
 			locations,
-			surveyByRefCode,
-			surveyByObjectId,
-			parentSurvey,
+			surveyByRefCode as SurveyDocument | null,
+			surveyByObjectId as SurveyDocument | null,
+			parentSurvey as SurveyDocument | null,
 			isEditMode
 		);
 		surveyRef.current = survey;
@@ -267,7 +269,7 @@ const Survey = () => {
 			setParentSurveyCode(existingData.parentSurveyCode as string);
 		} else {
 			setSurveyData(survey.data);
-			setParentSurveyCode(parentSurvey?.surveyCode);
+			setParentSurveyCode(parentSurvey?.surveyCode as string);
 		}
 
 		// Attach event handlers

@@ -1,25 +1,38 @@
 import { useRef } from 'react';
 
+import { Button, Tooltip } from '@mui/material';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import '@/styles/SurveyDetailsCss.css';
 import '@/styles/complete.css';
 
+import { useAbility } from '@/hooks';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
 import { printQrCodePdf } from '@/utils/qrCodeUtils';
+import { subject } from '@casl/ability';
 
 import { useApi } from '@/hooks/useApi';
 
 export default function SurveyDetails() {
 	const { id } = useParams();
 	const { surveyService } = useApi();
-	const { data: survey, isLoading: loading } =
-		surveyService.useSurveyWithUser(id ?? '') || {};
+	const {
+		data: survey,
+		isLoading: loading,
+		error
+	} = surveyService.useSurveyWithUser(id ?? '') || {};
 	const navigate = useNavigate();
 	const qrRefs = useRef<(HTMLDivElement | null)[]>([]);
+	const ability = useAbility();
 
-	// Renaming the json names
-	// TODO: verify these are the correct names for FA25 survey
+	// Check if user has permission to read this survey
+	const canRead = survey
+		? ability.can(ACTIONS.CASL.READ, subject(SUBJECTS.SURVEY, survey))
+		: false;
+	const canEdit = survey
+		? ability.can(ACTIONS.CASL.UPDATE, subject(SUBJECTS.SURVEY, survey))
+		: false;
 	const labelMap: Record<string, string> = {
 		first_two_letters_fname: 'First two letters of first name',
 		first_two_letters_lname: 'First two letters of last name',
@@ -57,7 +70,35 @@ export default function SurveyDetails() {
 	};
 
 	if (loading) return <p>Loading...</p>;
-	if (!survey) return <p>Survey not found.</p>;
+
+	if (error || !survey || !canRead) {
+		return (
+			<div>
+				<br />
+				<br />
+				<br />
+				<div className="survey-details-container">
+					<h2>Access Denied</h2>
+					<p>
+						You don't have permission to view this survey, or it
+						doesn't exist.
+					</p>
+					<Button
+						variant="contained"
+						onClick={() => navigate('/survey-entries')}
+						sx={{
+							textTransform: 'none',
+							backgroundColor: '#3E236E',
+							'&:hover': { backgroundColor: '#5F2A96' },
+							mt: 2
+						}}
+					>
+						Back to Survey Entries
+					</Button>
+				</div>
+			</div>
+		);
+	}
 
 	// Generate PDF with custom paper size (62mm width)
 	const handlePrint = () => {
@@ -196,12 +237,23 @@ export default function SurveyDetails() {
 					</pre>
 				</div>
 				{/* Edit Pre-screen Questions Button */}
-				<button
-					className="edit-button"
-					onClick={() => navigate(`/survey/${id}/edit`)}
+				<Tooltip
+					title={
+						!canEdit
+							? "You don't have permission to edit this survey"
+							: ''
+					}
 				>
-					Edit Prescreen Responses
-				</button>
+					<span>
+						<button
+							className="edit-button"
+							disabled={!canEdit}
+							onClick={() => navigate(`/survey/${id}/edit`)}
+						>
+							Edit Prescreen Responses
+						</button>
+					</span>
+				</Tooltip>
 			</div>
 		</div>
 	);
