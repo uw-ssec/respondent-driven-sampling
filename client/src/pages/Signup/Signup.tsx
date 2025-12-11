@@ -73,15 +73,7 @@ export default function Signup() {
 				setOtpSent(true);
 				setCountdown(60);
 			} else {
-				// Extract individual error messages from validation errors
-				if (data.errors && Array.isArray(data.errors)) {
-					const messages = data.errors.map(
-						(err: { message: string }) => err.message
-					);
-					setErrorMessages(messages);
-				} else {
-					setErrorMessages([data.message ?? 'Failed to send OTP']);
-				}
+				setErrorMessages([data.message ?? 'Failed to send OTP']);
 			}
 		} catch {
 			setErrorMessages(['Failed to send OTP']);
@@ -104,15 +96,7 @@ export default function Signup() {
 				setOtpSent(false);
 				setOtp('');
 			} else {
-				// Extract individual error messages from validation errors
-				if (data.errors && Array.isArray(data.errors)) {
-					const messages = data.errors.map(
-						(err: { message: string }) => err.message
-					);
-					setErrorMessages(messages);
-				} else {
-					setErrorMessages([data.message ?? 'Failed to verify OTP']);
-				}
+				setErrorMessages([data.message ?? 'Failed to verify OTP']);
 			}
 		} catch {
 			setErrorMessages(['Failed to verify OTP']);
