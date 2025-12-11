@@ -1,3 +1,3 @@
 export { useAbility } from './useAbility';
 export { useAuth } from './useAuth';
-export { useApi } from './useApi/useApi';
+export { useApi } from './useApi';
