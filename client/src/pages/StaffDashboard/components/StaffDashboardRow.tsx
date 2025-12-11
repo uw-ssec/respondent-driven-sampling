@@ -13,6 +13,8 @@ import {
 	Typography
 } from '@mui/material';
 
+import { UserDocument } from '@/types/User';
+
 interface StaffMember {
 	id: string;
 	employeeId: string;
@@ -23,8 +25,7 @@ interface StaffMember {
 
 interface StaffDashboardRowProps {
 	member: StaffMember;
-	// REVIEW: can we type this?
-	userData: any; // The full user object for CASL permission checks
+	userData: UserDocument; // The full user object for CASL permission checks
 	onApproval: (id: string, status: string) => void;
 	onEdit: (id: string) => void;
 	onDelete: (id: string) => void;

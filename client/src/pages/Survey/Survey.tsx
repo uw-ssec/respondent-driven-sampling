@@ -157,9 +157,9 @@ const Survey = () => {
 					});
 				}
 				if (result) {
-					setObjectId(result.data._id);
-					setParentSurveyCode(result.data.parentSurveyCode);
-					setSurveyCode(result.data.surveyCode);
+					setObjectId(result._id);
+					setParentSurveyCode(result.parentSurveyCode);
+					setSurveyCode(result.surveyCode);
 				}
 			} catch (error) {
 				// TODO: handle error (e.g., show notification as toast messages)
@@ -189,12 +189,8 @@ const Survey = () => {
 					return;
 				}
 
-				if (
-					result &&
-					'data' in result &&
-					result.data?.childSurveyCodes
-				) {
-					setChildSurveyCodes(result?.data?.childSurveyCodes ?? []);
+				if (result && result.childSurveyCodes) {
+					setChildSurveyCodes(result.childSurveyCodes);
 					navigate('/qrcode');
 					return;
 				}

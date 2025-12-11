@@ -34,9 +34,7 @@ export default function NewUser() {
 			});
 
 			if (createdUser) {
-				// REVIEW: we never get "message" because of normalization.
-				// REVIEW: Remove .message if being used elsewhere.
-				setMessage(createdUser.message ?? 'User created successfully!');
+				setMessage('User created successfully!');
 			} else {
 				setMessage('Failed to create user.');
 			}

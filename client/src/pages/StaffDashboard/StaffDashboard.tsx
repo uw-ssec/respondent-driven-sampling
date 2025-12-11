@@ -76,7 +76,7 @@ export default function StaffDashboard() {
 	};
 
 	// Data processing pipeline
-	const staffMembers = transformUsersToStaff(users);
+	const staffMembers = transformUsersToStaff(users ?? []);
 	const filteredStaff = filterStaff(staffMembers, searchTerm, filterRole);
 	const sortedStaff = sortStaff(filteredStaff, sortConfig);
 	const currentStaff = paginateStaff(sortedStaff, currentPage, itemsPerPage);

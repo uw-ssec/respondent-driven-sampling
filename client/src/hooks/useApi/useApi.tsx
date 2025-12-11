@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import { getAuthToken } from '@/utils/authTokenHandler';
 import { useNavigate } from 'react-router-dom';
-import useSWR, { mutate } from 'swr';
+import useSWR, { mutate, SWRResponse } from 'swr';
 
 import { LocationDocument } from '@/types/Locations';
 import { SeedDocument } from '@/types/Seed';
@@ -10,13 +10,15 @@ import { SurveyDocument } from '@/types/Survey';
 import { UserDocument } from '@/types/User';
 import { useAuth } from '@/hooks/useAuth';
 
-import { parseAndNormalizeResponse } from './utils';
+import { parseAndDeserializeResponse } from './utils';
 
-export const useAuthErrorHandler = (onLogout: () => void) => {
+export const useAuthErrorHandler = (
+	onLogout: () => void
+): ((response: Response) => boolean | undefined) => {
 	const navigate = useNavigate();
 
 	return useCallback(
-		(response: Response) => {
+		(response: Response): boolean | undefined => {
 			if (response.status === 401) {
 				onLogout();
 				navigate('/login');
@@ -35,7 +37,10 @@ export const useApi = () => {
 	const { handleLogout } = useAuth();
 	const handleAuthError = useAuthErrorHandler(handleLogout);
 
-	const fetchWithAuth = async (url: string, options?: RequestInit) => {
+	const fetchWithAuth = async (
+		url: string,
+		options?: RequestInit
+	): Promise<Response | null> => {
 		try {
 			const token = getAuthToken();
 			const response = await fetch(url, {
@@ -54,69 +59,81 @@ export const useApi = () => {
 		}
 	};
 
-	// Helper that combines fetchWithAuth and parseAndNormalizeResponse
-	// include 'isArray' as an option to help with normalization helpers
-	type FetchOptions = RequestInit & { isArray?: boolean };
-	async function fetchAndNormalize<T extends Record<string, any>>(
-		url: string,
-		options?: FetchOptions
-	) {
-		const { isArray = false, ...fetchOptions } = options ?? {};
-		const response = await fetchWithAuth(url, fetchOptions);
-		if (!response || !response.ok) return isArray ? [] : null;
+	// Need to deserialize date objects to ensure correct date comparisons for permission checks
+	async function fetchAndDeserialize<
+		T extends Record<string, any> | Record<string, any>[]
+	>(url: string, options?: RequestInit): Promise<T | null> {
+		const response = await fetchWithAuth(url, options);
 
-		return (await parseAndNormalizeResponse<T>(response, {
-			isArray
-		})) as any;
+		// Null object if response is null or not ok
+		// TODO: possibly find better way to handle errors
+		// i.e. propagate messages and statuses
+		if (!response || !response.ok) {
+			return null;
+		}
+
+		return await parseAndDeserializeResponse<T>(response);
 	}
 
-	const useUser = (userObjectId: string | undefined) => {
+	const useUser = (
+		userObjectId: string | undefined
+	): SWRResponse<UserDocument | null> | null => {
 		if (!userObjectId) return null;
 		return useSWR(`/api/users/${userObjectId}`, () =>
 			fetchUser(userObjectId)
 		);
 	};
 
-	const useUsers = () => {
+	const useUsers = (): SWRResponse<UserDocument[] | null, Error> => {
 		return useSWR(`/api/users`, () => fetchUsers());
 	};
 
-	const fetchUser = async (userObjectId: string) => {
-		return await fetchAndNormalize<UserDocument>(
+	const fetchUser = async (
+		userObjectId: string
+	): Promise<UserDocument | null> => {
+		return await fetchAndDeserialize<UserDocument>(
 			`/api/users/${userObjectId}`
 		);
 	};
 
-	const fetchUsers = async () => {
-		// REVIEW: is this UserDocument[] ?
-		return await fetchAndNormalize<UserDocument>(`/api/users`, {
-			isArray: true
-		});
+	const fetchUsers = async (): Promise<UserDocument[] | null> => {
+		return await fetchAndDeserialize<UserDocument[]>(`/api/users`);
 	};
 
 	const approveUser = async (
 		userObjectId: string,
 		approvalStatus: string,
 		approvedByUserObjectId: string
-	) => {
-		const result = await fetchAndNormalize(`/api/users/${userObjectId}`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ approvalStatus, approvedByUserObjectId })
-		});
+	): Promise<UserDocument | null> => {
+		const result = await fetchAndDeserialize<UserDocument>(
+			`/api/users/${userObjectId}`,
+			{
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ approvalStatus, approvedByUserObjectId })
+			}
+		);
 		return result ?? null;
 	};
 
-	const updateUser = async (userObjectId: string, userData: object) => {
-		return await fetchAndNormalize(`/api/users/${userObjectId}`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(userData)
-		});
+	const updateUser = async (
+		userObjectId: string,
+		userData: object
+	): Promise<UserDocument | null> => {
+		return await fetchAndDeserialize<UserDocument>(
+			`/api/users/${userObjectId}`,
+			{
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(userData)
+			}
+		);
 	};
 
-	const createUser = async (userData: object) => {
-		return await fetchAndNormalize<UserDocument>(`/api/users`, {
+	const createUser = async (
+		userData: object
+	): Promise<UserDocument | null> => {
+		return await fetchAndDeserialize<UserDocument>(`/api/users`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(userData)
@@ -131,40 +148,42 @@ export const useApi = () => {
 		createUser
 	};
 
-	const useSurveys = () => {
+	const useSurveys = (): SWRResponse<SurveyDocument[] | null> => {
 		return useSWR(`/api/surveys`, () => fetchSurveys());
 	};
 
-	// REVIEW: Consistently type all other Promise[s].
 	const fetchSurvey = async (
 		surveyObjectId: string
 	): Promise<SurveyDocument | null> => {
-		return await fetchAndNormalize<SurveyDocument>(
+		return await fetchAndDeserialize<SurveyDocument>(
 			`/api/surveys/${surveyObjectId}`
 		);
 	};
 
-	const fetchSurveys = async (): Promise<SurveyDocument[]> => {
-		// REVIEW: is this SurveyDocument[] ?
-		return await fetchAndNormalize<SurveyDocument>(`/api/surveys`, {
-			isArray: true
-		});
+	const fetchSurveys = async (): Promise<SurveyDocument[] | null> => {
+		return await fetchAndDeserialize<SurveyDocument[]>(`/api/surveys`);
 	};
 
-	const fetchSurveyBySurveyCode = async (surveyCode: string) => {
-		const result = await fetchAndNormalize<SurveyDocument>(
-			`/api/surveys?surveyCode=${surveyCode}`,
-			{ isArray: true }
+	const fetchSurveyBySurveyCode = async (
+		surveyCode: string
+	): Promise<SurveyDocument | null> => {
+		const result = await fetchAndDeserialize<SurveyDocument[]>(
+			`/api/surveys?surveyCode=${surveyCode}`
 		);
 		return result?.[0] ?? null;
 	};
 
-	const createSurvey = async (surveyData: object) => {
-		const result = await fetchAndNormalize(`/api/surveys`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(surveyData)
-		});
+	const createSurvey = async (
+		surveyData: object
+	): Promise<SurveyDocument | null> => {
+		const result = await fetchAndDeserialize<SurveyDocument>(
+			`/api/surveys`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(surveyData)
+			}
+		);
 
 		// Invalidate surveys list cache
 		mutate(`/api/surveys`);
@@ -176,8 +195,11 @@ export const useApi = () => {
 		return result;
 	};
 
-	const updateSurvey = async (surveyObjectId: string, surveyData: object) => {
-		const result = await fetchAndNormalize(
+	const updateSurvey = async (
+		surveyObjectId: string,
+		surveyData: object
+	): Promise<SurveyDocument | null> => {
+		const result = await fetchAndDeserialize<SurveyDocument>(
 			`/api/surveys/${surveyObjectId}`,
 			{
 				method: 'PATCH',
@@ -196,22 +218,29 @@ export const useApi = () => {
 		return result;
 	};
 
-	const fetchParentOfSurveyCode = async (surveyCode: string) => {
-		const result = await fetchAndNormalize<SurveyDocument>(
-			`/api/surveys?childSurveyCodes=${surveyCode}`,
-			{ isArray: true }
+	const fetchParentOfSurveyCode = async (
+		surveyCode: string
+	): Promise<SurveyDocument | null> => {
+		const result = await fetchAndDeserialize<SurveyDocument[]>(
+			`/api/surveys?childSurveyCodes=${surveyCode}`
 		);
 		return result?.[0] ?? null;
 	};
 
-	const useSurvey = (surveyObjectId: string) => {
+	const useSurvey = (
+		surveyObjectId: string
+	): SWRResponse<SurveyDocument | null> => {
 		return useSWR(
 			surveyObjectId ? `/api/surveys/${surveyObjectId}` : null,
 			() => fetchSurvey(surveyObjectId)
 		);
 	};
 
-	const useSurveysWithUsersAndLocations = () => {
+	const useSurveysWithUsersAndLocations = (): {
+		data: SurveyDocument[];
+		isLoading: boolean;
+		mutate: (() => void) | undefined;
+	} => {
 		const {
 			data: surveys,
 			isLoading: surveysLoading,
@@ -259,15 +288,24 @@ export const useApi = () => {
 		};
 	};
 
-	const useSurveyWithUser = (surveyObjectId: string) => {
+	type SurveyWithUser = SurveyDocument & {
+		employeeName: string;
+		employeeId: string;
+	};
+
+	const useSurveyWithUser = (
+		surveyObjectId: string
+	): SWRResponse<SurveyWithUser> => {
 		return useSWR(
 			surveyObjectId ? `/api/surveys/${surveyObjectId}` : null,
 			() => fetchSurveyWithUser(surveyObjectId)
 		);
 	};
 
-	const fetchSurveyWithUser = async (surveyObjectId: string) => {
-		const survey = await fetchAndNormalize<SurveyDocument>(
+	const fetchSurveyWithUser = async (
+		surveyObjectId: string
+	): Promise<SurveyWithUser> => {
+		const survey = await fetchAndDeserialize<SurveyDocument>(
 			`/api/surveys/${surveyObjectId}`
 		);
 		if (!survey) {
@@ -275,7 +313,7 @@ export const useApi = () => {
 				'Survey not found or you do not have permission to view it'
 			);
 		}
-		const user = await fetchAndNormalize<UserDocument>(
+		const user = await fetchAndDeserialize<UserDocument>(
 			`/api/users/${survey.createdByUserObjectId}`
 		);
 
@@ -288,7 +326,9 @@ export const useApi = () => {
 		};
 	};
 
-	const useSurveyBySurveyCode = (surveyCode: string | null) => {
+	const useSurveyBySurveyCode = (
+		surveyCode: string | null
+	): SWRResponse<SurveyDocument | null> => {
 		return useSWR(
 			surveyCode ? `/api/surveys?surveyCode=${surveyCode}` : null,
 			() => fetchSurveyBySurveyCode(surveyCode!),
@@ -300,7 +340,9 @@ export const useApi = () => {
 		);
 	};
 
-	const useParentOfSurveyCode = (surveyCode: string | null) => {
+	const useParentOfSurveyCode = (
+		surveyCode: string | null
+	): SWRResponse<SurveyDocument | null> => {
 		return useSWR(
 			surveyCode ? `/api/surveys?childSurveyCodes=${surveyCode}` : null,
 			() => fetchParentOfSurveyCode(surveyCode!)
@@ -308,11 +350,14 @@ export const useApi = () => {
 	};
 
 	// No useSWR wrapper here since it lives in our ApplyReferral handlers (better to fetch directly)
-	const fetchReferralCodeValidation = async (code: string) => {
-		return await fetchAndNormalize<{
-			isValid: boolean;
-			message: string;
-		}>(`/api/validate-referral-code/${code}`);
+	type ReferralCodeValidation = { isValid: boolean; message: string };
+
+	const fetchReferralCodeValidation = async (
+		code: string
+	): Promise<ReferralCodeValidation | null> => {
+		return await fetchAndDeserialize<ReferralCodeValidation>(
+			`/api/validate-referral-code/${code}`
+		);
 	};
 
 	const surveyService = {
@@ -328,35 +373,38 @@ export const useApi = () => {
 		useSurveyBySurveyCode
 	};
 
-	const useLocations = () => {
+	const useLocations = (): SWRResponse<LocationDocument[] | null> => {
 		return useSWR(`/api/locations`, () => fetchLocations());
 	};
 
-	const fetchLocations = async () => {
-		return await fetchAndNormalize<LocationDocument>(`/api/locations`, {
-			isArray: true
-		});
+	const fetchLocations = async (): Promise<LocationDocument[] | null> => {
+		return await fetchAndDeserialize<LocationDocument[]>(`/api/locations`);
 	};
 
 	const locationService = { fetchLocations, useLocations };
 
-	const useSeedBySurveyCode = (surveyCode: string | null) => {
+	const useSeedBySurveyCode = (
+		surveyCode: string | null
+	): SWRResponse<SeedDocument | null> => {
 		return useSWR(
 			surveyCode ? `/api/seeds?surveyCode=${surveyCode}` : null,
 			() => fetchSeedBySurveyCode(surveyCode!)
 		);
 	};
 
-	const fetchSeedBySurveyCode = async (surveyCode: string) => {
-		const result = await fetchAndNormalize(
-			`/api/seeds?surveyCode=${surveyCode}`,
-			{ isArray: true }
+	const fetchSeedBySurveyCode = async (
+		surveyCode: string
+	): Promise<SeedDocument | null> => {
+		const result = await fetchAndDeserialize<SeedDocument[]>(
+			`/api/seeds?surveyCode=${surveyCode}`
 		);
 		return result?.[0] ?? null;
 	};
 
-	const createSeed = async (seedData: object) => {
-		return await fetchAndNormalize<SeedDocument>(`/api/seeds`, {
+	const createSeed = async (
+		seedData: object
+	): Promise<SeedDocument | null> => {
+		return await fetchAndDeserialize<SeedDocument>(`/api/seeds`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(seedData)

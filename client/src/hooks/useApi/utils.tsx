@@ -1,70 +1,63 @@
-// Helper to parse JSON response and normalize dates automatically
-type NormalizeOptions<A extends boolean | undefined = boolean | undefined> = {
-	isArray?: A;
-};
-
-// Discriminated return type ensures callers get T[] when isArray is true
-export const parseAndNormalizeResponse = async <
-	T extends Record<string, any>,
-	A extends boolean | undefined = boolean | undefined
+export const parseAndDeserializeResponse = async <
+	T extends Record<string, any> | Record<string, any>[]
 >(
-	response: Response | null,
-	options?: NormalizeOptions<A>
-): Promise<A extends true ? T[] : T | null> => {
-	if (!response) return null as any;
+	response: Response | null
+): Promise<T | null> => {
+	if (!response) return null;
 
 	const json = await response.json();
 	const data = json?.data ?? json;
 
-	if (options?.isArray || Array.isArray(data)) {
-		return normalizeDatesArray(data as T[]) as any;
+	// Wrap deserialization in loop for arrays
+	if (Array.isArray(data)) {
+		return deserializeDatesArray(data) as T;
 	}
 
-	return normalizeDates(data as T) as any;
+	return deserializeDates(data) as T;
 };
 
-// Normalize date fields in API responses to ensure they are Date objects
+// Deserialize date fields in API responses to ensure they are Date objects
 // This ensures consistent UTC date comparisons for permission checks
-const normalizeDates = <T extends Record<string, any>>(
+const deserializeDates = <T extends Record<string, any>>(
 	obj: T | null | undefined
 ): T | null => {
 	if (!obj) return null;
 
-	const normalized = { ...obj } as any;
+	const deserialized = { ...obj } as any;
 
-	// Normalize createdAt if present
-	if ('createdAt' in normalized && normalized.createdAt !== undefined) {
-		normalized.createdAt =
-			normalized.createdAt instanceof Date
-				? normalized.createdAt
-				: new Date(normalized.createdAt);
+	// Deserialize createdAt if present
+	if ('createdAt' in deserialized && deserialized.createdAt !== undefined) {
+		deserialized.createdAt =
+			deserialized.createdAt instanceof Date
+				? deserialized.createdAt
+				: new Date(deserialized.createdAt);
 	}
 
-	// Normalize updatedAt if present
-	if ('updatedAt' in normalized && normalized.updatedAt !== undefined) {
-		normalized.updatedAt =
-			normalized.updatedAt instanceof Date
-				? normalized.updatedAt
-				: new Date(normalized.updatedAt);
+	// Deserialize updatedAt if present
+	if ('updatedAt' in deserialized && deserialized.updatedAt !== undefined) {
+		deserialized.updatedAt =
+			deserialized.updatedAt instanceof Date
+				? deserialized.updatedAt
+				: new Date(deserialized.updatedAt);
 	}
 
-	// Normalize deletedAt if present
-	if ('deletedAt' in normalized && normalized.deletedAt !== undefined) {
-		normalized.deletedAt =
-			normalized.deletedAt instanceof Date
-				? normalized.deletedAt
-				: new Date(normalized.deletedAt);
+	// Deserialize deletedAt if present
+	if ('deletedAt' in deserialized && deserialized.deletedAt !== undefined) {
+		deserialized.deletedAt =
+			deserialized.deletedAt instanceof Date
+				? deserialized.deletedAt
+				: new Date(deserialized.deletedAt);
 	}
 
-	return normalized as T;
+	return deserialized as T;
 };
 
 // Array version for our batch fetching functions
-const normalizeDatesArray = <T extends Record<string, any>>(
+const deserializeDatesArray = <T extends Record<string, any>>(
 	arr: T[] | null | undefined
 ): T[] => {
 	if (!arr) return [];
 	return arr
-		.map(item => normalizeDates(item))
+		.map(item => deserializeDates(item))
 		.filter((item): item is T => item !== null);
 };
