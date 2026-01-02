@@ -219,6 +219,7 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 				}}
 				allow="geolocation"
 				aria-label="Embedded Qualtrics survey"
+				aria-disabled={isCompleted}
 			/>
 
 			{/* Show continue button when completed */}
