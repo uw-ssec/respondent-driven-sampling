@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ElementFactory, Question, Serializer } from 'survey-core';
 import { SurveyQuestionElementBase, ReactQuestionFactory } from 'survey-react-ui';
+import { Button } from '@mui/material';
 import { useSurveyStore } from '@/stores';
 
 // Constants
@@ -242,33 +243,14 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 					}}>
 						✓ Survey Completed Successfully!
 					</p>
-					<button
+					<Button
+						variant="contained"
+						color="success"
+						size="large"
 						onClick={handleContinue}
-						style={{
-							backgroundColor: '#4caf50',
-							color: 'white',
-							border: 'none',
-							padding: '12px 32px',
-							fontSize: '16px',
-							fontWeight: 'bold',
-							borderRadius: '8px',
-							cursor: 'pointer',
-							boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-							transition: 'all 0.2s'
-						}}
-						onMouseOver={(e) => {
-							e.currentTarget.style.backgroundColor = '#45a049';
-							e.currentTarget.style.transform = 'translateY(-2px)';
-							e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
-						}}
-						onMouseOut={(e) => {
-							e.currentTarget.style.backgroundColor = '#4caf50';
-							e.currentTarget.style.transform = 'translateY(0)';
-							e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-						}}
 					>
 						Continue to Next Section →
-					</button>
+					</Button>
 				</div>
 			)}
 
@@ -286,28 +268,22 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 					<p style={{ marginBottom: '8px', color: '#666', fontSize: '14px' }}>
 						Complete the survey above to continue.
 					</p>
-					<button
+					<Button
+						variant="text"
+						size="small"
 						onClick={handleManualComplete}
-						style={{
-							backgroundColor: 'transparent',
-							color: '#666',
-							border: 'none',
-							padding: '4px 8px',
+						sx={{ 
+							textTransform: 'none',
+							fontStyle: 'italic',
 							fontSize: '12px',
-							cursor: 'pointer',
-							textDecoration: 'underline',
-							fontStyle: 'italic'
+							color: '#666',
+							'&:hover': {
+								color: '#333'
+							}
 						}}
-						onMouseOver={(e) => {
-							e.currentTarget.style.color = '#333';
-						}}
-						onMouseOut={(e) => {
-							e.currentTarget.style.color = '#666';
-						}}
-						title="Use this if you completed the survey but the continue button didn't appear"
 					>
 						Survey completed but continue button not showing? Click here
-					</button>
+					</Button>
 				</div>
 			)}
 		</div>
