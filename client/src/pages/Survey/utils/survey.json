@@ -28,16 +28,18 @@
     {
       "name": "qualtrics-survey",
       "title": "Main Survey",
+      "navigationButtonsVisibility": "hide",
       "elements": [
         {
           "type": "html",
           "name": "qualtrics-instruction",
-          "html": "<div style=\"background-color: #e8f4fd; padding: 15px; margin-bottom: 20px; border-radius: 8px;\"><strong>Instructions:</strong> Please complete the survey below. When finished, click the \"Continue to Next Section\" button at the bottom.</div>"
+          "html": "<div style=\"background-color: #e8f4fd; padding: 15px; margin-bottom: 20px; border-radius: 8px; border-left: 4px solid #2196F3;\"><strong>⚠️ Important:</strong> Please complete the survey below using the navigation buttons <strong>inside the survey</strong>. The Next button at the bottom of the page will become available when you finish.</div>"
         },
         {
           "type": "qualtrics",
           "name": "qualtrics_embed",
-          "title": "Complete the survey below:"
+          "title": "Complete the survey below:",
+          "isRequired": true
         }
       ]
     },
