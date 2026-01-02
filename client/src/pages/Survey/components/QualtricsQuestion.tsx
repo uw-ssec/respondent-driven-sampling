@@ -248,6 +248,8 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 						color="success"
 						size="large"
 						onClick={handleContinue}
+						type="button"
+						aria-label="Proceed to next section of survey"
 					>
 						Continue to Next Section →
 					</Button>
@@ -272,6 +274,8 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 						variant="text"
 						size="small"
 						onClick={handleManualComplete}
+						type="button"
+						aria-label="Manually mark survey as complete if automatic detection failed"
 						sx={{ 
 							textTransform: 'none',
 							fontStyle: 'italic',
