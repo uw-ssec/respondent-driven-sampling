@@ -33,7 +33,7 @@
         {
           "type": "html",
           "name": "qualtrics-instruction",
-          "html": "<div style=\"background-color: #e8f4fd; padding: 15px; margin-bottom: 20px; border-radius: 8px; border-left: 4px solid #2196F3;\"><strong>⚠️ Important:</strong> Please complete the survey below using the navigation buttons <strong>inside the survey</strong>. The Next button at the bottom of the page will become available when you finish.</div>"
+          "html": "<div style=\"background-color: #e8f4fd; padding: 15px; margin-bottom: 20px; border-radius: 8px; border-left: 4px solid #2196F3;\"><strong>⚠️ Important:</strong> Please complete the survey below using the navigation buttons <strong>inside the survey</strong>. The Continue button at the bottom of the page will appear when you finish.</div>"
         },
         {
           "type": "qualtrics",
