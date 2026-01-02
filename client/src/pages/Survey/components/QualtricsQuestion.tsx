@@ -72,7 +72,8 @@ const QualtricsQuestionComponent = ({ question }: QualtricsQuestionProps) => {
 	const [qualtricsUrl, setQualtricsUrl] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [configError, setConfigError] = useState<string | null>(null);
-	const [isCompleted, setIsCompleted] = useState(false);
+	// Initialize from question model to preserve state across remounts
+	const [isCompleted, setIsCompleted] = useState(question.qualtricsCompleted);
 
 	// Get the survey code from the Zustand store
 	const { getSurveyCode } = useSurveyStore();
