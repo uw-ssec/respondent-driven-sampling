@@ -91,7 +91,7 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 	// Ensuring these headers are explicitly set on every response
 	res.setHeader(
 		'Content-Security-Policy',
-		"default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-src 'self' https://*.qualtrics.com"
+		"default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-src 'self' https://*.qualtrics.com"
 	);
 	res.setHeader('X-Frame-Options', 'DENY');
 	res.setHeader(
