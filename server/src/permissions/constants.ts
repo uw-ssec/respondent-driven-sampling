@@ -92,8 +92,8 @@ export const CONDITION_QUERIES: Record<
 	[CONDITIONS.HAS_ADMIN_ROLE]: (_ctx: Context) => ({
 		...hasRole(['ADMIN'])
 	}),
-	[CONDITIONS.WAS_CREATED_TODAY]: (_ctx: Context) => ({
-		...isToday('createdAt')
+	[CONDITIONS.WAS_CREATED_TODAY]: (ctx: Context) => ({
+		...isToday('createdAt', ctx.timezone)
 	})
 };
 
@@ -109,7 +109,11 @@ export const CONDITION_ENUM = Object.values(CONDITIONS);
 
 // Types
 export type Role = (typeof ROLE_ENUM)[number];
-export type Context = { userObjectId: string; latestLocationObjectId: string };
+export type Context = {
+	userObjectId: string;
+	latestLocationObjectId: string;
+	timezone: string;
+};
 export type Action = (typeof ACTION_ENUM)[number];
 export type Subject = (typeof SUBJECT_ENUM)[number];
 export type Condition = (typeof CONDITION_ENUM)[number];

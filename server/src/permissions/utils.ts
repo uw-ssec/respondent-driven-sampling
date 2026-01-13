@@ -1,15 +1,13 @@
 // Returns a Mongo query filter that checks if the value of the given field is today
 // Made fieldName variable in case we want to have different checks for `updatedAt`/`createdAt`/`deletedAt`/etc.
-// Defaults to TIMEZONE env var (server-side), or Pacific timezone if not set
-const DEFAULT_TIMEZONE =
+
+// Server-side default timezone from environment, with fallback
+export const DEFAULT_TIMEZONE =
 	typeof process !== 'undefined' && process.env?.TIMEZONE
 		? process.env.TIMEZONE
 		: 'America/Los_Angeles';
 
-export function isToday(
-	fieldName: string,
-	timezone: string = DEFAULT_TIMEZONE
-) {
+export function isToday(fieldName: string, timezone: string) {
 	const now = new Date();
 
 	let startOfDay: Date;

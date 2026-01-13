@@ -4,8 +4,13 @@ import { useAuthContext } from '@/contexts';
 import defineAbilitiesForUser from '@/permissions/abilityBuilder';
 
 export const useAbility = () => {
-	const { userRole, userObjectId, lastestLocationObjectId, permissions } =
-		useAuthContext();
+	const {
+		userRole,
+		userObjectId,
+		lastestLocationObjectId,
+		permissions,
+		serverTimezone
+	} = useAuthContext();
 
 	// updates whenever our auth store updates
 	return useMemo(
@@ -14,8 +19,15 @@ export const useAbility = () => {
 				userRole ?? '',
 				userObjectId ?? '',
 				lastestLocationObjectId ?? '',
-				permissions
+				permissions,
+				serverTimezone
 			),
-		[userRole, userObjectId, lastestLocationObjectId, permissions]
+		[
+			userRole,
+			userObjectId,
+			lastestLocationObjectId,
+			permissions,
+			serverTimezone
+		]
 	);
 };

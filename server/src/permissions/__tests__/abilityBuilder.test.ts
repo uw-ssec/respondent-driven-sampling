@@ -12,7 +12,7 @@ jest.mock('../utils', () => {
 	const actual = jest.requireActual('../utils');
 	return {
 		...(actual as Record<string, any>),
-		isToday: (fieldName: string) => {
+		isToday: (fieldName: string, _timezone: string) => {
 			const startOfDay = new Date();
 			startOfDay.setHours(0, 0, 0, 0);
 
@@ -28,6 +28,9 @@ jest.mock('../utils', () => {
 		}
 	};
 });
+
+// Default timezone for tests
+const TEST_TIMEZONE = 'America/Los_Angeles';
 
 const self = {
 	userObjectId: '6901027707fdae19aae38d4c'
@@ -53,7 +56,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const volunteerAtSameLocation = subject('User', {
@@ -77,7 +81,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const managerAtSameLocation = subject('User', {
@@ -101,7 +106,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const adminAtSameLocation = subject('User', {
@@ -125,7 +131,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const volunteer = subject('User', {
@@ -150,7 +157,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const manager = subject('User', {
@@ -179,7 +187,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const otherAdmin = subject('User', {
@@ -208,7 +217,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const selfUser = subject('User', { _id: self.userObjectId });
@@ -236,7 +246,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(ability.can(ACTIONS.CASL.READ, SUBJECTS.USER)).toBe(
@@ -253,7 +264,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(ability.cannot(ACTIONS.CASL.DELETE, SUBJECTS.USER)).toBe(
@@ -272,7 +284,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(ability.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY)).toBe(
@@ -289,7 +302,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(
@@ -309,7 +323,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(ability.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY)).toBe(
@@ -326,7 +341,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const surveyCreatedToday = subject('Survey', {
@@ -347,7 +363,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.ADMIN,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(
@@ -368,7 +385,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(ability.can(ACTIONS.CASL.READ, SUBJECTS.USER)).toBe(
@@ -385,7 +403,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const volunteerAtSameLocation = subject('User', {
@@ -413,7 +432,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const managerUser = subject('User', {
@@ -441,7 +461,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const volunteerAtDifferentLocation = subject('User', {
@@ -469,7 +490,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const selfUser = subject('User', {
@@ -493,7 +515,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const manager = subject('User', {
@@ -519,7 +542,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const selfUser = subject('User', { _id: self.userObjectId });
@@ -547,7 +571,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(ability.cannot(ACTIONS.CASL.DELETE, SUBJECTS.USER)).toBe(
@@ -566,7 +591,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(ability.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY)).toBe(
@@ -583,7 +609,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(
@@ -603,7 +630,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const ownSurveyAtOwnLocation = subject('Survey', {
@@ -626,7 +654,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const otherUserSurvey = subject('Survey', {
@@ -649,7 +678,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const surveyAtDifferentLocation = subject('Survey', {
@@ -672,7 +702,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const ownSurveyAtOwnLocation = subject('Survey', {
@@ -695,7 +726,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const otherUserSurvey = subject('Survey', {
@@ -718,7 +750,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.MANAGER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(
@@ -739,7 +772,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const selfUser = subject('User', { _id: self.userObjectId });
@@ -762,7 +796,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const selfUser = subject('User', { _id: self.userObjectId });
@@ -790,7 +825,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const otherUserObj = subject('User', {
@@ -815,7 +851,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const otherUserObj = subject('User', {
@@ -836,7 +873,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(ability.cannot(ACTIONS.CASL.DELETE, SUBJECTS.USER)).toBe(
@@ -855,7 +893,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(ability.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY)).toBe(
@@ -872,7 +911,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				expect(
@@ -893,7 +933,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const ownSurveyAtOwnLocation = subject('Survey', {
@@ -916,7 +957,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const otherUserSurvey = subject('Survey', {
@@ -940,7 +982,8 @@ describe('CASL abilityBuilder', () => {
 					ROLES.VOLUNTEER,
 					self.userObjectId,
 					location1,
-					[]
+					[],
+					TEST_TIMEZONE
 				);
 
 				const ownSurveyAtOwnLocation = subject('Survey', {
@@ -991,12 +1034,13 @@ describe('CASL abilityBuilder', () => {
 			});
 
 			test('Volunteer cannot update surveys from other users', () => {
-				const ability = defineAbilitiesForUser(
-					ROLES.VOLUNTEER,
-					self.userObjectId,
-					location1,
-					[]
-				);
+			const ability = defineAbilitiesForUser(
+				ROLES.VOLUNTEER,
+				self.userObjectId,
+				location1,
+				[],
+				TEST_TIMEZONE
+			);
 
 				const otherUserSurvey = subject('Survey', {
 					createdByUserObjectId: otherUser.userObjectId,
@@ -1010,12 +1054,13 @@ describe('CASL abilityBuilder', () => {
 			});
 
 			test('Volunteer cannot delete surveys', () => {
-				const ability = defineAbilitiesForUser(
-					ROLES.VOLUNTEER,
-					self.userObjectId,
-					location1,
-					[]
-				);
+			const ability = defineAbilitiesForUser(
+				ROLES.VOLUNTEER,
+				self.userObjectId,
+				location1,
+				[],
+				TEST_TIMEZONE
+			);
 
 				expect(
 					ability.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY)

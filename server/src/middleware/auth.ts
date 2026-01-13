@@ -4,6 +4,7 @@ import Survey from '@/database/survey/mongoose/survey.model';
 import User, { IUser } from '@/database/user/mongoose/user.model';
 import { ApprovalStatus } from '@/database/utils/constants';
 import defineAbilitiesForUser from '@/permissions/abilityBuilder';
+import { DEFAULT_TIMEZONE } from '@/permissions/utils';
 import { AuthenticatedRequest } from '@/types/auth';
 import { verifyAuthToken } from '@/utils/authTokenHandler';
 
@@ -75,7 +76,8 @@ export async function auth(
 				action: permission.action,
 				subject: permission.subject,
 				conditions: permission.conditions
-			}))
+			})),
+			DEFAULT_TIMEZONE
 		);
 		if (!req.authorization) {
 			res.sendStatus(403);

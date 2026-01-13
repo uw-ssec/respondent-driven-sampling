@@ -28,6 +28,7 @@ interface AuthState {
 		subject: Subject;
 		conditions: Condition[];
 	}[];
+	serverTimezone: string;
 	isLoggedIn: boolean;
 	isLoading: boolean;
 }
@@ -49,11 +50,15 @@ interface AuthContextValue extends AuthState {
 			conditions: Condition[];
 		}[]
 	) => void;
+	setServerTimezone: (serverTimezone: string) => void;
 	clearSession: () => void;
 	fetchUserContext: (userObjectId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+// Default timezone fallback for client-side (matches server default)
+const DEFAULT_CLIENT_TIMEZONE = 'America/Los_Angeles';
 
 function getDefaultAuthState(): AuthState {
 	return {
@@ -67,6 +72,7 @@ function getDefaultAuthState(): AuthState {
 		locationObjectId: '',
 		lastestLocationObjectId: '',
 		permissions: [],
+		serverTimezone: DEFAULT_CLIENT_TIMEZONE,
 		isLoggedIn: false,
 		isLoading: false
 	};
@@ -91,6 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			permissions: [],
 			locationObjectId: '',
 			lastestLocationObjectId: '',
+			serverTimezone: DEFAULT_CLIENT_TIMEZONE,
 			isLoggedIn: true,
 			isLoading: true
 		};
@@ -151,6 +158,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				locationObjectId: user.data.locationObjectId,
 				lastestLocationObjectId: latestLocationObjectId,
 				permissions: user.data.permissions,
+				serverTimezone: user.serverTimezone ?? DEFAULT_CLIENT_TIMEZONE,
 				isLoggedIn: true,
 				isLoading: false
 			}));
@@ -200,6 +208,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		setState(prev => ({ ...prev, permissions }));
 	};
 
+	const setServerTimezone = (serverTimezone: string) => {
+		setState(prev => ({ ...prev, serverTimezone }));
+	};
+
 	const clearSession = () => {
 		deleteAuthToken(); // Clears from Zustand
 		setState(getDefaultAuthState());
@@ -218,6 +230,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		setLocationObjectId,
 		setLastestLocationObjectId,
 		setPermissions,
+		setServerTimezone,
 		clearSession,
 		fetchUserContext
 	};
