@@ -1,0 +1,22 @@
+# Sample locations for RDS study (FAKE DATA - FOR TESTING ONLY)
+# Import with: npm run location -- import src/scripts/sample-data/locations.yaml
+
+- hubName: 'Test Hub Alpha'
+  hubType: ESTABLISHMENT
+  locationType: ROOFTOP
+  address: '123 Fake Street, Testville, TS 00001'
+
+- hubName: 'Fictional Park North'
+  hubType: LOCALITY
+  locationType: APPROXIMATE
+  address: '101 Fictional Road, Fakesburg, FK 00004'
+
+- hubName: 'Mock Community Center'
+  hubType: ESTABLISHMENT
+  locationType: ROOFTOP
+  address: '303 Example Drive, Sampletown, ST 00006'
+
+- hubName: 'Demo Plaza Central'
+  hubType: LOCALITY
+  locationType: APPROXIMATE
+  address: '606 Fake Blvd, Exampleville, EV 00009'
