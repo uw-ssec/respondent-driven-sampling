@@ -20,7 +20,7 @@ export const useAbility = () => {
 				userObjectId ?? '',
 				lastestLocationObjectId ?? '',
 				permissions,
-				serverTimezone
+				serverTimezone ?? 'America/Los_Angeles'
 			),
 		[
 			userRole,
