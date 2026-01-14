@@ -30,10 +30,11 @@ export default function defineAbilitiesForUser(
 	userRole: Role,
 	userObjectId: string,
 	latestLocationObjectId: string,
-	permissions: { action: Action; subject: Subject; conditions: Condition[] }[]
+	permissions: { action: Action; subject: Subject; conditions: Condition[] }[],
+	timezone: string
 ): Ability {
 	const builder = new AbilityBuilder<Ability>(createMongoAbility);
-	const ctx: Context = { userObjectId, latestLocationObjectId };
+	const ctx: Context = { userObjectId, latestLocationObjectId, timezone };
 
 	// Assign default rules by role
 	switch (userRole) {
@@ -103,7 +104,7 @@ function applyAdminPermissions(builder: AbilityBuilder<Ability>, ctx: Context) {
 	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
 	// can update any surveys created today
 	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
-		...isToday('createdAt')
+		...isToday('createdAt', ctx.timezone)
 	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 
@@ -122,7 +123,7 @@ function applyManagerPermissions(
 	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.USER, FIELDS.USER.APPROVAL, {
 		...hasRole(['VOLUNTEER']),
 		...hasSameLocation(ctx.latestLocationObjectId),
-		...isToday('createdAt')
+		...isToday('createdAt', ctx.timezone)
 	});
 	// managers can pre-approve/create volunteers at their location
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.USER, {
@@ -144,7 +145,7 @@ function applyManagerPermissions(
 	// can only read/update surveys created at their own location today
 	builder.can([ACTIONS.CASL.UPDATE, ACTIONS.CASL.READ], SUBJECTS.SURVEY, {
 		...hasSameLocation(ctx.latestLocationObjectId),
-		...isToday('createdAt')
+		...isToday('createdAt', ctx.timezone)
 	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 
@@ -176,7 +177,7 @@ function applyVolunteerPermissions(
 	builder.can([ACTIONS.CASL.READ, ACTIONS.CASL.UPDATE], SUBJECTS.SURVEY, {
 		...isCreatedBySelf(ctx.userObjectId),
 		...hasSameLocation(ctx.latestLocationObjectId),
-		...isToday('createdAt')
+		...isToday('createdAt', ctx.timezone)
 	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 

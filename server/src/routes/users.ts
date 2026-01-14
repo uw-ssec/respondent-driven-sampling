@@ -10,6 +10,7 @@ import {
 import { auth } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
 import { ACTIONS, SUBJECTS } from '@/permissions/constants';
+import { DEFAULT_TIMEZONE } from '@/permissions/utils';
 import { AuthenticatedRequest } from '@/types/auth';
 
 const router = express.Router();
@@ -101,17 +102,18 @@ router.get(
 					User.modelName
 				) // Dynamic filter for handling custom permissions
 			});
-			if (!result) {
-				return res.status(404).json({ message: 'User not found' });
-			}
-			res.status(200).json({
-				message: 'User fetched successfully',
-				data: result.toObject()
-			});
-		} catch (err) {
-			next(err);
+		if (!result) {
+			return res.status(404).json({ message: 'User not found' });
 		}
+		res.status(200).json({
+			message: 'User fetched successfully',
+			data: result.toObject(),
+			serverTimezone: DEFAULT_TIMEZONE
+		});
+	} catch (err) {
+		next(err);
 	}
+}
 );
 
 /**
