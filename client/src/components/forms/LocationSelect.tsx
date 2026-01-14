@@ -18,7 +18,7 @@ export const LocationSelect = ({
 	const { locationService } = useApi();
 	const { data: locations = [] } = locationService.useLocations() ?? {};
 
-	const options = locations?.map(
+	const options = locations.map(
 		(location: { _id: string; hubName: string }) => ({
 			value: location._id,
 			label: location.hubName
