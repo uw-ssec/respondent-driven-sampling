@@ -30,24 +30,24 @@
  *     Example: npm run super-admin -- restore john@example.com
  *     Example: npm run super-admin -- restore 5551234567
  */
+import mongoose from 'mongoose';
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { createRequire } from 'module';
-// Get current directory
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const serverRequire = createRequire(path.join(__dirname, '../server/package.json'));
-
-const mongoose = serverRequire('mongoose');
-//import mongoose from 'mongoose';
+import connectDB from '@/database';
+import Location from '@/database/location/mongoose/location.model';
+import User from '@/database/user/mongoose/user.model';
+import {
+	createUserSchema,
+	updateUserSchema
+} from '@/database/user/zod/user.validator';
+import { ApprovalStatus } from '@/database/utils/constants';
 
 // ===== Validation Helper Functions =====
 
 function isValidObjectId(identifier: string): boolean {
-	return mongoose.Types.ObjectId.isValid(identifier) && /^[0-9a-fA-F]{24}$/.test(identifier);
+	return (
+		mongoose.Types.ObjectId.isValid(identifier) &&
+		/^[0-9a-fA-F]{24}$/.test(identifier)
+	);
 }
 
 function isValidEmail(email: string): boolean {
@@ -73,7 +73,7 @@ function normalizePhone(phone: string): string {
 
 // ===== Lookup Helper Functions =====
 
-async function findUserByIdentifier(identifier: string, User: any): Promise<any> {
+async function findUserByIdentifier(identifier: string) {
 	const isObjectId = isValidObjectId(identifier);
 	const isEmail = isValidEmail(identifier);
 	const isPhone = isValidPhone(identifier);
@@ -92,11 +92,13 @@ async function findUserByIdentifier(identifier: string, User: any): Promise<any>
 	} else if (isPhone) {
 		const normalizedPhone = normalizePhone(identifier);
 		console.log(`Looking up user with phone: "${normalizedPhone}"...`);
-		user = await User.findOne({ phone: normalizedPhone }).select('+deletedAt');
+		user = await User.findOne({ phone: normalizedPhone }).select(
+			'+deletedAt'
+		);
 		idType = 'phone number';
 	} else {
 		throw new Error(
-			`Invalid identifier "${identifier}". Must be a valid ObjectId, email address, or phone number (+1XXXXXXXXXX or XXXXXXXXXX).`,
+			`Invalid identifier "${identifier}". Must be a valid ObjectId, email address, or phone number (+1XXXXXXXXXX or XXXXXXXXXX).`
 		);
 	}
 
@@ -107,7 +109,7 @@ async function findUserByIdentifier(identifier: string, User: any): Promise<any>
 	return user;
 }
 
-async function validateLocationExists(locationId: string, Location: any): Promise<any> {
+async function validateLocationExists(locationId: string) {
 	const location = await Location.findById(locationId);
 	if (!location) {
 		throw new Error(`Location with ObjectId "${locationId}" not found`);
@@ -123,10 +125,7 @@ async function createSuperAdmin(
 	lastName: string,
 	email: string,
 	phone: string,
-	locationId: string,
-	User: any,
-	Location: any,
-	createUserSchema: any,
+	locationId: string
 ): Promise<void> {
 	console.log('\n📝 Creating new Super Admin...\n');
 
@@ -140,18 +139,20 @@ async function createSuperAdmin(
 		email,
 		phone: normalizedPhone,
 		role: 'SUPER_ADMIN',
-		locationObjectId: locationId,
+		locationObjectId: locationId
 	});
 
 	if (!validationResult.success) {
 		const errorMessages = validationResult.error.issues
-			? validationResult.error.issues.map((err) => `${err.path.join('.')}: ${err.message}`).join('\n')
-			: validationResult.error.message || 'Unknown validation error';
+			? validationResult.error.issues
+					.map(err => `${err.path.join('.')}: ${err.message}`)
+					.join('\n')
+			: 'Unknown validation error';
 		throw new Error(`Validation failed:\n\n${errorMessages}`);
 	}
 
 	const validatedData = validationResult.data;
-	const location = await validateLocationExists(locationId, Location);
+	const location = await validateLocationExists(locationId);
 
 	// Create super admin with PENDING status first (to satisfy the approverValidationHook)
 	// The hook only allows null approvedByUserObjectId for PENDING users
@@ -163,11 +164,13 @@ async function createSuperAdmin(
 		role: 'SUPER_ADMIN',
 		approvalStatus: 'PENDING',
 		locationObjectId: new mongoose.Types.ObjectId(locationId),
-		permissions: [], // Super admins have full access via role
+		permissions: [] // Super admins have full access via role
 	});
 
 	// Immediately approve the super admin (self-approval to avoid approval validation hook)
-	superAdmin.approvalStatus = 'APPROVED';
+	superAdmin.approvalStatus = ApprovalStatus.APPROVED;
+	// eslint-disable-next-line
+	// @ts-expect-error - self-approval requires assigning own _id
 	superAdmin.approvedByUserObjectId = superAdmin._id;
 	await superAdmin.save();
 
@@ -185,8 +188,10 @@ async function createSuperAdmin(
 
 // ===== READ Operations =====
 
-async function listSuperAdmins(User: any, Location: any, includeDeleted: boolean = false): Promise<void> {
-	console.log(`\n📋 Listing all Super Admins${includeDeleted ? ' (including deleted)' : ''}...\n`);
+async function listSuperAdmins(includeDeleted: boolean = false): Promise<void> {
+	console.log(
+		`\n📋 Listing all Super Admins${includeDeleted ? ' (including deleted)' : ''}...\n`
+	);
 
 	const query = User.find({ role: 'SUPER_ADMIN' });
 	if (includeDeleted) {
@@ -195,7 +200,9 @@ async function listSuperAdmins(User: any, Location: any, includeDeleted: boolean
 		query.where('deletedAt').equals(null);
 	}
 
-	const superAdmins = await query.populate('locationObjectId').sort({ createdAt: -1 });
+	const superAdmins = await query
+		.populate('locationObjectId')
+		.sort({ createdAt: -1 });
 
 	if (superAdmins.length === 0) {
 		console.log('No super admins found.');
@@ -211,8 +218,12 @@ async function listSuperAdmins(User: any, Location: any, includeDeleted: boolean
 		console.log(`  Email: ${admin.email}`);
 		console.log(`  Phone: ${admin.phone}`);
 		console.log(`  Status: ${admin.approvalStatus}`);
+		const loc = admin.locationObjectId as unknown as {
+			hubName?: string;
+			_id?: string;
+		};
 		console.log(
-			`  Location: ${admin.locationObjectId?.hubName || 'N/A'} (${admin.locationObjectId?._id || 'N/A'})`,
+			`  Location: ${loc?.hubName || 'N/A'} (${loc?._id || 'N/A'})`
 		);
 		console.log(`  Created: ${admin.createdAt}`);
 		console.log(`  Updated: ${admin.updatedAt}`);
@@ -223,13 +234,15 @@ async function listSuperAdmins(User: any, Location: any, includeDeleted: boolean
 	}
 }
 
-async function getSuperAdmin(identifier: string, User: any, Location: any): Promise<void> {
+async function getSuperAdmin(identifier: string): Promise<void> {
 	console.log('\n🔍 Fetching Super Admin details...\n');
 
-	const user = await findUserByIdentifier(identifier, User);
+	const user = await findUserByIdentifier(identifier);
 
 	if (user.role !== 'SUPER_ADMIN') {
-		throw new Error(`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`);
+		throw new Error(
+			`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`
+		);
 	}
 
 	// Populate location
@@ -242,7 +255,11 @@ async function getSuperAdmin(identifier: string, User: any, Location: any): Prom
 	console.log(`  Phone: ${user.phone}`);
 	console.log(`  Role: ${user.role}`);
 	console.log(`  Status: ${user.approvalStatus}`);
-	console.log(`  Location: ${user.locationObjectId?.hubName || 'N/A'} (${user.locationObjectId?._id || 'N/A'})`);
+	const loc = user.locationObjectId as unknown as {
+		hubName?: string;
+		_id?: string;
+	};
+	console.log(`  Location: ${loc?.hubName || 'N/A'} (${loc?._id || 'N/A'})`);
 	console.log(`  Created: ${user.createdAt}`);
 	console.log(`  Updated: ${user.updatedAt}`);
 	if (user.approvedByUserObjectId) {
@@ -265,21 +282,22 @@ async function updateSuperAdmin(
 		phone?: string;
 		locationObjectId?: string;
 		approvalStatus?: string;
-	},
-	User: any,
-	Location: any,
-	updateUserSchema: any,
+	}
 ): Promise<void> {
 	console.log('\n✏️  Updating Super Admin...\n');
 
-	const user = await findUserByIdentifier(identifier, User);
+	const user = await findUserByIdentifier(identifier);
 
 	if (user.role !== 'SUPER_ADMIN') {
-		throw new Error(`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`);
+		throw new Error(
+			`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`
+		);
 	}
 
 	if (user.deletedAt) {
-		throw new Error(`Cannot update deleted user. Restore the user first with the 'restore' command.`);
+		throw new Error(
+			`Cannot update deleted user. Restore the user first with the 'restore' command.`
+		);
 	}
 
 	// Validate updates using Zod schema
@@ -288,8 +306,10 @@ async function updateSuperAdmin(
 	if (!validationResult.success) {
 		// Format Zod errors for display
 		const errorMessages = validationResult.error.issues
-			? validationResult.error.issues.map((err) => `${err.path.join('.')}: ${err.message}`).join(', ')
-			: validationResult.error.message || 'Unknown validation error';
+			? validationResult.error.issues
+					.map(err => `${err.path.join('.')}: ${err.message}`)
+					.join(', ')
+			: 'Unknown validation error';
 		throw new Error(`Validation failed: ${errorMessages}`);
 	}
 
@@ -313,8 +333,11 @@ async function updateSuperAdmin(
 	}
 
 	if (validatedUpdates.locationObjectId !== undefined) {
-		await validateLocationExists(validatedUpdates.locationObjectId, Location);
-		user.locationObjectId = new mongoose.Types.ObjectId(validatedUpdates.locationObjectId);
+		await validateLocationExists(validatedUpdates.locationObjectId);
+		// @ts-expect-error - ObjectId type mismatch between mongoose and schema
+		user.locationObjectId = new mongoose.Types.ObjectId(
+			validatedUpdates.locationObjectId
+		);
 	}
 
 	if (validatedUpdates.approvalStatus !== undefined) {
@@ -331,19 +354,30 @@ async function updateSuperAdmin(
 	console.log(`  Email: ${user.email}`);
 	console.log(`  Phone: ${user.phone}`);
 	console.log(`  Status: ${user.approvalStatus}`);
-	console.log(`  Location: ${user.locationObjectId?.hubName || 'N/A'} (${user.locationObjectId?._id || 'N/A'})`);
+	const loc = user.locationObjectId as unknown as {
+		hubName?: string;
+		_id?: string;
+	};
+	console.log(`  Location: ${loc?.hubName || 'N/A'} (${loc?._id || 'N/A'})`);
 	console.log(`  Updated: ${user.updatedAt}`);
 }
 
 // ===== DELETE Operation =====
 
-async function deleteSuperAdmin(identifier: string, hardDelete: boolean, User: any): Promise<void> {
-	console.log(`\n🗑️  ${hardDelete ? 'Permanently deleting' : 'Soft deleting'} Super Admin...\n`);
+async function deleteSuperAdmin(
+	identifier: string,
+	hardDelete: boolean
+): Promise<void> {
+	console.log(
+		`\n🗑️  ${hardDelete ? 'Permanently deleting' : 'Soft deleting'} Super Admin...\n`
+	);
 
-	const user = await findUserByIdentifier(identifier, User);
+	const user = await findUserByIdentifier(identifier);
 
 	if (user.role !== 'SUPER_ADMIN') {
-		throw new Error(`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`);
+		throw new Error(
+			`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`
+		);
 	}
 
 	if (hardDelete) {
@@ -376,13 +410,15 @@ async function deleteSuperAdmin(identifier: string, hardDelete: boolean, User: a
 
 // ===== RESTORE Operation =====
 
-async function restoreSuperAdmin(identifier: string, User: any): Promise<void> {
+async function restoreSuperAdmin(identifier: string): Promise<void> {
 	console.log('\n♻️  Restoring Super Admin...\n');
 
-	const user = await findUserByIdentifier(identifier, User);
+	const user = await findUserByIdentifier(identifier);
 
 	if (user.role !== 'SUPER_ADMIN') {
-		throw new Error(`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`);
+		throw new Error(
+			`User "${identifier}" exists but is not a Super Admin (role: ${user.role})`
+		);
 	}
 
 	if (!user.deletedAt) {
@@ -390,6 +426,7 @@ async function restoreSuperAdmin(identifier: string, User: any): Promise<void> {
 		return;
 	}
 
+	// @ts-expect-error - null is valid for soft-delete restoration
 	user.deletedAt = null;
 	await user.save();
 	await user.populate('locationObjectId');
@@ -400,17 +437,16 @@ async function restoreSuperAdmin(identifier: string, User: any): Promise<void> {
 	console.log(`  Name: ${user.firstName} ${user.lastName}`);
 	console.log(`  Email: ${user.email}`);
 	console.log(`  Phone: ${user.phone}`);
-	console.log(`  Location: ${user.locationObjectId?.hubName || 'N/A'} (${user.locationObjectId?._id || 'N/A'})`);
+	const loc = user.locationObjectId as unknown as {
+		hubName?: string;
+		_id?: string;
+	};
+	console.log(`  Location: ${loc?.hubName || 'N/A'} (${loc?._id || 'N/A'})`);
 }
 
 // ===== Main Script Logic =====
 
 async function main(): Promise<void> {
-	const User = (await import('../server/src/database/user/mongoose/user.model.js')).default;
-	const Location = (await import('../server/src/database/location/mongoose/location.model.js')).default;
-	const connectDB = (await import('../server/src/database/index.js')).default;
-	const { createUserSchema, updateUserSchema } = await import('../server/src/database/user/zod/user.validator.js');
-
 	try {
 		console.log('Connecting to database...');
 		await connectDB();
@@ -429,34 +465,52 @@ async function main(): Promise<void> {
 			case 'create':
 				if (args.length < 6) {
 					console.error(
-						'Error: create requires 5 arguments: <firstName> <lastName> <email> <phone> <locationId>',
+						'Error: create requires 5 arguments: <firstName> <lastName> <email> <phone> <locationId>'
 					);
 					process.exit(1);
 				}
-				await createSuperAdmin(args[1], args[2], args[3], args[4], args[5], User, Location, createUserSchema);
+				await createSuperAdmin(
+					args[1],
+					args[2],
+					args[3],
+					args[4],
+					args[5]
+				);
 				break;
 
-			case 'list':
+			case 'list': {
 				const includeDeleted = args.includes('--all');
-				await listSuperAdmins(User, Location, includeDeleted);
+				await listSuperAdmins(includeDeleted);
 				break;
+			}
 
 			case 'get':
 				if (args.length < 2) {
-					console.error('Error: get requires 1 argument: <email|phone|objectId>');
+					console.error(
+						'Error: get requires 1 argument: <email|phone|objectId>'
+					);
 					process.exit(1);
 				}
-				await getSuperAdmin(args[1], User, Location);
+				await getSuperAdmin(args[1]);
 				break;
 
 			case 'update': {
 				if (args.length < 3) {
-					console.error('Error: update requires at least identifier and one update flag');
+					console.error(
+						'Error: update requires at least identifier and one update flag'
+					);
 					process.exit(1);
 				}
 
 				const identifier = args[1];
-				const updates: any = {};
+				const updates: {
+					firstName?: string;
+					lastName?: string;
+					email?: string;
+					phone?: string;
+					locationObjectId?: string;
+					approvalStatus?: string;
+				} = {};
 
 				for (let i = 2; i < args.length; i++) {
 					const arg = args[i];
@@ -489,7 +543,9 @@ async function main(): Promise<void> {
 								updates.approvalStatus = value;
 								break;
 							default:
-								console.error(`Error: Unknown update flag --${key}`);
+								console.error(
+									`Error: Unknown update flag --${key}`
+								);
 								process.exit(1);
 						}
 
@@ -502,25 +558,30 @@ async function main(): Promise<void> {
 					process.exit(1);
 				}
 
-				await updateSuperAdmin(identifier, updates, User, Location, updateUserSchema);
+				await updateSuperAdmin(identifier, updates);
 				break;
 			}
 
-			case 'delete':
+			case 'delete': {
 				if (args.length < 2) {
-					console.error('Error: delete requires 1 argument: <email|phone|objectId>');
+					console.error(
+						'Error: delete requires 1 argument: <email|phone|objectId>'
+					);
 					process.exit(1);
 				}
 				const hardDelete = args.includes('--hard');
-				await deleteSuperAdmin(args[1], hardDelete, User);
+				await deleteSuperAdmin(args[1], hardDelete);
 				break;
+			}
 
 			case 'restore':
 				if (args.length < 2) {
-					console.error('Error: restore requires 1 argument: <email|phone|objectId>');
+					console.error(
+						'Error: restore requires 1 argument: <email|phone|objectId>'
+					);
 					process.exit(1);
 				}
-				await restoreSuperAdmin(args[1], User);
+				await restoreSuperAdmin(args[1]);
 				break;
 
 			default:
@@ -529,7 +590,10 @@ async function main(): Promise<void> {
 				process.exit(1);
 		}
 	} catch (error) {
-		console.error('\n✗ Error:', error instanceof Error ? error.message : error);
+		console.error(
+			'\n✗ Error:',
+			error instanceof Error ? error.message : error
+		);
 		process.exit(1);
 	} finally {
 		await mongoose.connection.close();

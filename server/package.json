@@ -13,10 +13,10 @@
 		"clean": "rimraf build",
 		"lint": "eslint . --ext js,ts",
 		"lint:fix": "eslint . --ext js,ts --fix",
-		"super-admin": "tsx --env-file=.env ../scripts/superAdminCRUD.tsx",
+		"super-admin": "tsx --env-file=.env src/scripts/superAdminCRUD.ts",
 		"location": "tsx --env-file=.env src/scripts/locationCRUD.ts",
-		"generate-seeds": "tsx --env-file=.env ../scripts/generateSeeds.ts",
-		"generate-coupons": "tsx --env-file=.env ../scripts/generateCoupons.ts"
+		"generate-seeds": "tsx --env-file=.env src/scripts/generateSeeds.ts",
+		"generate-coupons": "tsx --env-file=.env src/scripts/generateCoupons.ts"
 	},
 	"keywords": [],
 	"author": "",
