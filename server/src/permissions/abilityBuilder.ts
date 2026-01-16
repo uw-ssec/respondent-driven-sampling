@@ -30,10 +30,11 @@ export default function defineAbilitiesForUser(
 	userRole: Role,
 	userObjectId: string,
 	latestLocationObjectId: string,
-	permissions: { action: Action; subject: Subject; conditions: Condition[] }[]
+	permissions: { action: Action; subject: Subject; conditions: Condition[] }[],
+	timezone: string
 ): Ability {
 	const builder = new AbilityBuilder<Ability>(createMongoAbility);
-	const ctx: Context = { userObjectId, latestLocationObjectId };
+	const ctx: Context = { userObjectId, latestLocationObjectId, timezone };
 
 	// Assign default rules by role
 	switch (userRole) {
@@ -79,12 +80,12 @@ function applyAdminPermissions(builder: AbilityBuilder<Ability>, ctx: Context) {
 		SUBJECTS.USER,
 		hasRole(['VOLUNTEER', 'MANAGER', 'ADMIN'])
 	);
-	// admins can update location and role of volunteers, managers, and admins
+	// admins can update location and role of volunteers and managers only (no admins)
 	builder.can(
 		ACTIONS.CASL.UPDATE,
 		SUBJECTS.USER,
 		[...FIELDS.USER.LOCATION, ...FIELDS.USER.ROLE],
-		hasRole(['VOLUNTEER', 'MANAGER', 'ADMIN'])
+		hasRole(['VOLUNTEER', 'MANAGER'])
 	);
 	// admins can update own profile AND own location
 	builder.can(
@@ -99,12 +100,12 @@ function applyAdminPermissions(builder: AbilityBuilder<Ability>, ctx: Context) {
 
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY);
+	// can read all surveys (all locations/times)
 	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
-	// NOTE: Removing isToday because it is not tested.
-	// builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
-	// 	...isToday('createdAt')
-	// });
-	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY);
+	// can update any surveys created today
+	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
+		...isToday('createdAt', ctx.timezone)
+	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 
 	// admins can read all seeds
@@ -118,11 +119,11 @@ function applyManagerPermissions(
 ) {
 	// User actions
 	builder.can(ACTIONS.CASL.READ, SUBJECTS.USER);
-	// can only approve volunteers at their current location today
+	// can only approve volunteers created today at their latest location
 	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.USER, FIELDS.USER.APPROVAL, {
 		...hasRole(['VOLUNTEER']),
 		...hasSameLocation(ctx.latestLocationObjectId),
-		...isToday('createdAt')
+		...isToday('createdAt', ctx.timezone)
 	});
 	// managers can pre-approve/create volunteers at their location
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.USER, {
@@ -140,18 +141,15 @@ function applyManagerPermissions(
 
 	// Survey actions
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY);
-	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY);
-	// can only read/update surveys created by themselves at their own location today
-
-	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
-		...isCreatedBySelf(ctx.userObjectId),
-		...hasSameLocation(ctx.latestLocationObjectId)
-		//...isToday('createdAt') // NOTE: Removing isToday because it is not tested.
+	// can only read/update surveys created at their own location today
+	builder.can([ACTIONS.CASL.UPDATE, ACTIONS.CASL.READ], SUBJECTS.SURVEY, {
+		...hasSameLocation(ctx.latestLocationObjectId),
+		...isToday('createdAt', ctx.timezone)
 	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 
-	// admins can read all seeds
+	// managers can read all seeds
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SEED);
 	builder.can(ACTIONS.CASL.READ, SUBJECTS.SEED);
 }
@@ -175,12 +173,11 @@ function applyVolunteerPermissions(
 	// Survey actions
 	builder.can(ACTIONS.CASL.CREATE, SUBJECTS.SURVEY);
 	builder.can(ACTIONS.CUSTOM.CREATE_WITHOUT_REFERRAL, SUBJECTS.SURVEY);
-	builder.can(ACTIONS.CASL.READ, SUBJECTS.SURVEY);
 	// can only read & update surveys created by themselves at their own location today
-	builder.can(ACTIONS.CASL.UPDATE, SUBJECTS.SURVEY, {
+	builder.can([ACTIONS.CASL.READ, ACTIONS.CASL.UPDATE], SUBJECTS.SURVEY, {
 		...isCreatedBySelf(ctx.userObjectId),
-		...hasSameLocation(ctx.latestLocationObjectId)
-		// ...isToday('createdAt') // NOTE: Removing isToday because it is not tested.
+		...hasSameLocation(ctx.latestLocationObjectId),
+		...isToday('createdAt', ctx.timezone)
 	});
 	builder.cannot(ACTIONS.CASL.DELETE, SUBJECTS.SURVEY);
 

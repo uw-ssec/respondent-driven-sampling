@@ -16,9 +16,9 @@ export const LocationSelect = ({
 	...props
 }: LocationSelectProps) => {
 	const { locationService } = useApi();
-	const { data: locations = [] } = locationService.useLocations() || {};
+	const { data: locations = [] } = locationService.useLocations() ?? {};
 
-	const options = locations.map(
+	const options = locations?.map(
 		(location: { _id: string; hubName: string }) => ({
 			value: location._id,
 			label: location.hubName
@@ -26,14 +26,14 @@ export const LocationSelect = ({
 	);
 
 	const optionsWithEmpty = includeEmptyOption
-		? [{ value: '', label: 'Select a location' }, ...options]
+		? [{ value: '', label: 'Select a location' }, ...(options ?? [])]
 		: options;
 
 	return (
 		<FormSelect
 			{...props}
 			label="Location"
-			options={optionsWithEmpty}
+			options={optionsWithEmpty ?? []}
 			canEdit={canEdit}
 			showTooltip={showTooltip}
 		/>

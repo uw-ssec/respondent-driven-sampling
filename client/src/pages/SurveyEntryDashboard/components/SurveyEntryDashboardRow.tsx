@@ -1,9 +1,12 @@
+import { useAbility } from '@/hooks';
+import { ACTIONS, SUBJECTS } from '@/permissions/constants';
+import { subject } from '@casl/ability';
 import {
 	Button,
 	Chip,
 	TableCell,
-	TableRow
-	// Tooltip,
+	TableRow,
+	Tooltip
 	// Typography
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +23,12 @@ export default function SurveyEntryDashboardRow({
 	survey
 }: SurveyEntryDashboardRowProps) {
 	const navigate = useNavigate();
+	const ability = useAbility();
+
+	const canUpdate = ability.can(
+		ACTIONS.CASL.UPDATE,
+		subject(SUBJECTS.SURVEY, survey)
+	);
 
 	return (
 		<TableRow hover sx={{ '&:hover': { backgroundColor: '#f8f8f8' } }}>
@@ -74,16 +83,29 @@ export default function SurveyEntryDashboardRow({
 						size="small"
 					/>
 				) : (
-					<Button
-						size="small"
-						variant="outlined"
-						onClick={() =>
-							navigate(`/survey/${survey._id}/continue`)
+					<Tooltip
+						title={
+							canUpdate
+								? ''
+								: 'You do not have permission to continue this survey'
 						}
-						sx={{ textTransform: 'none' }}
+						arrow
+						placement="top"
 					>
-						Continue
-					</Button>
+						<span>
+							<Button
+								size="small"
+								variant="outlined"
+								disabled={!canUpdate}
+								onClick={() =>
+									navigate(`/survey/${survey._id}/continue`)
+								}
+								sx={{ textTransform: 'none' }}
+							>
+								Continue
+							</Button>
+						</span>
+					</Tooltip>
 				)}
 			</TableCell>
 		</TableRow>
