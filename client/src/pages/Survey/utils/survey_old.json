@@ -1,8 +1,5 @@
 {
   "title": "Homelessness Experience Survey",
-  "showProgressBar": true,
-  "progressBarLocation": "top",
-  "progressBarShowPageTitles": true,
   "pages": [
     {
       "name": "volunteer-pre-screen",
@@ -35,21 +32,27 @@
         {
           "type": "html",
           "name": "consent-note",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\">\n\t\t\t\t<strong>Instructions:</strong> Please read the following consent information out loud to the respondent and have them orally give their consent to you.\n\t\t\t</div>\n\t\t\t<br />\n\t\t\t<p>\n\t\t\t\tAs part of work with the <strong>University of Washington</strong> in preparation for\n\t\t\t\t<strong>King County Regional Homelessness Authority (KCRHA) 2026 PIT Count</strong>,\n\t\t\t\tI'd like to ask you some questions we're required to ask and collect for <strong>KCRHA's</strong>\n\t\t\t\tfunders about unsheltered homelessness in our region.\n\t\t\t</p>\n\t\t\t<p>\n\t\t\t\tYour participation is voluntary and will not affect any services you or your family are seeking or currently receiving.\n\t\t\t\tWe are surveying many people and will put all responses together, so it will not be possible to identify you\n\t\t\t\tfrom the information you provide here.\n\t\t\t</p>\n\t\t\t<p>\n\t\t\t\tAs a token of appreciation for your time, we will give you a <strong>$20 pre-loaded debit card</strong>.\n\t\t\t</p>\n\t\t\t<p>\n\t\t\t\tWould you be willing to talk with me for about <strong>30 minutes</strong>?\n\t\t\t</p>"
+          "html": "<div><strong>Please read the following consent information out loud to the respondent and have them orally give their consent to you:</strong></div>\n            <br />\n<p>As part of work with the King County Regional Homelessness Authority (KCRHA), I’d like to ask you some questions we’re required to ask and collect for our funders about unsheltered homelessness in our region.</p>\n<p>Your participation is voluntary and will not affect any services you or your family are seeking or currently receiving. We are surveying many people and will put all responses together, so it will not be possible to identify you from the information you provide here.</p>\n<p>As a token of appreciation for your time, we will give you a $20 preloaded debit card, $40 for families with minor children at the end.</p>\n<p>Would you be willing to talk with me for about 30 min?</p>"
         },
         {
           "type": "radiogroup",
           "name": "consent_given",
           "title": "Do you consent to participate in this survey?",
-          "choices": ["Yes", "No"],
-          "isRequired": true
+          "isRequired": true,
+          "choices": [
+            "Yes",
+            "No"
+          ]
         },
         {
           "type": "radiogroup",
           "name": "is_adult",
           "title": "Are you 18 years old or older?",
-          "choices": ["Yes", "No"],
-          "isRequired": true
+          "isRequired": true,
+          "choices": [
+            "Yes",
+            "No"
+          ]
         }
       ]
     },
@@ -85,9 +88,7 @@
           "type": "text",
           "name": "date_of_birth",
           "title": "Enter the respondent's date of birth",
-          "inputType": "date",
-          "minValueExpression": "today(-36525)",
-          "maxValueExpression": "today(-6574)"
+          "inputType": "date"
         }
       ]
     },
@@ -96,21 +97,16 @@
       "title": "Gift Cards",
       "elements": [
         {
-          "type": "html",
-          "name": "referral_instruction",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\">\n\t\t\t\t<strong>Instructions:</strong> Please read the following information out loud to the respondent.\n\t\t\t</div>\n\t\t\t<br />\n\t\t\t<p>\n\t\t\t\tAt the end of this survey, we will give you <strong>referral coupons</strong>.\n\t\t\t\tPlease give them to other people experiencing homelessness.\n\t\t\t\tIf they come and take our survey using your coupon, we can send you <strong>$5 gift cards</strong> for each completed referral.\n\t\t\t\tTo receive these gift cards, we need either a <strong>phone number or email address</strong>.\n\t\t\t</p>"
-        },
-        {
           "type": "checkbox",
           "name": "email_phone_consent",
           "title": "Do you consent to receive your gift cards via SMS or email?",
           "choices": [
             {
-              "value": "email",
+              "value": "Item 1",
               "text": "Email address"
             },
             {
-              "value": "phone",
+              "value": "Item 2",
               "text": "Phone number"
             }
           ],
@@ -119,19 +115,16 @@
         {
           "type": "text",
           "name": "email",
-          "visibleIf": "{email_phone_consent} contains 'email'",
+          "visibleIf": "{email_phone_consent} contains 'Item 1'",
           "title": "What's your email address?",
           "inputType": "email"
         },
         {
           "type": "text",
           "name": "phone",
-          "visibleIf": "{email_phone_consent} contains 'phone'",
+          "visibleIf": "{email_phone_consent} contains 'Item 2'",
           "title": "What's your phone number?",
-          "maskType": "pattern",
-          "maskSettings": {
-            "pattern": "+1(999)-999-99-99"
-          }
+          "inputType": "tel"
         }
       ]
     },
@@ -214,12 +207,12 @@
             }
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)",
-          "isRequired": false
+          "otherText": "Other (please specify)"
         },
         {
           "type": "checkbox",
           "name": "vehicle_amenities",
+          "visibleIf": "{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']",
           "title": "Does your vehicle have access to any of the following needs?",
           "choices": [
             "Drinking water",
@@ -228,14 +221,13 @@
             "Ability to bathe",
             "Ability to cook hot food"
           ],
-          "showNoneItem": true,
           "separateSpecialChoices": true,
-          "isRequired": false,
-          "visibleIf": "{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']"
+          "showNoneItem": true
         },
         {
           "type": "checkbox",
           "name": "personal_amenities",
+          "visibleIf": "{sleeping_situation} notempty and !{sleeping_situation} anyof ['small_vehicle', 'large_vehicle']",
           "title": "Do you generally have access to any of the following needs?",
           "choices": [
             "Drinking water",
@@ -244,9 +236,7 @@
             "Ability to bathe",
             "Ability to cook hot food"
           ],
-          "showNoneItem": true,
-          "isRequired": false,
-          "visibleIf": "{sleeping_situation} notempty and !({sleeping_situation} anyof ['small_vehicle', 'large_vehicle', 'choose_not_to_answer', 'do_not_know'])"
+          "showNoneItem": true
         }
       ]
     },
@@ -255,22 +245,16 @@
       "title": "Network Module",
       "elements": [
         {
-          "type": "html",
-          "name": "network_size_instruction",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\">\n\t\t\t\t<strong>Instructions:</strong> If the respondent says \"hundreds\" or \"too many\" emphasize the \"personally know\" part of the question. They would need to both recognize each other and know some information about each other.\n\t\t\t</div>"
-        },
-        {
           "type": "text",
           "name": "non_family_network_size",
           "title": "Other than any family living with you, how many people do you closely know who are also unhoused or experiencing homelessness today?",
-          "inputType": "number",
           "validators": [
             {
               "type": "numeric",
-              "minValue": 0,
-              "maxValue": 100
+              "minValue": 0
             }
-          ]
+          ],
+          "inputType": "number"
         }
       ]
     },
@@ -290,14 +274,14 @@
           "templateElements": [
             {
               "type": "text",
-              "name": "network_person_name",
-              "title": "Name/Nickname/Initials",
+              "name": "name_pseudo",
+              "title": "Name/Nickname",
               "placeholder": "Name or nickname"
             },
             {
               "type": "dropdown",
               "name": "relationship",
-              "title": "What is your relationship to {panel.network_person_name}?",
+              "title": "Relationship",
               "choices": [
                 "Friend",
                 "Acquaintance",
@@ -312,8 +296,8 @@
             },
             {
               "type": "dropdown",
-              "name": "network_sleeping_situation",
-              "title": "Where does {panel.network_person_name} currently sleep?",
+              "name": "question1",
+              "title": "Where do they currently sleep?",
               "choices": [
                 {
                   "value": "outside_in_tent",
@@ -388,17 +372,17 @@
               "otherText": "Other (please specify)"
             }
           ],
-          "displayMode": "tab",
+          "templateTitle": "Person #{panelIndex}",
           "maxPanelCount": 50,
-          "panelAddText": "+ Add new person",
-          "panelRemoveText": "Remove",
-          "templateTitle": "Person: {panel.network_person_name}"
+          "addPanelText": "+ Add another person",
+          "removePanelText": "Remove",
+          "displayMode": "tab"
         }
       ]
     },
     {
-      "name": "duration_homelessness",
-      "title": "Duration of Homelessness",
+      "name": "living_situation",
+      "title": "Duration of Homelesness",
       "elements": [
         {
           "type": "radiogroup",
@@ -413,8 +397,7 @@
             "1 year or longer",
             "Choose not to answer",
             "Do not know"
-          ],
-          "isRequired": false
+          ]
         },
         {
           "type": "radiogroup",
@@ -427,8 +410,7 @@
             "4 or more times",
             "Choose not to answer",
             "Do not know"
-          ],
-          "isRequired": false
+          ]
         },
         {
           "type": "multipletext",
@@ -463,14 +445,19 @@
           "type": "radiogroup",
           "name": "shelter_services",
           "title": "In the past 3 years, have you enrolled in an Emergency Shelter or received any other form of housing assistance from an organization that serves people experiencing homelessness? (Includes referrals, vouchers, hygiene support, etc.)",
-          "choices": ["Yes", "No", "Choose not to answer", "Do not know"]
+          "choices": [
+            "Yes",
+            "No",
+            "Choose not to answer",
+            "Do not know"
+          ]
         },
         {
           "type": "matrixdynamic",
           "name": "shelter_services_details",
           "visibleIf": "{shelter_services} = 'Yes'",
           "title": "Housing Assistance Services",
-          "description": "Fill out the table below as much as possible.\\nIn case a respondent received a service multiple times, only include the last service received.",
+          "description": "Fill out the table below as much as possible.\nIn case a respondent received a service multiple times, only include the last service received.",
           "validators": [
             {
               "type": "expression"
@@ -479,58 +466,100 @@
           "columns": [
             {
               "name": "shelter_service_type",
-              "title": "Type  of Last Service Received",
+              "title": "Type  of Service Received",
               "cellType": "dropdown",
               "choices": [
                 {
-                  "value": "1",
-                  "text": "Street Outreach"
+                  "value": "1 ",
+                  "text": " Street Outreach"
                 },
                 {
-                  "value": "2",
-                  "text": "Diversion"
+                  "value": "2 ",
+                  "text": " Diversion"
                 },
                 {
-                  "value": "3",
-                  "text": "Emergency Shelter"
+                  "value": "3 ",
+                  "text": " Emergency Shelter"
                 },
                 {
-                  "value": "4",
-                  "text": "Temporary Housing"
+                  "value": "4 ",
+                  "text": " Temporary Housing"
                 },
                 {
-                  "value": "5",
-                  "text": "Coordinated Entry"
+                  "value": "5 ",
+                  "text": " Coordinated Entry"
                 },
                 {
-                  "value": "6",
-                  "text": "Severe Weather Shelter"
+                  "value": "6 ",
+                  "text": " Severe Weather Shelter"
                 },
                 {
-                  "value": "7",
-                  "text": "Day Center"
+                  "value": "7 ",
+                  "text": " Day Center"
                 },
                 {
-                  "value": "8",
-                  "text": "Food bank"
+                  "value": "8 ",
+                  "text": " Food bank"
                 },
                 {
-                  "value": "9",
-                  "text": "Case Management"
+                  "value": "9 ",
+                  "text": " Case Management\t"
                 }
               ],
               "showOtherItem": true
             },
             {
               "name": "shelter_service_year",
-              "title": "Date of Service Received (Month/Year)",
-              "cellType": "text",
-              "maskType": "datetime",
-              "maskSettings": {
-                "pattern": "mm/yyyy",
-                "min": "1950-01-01",
-                "max": "2025-12-15"
-              }
+              "title": "Year ",
+              "cellType": "dropdown",
+              "choices": [
+                "2025",
+                "2024",
+                "2023",
+                "2022",
+                "2021",
+                "2020",
+                "2019",
+                "2018",
+                "2017",
+                "2016",
+                "2015",
+                "2014",
+                "2013",
+                "2012",
+                "2011",
+                "2010",
+                "2009",
+                "2008",
+                "2007",
+                "2006",
+                "2005",
+                "2004",
+                "2003",
+                "2002",
+                "2001",
+                "2000",
+                "Before 2000"
+              ]
+            },
+            {
+              "name": "shelter_service_month",
+              "title": "Month",
+              "cellType": "dropdown",
+              "choices": [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December"
+              ]
             }
           ],
           "choices": [
@@ -555,12 +584,6 @@
       "title": "Demographics",
       "elements": [
         {
-          "type": "html",
-          "name": "demographics_instruction",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER: Because the respondent has already indicated they are under 18, you may select 0-17 without asking this question.</strong></div>",
-          "visibleIf": "{is_adult} = 'No'"
-        },
-        {
           "type": "radiogroup",
           "name": "age_group",
           "title": "How old are you?",
@@ -574,8 +597,7 @@
             "65 or older",
             "Choose not to answer",
             "Do not know"
-          ],
-          "isRequired": false
+          ]
         },
         {
           "type": "checkbox",
@@ -592,37 +614,8 @@
             "Choose not to answer",
             "Do not know"
           ],
-          "isRequired": false,
           "showOtherItem": true,
           "otherText": "Other (please specify)"
-        },
-        {
-          "type": "radiogroup",
-          "name": "ethnicity",
-          "title": "Are you Hispanic/ Latina/e/o?",
-          "choices": ["Yes", "No", "Choose not to answer", "Do not know"],
-          "isRequired": false,
-          "visible": false
-        },
-        {
-          "type": "checkbox",
-          "name": "racial_id",
-          "title": "Which of the following best describes your racial identity? (Select all that apply)",
-          "choices": [
-            "American Indian or Alaska Native",
-            "Asian",
-            "Black or African American",
-            "Hispanic or Latino",
-            "Middle Eastern or North African",
-            "Native Hawaiian or Pacific Islander",
-            "White",
-            "Choose not to answer",
-            "Do not know"
-          ],
-          "showOtherItem": true,
-          "otherText": "Other (please specify)",
-          "isRequired": false,
-          "visible": false
         },
         {
           "type": "checkbox",
@@ -637,23 +630,17 @@
             "Middle Eastern or North African",
             "Native Hawaiian or Pacific Islander",
             "White",
+            "Other (please specify)",
             "Choose not to answer",
             "Do not know"
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)",
-          "isRequired": false
+          "otherText": "Other (please specify)"
         },
         {
           "type": "text",
           "name": "tribal_affil",
           "title": "Do you have a Tribal Affiliation? If so, what is it?"
-        },
-        {
-          "type": "html",
-          "name": "va_health_eligible_instruction",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER: Because the respondent has indicated they are under 18, only ask about <i>family members'</i> status</strong></div>",
-          "visibleIf": "{is_adult} = 'No'"
         },
         {
           "type": "radiogroup",
@@ -666,15 +653,17 @@
             "No, neither I nor a member of my immediate family are veterans",
             "Choose not to answer",
             "Do not know"
-          ],
-          "isRequired": false
+          ]
         },
         {
           "type": "radiogroup",
           "name": "va_health_eligible",
-          "title": "Have you ever received health care of other benefits from a Veterans Administration (VA) center?",
-          "choices": ["Yes", "No", "Do not know"],
-          "isRequired": false
+          "title": "Have you ever recieved health care of other benefits from a Veterans Administration (VA) center?",
+          "choices": [
+            "Yes",
+            "No",
+            "Do not know"
+          ]
         }
       ]
     },
@@ -686,29 +675,45 @@
           "type": "radiogroup",
           "name": "fleeing_dv",
           "title": "Are you currently experiencing homelessness because you are/were fleeing domestic violence, dating violence, sexual assault, or stalking?",
-          "choices": ["Yes", "No", "Choose not to answer", "Do not know"],
-          "isRequired": false
+          "choices": [
+            "Yes",
+            "No",
+            "Choose not to answer",
+            "Do not know"
+          ]
         },
         {
           "type": "radiogroup",
           "name": "disabled",
           "title": "Do you identify as having a disability?",
-          "choices": ["Yes", "No", "Choose not to answer", "Do not know"],
-          "isRequired": false
+          "choices": [
+            "Yes",
+            "No",
+            "Choose not to answer",
+            "Do not know"
+          ]
         },
         {
           "type": "radiogroup",
           "name": "mental_health",
           "title": "Do you identify as having a severe mental illness?",
-          "choices": ["Yes", "No", "Choose not to answer", "Do not know"],
-          "isRequired": false
+          "choices": [
+            "Yes",
+            "No",
+            "Choose not to answer",
+            "Do not know"
+          ]
         },
         {
           "type": "radiogroup",
           "name": "substance_use",
           "title": "Do you identify as having a substance use disorder?",
-          "choices": ["Yes", "No", "Choose not to answer", "Do not know"],
-          "isRequired": false
+          "choices": [
+            "Yes",
+            "No",
+            "Choose not to answer",
+            "Do not know"
+          ]
         }
       ]
     },
@@ -730,7 +735,6 @@
               "type": "text",
               "name": "hh_member_initials",
               "title": "Initials",
-              "placeholder": "e.g., JD",
               "validators": [
                 {
                   "type": "regex",
@@ -738,7 +742,7 @@
                   "regex": "^[A-Za-z]{1,4}$"
                 }
               ],
-              "isRequired": false
+              "placeholder": "e.g., JD"
             },
             {
               "type": "dropdown",
@@ -752,8 +756,7 @@
                 "Spouse",
                 "Non-married partner",
                 "Other non-family member"
-              ],
-              "isRequired": false
+              ]
             },
             {
               "type": "dropdown",
@@ -763,11 +766,10 @@
                 "Under 18 years old",
                 "18 - 24 years old",
                 "25 years or older"
-              ],
-              "isRequired": false
+              ]
             },
             {
-              "type": "radiogroup",
+              "type": "tagbox",
               "name": "hh_member_gender_id",
               "title": "Which of the following best describes the gender of {panel.hh_member_initials}?",
               "choices": [
@@ -780,9 +782,7 @@
                 "Different identity",
                 "Choose not to answer",
                 "Do not know"
-              ],
-              "searchEnabled": true,
-              "isRequired": false
+              ]
             },
             {
               "type": "checkbox",
@@ -796,12 +796,10 @@
                 "Middle Eastern or North African",
                 "Native Hawaiian or Pacific Islander",
                 "White",
+                "Other (please specify)",
                 "Choose not to answer",
                 "Do not know"
-              ],
-              "searchEnabled": true,
-              "isRequired": false,
-              "visible": true
+              ]
             },
             {
               "type": "text",
@@ -812,40 +810,52 @@
               "type": "radiogroup",
               "name": "hh_member_vet_status",
               "title": "Is {panel.hh_member_initials} a veteran?",
-              "choices": ["Yes", "No", "Choose not to answer", "Do not know"],
-              "isRequired": false
+              "choices": [
+                "Yes",
+                "No",
+                "Choose not to answer",
+                "Do not know"
+              ]
             },
             {
               "type": "radiogroup",
               "name": "hh_member_disability",
               "title": "Does {panel.hh_member_initials} identify as having a disability?",
-              "choices": ["Yes", "No", "Choose not to answer", "Do not know"],
-              "isRequired": false
+              "choices": [
+                "Yes",
+                "No",
+                "Choose not to answer",
+                "Do not know"
+              ]
             },
             {
               "type": "radiogroup",
               "name": "hh_member_smi",
               "title": "Does {panel.hh_member_initials} identify as having a severe mental illness?",
-              "choices": ["Yes", "No", "Choose not to answer", "Do not know"],
-              "isRequired": false
+              "choices": [
+                "Yes",
+                "No",
+                "Choose not to answer",
+                "Do not know"
+              ]
             },
             {
               "type": "radiogroup",
               "name": "hh_member_sud",
               "title": "Does {panel.hh_member_initials} identify as having a substance use disorder?",
-              "choices": ["Yes", "No", "Choose not to answer", "Do not know"],
-              "isRequired": false
+              "choices": [
+                "Yes",
+                "No",
+                "Choose not to answer",
+                "Do not know"
+              ]
             }
           ],
-          "panelCount": 0,
-          "minPanelCount": 0,
-          "maxPanelCount": 10,
-          "panelAddText": "+ Add household member",
-          "panelRemoveText": "Remove",
-          "displayMode": "tab",
           "templateTitle": "Household Member: {panel.hh_member_initials}",
-          "allowAddPanel": true,
-          "allowRemovePanel": true
+          "maxPanelCount": 10,
+          "addPanelText": "+ Add household member",
+          "removePanelText": "Remove",
+          "displayMode": "tab"
         }
       ]
     },
@@ -914,8 +924,7 @@
             "Walking"
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)",
-          "isRequired": false
+          "otherText": "Other (please specify)"
         },
         {
           "type": "panel",
@@ -925,25 +934,45 @@
             {
               "type": "slider",
               "name": "travel_time_hours",
+              "width": "100px",
+              "maxWidth": "75%",
               "title": "Hours",
-              "min": 0,
               "max": 10,
-              "step": 1
+              "step": 0
             },
             {
               "type": "slider",
               "name": "travel_time_minutes",
+              "width": "100px",
+              "minWidth": "75%",
+              "maxWidth": "75%",
               "title": "Minutes",
-              "min": 0,
               "max": 60,
-              "step": 5
+              "step": 5,
+              "customLabels": [
+                0,
+                10,
+                20,
+                30,
+                40,
+                50,
+                60
+              ],
+              "labelCount": 7
             }
           ]
         },
         {
-          "type": "checkbox",
+          "type": "dropdown",
           "name": "travel_distance",
           "title": "About how many miles did you travel to {location}?",
+          "validators": [
+            {
+              "type": "regex",
+              "text": "Please enter an integer value in miles",
+              "regex": "^[0-9]+$"
+            }
+          ],
           "choices": [
             "Less than half a mile",
             "Half a mile to 1 mile"
@@ -1142,12 +1171,6 @@
           ]
         },
         {
-          "type": "html",
-          "name": "age_first_hmlss_instruction",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER: Because the respondent has indicated they are under 18, you may select 0-17 without asking the question.</strong></div>",
-          "visibleIf": "{is_adult} = 'No'"
-        },
-        {
           "type": "dropdown",
           "name": "age_first_hmlss",
           "title": "How old were you the first time you experienced homelessness?",
@@ -1211,14 +1234,22 @@
           "name": "eviction_type",
           "visibleIf": "{precipitating_events} contains 'Eviction'",
           "title": "Was the law enforcement involved?",
-          "choices": ["Yes", "No", "Choose not to answer", "Do not know"]
+          "choices": [
+            "Yes",
+            "No",
+            "Choose not to answer",
+            "Do not know"
+          ]
         },
         {
-          "type": "radiogroup",
+          "type": "dropdown",
           "name": "eviction_court_ordered",
           "visibleIf": "{eviction_type} = 'Yes'",
           "title": "Were you ordered to court?",
-          "choices": ["Yes", "No"]
+          "choices": [
+            "Yes",
+            "No"
+          ]
         },
         {
           "type": "tagbox",
@@ -1251,29 +1282,30 @@
           "type": "dropdown",
           "name": "pet_animal",
           "title": "Do you have a pet or animal companion?",
-          "choices": ["Yes", "No", "Choose not to answer"],
-          "isRequired": false
+          "choices": [
+            "Yes",
+            "No",
+            "Choose not to answer"
+          ]
         },
         {
           "type": "paneldynamic",
           "name": "pet_animal_details",
+          "visibleIf": "{pet_animal} = 'Yes'",
           "title": "Pet Information",
           "templateElements": [
             {
-              "type": "text",
-              "name": "pet_name",
-              "title": "Pet Name (optional)",
-              "placeholder": "e.g., Fluffy"
-            },
-            {
-              "type": "radiogroup",
+              "type": "dropdown",
               "name": "pet_animal_type",
               "title": "Type of Animal",
               "choices": [
                 "Cat",
                 "Dog",
                 "Pocket pet / rodent",
-                "Choose not to answer"
+                {
+                  "value": "Item 1",
+                  "text": "Choose not to answer"
+                }
               ],
               "showOtherItem": true,
               "otherText": "Specify other animal type"
@@ -1281,7 +1313,7 @@
             {
               "type": "radiogroup",
               "name": "pet_animal_weight",
-              "title": "Approximate Weight of {panel.pet_name}",
+              "title": "Approximate Weight",
               "choices": [
                 "40 lbs or less",
                 "More than 40 lbs",
@@ -1294,7 +1326,7 @@
             {
               "type": "radiogroup",
               "name": "pet_animal_vet_care",
-              "title": "Has {panel.pet_name} seen vet care in last 3 years (such as for wellness visits, vaccines, or an illness)?",
+              "title": "Seen vet care in last 3 years (such as for wellness visits, vaccines, or an illness)?",
               "choices": [
                 "Yes",
                 "No",
@@ -1307,7 +1339,7 @@
             {
               "type": "radiogroup",
               "name": "pet_medical_needs",
-              "title": "How long have you been responsible for {panel.pet_name}?",
+              "title": "How long have you been responsible for this animal?",
               "choices": [
                 "Less than 1 year",
                 "1-3 years",
@@ -1319,12 +1351,13 @@
               ]
             }
           ],
-          "displayMode": "tab",
+          "templateTitle": "Pet #{panelIndex}",
+          "templateTabTitle": "Pet {panelIndex}",
+          "tabTitlePlaceholder": "New Pet",
           "maxPanelCount": 10,
-          "panelAddText": "+ Add new pet",
-          "panelRemoveText": "Remove",
-          "templateTitle": "Pet: {panel.pet_name}",
-          "visibleIf": "{pet_animal} = 'Yes'"
+          "addPanelText": "+ Add another pet",
+          "removePanelText": "Remove",
+          "displayMode": "tab"
         }
       ]
     },
@@ -1333,11 +1366,18 @@
       "title": "Survey Deduplication",
       "elements": [
         {
-          "type": "radiogroup",
+          "type": "dropdown",
           "name": "deduplication",
-          "title": "After completing this survey, do you believe you have completed this before?",
-          "choices": ["Yes", "No", "Do not know"],
-          "isRequired": false
+          "title": "After completing this survey, do you believe you’ve completed this before?",
+          "isRequired": true,
+          "choices": [
+            "Yes",
+            "No",
+            {
+              "value": "Item 1",
+              "text": "Do not know"
+            }
+          ]
         }
       ]
     },
@@ -1359,5 +1399,7 @@
       "expression": "{consent_given} = 'No' or {is_adult} = 'No'"
     }
   ],
-  "partialSendEnabled": true
+  "showProgressBar": true,
+  "progressBarLocation": "top",
+  "progressBarShowPageTitles": true
 }
