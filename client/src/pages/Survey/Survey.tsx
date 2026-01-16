@@ -243,7 +243,6 @@ const Survey = () => {
 
 		// Initialize the survey
 		const { survey, existingData } = initializeSurvey(
-			locations,
 			surveyByRefCode as SurveyDocument | null,
 			surveyByObjectId as SurveyDocument | null,
 			parentSurvey as SurveyDocument | null,
