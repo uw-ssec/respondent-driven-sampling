@@ -68,7 +68,7 @@ function createOutputDirectory(): string {
     return outputDir;
 }
 
-function generateTimestampFilename(locationName: string, outputDir: string): string {
+function generateTimestampFilename(templateKey: string, count: number, outputDir: string): string {
     const now = new Date();
     const timestamp = [
         now.getFullYear(),
@@ -78,8 +78,8 @@ function generateTimestampFilename(locationName: string, outputDir: string): str
         String(now.getMinutes()).padStart(2, '0'),
         String(now.getSeconds()).padStart(2, '0')
     ].join('');
-    const sanitizedLocationName = locationName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    const filename = `kcrha-pit-count-seeds-${sanitizedLocationName}-${timestamp}.pdf`;
+    const sanitizedTemplateKey = templateKey.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    const filename = `kcrha-pit-2026-${sanitizedTemplateKey}-${count}-seeds-${timestamp}.pdf`;
     return path.join(outputDir, filename);
 }
 
@@ -273,9 +273,9 @@ async function addSpanishPage(doc: any, surveyCode: string, template: LocationTe
         .text(template.warningEs, margin, footerY, { width: contentWidth, align: 'left', lineGap: 2 });
 }
 
-async function generatePDF(seeds: any[], locationName: string, templateKey: string = 'seattle'): Promise<void> {
+async function generatePDF(seeds: any[], templateKey: string = 'seattle'): Promise<void> {
     const outputDir = createOutputDirectory();
-    const filepath = generateTimestampFilename(locationName, outputDir);
+    const filepath = generateTimestampFilename(templateKey, seeds.length, outputDir);
 
     // Load and get the location template
     const templates = loadTemplates();
@@ -403,7 +403,7 @@ async function generateSeeds(locationIdentifier: string, count: number, template
         printSeedsSummary(createdSeeds, location.hubName);
 
         console.log('\n📄 Generating PDF with QR codes...');
-        await generatePDF(createdSeeds, location.hubName, templateKey);
+        await generatePDF(createdSeeds, templateKey);
     } catch (error) {
         console.error('\n✗ Error:', error instanceof Error ? error.message : error);
         process.exit(1);

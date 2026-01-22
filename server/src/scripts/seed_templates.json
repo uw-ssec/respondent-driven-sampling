@@ -94,8 +94,10 @@
   "north": {
     "headerEn": "North King County Survey Locations",
     "headerEs": "Ubicaciones en Condado de King del norte",
-    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card. Language translation (including ASL) will be available. Pets and service animals welcome.",
-    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20. Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
     "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
     "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
     "locations": [
@@ -127,9 +129,11 @@
   },
   "east": {
     "headerEn": "East King County Survey Locations",
-     "headerEs": "Ubicaciones en Condado de King del este ",
-    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card. Language translation (including ASL) will be available. Pets and service animals welcome.",
-    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20. Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "headerEs": "Ubicaciones en Condado de King del este",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
     "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
     "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
     "locations": [
@@ -170,8 +174,10 @@
   "snoqualmie valley": {
     "headerEn": "Snoqualmie Valley Survey Locations",
     "headerEs": "Ubicaciones en Snoqualmie Valley",
-    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card. Language translation (including ASL) will be available. Pets and service animals welcome.",
-    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20. Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
     "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
     "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
     "locations": [
@@ -195,9 +201,11 @@
   },
   "southeast": {
     "headerEn": "Southeast King County Locations",
-    "headerEs": "Ubicaciones en Condado de King del sudeste ",
-    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card. Language translation (including ASL) will be available. Pets and service animals welcome.",
-    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20. Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "headerEs": "Ubicaciones en Condado de King del sudeste",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
     "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
     "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
     "locations": [
@@ -221,9 +229,11 @@
   },
   "south": {
     "headerEn": "South King County Survey Locations",
-    "headerEs": "Ubicaciones en Condado de King del sur ",
-    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card. Language translation (including ASL) will be available. Pets and service animals welcome.",
-    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20. Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "headerEs": "Ubicaciones en Condado de King del sur",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
     "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
     "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
     "locations": [
@@ -264,8 +274,10 @@
   "Vashon" : {
     "headerEn": "Vashon Survey Locations",
     "headerEs": "Ubicaciones en Vashon",
-    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card. Language translation (including ASL) will be available. Pets and service animals welcome.",
-    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20. Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
     "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
     "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
     "locations": [
