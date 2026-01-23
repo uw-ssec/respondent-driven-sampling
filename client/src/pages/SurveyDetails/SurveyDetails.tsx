@@ -194,7 +194,7 @@ export default function SurveyDetails() {
 					</div>
 					<div className="qr-buttons">
 						<button className="generate-btn" onClick={handlePrint}>
-							Print QR Codes
+							Print Coupon Codes
 						</button>
 					</div>
 				</div>

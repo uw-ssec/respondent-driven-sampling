@@ -62,13 +62,13 @@ export default function QrPage() {
 
 				<div className="qr-buttons">
 					<button className="generate-btn" onClick={handlePrint}>
-						Print QR Codes
+						Print Coupon Codes
 					</button>
 					<button
 						className="generate-btn"
 						onClick={() => navigate('/dashboard')}
 					>
-						Complete Surveying Process
+						Return to Home Page
 					</button>
 				</div>
 			</div>
