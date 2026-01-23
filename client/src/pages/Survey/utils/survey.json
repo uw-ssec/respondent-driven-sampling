@@ -137,6 +137,7 @@
         {
           "type": "radiogroup",
           "name": "survey_churn_seed",
+          "visibleIf": "{survey_churn_prioryr} = 'Yes'",
           "title": "In 2024, did you receive a coupon from a care worker or navigator (this was referred to as a \"seed coupon\")?",
           "choices": [
             "Yes",
@@ -149,6 +150,7 @@
         {
           "type": "radiogroup",
           "name": "survey_churn_referral",
+          "visibleIf": "{survey_churn_prioryr} = 'Yes'",
           "title": "In 2024, did you receive a coupon from a friend or other person experiencing homelessness?",
           "choices": [
             "Yes",
@@ -257,7 +259,7 @@
         {
           "type": "checkbox",
           "name": "personal_amenities",
-          "visibleIf": "{sleeping_situation} noneof ['small_vehicle', 'large_vehicle'] and {sleeping_situation} <> 'none'",
+          "visibleIf": "{sleeping_situation} noneof ['small_vehicle', 'large_vehicle'] and {sleeping_situation} <> 'none' and {sleeping_situation} notempty",
           "title": "Do you generally have access to any of the following needs?",
           "choices": [
             "Drinking water",
@@ -615,7 +617,7 @@
             "American Indian or Alaska Native",
             "Asian",
             "Black or African American",
-            "Hispanic or Latino",
+            "Hispanic/Latina/e/o",
             "Middle Eastern or North African",
             "Native Hawaiian or Pacific Islander",
             "White",
@@ -799,7 +801,7 @@
             {
               "type": "radiogroup",
               "name": "hh_member_ethnicity",
-              "title": "Is {panel.hh_member_initials} Hispanic/Latina/e/o??\n",
+              "title": "Is {panel.hh_member_initials} Hispanic/Latina/e/o?\n",
               "choices": [
                 "Yes",
                 "No",
@@ -816,7 +818,7 @@
                 "American Indian or Alaska Native",
                 "Asian",
                 "Black or African American",
-                "Hispanic or Latino",
+                "Hispanic/Latina/e/o",
                 "Middle Eastern or North African",
                 "Native Hawaiian or Pacific Islander",
                 "White",
