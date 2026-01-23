@@ -113,8 +113,8 @@
           "name": "date_of_birth",
           "title": "Enter the respondent's date of birth",
           "inputType": "date",
-          "minValueExpression": "today(-36525)",
-          "maxValueExpression": "today(-6574)"
+          "min": "1926-02-01",
+          "max": "2014-02-28"
         }
       ]
     },
