@@ -1,12 +1,5 @@
 {
-  "showProgressBar": true,
-  "progressBarLocation": "auto",
-  "progressBarType": "pages",
-  "widthMode": "responsive",
-  "progressBarShowPageNumbers": true,
-  "progressBarShowPageTitles": true,
-  "partialSendEnabled": true,
-  "title": "Homelessness Experience Survey",
+  "title": "Unsheltered Point-in-Time Count 2026",
   "pages": [
     {
       "name": "volunteer-pre-screen",
@@ -33,7 +26,7 @@
       ]
     },
     {
-      "name": "page1",
+      "name": "age_check",
       "title": "Age Check",
       "elements": [
         {
@@ -72,7 +65,7 @@
         {
           "type": "html",
           "name": "youth_consent",
-          "visibleIf": "{is_adult} = 'No' and {is_over12} = 'Yes'",
+          "enableIf": "{is_adult} = 'No'",
           "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\">\n<strong>Instructions:</strong> Please read the following consent information out loud to the respondent and have them orally give their consent to you.\n</div>\n\n<div style=\"max-width: 800px; margin: 20px auto; font-family: Arial, sans-serif; line-height: 1.6;\">\n<h4 style=\"text-align: center; color: #333; margin-bottom: 20px; font-size: 18px;\">Unsheltered Point-in-Time Count 2026</h4>\n\n<h4 style=\"color: #444; margin-top: 20px; margin-bottom: 10px;\">UW Researchers:</h4>\n<ul style=\"list-style: none; padding-left: 0; margin-bottom: 20px;\">\n\t<li style=\"margin-bottom: 8px;\">\n\t\t<strong>Dr. Zack W. Almquist</strong><br>\n\t\tAssociate Professor, Department of Sociology<br>\n\t\t<a href=\"mailto:zalmquist@uw.edu\">zalmquist@uw.edu</a>\n\t</li>\n\t<li style=\"margin-bottom: 8px;\">\n\t\t<strong>Dr. Amy Hagopian</strong><br>\n\t\tProfessor Emeritus, Global Health<br>\n\t\tProfessor Emeritus, Health Systems and Population Health<br>\n\t\tDirector, Community Oriented Public Health Practice<br>\n\t\t<a href=\"mailto:hagopian@uw.edu\">hagopian@uw.edu</a>\n\t</li>\n\t<li style=\"margin-bottom: 8px;\">\n\t\t<strong>Dr. June Yang</strong><br>\n\t\tResearch Scientist, Center for Studies in Demography and Ecology (CSDE) &amp; eScience Institute<br>\n\t\t<a href=\"mailto:jyang32@uw.edu\">jyang32@uw.edu</a>\n\t</li>\n</ul>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">Why are we talking to you?</h4>\n<p style=\"margin-bottom: 15px;\">We are doing a research study to learn more about young people who are experiencing homelessness or unstable housing. We want to understand how many youth are in this situation, what their lives are like, and how their friendships and social networks work.</p>\n<p style=\"margin-bottom: 20px;\">We are asking you to be in this study because you are a young person who is currently experiencing homelessness or unstable housing.</p>\n<p style=\"margin-bottom: 20px;\"><strong>Taking part is your choice.</strong></p>\n\n<div style=\"background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0;\">\n<h4 style=\"color: #1976D2; margin-top: 0; margin-bottom: 12px;\">Key things to know:</h4>\n<ul style=\"margin-bottom: 0; padding-left: 20px;\">\n\t<li style=\"margin-bottom: 8px;\">If you join, we will ask you to do a survey that takes about 10–15 minutes.</li>\n\t<li style=\"margin-bottom: 8px;\">The survey will ask about:\n\t\t<ul style=\"margin-top: 5px; padding-left: 20px;\">\n\t\t\t<li>Your housing situation</li>\n\t\t\t<li>Your health</li>\n\t\t\t<li>People you know who are also experiencing homelessness or unstable housing</li>\n\t\t</ul>\n\t</li>\n\t<li style=\"margin-bottom: 8px;\">You will get a <strong>$20 prepaid card</strong> for doing the survey.</li>\n\t<li style=\"margin-bottom: 8px;\">You can also receive <strong>$5 for each person you successfully recruit</strong> (up to three people) who is also experiencing homelessness or unstable housing and who chooses to do the survey.</li>\n\t<li style=\"margin-bottom: 8px;\">Some questions may feel personal (for example, about health, substance use, or your housing history).</li>\n\t<li style=\"margin-bottom: 8px;\">You can skip any question you do not want to answer.</li>\n\t<li style=\"margin-bottom: 8px;\">You can stop at any time, and you will still get your payment for the survey.</li>\n\t<li style=\"margin-bottom: 8px;\">We will keep your information private as much as the law allows.</li>\n\t<li style=\"margin-bottom: 0;\">We will not share your answers with parents/guardians, teachers, case workers, or shelter staff unless we are worried that you or someone else is in serious danger.</li>\n</ul>\n</div>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">What is the purpose of this study?</h4>\n<p style=\"margin-bottom: 10px;\">The purpose of this study is to:</p>\n<ul style=\"margin-bottom: 20px; padding-left: 25px;\">\n\t<li>Learn more about how many people are experiencing homelessness.</li>\n\t<li>Understand what life is like for youth who are unhoused or unstably housed.</li>\n\t<li>Learn how social networks (the people you know) are connected to homelessness.</li>\n</ul>\n<p style=\"margin-bottom: 20px;\">This information may help community organizations and local leaders plan better services and support for youth.</p>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">What will happen if you join?</h4>\n<p style=\"margin-bottom: 10px;\">If you decide to be in the study:</p>\n<ul style=\"margin-bottom: 15px; padding-left: 25px;\">\n\t<li>A researcher will explain the study and answer any questions you have.</li>\n\t<li>You will do a survey (on a tablet, phone, or paper, or read aloud if you prefer).</li>\n\t<li>The survey will ask you about:\n\t\t<ul style=\"margin-top: 5px;\">\n\t\t\t<li>Your age and basic background</li>\n\t\t\t<li>Your current and past housing situation</li>\n\t\t\t<li>Your health and well-being</li>\n\t\t\t<li>People you know who are also experiencing homelessness or unstable housing</li>\n\t\t</ul>\n\t</li>\n\t<li>The survey will take about 10–15 minutes.</li>\n\t<li>You can take breaks, skip any questions you don't like, or stop at any time.</li>\n</ul>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">Are there any risks or discomforts?</h4>\n<p style=\"margin-bottom: 15px;\">Some questions may feel personal, sad, or uncomfortable (for example, questions about your housing situation, substance use, or hard life experiences).</p>\n<p style=\"margin-bottom: 15px;\">You might feel upset when thinking or talking about these topics.</p>\n<ul style=\"margin-bottom: 20px; padding-left: 25px;\">\n\t<li>You do not have to answer any question you do not want to answer.</li>\n\t<li>You can stop the survey at any time, for any reason.</li>\n\t<li>If you become upset, we can pause, stop, or help connect you with local resources if available.</li>\n</ul>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">Will you be paid?</h4>\n<p style=\"margin-bottom: 8px;\"><strong>Yes.</strong></p>\n<ul style=\"margin-bottom: 20px; padding-left: 25px;\">\n\t<li>You will get a $20 prepaid visa card or electronic payment after you complete the survey.</li>\n\t<li>You can also receive $5 for each person (up to three people) you recruit who is also experiencing homelessness or unstable housing and who decides to do the survey.</li>\n\t<li>Even if you decide to stop the survey early, you will still receive the $20 for participating.</li>\n</ul>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">Will your answers be kept private?</h4>\n<p style=\"margin-bottom: 15px;\">We will do our best to keep your information private:</p>\n<ul style=\"margin-bottom: 15px; padding-left: 25px;\">\n\t<li>We will give you a study ID number instead of using your name on the survey.</li>\n\t<li>Your name and any contact information (like phone or email) will be stored separately from your survey answers.</li>\n\t<li>Only the research team, individuals from the UW, or other agencies that may need to audit study records will have access to the link between your name and your survey ID, and this will be kept in secure, password-protected files.</li>\n</ul>\n<p style=\"margin-bottom: 15px;\"><strong>However, there are a few important exceptions:</strong></p>\n<ul style=\"margin-bottom: 20px; padding-left: 25px;\">\n\t<li>If you tell us that you plan to seriously hurt yourself or hurt someone else, we must tell someone who can help keep you or others safe.</li>\n\t<li>Because you are a young person, if you tell us that an adult is hurting you, abusing you, or neglecting you, we are required by law to report this to a person or agency who can help keep you safe.</li>\n\t<li>Sometimes government or university staff check studies like this to make sure they are being done safely and legally. If they review this study, they may look at study records, but they will protect your privacy, and your information will not be used to get you in trouble with the law.</li>\n</ul>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">What happens to your information after the study?</h4>\n<p style=\"margin-bottom: 15px;\">Because this is a multi-year project, we need to keep your data for some time.</p>\n<p style=\"margin-bottom: 15px;\">We will keep your survey answers and the link between your name/contact information and your study ID for as long as needed to:</p>\n<ul style=\"margin-bottom: 15px; padding-left: 25px;\">\n\t<li>Finish this study</li>\n\t<li>Do closely related studies about homelessness</li>\n\t<li>Meet University of Washington and state/federal rules for how long we must keep research records</li>\n</ul>\n<p style=\"margin-bottom: 20px;\">We may use your de-identified survey data (data with your name and contact information removed) in future research about homelessness and housing. We may share de-identified data with other researchers, but your name and direct contact information will not be shared without additional approval and/or your additional consent.</p>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">What if you change your mind?</h4>\n<p style=\"margin-bottom: 15px;\">Being in this study is voluntary.</p>\n<ul style=\"margin-bottom: 15px; padding-left: 25px;\">\n\t<li>You can say no to being in the study.</li>\n\t<li>If you start and then change your mind, you can stop at any time.</li>\n\t<li>If you stop, we will not collect new information from you or contact you again for this study (unless you later tell us you want to re-join).</li>\n</ul>\n<p style=\"margin-bottom: 15px;\"><strong>However:</strong></p>\n<ul style=\"margin-bottom: 20px; padding-left: 25px;\">\n\t<li>We will keep and continue to use information already collected about you, including any data that have already been de-identified and combined with other participants. Once your data are combined and analyzed, they cannot be separated out.</li>\n\t<li>We may keep certain basic identifiers (such as your date of birth and initials) and the code that links those to your study ID, as allowed by UW policy and law.</li>\n\t<li>You can decide if you are comfortable with this before you agree to participate.</li>\n</ul>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">What will be shared with others?</h4>\n<p style=\"margin-bottom: 10px;\">We may share group-level results (for example, \"X% of youth reported Y\") with:</p>\n<ul style=\"margin-bottom: 15px; padding-left: 25px;\">\n\t<li>King County Regional Homelessness Authority (KCRHA)</li>\n\t<li>Local governments</li>\n\t<li>HUD (the U.S. Department of Housing and Urban Development)</li>\n\t<li>Community organizations</li>\n\t<li>In academic papers or presentations</li>\n</ul>\n<p style=\"margin-bottom: 20px;\">Your name or direct contact information will never appear in any reports or publications.</p>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">Whom can you talk to?</h4>\n<p style=\"margin-bottom: 15px;\">If you have questions or concerns about the study, you can contact:</p>\n<ul style=\"list-style: none; padding-left: 0; margin-bottom: 15px;\">\n\t<li>Dr. Zack Almquist – <a href=\"mailto:zalmquis@uw.edu\">zalmquis@uw.edu</a></li>\n\t<li>Dr. Amy Hagopian – <a href=\"mailto:hagopian@uw.edu\">hagopian@uw.edu</a></li>\n\t<li>Dr. June Yang – <a href=\"mailto:jyang32@uw.edu\">jyang32@uw.edu</a></li>\n</ul>\n<p style=\"margin-bottom: 15px;\">If you have questions about your rights as someone in a research study or complaints about the research, you can contact:</p>\n<p style=\"margin-bottom: 20px; padding-left: 20px;\"><strong>Human Subjects Division (HSD) – University of Washington</strong><br>\nPhone: (206) 543-0098<br>\nEmail: <a href=\"mailto:hsdinfo@uw.edu\">hsdinfo@uw.edu</a></p>\n\n<h4 style=\"color: #444; margin-top: 25px; margin-bottom: 10px;\">Your choice (Assent)</h4>\n<p style=\"margin-bottom: 15px;\">Taking part in this research is your choice. You may refuse to participate or stop at any time without penalty or loss of benefits to which you are entitled.</p>\n<p style=\"margin-bottom: 10px;\"><strong>By agreeing, you are saying:</strong></p>\n<ul style=\"margin-bottom: 20px; padding-left: 25px;\">\n\t<li>Someone explained this study to you in a way you understand.</li>\n\t<li>You had a chance to ask questions.</li>\n\t<li>Your questions were answered.</li>\n\t<li>You understand that you can stop at any time.</li>\n\t<li>You want to be in this study.</li>\n</ul>\n</div>\n"
         },
         {
@@ -122,7 +115,13 @@
           "inputType": "date",
           "minValueExpression": "today(-36525)",
           "maxValueExpression": "today(-6574)"
-        },
+        }
+      ]
+    },
+    {
+      "name": "survey_churn",
+      "title": "Previous Surveys",
+      "elements": [
         {
           "type": "radiogroup",
           "name": "survey_churn_prioryr",
@@ -231,15 +230,13 @@
               "text": "In a friend or family member's house/apartment"
             },
             {
-              "value": "choose_not_to_answer",
-              "text": "Choose not to answer"
-            },
-            {
               "value": "do_not_know",
               "text": "Do not know"
             }
           ],
           "showOtherItem": true,
+          "showNoneItem": true,
+          "noneText": "Choose not to answer",
           "otherText": "Other (please specify)"
         },
         {
@@ -260,7 +257,7 @@
         {
           "type": "checkbox",
           "name": "personal_amenities",
-          "visibleIf": "{sleeping_situation} notempty and !({sleeping_situation} anyof ['small_vehicle', 'large_vehicle', 'choose_not_to_answer', 'do_not_know'])",
+          "visibleIf": "{sleeping_situation} noneof ['small_vehicle', 'large_vehicle'] and {sleeping_situation} <> 'none'",
           "title": "Do you generally have access to any of the following needs?",
           "choices": [
             "Drinking water",
@@ -309,7 +306,7 @@
         {
           "type": "paneldynamic",
           "name": "non_family_network",
-          "title": "For those [##] people, please fill in as much of the following information as you are able:\n",
+          "title": "For those {non_family_network_size} people, please fill in as much of the following information as you are able:\n",
           "bindings": {
             "panelCount": "non_family_network"
           },
@@ -402,15 +399,13 @@
                   "text": "In a friend or family member's house/apartment"
                 },
                 {
-                  "value": "choose_not_to_answer",
-                  "text": "Choose not to answer"
-                },
-                {
                   "value": "do_not_know",
                   "text": "Do not know"
                 }
               ],
               "showOtherItem": true,
+              "showNoneItem": true,
+              "noneText": "Choose not to answer",
               "otherText": "Other (please specify)"
             }
           ],
@@ -437,9 +432,10 @@
             "1 month or more, but less than 90 days",
             "90 days or more, but less than 1 year",
             "1 year or longer",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
@@ -450,9 +446,10 @@
             "2 times",
             "3 times",
             "4 or more times",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "multipletext",
@@ -490,9 +487,10 @@
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "matrixdynamic",
@@ -559,7 +557,6 @@
         {
           "type": "html",
           "name": "demographics_instruction",
-          "visibleIf": "{is_adult} = 'No'",
           "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER: Because the respondent has already indicated they are under 18, you may select 0-17 without asking this question.</strong></div>"
         },
         {
@@ -574,9 +571,10 @@
             "45-54",
             "55-64",
             "65 or older",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "checkbox",
@@ -590,28 +588,28 @@
             "Non-binary",
             "Questioning",
             "Different identity",
-            "Choose not to answer",
             "Do not know"
           ],
           "showOtherItem": true,
+          "showNoneItem": true,
+          "noneText": "Choose not to answer",
           "otherText": "Other (please specify)"
         },
         {
           "type": "radiogroup",
           "name": "ethnicity",
-          "visible": false,
           "title": "Are you Hispanic/ Latina/e/o?",
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "checkbox",
           "name": "racial_id",
-          "visible": false,
           "title": "Which of the following best describes your racial identity? (Select all that apply)",
           "choices": [
             "American Indian or Alaska Native",
@@ -621,29 +619,11 @@
             "Middle Eastern or North African",
             "Native Hawaiian or Pacific Islander",
             "White",
-            "Choose not to answer",
             "Do not know"
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)"
-        },
-        {
-          "type": "checkbox",
-          "name": "race_ethnicity",
-          "title": "Which of the following best describes your race and/or ethnicity? ",
-          "description": "Note, you may report more than one group.",
-          "choices": [
-            "American Indian or Alaska Native",
-            "Asian",
-            "Black or African American",
-            "Hispanic or Latino",
-            "Middle Eastern or North African",
-            "Native Hawaiian or Pacific Islander",
-            "White",
-            "Choose not to answer",
-            "Do not know"
-          ],
-          "showOtherItem": true,
+          "showNoneItem": true,
+          "noneText": "Choose not to answer",
           "otherText": "Other (please specify)"
         },
         {
@@ -654,22 +634,22 @@
         {
           "type": "html",
           "name": "va_health_eligible_instruction",
-          "enableIf": "{is_adult} = 'No'",
+          "visibleIf": "{is_adult} = 'No'",
           "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER: Because the respondent has indicated they are under 18, only ask about <i>family members'</i> status</strong></div>"
         },
         {
           "type": "radiogroup",
           "name": "veteran_status",
           "title": "Are you or a member of your immediate family a veteran?",
-          "enableIf": "{is_adult} = 'No' and {is_over12} = 'Yes'",
           "choices": [
             "Yes, I am a veteran",
             "Yes, a member of my immediate family is a veteran",
             "Yes, I am a veteran AND a member of my immediate family is a veteran",
             "No, neither I nor a member of my immediate family are veterans",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
@@ -679,7 +659,9 @@
             "Yes",
             "No",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         }
       ]
     },
@@ -690,14 +672,15 @@
         {
           "type": "radiogroup",
           "name": "fleeing_dv",
+          "visibleIf": "{is_adult} = 'Yes'",
           "title": "Are you currently experiencing homelessness because you are/were fleeing domestic violence, dating violence, sexual assault, or stalking?",
-          "enableIf": "{is_adult} = 'No' and {is_over12} = 'Yes'",
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
@@ -706,32 +689,36 @@
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
           "name": "mental_health",
+          "visibleIf": "{is_adult} = 'Yes'",
           "title": "Do you identify as having a severe mental illness?",
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
           "name": "substance_use",
+          "visibleIf": "{is_adult} = 'Yes'",
           "title": "Do you identify as having a substance use disorder?",
-          "enableIf": "{is_adult} = 'No' and {is_over12} = 'Yes'",
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         }
       ]
     },
@@ -804,14 +791,27 @@
                 "Non-binary",
                 "Questioning",
                 "Different identity",
-                "Choose not to answer",
                 "Do not know"
-              ]
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
+            },
+            {
+              "type": "radiogroup",
+              "name": "hh_member_ethnicity",
+              "title": "Is {panel.hh_member_initials} Hispanic/Latina/e/o??\n",
+              "choices": [
+                "Yes",
+                "No",
+                "Do not know"
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "checkbox",
-              "name": "hh_member_race_ethnicity",
-              "title": "Which of the following best describes the race and/or ethnicity of {panel.hh_member_initials}? (Note, you may report more than one group.)",
+              "name": "hh_member_race",
+              "title": "Which of the following best describes the racial identity of {panel.hh_member_initials}? (Note, you may report more than one group.)",
               "choices": [
                 "American Indian or Alaska Native",
                 "Asian",
@@ -820,9 +820,10 @@
                 "Middle Eastern or North African",
                 "Native Hawaiian or Pacific Islander",
                 "White",
-                "Choose not to answer",
                 "Do not know"
-              ]
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "text",
@@ -837,9 +838,10 @@
               "choices": [
                 "Yes",
                 "No",
-                "Choose not to answer",
                 "Do not know"
-              ]
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "radiogroup",
@@ -848,33 +850,36 @@
               "choices": [
                 "Yes",
                 "No",
-                "Choose not to answer",
                 "Do not know"
-              ]
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "radiogroup",
               "name": "hh_member_smi",
+              "visibleIf": "{is_adult} = 'Yes'",
               "title": "Does {panel.hh_member_initials} identify as having a severe mental illness?",
-              "enableIf": "{is_adult} = 'No' and {is_over12} = 'Yes'",
               "choices": [
                 "Yes",
                 "No",
-                "Choose not to answer",
                 "Do not know"
-              ]
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "radiogroup",
               "name": "hh_member_sud",
+              "visibleIf": "{is_adult} = 'Yes'",
               "title": "Does {panel.hh_member_initials} identify as having a substance use disorder?",
-              "enableIf": "{is_adult} = 'No'",
               "choices": [
                 "Yes",
                 "No",
-                "Choose not to answer",
                 "Do not know"
-              ]
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             }
           ],
           "templateTitle": "Household Member: {panel.hh_member_initials}",
@@ -974,9 +979,10 @@
                 "Washington State (Outside of King County)",
                 "United States (Outside of Washington State)",
                 "Outside of the United States",
-                "Choose not to answer",
                 "Do not know"
-              ]
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "dropdown",
@@ -1166,9 +1172,10 @@
             "36-49",
             "50-65",
             "66 or older",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "tagbox",
@@ -1193,10 +1200,11 @@
             "Resettlement transition",
             "Aging out of foster care",
             "Death of a parent/spouse/child",
-            "Choose not to answer",
             "Do not know"
           ],
           "showOtherItem": true,
+          "showNoneItem": true,
+          "noneText": "Choose not to answer",
           "otherText": "Other (please specify)"
         },
         {
@@ -1232,9 +1240,10 @@
           "title": "Do you have a pet or animal companion?",
           "choices": [
             "Yes",
-            "No",
-            "Choose not to answer"
-          ]
+            "No"
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "paneldynamic",
@@ -1255,10 +1264,11 @@
               "choices": [
                 "Cat",
                 "Dog",
-                "Pocket pet / rodent",
-                "Choose not to answer"
+                "Pocket pet / rodent"
               ],
               "showOtherItem": true,
+              "showNoneItem": true,
+              "noneText": "Choose not to answer",
               "otherText": "Specify other animal type"
             },
             {
@@ -1267,12 +1277,10 @@
               "title": "Approximate Weight of {panel.pet_name}",
               "choices": [
                 "40 lbs or less",
-                "More than 40 lbs",
-                {
-                  "value": "More than 41 lbs",
-                  "text": "Choose not to answer"
-                }
-              ]
+                "More than 40 lbs"
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "radiogroup",
@@ -1280,12 +1288,10 @@
               "title": "Has {panel.pet_name} seen vet care in last 3 years (such as for wellness visits, vaccines, or an illness)?",
               "choices": [
                 "Yes",
-                "No",
-                {
-                  "value": "Item 1",
-                  "text": "Choose not to answer"
-                }
-              ]
+                "No"
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "radiogroup",
@@ -1294,12 +1300,10 @@
               "choices": [
                 "Less than 1 year",
                 "1-3 years",
-                "More than 3 years",
-                {
-                  "value": "More than 4 years",
-                  "text": "Choose not to answer"
-                }
-              ]
+                "More than 3 years"
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             }
           ],
           "templateTitle": "Pet: {panel.pet_name}",
@@ -1360,7 +1364,8 @@
               "text": "Phone number"
             }
           ],
-          "showNoneItem": true
+          "showNoneItem": true,
+          "noneText": "None"
         },
         {
           "type": "text",
@@ -1408,6 +1413,7 @@
           "name": "gift_card_number",
           "visibleIf": "{gift_card_check} = 'Yes'",
           "title": "Please enter the last 4 digits of the Gift Card:",
+          "isRequired": true,
           "requiredIf": "{gift_card_check} = 'Yes'",
           "inputType": "number",
           "min": 0,
@@ -1416,10 +1422,9 @@
         {
           "type": "text",
           "name": "gift_card_2",
-          "visibleIf": "{gift_card_check} = 'Yes' and {household_members[0].hh_member_age} = 'Under 18 years old'",
+          "visibleIf": "{gift_card_check} = 'Yes' and {household_members[0].hh_member_age} anyof ['0-6 years old', '7-12 years old', '13-17 years old']",
           "title": "Please enter the last 4 digits of the 2nd Gift Card:",
           "description": "Note: Families with minor children receive two gift cards.",
-          "requiredIf": "{gift_card_check} = 'Yes'",
           "inputType": "number",
           "min": 0,
           "max": 9999
@@ -1436,5 +1441,13 @@
       "type": "complete",
       "expression": "{is_adult} = 'No' and {is_over12} = 'No'"
     }
-  ]
+  ],
+  "partialSendEnabled": true,
+  "showPageTitles": false,
+  "showProgressBar": true,
+  "progressBarShowPageTitles": true,
+  "progressBarShowPageNumbers": true,
+  "tocLocation": "right",
+  "textUpdateMode": "onTyping",
+  "widthMode": "responsive"
 }
