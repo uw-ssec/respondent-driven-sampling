@@ -1,9 +1,9 @@
-name: RDS TEST Build and Deploy Monolithic React + Node app to Azure
+name: Deploying kc-pit-2026-test branch to rds-app-kc test slot
 
 on:
   push:
     branches:
-      - test # or your deployment branch
+      - kc-pit-2026-test # or your deployment branch
 
 jobs:
   build-and-deploy:
@@ -59,5 +59,5 @@ jobs:
         with:
           app-name: rds-app-kc # Replace with your Azure App Service name
           slot-name: "test"
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_RDS_TEST_DEPLOY }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE_rds-app-kc-test }}
           package: ./server
