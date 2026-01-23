@@ -230,16 +230,14 @@
               "text": "In a friend or family member's house/apartment"
             },
             {
-              "value": "choose_not_to_answer",
-              "text": "Choose not to answer"
-            },
-            {
               "value": "do_not_know",
               "text": "Do not know"
             }
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)"
+          "otherText": "Other (please specify)",
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "checkbox",
@@ -401,16 +399,14 @@
                   "text": "In a friend or family member's house/apartment"
                 },
                 {
-                  "value": "choose_not_to_answer",
-                  "text": "Choose not to answer"
-                },
-                {
                   "value": "do_not_know",
                   "text": "Do not know"
                 }
               ],
               "showOtherItem": true,
-              "otherText": "Other (please specify)"
+              "otherText": "Other (please specify)",
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             }
           ],
           "templateTitle": "Person: {panel.network_person_name}",
@@ -436,9 +432,10 @@
             "1 month or more, but less than 90 days",
             "90 days or more, but less than 1 year",
             "1 year or longer",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
@@ -449,9 +446,10 @@
             "2 times",
             "3 times",
             "4 or more times",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "multipletext",
@@ -489,9 +487,10 @@
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "matrixdynamic",
@@ -572,9 +571,10 @@
             "45-54",
             "55-64",
             "65 or older",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "checkbox",
@@ -588,11 +588,12 @@
             "Non-binary",
             "Questioning",
             "Different identity",
-            "Choose not to answer",
             "Do not know"
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)"
+          "otherText": "Other (please specify)",
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
@@ -601,9 +602,10 @@
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "checkbox",
@@ -617,11 +619,12 @@
             "Middle Eastern or North African",
             "Native Hawaiian or Pacific Islander",
             "White",
-            "Choose not to answer",
             "Do not know"
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)"
+          "otherText": "Other (please specify)",
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "text",
@@ -643,9 +646,10 @@
             "Yes, a member of my immediate family is a veteran",
             "Yes, I am a veteran AND a member of my immediate family is a veteran",
             "No, neither I nor a member of my immediate family are veterans",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
@@ -671,9 +675,10 @@
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
@@ -682,9 +687,10 @@
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
@@ -694,9 +700,10 @@
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "radiogroup",
@@ -706,9 +713,10 @@
           "choices": [
             "Yes",
             "No",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         }
       ]
     },
@@ -781,9 +789,10 @@
                 "Non-binary",
                 "Questioning",
                 "Different identity",
-                "Choose not to answer",
                 "Do not know"
-              ]
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "radiogroup",
@@ -968,9 +977,10 @@
                 "Washington State (Outside of King County)",
                 "United States (Outside of Washington State)",
                 "Outside of the United States",
-                "Choose not to answer",
                 "Do not know"
-              ]
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "dropdown",
@@ -1160,9 +1170,10 @@
             "36-49",
             "50-65",
             "66 or older",
-            "Choose not to answer",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "tagbox",
@@ -1187,11 +1198,12 @@
             "Resettlement transition",
             "Aging out of foster care",
             "Death of a parent/spouse/child",
-            "Choose not to answer",
             "Do not know"
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)"
+          "otherText": "Other (please specify)",
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "tagbox",
@@ -1226,9 +1238,10 @@
           "title": "Do you have a pet or animal companion?",
           "choices": [
             "Yes",
-            "No",
-            "Choose not to answer"
-          ]
+            "No"
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         },
         {
           "type": "paneldynamic",
@@ -1249,11 +1262,12 @@
               "choices": [
                 "Cat",
                 "Dog",
-                "Pocket pet / rodent",
-                "Choose not to answer"
+                "Pocket pet / rodent"
               ],
               "showOtherItem": true,
-              "otherText": "Specify other animal type"
+              "otherText": "Specify other animal type",
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "radiogroup",
@@ -1261,12 +1275,10 @@
               "title": "Approximate Weight of {panel.pet_name}",
               "choices": [
                 "40 lbs or less",
-                "More than 40 lbs",
-                {
-                  "value": "More than 41 lbs",
-                  "text": "Choose not to answer"
-                }
-              ]
+                "More than 40 lbs"
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "radiogroup",
@@ -1274,12 +1286,10 @@
               "title": "Has {panel.pet_name} seen vet care in last 3 years (such as for wellness visits, vaccines, or an illness)?",
               "choices": [
                 "Yes",
-                "No",
-                {
-                  "value": "Item 1",
-                  "text": "Choose not to answer"
-                }
-              ]
+                "No"
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             },
             {
               "type": "radiogroup",
@@ -1288,12 +1298,10 @@
               "choices": [
                 "Less than 1 year",
                 "1-3 years",
-                "More than 3 years",
-                {
-                  "value": "More than 4 years",
-                  "text": "Choose not to answer"
-                }
-              ]
+                "More than 3 years"
+              ],
+              "showNoneItem": true,
+              "noneText": "Choose not to answer"
             }
           ],
           "templateTitle": "Pet: {panel.pet_name}",
