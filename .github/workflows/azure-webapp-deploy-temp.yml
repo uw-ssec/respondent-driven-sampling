@@ -1,4 +1,4 @@
-name: Deploying kc-pit-2026 branch to rds-app-kc prod slot
+name:  Deploying kc-pit-2026 branch to rds-main (rob) slot
 
 on:
   push:
@@ -23,11 +23,6 @@ jobs:
       - name: Install client dependencies
         run: |
           cd client
-          npm install
-
-      - name: Install server dependencies
-        run: |
-          cd server
           npm install
 
       - name: Build React client
@@ -57,7 +52,7 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: rds-app-kc # Replace with your Azure App Service name
+          app-name: rds-main # Replace with your Azure App Service name
           slot-name: "Production"
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE_rds_app_kc}}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE_rds_main_rob }}
           package: ./server
