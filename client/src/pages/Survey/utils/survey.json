@@ -235,9 +235,9 @@
             }
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)",
           "showNoneItem": true,
-          "noneText": "Choose not to answer"
+          "noneText": "Choose not to answer",
+          "otherText": "Other (please specify)"
         },
         {
           "type": "checkbox",
@@ -257,7 +257,7 @@
         {
           "type": "checkbox",
           "name": "personal_amenities",
-          "visibleIf": "{sleeping_situation} notempty and !({sleeping_situation} anyof ['small_vehicle', 'large_vehicle', 'choose_not_to_answer', 'do_not_know'])",
+          "visibleIf": "{sleeping_situation} noneof ['small_vehicle', 'large_vehicle'] and {sleeping_situation} <> 'none'",
           "title": "Do you generally have access to any of the following needs?",
           "choices": [
             "Drinking water",
@@ -306,7 +306,7 @@
         {
           "type": "paneldynamic",
           "name": "non_family_network",
-          "title": "For those [##] people, please fill in as much of the following information as you are able:\n",
+          "title": "For those {non_family_network_size} people, please fill in as much of the following information as you are able:\n",
           "bindings": {
             "panelCount": "non_family_network"
           },
@@ -404,9 +404,9 @@
                 }
               ],
               "showOtherItem": true,
-              "otherText": "Other (please specify)",
               "showNoneItem": true,
-              "noneText": "Choose not to answer"
+              "noneText": "Choose not to answer",
+              "otherText": "Other (please specify)"
             }
           ],
           "templateTitle": "Person: {panel.network_person_name}",
@@ -591,9 +591,9 @@
             "Do not know"
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)",
           "showNoneItem": true,
-          "noneText": "Choose not to answer"
+          "noneText": "Choose not to answer",
+          "otherText": "Other (please specify)"
         },
         {
           "type": "radiogroup",
@@ -622,9 +622,9 @@
             "Do not know"
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)",
           "showNoneItem": true,
-          "noneText": "Choose not to answer"
+          "noneText": "Choose not to answer",
+          "otherText": "Other (please specify)"
         },
         {
           "type": "text",
@@ -1201,9 +1201,9 @@
             "Do not know"
           ],
           "showOtherItem": true,
-          "otherText": "Other (please specify)",
           "showNoneItem": true,
-          "noneText": "Choose not to answer"
+          "noneText": "Choose not to answer",
+          "otherText": "Other (please specify)"
         },
         {
           "type": "tagbox",
@@ -1265,9 +1265,9 @@
                 "Pocket pet / rodent"
               ],
               "showOtherItem": true,
-              "otherText": "Specify other animal type",
               "showNoneItem": true,
-              "noneText": "Choose not to answer"
+              "noneText": "Choose not to answer",
+              "otherText": "Specify other animal type"
             },
             {
               "type": "radiogroup",
