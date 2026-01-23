@@ -59,5 +59,5 @@ jobs:
         with:
           app-name: rds-app-kc # Replace with your Azure App Service name
           slot-name: "test"
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE_rds-app-kc-test }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE_rds_app_kc_test }}
           package: ./server
