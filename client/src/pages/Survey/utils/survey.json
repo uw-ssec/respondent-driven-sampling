@@ -659,7 +659,9 @@
             "Yes",
             "No",
             "Do not know"
-          ]
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
         }
       ]
     },
