@@ -310,67 +310,6 @@ const Survey = () => {
 				{surveyRef.current && (
 					<SurveyComponent model={surveyRef.current} />
 				)}
-				<div
-					style={{
-						display: 'flex',
-						justifyContent: 'center',
-						gap: '24px',
-						marginTop: '12px'
-					}}
-				>
-					<div
-						onClick={() => {
-							if (
-								surveyRef.current &&
-								surveyRef.current.currentPageNo > 0
-							) {
-								surveyRef.current.prevPage();
-							}
-						}}
-						style={{ cursor: 'pointer' }}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							width="36px"
-							height="36px"
-						>
-							<circle cx="12" cy="12" r="10" fill="#3E236E" />
-							<path
-								d="M14 7l-5 5 5 5"
-								stroke="white"
-								strokeWidth="2"
-								fill="none"
-							/>
-						</svg>
-					</div>
-					<div
-						onClick={() => {
-							if (
-								surveyRef.current &&
-								!surveyRef.current.isLastPage
-							) {
-								surveyRef.current.nextPage();
-							}
-						}}
-						style={{ cursor: 'pointer' }}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							width="36px"
-							height="36px"
-						>
-							<circle cx="12" cy="12" r="10" fill="#3E236E" />
-							<path
-								d="M10 7l5 5-5 5"
-								stroke="white"
-								strokeWidth="2"
-								fill="none"
-							/>
-						</svg>
-					</div>
-				</div>
 			</div>
 		</>
 	);
