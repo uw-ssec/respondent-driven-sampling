@@ -20,7 +20,7 @@ import { initializeSurvey } from './utils/surveyUtils';
 
 // This component is responsible for rendering the survey and handling its logic
 // It uses the SurveyJS library to create and manage the survey
-// It also handles referral code validation and geolocation
+// It also handles coupon code validation and geolocation
 // It uses React Router for navigation and URL parameter handling
 // It uses Zustand (with persist) & localstorage to manage and persist data across sessions
 // It uses the useEffect hook to manage side effects, such as fetching data and updating state
@@ -43,7 +43,7 @@ const Survey = () => {
 	// Add a ref to store the original full survey data in edit mode
 	const originalSurveyData = useRef<any>(null);
 
-	// Conditionally fetch survey by referral code (only when surveyCodeInUrl exists)
+	// Conditionally fetch survey by coupon code (only when surveyCodeInUrl exists)
 	const { data: surveyByRefCode, isLoading: surveyByRefLoading } =
 		surveyCodeInUrl
 			? surveyService.useSurveyBySurveyCode(surveyCodeInUrl)
@@ -235,7 +235,7 @@ const Survey = () => {
 			)
 		) {
 			toast.error(
-				'You do not have permission to create a survey without a referral code.'
+				'You do not have permission to create a survey without a coupon code.'
 			);
 			navigate('/apply-referral');
 			return;

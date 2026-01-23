@@ -77,7 +77,7 @@ export function Header() {
 						<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
 					</svg>
 				</div>
-				<h1>RDS Mobile</h1>
+				<h1>Point-in-Time Count 2026</h1>
 			</div>
 
 			{/* Navigation Icons */}

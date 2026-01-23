@@ -49,11 +49,11 @@ const createQrCodePdf = (
 		// Add QR code image
 		pdf.addImage(imgData, 'PNG', qrX, qrY, qrSizePt, qrSizePt);
 
-		// Add referral code text
+		// Add coupon code text
 		const code = codes[i];
 		pdf.setFontSize(10);
 		pdf.text(
-			`Referral Code: ${code}`,
+			`Coupon Code: ${code}`,
 			pageWidthPt / 2,
 			qrY + qrSizePt + spacingPt,
 			{

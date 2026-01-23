@@ -229,8 +229,7 @@ router.post(
 				)
 			) {
 				return res.status(403).json({
-					message:
-						'Please provide a referral code to create a survey.'
+					message: 'Please provide a coupon code to create a survey.'
 				});
 			}
 		} else {

@@ -48,7 +48,7 @@ function isUniqueSurveyCodeArray(codes: Array<string>): boolean {
 }
 
 /**
- * Generates a random referral code consisting of 8 hexadecimal characters.
+ * Generates a random coupon code consisting of 8 hexadecimal characters.
  * The code is case-insensitive and can be used for tracking referrals in a system.
  * Guaranteed to be unique across all surveys within the database.
  * @returns string - A unique 8-character hexadecimal code in uppercase

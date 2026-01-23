@@ -27,7 +27,7 @@ export const initializeSurvey = (
 	}
 
 	const survey = new Model(surveyJson);
-	
+
 	// Apply custom theme
 	survey.applyTheme(themeJson);
 
@@ -43,7 +43,7 @@ export const initializeSurvey = (
 			}
 		};
 	}
-	// Populate with existing data from referral code if found
+	// Populate with existing data from coupon code if found
 	else if (surveyByRefCode) {
 		survey.data = surveyByRefCode.responses;
 		return {

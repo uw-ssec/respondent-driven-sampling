@@ -48,8 +48,7 @@ export default function QrPage() {
 												level="M"
 											/>
 											<p className="qr-code-text">
-												{index + 1}. Referral Code:{' '}
-												{code}
+												{index + 1}. Coupon Code: {code}
 											</p>
 										</div>
 									);
