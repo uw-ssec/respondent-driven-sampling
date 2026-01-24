@@ -530,8 +530,8 @@
               "maskType": "datetime",
               "maskSettings": {
                 "pattern": "mm/yyyy",
-                "min": "1950-01-01",
-                "max": "2025-12-15"
+                "min": "2023-01-01",
+                "max": "2026-02-15"
               }
             }
           ],
