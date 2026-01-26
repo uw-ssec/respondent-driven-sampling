@@ -177,7 +177,7 @@ export default function SurveyDetails() {
 						</ul>
 					) : (
 						<p>N/A</p>
-					)}				
+					)}
 					{/* Display QR Codes */}
 					<div className="print-area">
 						<div className="qr-code-container">
