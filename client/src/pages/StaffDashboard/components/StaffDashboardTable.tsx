@@ -12,9 +12,10 @@ import StaffDashboardRow from './StaffDashboardRow';
 
 interface StaffMember {
 	id: string;
-	employeeId: string;
 	name: string;
 	position: string;
+	locationObjectId: string;
+	phone: string;
 	approvalStatus: string;
 }
 
@@ -52,24 +53,6 @@ export default function StaffDashboardTable({
 							}}
 						>
 							<TableSortLabel
-								active={sortConfig.key === 'employeeId'}
-								direction={
-									sortConfig.key === 'employeeId'
-										? sortConfig.direction
-										: 'asc'
-								}
-								onClick={() => onSort('employeeId')}
-							>
-								Employee ID
-							</TableSortLabel>
-						</TableCell>
-						<TableCell
-							sx={{
-								fontWeight: 600,
-								backgroundColor: '#f9f9f9'
-							}}
-						>
-							<TableSortLabel
 								active={sortConfig.key === 'name'}
 								direction={
 									sortConfig.key === 'name'
@@ -96,7 +79,43 @@ export default function StaffDashboardTable({
 								}
 								onClick={() => onSort('position')}
 							>
-								Position
+								Role
+							</TableSortLabel>
+						</TableCell>
+						<TableCell
+							sx={{
+								fontWeight: 600,
+								backgroundColor: '#f9f9f9'
+							}}
+						>
+							<TableSortLabel
+								active={sortConfig.key === 'locationObjectId'}
+								direction={
+									sortConfig.key === 'locationObjectId'
+										? sortConfig.direction
+										: 'asc'
+								}
+								onClick={() => onSort('locationObjectId')}
+							>
+								Location
+							</TableSortLabel>
+						</TableCell>
+						<TableCell
+							sx={{
+								fontWeight: 600,
+								backgroundColor: '#f9f9f9'
+							}}
+						>
+							<TableSortLabel
+								active={sortConfig.key === 'phone'}
+								direction={
+									sortConfig.key === 'phone'
+										? sortConfig.direction
+										: 'asc'
+								}
+								onClick={() => onSort('phone')}
+							>
+								Phone Number
 							</TableSortLabel>
 						</TableCell>
 						<TableCell
@@ -131,7 +150,7 @@ export default function StaffDashboardTable({
 				<TableBody>
 					{staff.length === 0 ? (
 						<TableRow>
-							<TableCell colSpan={5} align="center">
+							<TableCell colSpan={6} align="center">
 								No staff members found.
 							</TableCell>
 						</TableRow>
