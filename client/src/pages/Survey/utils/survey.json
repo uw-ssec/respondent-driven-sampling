@@ -7,7 +7,7 @@
       "elements": [
         {
           "type": "html",
-          "name": "question3",
+          "name": "intro_text",
           "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>Instructions:</strong> These questions are for volunteers only. Please do not ask the respondent.</div>"
         },
         {
@@ -1497,6 +1497,22 @@
           "inputType": "number",
           "min": 0,
           "max": 9999
+        }
+      ]
+    },
+    {
+      "name": "end_page",
+      "title": "End Page",
+      "elements": [
+        {
+          "type": "html",
+          "name": "question2",
+          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>Instructions:</strong> These questions are for volunteers only. Please do not ask the respondent.</div>"
+        },
+        {
+          "type": "comment",
+          "name": "survey_comments",
+          "title": "Please document any issues, exceptions, or important context about this survey (e.g., respondent left early, alternate contact information provided, questions skipped due to circumstances, etc.)"
         }
       ]
     }
