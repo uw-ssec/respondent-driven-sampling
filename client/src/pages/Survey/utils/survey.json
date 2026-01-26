@@ -1238,31 +1238,31 @@
             "Illness/medical problem",
             {
               "value": "Substance Use Disorder",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = Yes"
             },
             {
               "value": "Mental health issues",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = Yes"
             },
             {
               "value": "Hospitalization/treatment",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = Yes"
             },
             "Divorce/separation/breakup",
             "Could not afford rent increase",
             {
               "value": "Argument with family/friend/roommate",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = Yes"
             },
             {
               "value": "Family domestic violence",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = Yes"
             },
             "Family/friend's housing wouldn't let me stay",
             "Family/friend couldn't afford to let me stay",
             {
               "value": "Safety",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = Yes"
             },
             "Resettlement transition",
             "Aging out of foster care",
