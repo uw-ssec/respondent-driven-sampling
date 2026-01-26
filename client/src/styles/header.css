@@ -24,6 +24,20 @@
   color: #3E236E;
 }
 
+/* Left icons container */
+.left-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Back icon */
+.back-icon {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
 /* Home icon */
 .home-icon {
   display: flex;
