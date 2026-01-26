@@ -18,10 +18,11 @@ export default function SurveyDetails() {
 	const { id } = useParams();
 	const { surveyService } = useApi();
 	const {
-		data: survey,
-		isLoading: loading, 
-		error
-	} = surveyService.useSurveyWithUser(id ?? '') || {};
+		data: surveys,
+		isLoading: loading
+	} = surveyService.useSurveysWithUsersAndLocations() || {};
+	const survey = surveys?.find(s => s._id === id);
+	const error = !loading && !survey;
 	const navigate = useNavigate();
 	const qrRefs = useRef<(HTMLDivElement | null)[]>([]);
 	const ability = useAbility();
@@ -33,40 +34,23 @@ export default function SurveyDetails() {
 	const canEdit = survey
 		? ability.can(ACTIONS.CASL.UPDATE, subject(SUBJECTS.SURVEY, survey))
 		: false;
+	// Fields to display in survey responses section
+	const displayFields = [
+		'first_two_letters_fname',
+		'first_two_letters_lname',
+		'date_of_birth',
+		'email_phone_consent',
+		'email',
+		'phone'
+	];
+
 	const labelMap: Record<string, string> = {
-		first_two_letters_fname: 'First two letters of first name',
-		first_two_letters_lname: 'First two letters of last name',
-		year_born: 'Year born',
-		month_born: 'Month born',
-		location: 'Location',
-		interpreter: 'Using interpreter?',
-		language: 'Language (if using interpreter)',
-		phone_number: 'Phone number',
+		first_two_letters_fname: 'First name initials',
+		first_two_letters_lname: 'Last name initials',
+		date_of_birth: 'Date of Birth',
+		email_phone_consent: 'Email/Phone Consent',
 		email: 'Email',
-		email_consent: 'Consent to email',
-		age_for_consent: 'Age 18 or over?',
-		consent_given: 'Oral consent given?',
-		homeless_people_count:
-			'Number of people experiencing homelessness you know',
-		people_you_know: 'People you know experiencing homelessness',
-		sleeping_location_last_night: 'Sleeping Location Last Night',
-		homeless_duration_since_housing: 'Homeless Duration Since Housing',
-		homeless_occurrences_past_3_years: 'Homeless Occurrences Past 3 Years',
-		months_homeless: 'Months Homeless',
-		age: 'Age',
-		hispanic_latino: 'Hispanic/Latino',
-		veteran: 'Veteran',
-		fleeing_dv: 'Fleeing Domestic Violence',
-		disability: 'Disability',
-		mental_illness: 'Mental Illness',
-		substance_abuse: 'Substance Abuse',
-		city_lasthoused: 'City Last Housed',
-		minutes_traveled: 'Minutes Traveled',
-		events_conditions: 'Events/Conditions',
-		shelter_preferences: 'Shelter Preferences',
-		person_name: 'Name',
-		relationship: 'Relationship',
-		current_sleeping_location: 'Current Sleeping Location'
+		phone: 'Phone'
 	};
 
 	if (loading) return <p>Loading...</p>;
@@ -119,17 +103,53 @@ export default function SurveyDetails() {
 
 				<div className="survey-info">
 					<p>
-						<strong>Employee ID:</strong> {survey.employeeId}
+						<strong>Survey Code:</strong> {survey.surveyCode}
 					</p>
 					<p>
-						<strong>Employee Name:</strong> {survey.employeeName}
+						<strong>Staff Name:</strong> {survey.employeeName}
 					</p>
 					<p>
-						<strong>Submitted At:</strong>{' '}
+						<strong>Location:</strong> {survey.locationName}
+					</p>
+					<p>
+						<strong>Date and Time:</strong>{' '}
 						{new Date(survey.createdAt).toLocaleString()}
 					</p>
 				</div>
 
+				{/* Gift Card Information */}
+				<div className="responses-section">
+					<h3>Gift Card Information</h3>
+					<pre>
+						{survey.responses &&
+							displayFields
+								.filter(field => field in survey.responses)
+								.map(field => {
+									const answer = survey.responses[field];
+									const label = labelMap[field] || field;
+									return `${label}: ${answer ?? 'N/A'}`;
+								})
+								.join('\n\n')}
+					</pre>
+				</div>
+				{/* Edit Pre-screen Questions Button */}
+				<Tooltip
+					title={
+						!canEdit
+							? "You don't have permission to edit this survey"
+							: ''
+					}
+				>
+					<span>
+						<button
+							className="edit-button"
+							disabled={!canEdit}
+							onClick={() => navigate(`/survey/${id}/edit`)}
+						>
+							Edit Gift Card Information
+						</button>
+					</span>
+				</Tooltip>
 				{/* Coupon Code Information */}
 				<div className="referral-info">
 					<h3>Referral Information</h3>
@@ -157,7 +177,7 @@ export default function SurveyDetails() {
 						</ul>
 					) : (
 						<p>N/A</p>
-					)}
+					)}				
 					{/* Display QR Codes */}
 					<div className="print-area">
 						<div className="qr-code-container">
@@ -198,62 +218,6 @@ export default function SurveyDetails() {
 						</button>
 					</div>
 				</div>
-
-				{/* Survey Responses */}
-				<div className="responses-section">
-					<h3>Survey Responses</h3>
-					<pre>
-						{survey.responses &&
-							Object.entries(survey.responses)
-								.map(([question, answer]) => {
-									const label =
-										labelMap[question] || question;
-
-									if (
-										question === 'people_you_know' &&
-										Array.isArray(answer)
-									) {
-										return (
-											`\n${label}:\n` +
-											answer
-												.map((person, index) => {
-													return (
-														`  Person ${index + 1}:\n` +
-														Object.entries(person)
-															.map(
-																([key, val]) =>
-																	`    ${key}: ${val}`
-															)
-															.join('\n')
-													);
-												})
-												.join('\n\n')
-										);
-									} else {
-										return `${label}: ${answer}`;
-									}
-								})
-								.join('\n\n')}
-					</pre>
-				</div>
-				{/* Edit Pre-screen Questions Button */}
-				<Tooltip
-					title={
-						!canEdit
-							? "You don't have permission to edit this survey"
-							: ''
-					}
-				>
-					<span>
-						<button
-							className="edit-button"
-							disabled={!canEdit}
-							onClick={() => navigate(`/survey/${id}/edit`)}
-						>
-							Edit Prescreen Responses
-						</button>
-					</span>
-				</Tooltip>
 			</div>
 		</div>
 	);
