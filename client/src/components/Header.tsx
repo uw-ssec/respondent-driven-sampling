@@ -26,6 +26,10 @@ export function Header() {
 		navigate('/dashboard');
 	};
 
+	const goToPreviousPage = () => {
+		navigate(-1);
+	};
+
 	// Function to handle new entry navigation
 	const handleNewEntry = () => {
 		navigate('/apply-referral');
@@ -59,22 +63,43 @@ export function Header() {
 	// Close menu when navigating
 	return (
 		<div className="header">
-			{/* Home Icon */}
-			<div
-				className="home-icon"
-				onClick={goToLanding}
-				style={{ cursor: 'pointer' }}
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 24 24"
-					fill="#3E236E"
-					width="24px"
-					height="24px"
+			{/* Left Icons Container */}
+			<div className="left-icons">
+				{/* Previous Page Icon */}
+				<div
+					className="back-icon"
+					onClick={goToPreviousPage}
+					style={{ cursor: 'pointer' }}
 				>
-					<path d="M0 0h24v24H0z" fill="none" />
-					<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-				</svg>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						fill="#3E236E"
+						width="24px"
+						height="24px"
+					>
+						<path d="M0 0h24v24H0z" fill="none" />
+						<path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+					</svg>
+				</div>
+
+				{/* Home Icon */}
+				<div
+					className="home-icon"
+					onClick={goToLanding}
+					style={{ cursor: 'pointer' }}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						fill="#3E236E"
+						width="24px"
+						height="24px"
+					>
+						<path d="M0 0h24v24H0z" fill="none" />
+						<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+					</svg>
+				</div>
 			</div>
 
 			{/* Centered Title */}
