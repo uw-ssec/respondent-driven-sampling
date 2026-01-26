@@ -484,51 +484,51 @@
       ]
     },
     {
-      "name": "shelter_services_panel",
-      "title": "Housing Assistance Services",
-      "elements": [
-        {
-          "type": "radiogroup",
-          "name": "winter_shelter",
-          "title": "In the last week, did you stay in a Winter / Severe Weather Shelter?  \n",
-          "description": "Please check all dates the respondent used a winter shelter.",
-          "choices": [
-            "Yes",
-            "No",
-            "Do not know"
-          ],
-          "showNoneItem": true,
-          "noneText": "Choose not to answer"
-        },
-        {
-          "type": "tagbox",
-          "name": "winter_shelter_dates",
-          "visibleIf": "{winter_shelter} = 'Yes'",
-          "title": "Which days did you stay in a Winter / Severe Weather Shelter? \n",
-          "choices": [
-            "January 17th, 2026",
-            "January 18th, 2026",
-            "January 19th, 2026",
-            "January 20th, 2026",
-            "January 21st, 2026",
-            "January 22nd, 2026",
-            "January 23rd, 2026",
-            "January 24th, 2026",
-            "January 25th, 2026",
-            "January 26th, 2026",
-            "January 27th, 2026",
-            "January 28th, 2026",
-            "January 29th, 2026",
-            "January 30th, 2026",
-            "January 31st, 2026",
-            "February 1st, 2026",
-            "February 2nd, 2026",
-            "February 3rd, 2026",
-            "February 4th, 2026",
-            "February 5th, 2026",
-            "February 6th, 2026"
-          ]
-        },
+                  "name": "shelter_services_panel",
+                  "title": "Housing Assistance Services",
+                  "elements": [
+                    {
+                      "type": "radiogroup",
+                      "name": "winter_shelter",
+                      "title": "In the last week, did you stay in a Winter / Severe Weather Shelter?  \n",
+                      "choices": [
+                        "Yes",
+                        "No",
+                        "Do not know"
+                      ],
+                      "showNoneItem": true,
+                      "noneText": "Choose not to answer"
+                    },
+                    {
+                      "type": "tagbox",
+                      "name": "winter_shelter_dates",
+                      "visibleIf": "{winter_shelter} = 'Yes'",
+                      "title": "Which days did you stay in a Winter / Severe Weather Shelter? \n",
+                      "description": "Please check all dates the respondent used a winter shelter.",
+                      "choices": [
+                        "January 17th, 2026",
+                        "January 18th, 2026",
+                        "January 19th, 2026",
+                        "January 20th, 2026",
+                        "January 21st, 2026",
+                        "January 22nd, 2026",
+                        "January 23rd, 2026",
+                        "January 24th, 2026",
+                        "January 25th, 2026",
+                        "January 26th, 2026",
+                        "January 27th, 2026",
+                        "January 28th, 2026",
+                        "January 29th, 2026",
+                        "January 30th, 2026",
+                        "January 31st, 2026",
+                        "February 1st, 2026",
+                        "February 2nd, 2026",
+                        "February 3rd, 2026",
+                        "February 4th, 2026",
+                        "February 5th, 2026",
+                        "February 6th, 2026"
+                      ]
+                    },
         {
           "type": "radiogroup",
           "name": "shelter_services",
