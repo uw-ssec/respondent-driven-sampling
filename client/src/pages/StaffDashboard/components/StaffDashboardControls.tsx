@@ -13,16 +13,22 @@ import {
 interface StaffDashboardControlsProps {
 	searchTerm: string;
 	filterRole: string;
+	filterLocation: string;
+	locations: string[];
 	onSearchChange: (value: string) => void;
 	onRoleFilterChange: (value: string) => void;
+	onLocationFilterChange: (value: string) => void;
 	onNewUserClick: () => void;
 }
 
 export default function StaffDashboardControls({
 	searchTerm,
 	filterRole,
+	filterLocation,
+	locations,
 	onSearchChange,
 	onRoleFilterChange,
+	onLocationFilterChange,
 	onNewUserClick
 }: StaffDashboardControlsProps) {
 	return (
@@ -61,6 +67,22 @@ export default function StaffDashboardControls({
 					<MenuItem value="ADMIN">Admin</MenuItem>
 					<MenuItem value="MANAGER">Manager</MenuItem>
 					<MenuItem value="VOLUNTEER">Volunteer</MenuItem>
+				</Select>
+			</FormControl>
+
+			<FormControl size="small" sx={{ minWidth: 150 }}>
+				<InputLabel>Filter Location</InputLabel>
+				<Select
+					value={filterLocation}
+					label="Filter Location"
+					onChange={e => onLocationFilterChange(e.target.value)}
+				>
+					<MenuItem value="">All Locations</MenuItem>
+					{locations.map(location => (
+						<MenuItem key={location} value={location}>
+							{location}
+						</MenuItem>
+					))}
 				</Select>
 			</FormControl>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuthContext } from '@/contexts';
 import { useApi } from '@/hooks';
@@ -15,18 +15,20 @@ import {
 
 interface StaffMember {
 	id: string;
-	employeeId: string;
 	name: string;
 	position: string;
+	locationObjectId: string;
+	phone: string;
 	approvalStatus: string;
 }
 
 export default function StaffDashboard() {
 	const navigate = useNavigate();
-	const { userService } = useApi();
+	const { userService, locationService } = useApi();
 	const { userObjectId } = useAuthContext();
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filterRole, setFilterRole] = useState('');
+	const [filterLocation, setFilterLocation] = useState('');
 	const [currentPage, setCurrentPage] = useState(0); // MUI uses 0-based index
 	const [itemsPerPage, setItemsPerPage] = useState(10);
 	const [sortConfig, setSortConfig] = useState<{
@@ -38,6 +40,12 @@ export default function StaffDashboard() {
 	});
 
 	const { data: users, mutate } = userService.useUsers() || {};
+	const { data: locations } = locationService.useLocations() || {};
+
+	// Reset to first page when filters change
+	useEffect(() => {
+		setCurrentPage(0);
+	}, [searchTerm, filterRole, filterLocation]);
 
 	// Handlers
 	const handleApproval = async (id: string, status: string) => {
@@ -75,9 +83,19 @@ export default function StaffDashboard() {
 		}
 	};
 
+	// Create location lookup map
+	const locationMap = new Map(
+		locations?.map(loc => [loc._id, loc.hubName]) ?? []
+	);
+
+	// Get unique location names for filter dropdown
+	const uniqueLocations = Array.from(
+		new Set(locations?.map(loc => loc.hubName).filter(Boolean))
+	).sort();
+
 	// Data processing pipeline
-	const staffMembers = transformUsersToStaff(users ?? []);
-	const filteredStaff = filterStaff(staffMembers, searchTerm, filterRole);
+	const staffMembers = transformUsersToStaff(users ?? [], locationMap);
+	const filteredStaff = filterStaff(staffMembers, searchTerm, filterRole, filterLocation);
 	const sortedStaff = sortStaff(filteredStaff, sortConfig);
 	const currentStaff = paginateStaff(sortedStaff, currentPage, itemsPerPage);
 
@@ -104,8 +122,11 @@ export default function StaffDashboard() {
 				<StaffDashboardControls
 					searchTerm={searchTerm}
 					filterRole={filterRole}
+					filterLocation={filterLocation}
+					locations={uniqueLocations}
 					onSearchChange={setSearchTerm}
 					onRoleFilterChange={setFilterRole}
+					onLocationFilterChange={setFilterLocation}
 					onNewUserClick={() => navigate('/add-new-user')}
 				/>
 
