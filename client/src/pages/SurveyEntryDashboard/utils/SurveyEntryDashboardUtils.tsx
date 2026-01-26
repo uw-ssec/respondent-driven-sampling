@@ -81,7 +81,7 @@ export const sortSurveys = (
  * Filter surveys by location name
  */
 export const filterSurveysByLocation = (
-	surveys: SurveyDocument[],
+	surveys: SurveyDocument[] | undefined,
 	locationName: string | null
 ): SurveyDocument[] => {
 	if (!surveys) return [];
