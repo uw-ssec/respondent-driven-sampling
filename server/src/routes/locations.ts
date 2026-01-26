@@ -35,7 +35,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const result = await Location.find({
 			$and: [req.query]
-		});
+		}).sort({ hubName: 1 });
 		res.status(200).json({
 			message: 'Locations fetched successfully',
 			data: result.map(item => item.toObject())
