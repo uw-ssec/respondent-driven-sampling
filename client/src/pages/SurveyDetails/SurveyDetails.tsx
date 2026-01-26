@@ -19,7 +19,7 @@ export default function SurveyDetails() {
 	const { surveyService } = useApi();
 	const {
 		data: survey,
-		isLoading: loading,
+		isLoading: loading, 
 		error
 	} = surveyService.useSurveyWithUser(id ?? '') || {};
 	const navigate = useNavigate();

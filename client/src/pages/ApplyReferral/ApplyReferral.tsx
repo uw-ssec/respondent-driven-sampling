@@ -171,7 +171,7 @@ export default function ApplyReferral() {
 	return (
 		<div className="apply-referral-page">
 			<div className="apply-referral-container">
-				<h2>Apply Coupon code</h2>
+				<h2>Start a New Survey</h2>
 				<p>Enter or Scan a QR code to start a new survey.</p>
 
 				{/* <input
