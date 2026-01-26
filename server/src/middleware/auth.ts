@@ -43,7 +43,8 @@ export async function auth(
 			// This case means that the user has a valid JWT signed by our server but
 			// the account it is linked to does not exist in our database.
 			res.status(400).json({
-				message: 'User account not found. Please contact your admin.'
+				message:
+					'User account not found. Please contact Administration.'
 			});
 			return;
 		}
@@ -52,7 +53,7 @@ export async function auth(
 		if (user.approvalStatus !== ApprovalStatus.APPROVED) {
 			res.status(403).json({
 				message:
-					'User account not approved yet. Please contact your admin.'
+					'User account not approved yet. Please contact Administration.'
 			});
 			return;
 		}

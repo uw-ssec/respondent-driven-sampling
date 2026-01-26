@@ -153,7 +153,9 @@ export default function Login() {
 					color="primary.main"
 					sx={{ mb: 3 }}
 				>
-					{otpSent ? 'Verify OTP' : 'Hi, Welcome to RDS Mobile!'}
+					{otpSent
+						? 'Verify OTP'
+						: 'Hi, Welcome to Point-in-Time Count 2026!'}
 				</Typography>
 
 				{/* Initial login page */}

@@ -58,7 +58,7 @@ async function generateQRCodeBuffer(
 	surveyCode: string,
 	qrSize: number
 ): Promise<Buffer> {
-	// Encode only the referral code (no URL) so QR codes work across any deployment
+	// Encode only the coupon code (no URL) so QR codes work across any deployment
 	const qrDataUrl = await QRCode.toDataURL(surveyCode, {
 		width: qrSize,
 		margin: 1,
@@ -142,7 +142,7 @@ async function addQRCodePage(
 
 	currentY += 50;
 
-	// QR Code and Referral Code
+	// QR Code and Coupon Code
 	const qrSize = 100;
 	const qrX = (pageWidth - qrSize) / 2;
 
@@ -156,7 +156,7 @@ async function addQRCodePage(
 
 	doc.fontSize(16)
 		.font('Helvetica-Bold')
-		.text(`Referral Code: ${surveyCode}`, margin, currentY, {
+		.text(`Coupon Code: ${surveyCode}`, margin, currentY, {
 			align: 'center',
 			width: contentWidth
 		});

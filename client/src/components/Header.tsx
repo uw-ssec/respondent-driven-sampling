@@ -59,26 +59,26 @@ export function Header() {
 	// Close menu when navigating
 	return (
 		<div className="header">
-			{/* Logo with Home Icon */}
+			{/* Home Icon */}
 			<div
-				className="logo"
+				className="home-icon"
 				onClick={goToLanding}
 				style={{ cursor: 'pointer' }}
 			>
-				<div className="home-icon">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 24 24"
-						fill="#3E236E"
-						width="24px"
-						height="24px"
-					>
-						<path d="M0 0h24v24H0z" fill="none" />
-						<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-					</svg>
-				</div>
-				<h1>RDS Mobile</h1>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="#3E236E"
+					width="24px"
+					height="24px"
+				>
+					<path d="M0 0h24v24H0z" fill="none" />
+					<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+				</svg>
 			</div>
+
+			{/* Centered Title */}
+			<h1 className="header-title">Point-in-Time Count 2026</h1>
 
 			{/* Navigation Icons */}
 			<div className="nav-icons">

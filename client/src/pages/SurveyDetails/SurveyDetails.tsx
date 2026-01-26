@@ -130,7 +130,7 @@ export default function SurveyDetails() {
 					</p>
 				</div>
 
-				{/* Referral Code Information */}
+				{/* Coupon Code Information */}
 				<div className="referral-info">
 					<h3>Referral Information</h3>
 					<p>
@@ -180,7 +180,7 @@ export default function SurveyDetails() {
 													level="M"
 												/>
 												<p className="qr-code-text">
-													{index + 1}. Referral Code:{' '}
+													{index + 1}. Coupon Code:{' '}
 													{code}
 												</p>
 											</div>
@@ -194,7 +194,7 @@ export default function SurveyDetails() {
 					</div>
 					<div className="qr-buttons">
 						<button className="generate-btn" onClick={handlePrint}>
-							Print QR Codes
+							Print Coupon Codes
 						</button>
 					</div>
 				</div>

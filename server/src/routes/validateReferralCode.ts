@@ -15,7 +15,7 @@ const validateReferralCodeSchema = z
 			.string()
 			.length(
 				SURVEY_CODE_LENGTH,
-				`Referral code must be exactly ${SURVEY_CODE_LENGTH} characters`
+				`Coupon code must be exactly ${SURVEY_CODE_LENGTH} characters`
 			)
 	})
 	.strict()
@@ -78,7 +78,7 @@ router.get(
 			}
 			res.status(200).json({
 				isValid: true,
-				message: 'Referral code is valid'
+				message: 'Coupon code is valid'
 			});
 		} catch (error) {
 			next(error);

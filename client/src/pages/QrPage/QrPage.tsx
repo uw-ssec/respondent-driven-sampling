@@ -48,8 +48,7 @@ export default function QrPage() {
 												level="M"
 											/>
 											<p className="qr-code-text">
-												{index + 1}. Referral Code:{' '}
-												{code}
+												{index + 1}. Coupon Code: {code}
 											</p>
 										</div>
 									);
@@ -63,13 +62,13 @@ export default function QrPage() {
 
 				<div className="qr-buttons">
 					<button className="generate-btn" onClick={handlePrint}>
-						Print QR Codes
+						Print Coupon Codes
 					</button>
 					<button
 						className="generate-btn"
 						onClick={() => navigate('/dashboard')}
 					>
-						Complete Surveying Process
+						Return to Home Page
 					</button>
 				</div>
 			</div>
