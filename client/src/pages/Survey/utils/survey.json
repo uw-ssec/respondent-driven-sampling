@@ -1,5 +1,11 @@
 {
   "title": "Unsheltered Point-in-Time Count 2026",
+  "calculatedValues": [
+    {
+      "name": "has_minor_child",
+      "expression": "countInArray({household_members}, 'hh_member_age', {hh_member_age} anyof ['0-6 years old', '7-12 years old', '13-17 years old']) > 0"
+    }
+  ],
   "pages": [
     {
       "name": "volunteer-pre-screen",
@@ -1491,7 +1497,7 @@
         {
           "type": "text",
           "name": "gift_card_2",
-          "visibleIf": "{gift_card_check} = 'Yes' and {household_members[0].hh_member_age} anyof ['0-6 years old', '7-12 years old', '13-17 years old']",
+          "visibleIf": "{gift_card_check} = 'Yes' and {has_minor_child} = true",
           "title": "Please enter the last 4 digits of the 2nd Gift Card:",
           "description": "Note: Families with minor children receive two gift cards.",
           "inputType": "number",
