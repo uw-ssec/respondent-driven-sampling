@@ -1,63 +1,64 @@
 /* CSS FOR SURVEYDETAILS.JS */
 .survey-details-container {
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-    background-color: #f7f7f7;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+	max-width: 800px;
+	margin: auto;
+	padding: 20px;
+	background-color: #f7f7f7;
+	border-radius: 10px;
+	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* General styles for headings and paragraphs */
-.survey-info, .referral-info {
-    margin-bottom: 20px;
-    padding: 15px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+.survey-info,
+.referral-info {
+	margin-bottom: 20px;
+	padding: 15px;
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Specific styles for headings */
 h3 {
-    color: #3E236E;
-    margin-bottom: 10px;
+	color: #3e236e;
+	margin-bottom: 10px;
 }
 
-/* Styles for the referral code input */
+/* Styles for the coupon code input */
 .referral-list {
-    list-style: none;
-    padding: 0;
+	list-style: none;
+	padding: 0;
 }
 
-/* Styles for the referral code input */
+/* Styles for the coupon code input */
 .referral-code-tag {
-    display: inline-block;
-    background-color: #e0e0e0;
-    padding: 5px 10px;
-    border-radius: 5px;
-    margin: 5px;
-    font-weight: bold;
+	display: inline-block;
+	background-color: #e0e0e0;
+	padding: 5px 10px;
+	border-radius: 5px;
+	margin: 5px;
+	font-weight: bold;
 }
 
 /* Styles for the action buttons */
 .responses-section pre {
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-    white-space: pre-wrap;
-    word-wrap: break-word;
+	background: #fff;
+	padding: 15px;
+	border-radius: 8px;
+	box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+	white-space: pre-wrap;
+	word-wrap: break-word;
 }
 
 /* Edit Pre-Screen Responses Button */
 .edit-button {
-  width: 100%;
-  padding: 14px;
-  background-color: #3e236e;
-  color: white;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 8px;
-  margin-top: 10px;
+	width: 100%;
+	padding: 14px;
+	background-color: #3e236e;
+	color: white;
+	border: none;
+	font-size: 16px;
+	cursor: pointer;
+	border-radius: 8px;
+	margin-top: 10px;
 }

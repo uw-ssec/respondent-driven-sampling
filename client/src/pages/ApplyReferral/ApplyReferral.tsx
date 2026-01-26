@@ -38,29 +38,29 @@ export default function ApplyReferral() {
 		}
 		setIsScanning(false);
 
-		// Extract referral code from scanned text
+		// Extract coupon code from scanned text
 		const code = decodedText.trim();
 
 		if (!code) {
-			toast.error('Invalid QR Code. Could not extract referral code.');
+			toast.error('Invalid QR Code. Could not extract coupon code.');
 			return;
 		}
 
-		// Clear any existing survey data and navigate to survey with the referral code
+		// Clear any existing survey data and navigate to survey with the coupon code
 		clearSurvey();
 		try {
 			const data = await surveyService.fetchReferralCodeValidation(code);
 
 			if (!data?.isValid) {
-				setErrorMessage(data?.message ?? 'Invalid referral code.');
+				setErrorMessage(data?.message ?? 'Invalid coupon code.');
 				setLoading(false);
 				return;
 			}
 
-			// If valid, navigate to the survey page with the referral code
+			// If valid, navigate to the survey page with the coupon code
 			navigate(`/survey?ref=${code}`);
 		} catch (error) {
-			console.error('Error validating referral code:', error);
+			console.error('Error validating coupon code:', error);
 			setErrorMessage(
 				error instanceof Error
 					? error.message
@@ -125,16 +125,16 @@ export default function ApplyReferral() {
 		};
 	}, [isScanning, onScanSuccess, onScanFailure]);
 
-	// Function to handle referral code submission
+	// Function to handle coupon code submission
 	const handleStartSurvey = async () => {
 		if (!referralCode.trim()) {
-			setErrorMessage('Please enter a referral code.');
+			setErrorMessage('Please enter a coupon code.');
 			return;
 		}
 
 		if (referralCode.length !== SURVEY_CODE_LENGTH) {
 			setErrorMessage(
-				`Please enter a valid ${SURVEY_CODE_LENGTH}-character referral code.`
+				`Please enter a valid ${SURVEY_CODE_LENGTH}-character coupon code.`
 			);
 			return;
 		}
@@ -149,15 +149,15 @@ export default function ApplyReferral() {
 				await surveyService.fetchReferralCodeValidation(referralCode);
 
 			if (!data?.isValid) {
-				setErrorMessage(data?.message ?? 'Invalid referral code.');
+				setErrorMessage(data?.message ?? 'Invalid coupon code.');
 				setLoading(false);
 				return;
 			}
 
-			// If valid, navigate to the survey page with the referral code
+			// If valid, navigate to the survey page with the coupon code
 			navigate(`/survey?ref=${referralCode}`);
 		} catch (error) {
-			console.error('Error validating referral code:', error);
+			console.error('Error validating coupon code:', error);
 			setErrorMessage(
 				error instanceof Error
 					? error.message
@@ -171,12 +171,12 @@ export default function ApplyReferral() {
 	return (
 		<div className="apply-referral-page">
 			<div className="apply-referral-container">
-				<h2>Apply Referral Code</h2>
+				<h2>Start a New Survey</h2>
 				<p>Enter or Scan a QR code to start a new survey.</p>
 
 				{/* <input
 					type="text"
-					placeholder="Enter referral code..."
+					placeholder="Enter coupon code..."
 					value={referralCode}
 					onChange={e =>
 						setReferralCode(e.target.value.toUpperCase())
@@ -185,8 +185,8 @@ export default function ApplyReferral() {
 				/> */}
 				<TextField
 					type="text"
-					label="Referral Code"
-					placeholder="Enter referral code..."
+					label="Coupon code"
+					placeholder="Enter coupon code..."
 					value={referralCode}
 					onChange={e =>
 						setReferralCode(e.target.value.toUpperCase())
@@ -202,7 +202,7 @@ export default function ApplyReferral() {
 					onClick={handleStartSurvey}
 					disabled={loading}
 				>
-					{loading ? 'Checking...' : 'Start Survey with Referral'}
+					{loading ? 'Checking...' : 'Enter the Coupon Code'}
 				</button>
 
 				{/* QR Code Scanner Button */}
@@ -225,7 +225,7 @@ export default function ApplyReferral() {
 						}}
 						className="new-seed-btn"
 					>
-						No referral code? Start new survey
+						No coupon code? Start new survey
 					</div>
 				)}
 

@@ -10,6 +10,7 @@ import {
 } from './components';
 import {
 	filterSurveysByDate,
+	filterSurveysByLocation,
 	paginateSurveys,
 	searchSurveys,
 	sortSurveys,
@@ -23,6 +24,7 @@ export default function SurveyEntryDashboard() {
 	const [viewAll, setViewAll] = useState(false);
 	const [filterMode, setFilterMode] = useState('byDate');
 	const [showFilterPopup, setShowFilterPopup] = useState(false);
+	const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 	const [sortConfig, setSortConfig] = useState<{
 		key: string | null;
 		direction: 'asc' | 'desc';
@@ -38,7 +40,7 @@ export default function SurveyEntryDashboard() {
 	useEffect(() => {
 		setViewAll(filterMode === 'viewAll');
 		setCurrentPage(0);
-	}, [filterMode, selectedDate, searchTerm]);
+	}, [filterMode, selectedDate, searchTerm, selectedLocation]);
 
 	const handleSort = (key: string) => {
 		setSortConfig(prev => ({
@@ -48,12 +50,13 @@ export default function SurveyEntryDashboard() {
 		}));
 	};
 
-	const filteredSurveys = filterSurveysByDate(
+	const filteredByDate = filterSurveysByDate(
 		surveys ?? [],
 		viewAll,
 		selectedDate
 	);
-	const sortedSurveys = sortSurveys(filteredSurveys, sortConfig);
+	const filteredByLocation = filterSurveysByLocation(filteredByDate, selectedLocation);
+	const sortedSurveys = sortSurveys(filteredByLocation, sortConfig);
 	const searchedSurveys = searchSurveys(sortedSurveys, searchTerm);
 	const currentSurveys = paginateSurveys(
 		searchedSurveys,
@@ -65,15 +68,15 @@ export default function SurveyEntryDashboard() {
 		{ key: 'createdAt', label: 'Date & Time', sortable: true, width: 120 },
 		// { key: 'employeeId', label: 'Employee ID', sortable: true, width: 120 },
 		{
-			key: 'employeeName',
-			label: 'Employee Name',
+			key: 'surveyCode',
+			label: 'Survey Code',
 			sortable: true,
 			width: 120
 		},
 		{ key: 'locationName', label: 'Location', sortable: true, width: 130 },
 		{
-			key: 'parentSurveyCode',
-			label: 'Referred By Code',
+			key: 'employeeName',
+			label: 'Staff Name',
 			sortable: true,
 			width: 140
 		},
@@ -95,13 +98,13 @@ export default function SurveyEntryDashboard() {
 			sortable: true,
 			width: 110
 		},
+		{ key: 'progress', label: 'Progress', sortable: false, width: 120 },
 		{
 			key: 'actions',
 			label: 'Survey Responses',
 			sortable: false,
 			width: 130
-		},
-		{ key: 'progress', label: 'Progress', sortable: false, width: 120 }
+		}
 	];
 
 	return (
@@ -125,6 +128,7 @@ export default function SurveyEntryDashboard() {
 				{viewAll
 					? 'Viewing All Survey Entries'
 					: `Entries for: ${toPacificDateOnlyString(selectedDate)}`}
+				{selectedLocation && ` • Location: ${selectedLocation}`}
 			</Typography>
 
 			<Paper elevation={2} sx={{ width: '100%', mb: 2 }}>
@@ -160,10 +164,21 @@ export default function SurveyEntryDashboard() {
 				open={showFilterPopup}
 				filterMode={filterMode}
 				selectedDate={selectedDate}
+				selectedLocation={selectedLocation}
+				locations={
+					Array.from(
+						new Set(
+							surveys
+								?.map(s => s.locationName)
+								.filter(Boolean)
+						)
+					) ?? []
+				}
 				onClose={() => setShowFilterPopup(false)}
-				onApply={(mode, date) => {
+				onApply={(mode, date, location) => {
 					setFilterMode(mode);
 					setSelectedDate(date);
+					setSelectedLocation(location);
 				}}
 			/>
 		</Box>

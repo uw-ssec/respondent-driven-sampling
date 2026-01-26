@@ -6,9 +6,13 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
+	FormControl,
 	FormControlLabel,
+	InputLabel,
+	MenuItem,
 	Radio,
 	RadioGroup,
+	Select,
 	TextField
 } from '@mui/material';
 
@@ -18,30 +22,37 @@ interface FilterDialogProps {
 	open: boolean;
 	filterMode: string;
 	selectedDate: Date;
+	selectedLocation: string | null;
+	locations: string[];
 	onClose: () => void;
-	onApply: (mode: string, date: Date) => void;
+	onApply: (mode: string, date: Date, location: string | null) => void;
 }
 
 export default function FilterDialog({
 	open,
 	filterMode,
 	selectedDate,
+	selectedLocation,
+	locations,
 	onClose,
 	onApply
 }: FilterDialogProps) {
 	const [tempFilterMode, setTempFilterMode] = React.useState(filterMode);
 	const [tempSelectedDate, setTempSelectedDate] =
 		React.useState(selectedDate);
+	const [tempSelectedLocation, setTempSelectedLocation] =
+		React.useState<string | null>(selectedLocation);
 
 	React.useEffect(() => {
 		if (open) {
 			setTempFilterMode(filterMode);
 			setTempSelectedDate(selectedDate);
+			setTempSelectedLocation(selectedLocation);
 		}
-	}, [open, filterMode, selectedDate]);
+	}, [open, filterMode, selectedDate, selectedLocation]);
 
 	const handleApply = () => {
-		onApply(tempFilterMode, tempSelectedDate);
+		onApply(tempFilterMode, tempSelectedDate, tempSelectedLocation);
 		onClose();
 	};
 
@@ -78,6 +89,23 @@ export default function FilterDialog({
 						}}
 					/>
 				)}
+
+				<FormControl fullWidth sx={{ mt: 2 }}>
+					<InputLabel id="location-filter-label">Location</InputLabel>
+					<Select
+						labelId="location-filter-label"
+						value={tempSelectedLocation ?? ''}
+						label="Location"
+						onChange={e => setTempSelectedLocation(e.target.value || null)}
+					>
+						<MenuItem value="">All Locations</MenuItem>
+						{locations.map(location => (
+							<MenuItem key={location} value={location}>
+								{location}
+							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Cancel</Button>

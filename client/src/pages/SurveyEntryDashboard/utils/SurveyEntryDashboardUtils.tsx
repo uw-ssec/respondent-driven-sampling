@@ -78,6 +78,19 @@ export const sortSurveys = (
 };
 
 /**
+ * Filter surveys by location name
+ */
+export const filterSurveysByLocation = (
+	surveys: SurveyDocument[] | undefined,
+	locationName: string | null
+): SurveyDocument[] => {
+	if (!surveys) return [];
+	if (!locationName) return surveys;
+
+	return surveys.filter(s => s.locationName === locationName);
+};
+
+/**
  * Search surveys by term across multiple fields
  */
 export const searchSurveys = (
@@ -90,10 +103,9 @@ export const searchSurveys = (
 
 	return surveys.filter(s => {
 		const searchableText = [
-			s.employeeId,
+			s.surveyCode,
 			s.employeeName,
 			s.locationName,
-			s.parentSurveyCode,
 			s.responses?.first_two_letters_fname,
 			s.responses?.first_two_letters_lname,
 			s.responses?.date_of_birth

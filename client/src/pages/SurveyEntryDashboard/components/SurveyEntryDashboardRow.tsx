@@ -33,25 +33,9 @@ export default function SurveyEntryDashboardRow({
 	return (
 		<TableRow hover sx={{ '&:hover': { backgroundColor: '#f8f8f8' } }}>
 			<TableCell>{toPacificDateTimeString(survey.createdAt)}</TableCell>
-			{/* <TableCell>
-				<Tooltip title={survey.employeeId} arrow>
-					<Typography
-						variant="body2"
-						sx={{
-							fontSize: '0.85rem',
-							maxWidth: '90px',
-							overflow: 'hidden',
-							textOverflow: 'ellipsis',
-							whiteSpace: 'nowrap'
-						}}
-					>
-						{survey.employeeId}
-					</Typography>
-				</Tooltip>
-			</TableCell> */}
-			<TableCell>{survey.employeeName}</TableCell>
+			<TableCell>{survey.surveyCode ?? 'N/A'}</TableCell>
 			<TableCell>{survey.locationName ?? 'N/A'}</TableCell>
-			<TableCell>{survey.parentSurveyCode ?? 'N/A'}</TableCell>
+			<TableCell>{survey.employeeName}</TableCell>
 			<TableCell>
 				{survey.responses?.first_two_letters_fname ?? 'N/A'}
 			</TableCell>
@@ -59,20 +43,6 @@ export default function SurveyEntryDashboardRow({
 				{survey.responses?.first_two_letters_lname ?? 'N/A'}
 			</TableCell>
 			<TableCell>{survey.responses?.date_of_birth ?? 'N/A'}</TableCell>
-			<TableCell>
-				<Button
-					size="small"
-					variant="contained"
-					onClick={() => navigate(`/survey/${survey._id}`)}
-					sx={{
-						textTransform: 'none',
-						backgroundColor: '#3E236E',
-						'&:hover': { backgroundColor: '#5F2A96' }
-					}}
-				>
-					View Details
-				</Button>
-			</TableCell>
 			<TableCell>
 				{/* TODO: add some kind of permission check/unlocking functionality here for admin */}
 				{survey.isCompleted ? (
@@ -107,6 +77,20 @@ export default function SurveyEntryDashboardRow({
 						</span>
 					</Tooltip>
 				)}
+			</TableCell>
+			<TableCell>
+				<Button
+					size="small"
+					variant="contained"
+					onClick={() => navigate(`/survey/${survey._id}`)}
+					sx={{
+						textTransform: 'none',
+						backgroundColor: '#3E236E',
+						'&:hover': { backgroundColor: '#5F2A96' }
+					}}
+				>
+					View Details
+				</Button>
 			</TableCell>
 		</TableRow>
 	);

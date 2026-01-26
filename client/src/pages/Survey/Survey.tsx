@@ -20,7 +20,7 @@ import { initializeSurvey } from './utils/surveyUtils';
 
 // This component is responsible for rendering the survey and handling its logic
 // It uses the SurveyJS library to create and manage the survey
-// It also handles referral code validation and geolocation
+// It also handles coupon code validation and geolocation
 // It uses React Router for navigation and URL parameter handling
 // It uses Zustand (with persist) & localstorage to manage and persist data across sessions
 // It uses the useEffect hook to manage side effects, such as fetching data and updating state
@@ -43,7 +43,7 @@ const Survey = () => {
 	// Add a ref to store the original full survey data in edit mode
 	const originalSurveyData = useRef<any>(null);
 
-	// Conditionally fetch survey by referral code (only when surveyCodeInUrl exists)
+	// Conditionally fetch survey by coupon code (only when surveyCodeInUrl exists)
 	const { data: surveyByRefCode, isLoading: surveyByRefLoading } =
 		surveyCodeInUrl
 			? surveyService.useSurveyBySurveyCode(surveyCodeInUrl)
@@ -235,7 +235,7 @@ const Survey = () => {
 			)
 		) {
 			toast.error(
-				'You do not have permission to create a survey without a referral code.'
+				'You do not have permission to create a survey without a coupon code.'
 			);
 			navigate('/apply-referral');
 			return;
@@ -310,67 +310,6 @@ const Survey = () => {
 				{surveyRef.current && (
 					<SurveyComponent model={surveyRef.current} />
 				)}
-				<div
-					style={{
-						display: 'flex',
-						justifyContent: 'center',
-						gap: '24px',
-						marginTop: '12px'
-					}}
-				>
-					<div
-						onClick={() => {
-							if (
-								surveyRef.current &&
-								surveyRef.current.currentPageNo > 0
-							) {
-								surveyRef.current.prevPage();
-							}
-						}}
-						style={{ cursor: 'pointer' }}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							width="36px"
-							height="36px"
-						>
-							<circle cx="12" cy="12" r="10" fill="#3E236E" />
-							<path
-								d="M14 7l-5 5 5 5"
-								stroke="white"
-								strokeWidth="2"
-								fill="none"
-							/>
-						</svg>
-					</div>
-					<div
-						onClick={() => {
-							if (
-								surveyRef.current &&
-								!surveyRef.current.isLastPage
-							) {
-								surveyRef.current.nextPage();
-							}
-						}}
-						style={{ cursor: 'pointer' }}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							width="36px"
-							height="36px"
-						>
-							<circle cx="12" cy="12" r="10" fill="#3E236E" />
-							<path
-								d="M10 7l5 5-5 5"
-								stroke="white"
-								strokeWidth="2"
-								fill="none"
-							/>
-						</svg>
-					</div>
-				</div>
 			</div>
 		</>
 	);
