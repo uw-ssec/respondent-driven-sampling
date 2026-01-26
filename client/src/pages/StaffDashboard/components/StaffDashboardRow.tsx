@@ -9,17 +9,17 @@ import {
 	Stack,
 	TableCell,
 	TableRow,
-	Tooltip,
-	Typography
+	Tooltip
 } from '@mui/material';
 
 import { UserDocument } from '@/types/User';
 
 interface StaffMember {
 	id: string;
-	employeeId: string;
 	name: string;
 	position: string;
+	locationObjectId: string;
+	phone: string;
 	approvalStatus: string;
 }
 
@@ -73,18 +73,10 @@ export default function StaffDashboardRow({
 				'&:hover': { backgroundColor: '#f8f8f8' }
 			}}
 		>
-			<TableCell>
-				<Typography
-					variant="body2"
-					sx={{
-						fontSize: '0.85rem'
-					}}
-				>
-					{member.employeeId}
-				</Typography>
-			</TableCell>
 			<TableCell>{member.name}</TableCell>
 			<TableCell>{member.position}</TableCell>
+			<TableCell>{member.locationObjectId}</TableCell>
+			<TableCell>{member.phone}</TableCell>
 			<TableCell>
 				<Tooltip
 					title={
