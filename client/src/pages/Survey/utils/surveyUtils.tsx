@@ -18,7 +18,13 @@ export const initializeSurvey = (
 	if (isEditMode) {
 		// Edit mode only uses first 3 pages: volunteer-pre-screen, consent, survey-validation
 		surveyJson.title = 'Homelessness Experience Survey (Edit Mode)';
-		surveyJson.pages = surveyJson.pages.slice(0, 3);
+		// surveyJson.pages = surveyJson.pages.slice(0, 4);
+		surveyJson.pages = [
+			...surveyJson.pages.slice(0, 4), 
+			surveyJson.pages[16], 
+			surveyJson.pages[17]
+		].filter(page => page !== undefined);
+
 		// Remove any early stop triggers to allow full editing of survey
 		// Without this, the survey will stop early if consent is revoked, not allowing any edits to consecutive pages
 		if (surveyJson.triggers) {
