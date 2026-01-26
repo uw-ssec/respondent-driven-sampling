@@ -27,7 +27,15 @@ export function Header() {
 	};
 
 	const goToPreviousPage = () => {
-		navigate(-1);
+		// Check if we're on the actual survey page (not survey-entries, survey-details, etc.)
+		const path = window.location.pathname;
+		const isSurveyPage = path === '/survey' || path.match(/^\/survey\/[^/]+\/edit$/);
+
+		if (isSurveyPage) {
+			navigate('/apply-referral');
+		} else {
+			navigate(-1);
+		}
 	};
 
 	// Function to handle new entry navigation
