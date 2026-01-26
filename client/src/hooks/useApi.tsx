@@ -352,38 +352,47 @@ export const useApi = () => {
 	type SurveyWithUser = SurveyDocument & {
 		employeeName: string;
 		employeeId: string;
+		locationName: string;
 	};
 
 	const useSurveyWithUser = (
-		surveyObjectId: string
-	): SWRResponse<SurveyWithUser> => {
+		surveyObjectId: string | undefined
+	): SWRResponse<SurveyWithUser | null> => {
 		return useSWR(
 			surveyObjectId ? `/api/surveys/${surveyObjectId}` : null,
-			() => fetchSurveyWithUser(surveyObjectId)
+			() => fetchSurveyWithUser(surveyObjectId!)
 		);
 	};
 
 	const fetchSurveyWithUser = async (
 		surveyObjectId: string
-	): Promise<SurveyWithUser> => {
+	): Promise<SurveyWithUser | null> => {
 		const survey = await fetchAndDeserialize<SurveyDocument>(
 			`/api/surveys/${surveyObjectId}`
 		);
 		if (!survey) {
-			throw new Error(
-				'Survey not found or you do not have permission to view it'
-			);
+			return null;
 		}
-		const user = await fetchAndDeserialize<UserDocument>(
-			`/api/users/${survey.createdByUserObjectId}`
-		);
+
+		// Fetch user and location in parallel for efficiency
+		const [user, location] = await Promise.all([
+			fetchAndDeserialize<UserDocument>(
+				`/api/users/${survey.createdByUserObjectId}`
+			),
+			survey.locationObjectId
+				? fetchAndDeserialize<LocationDocument>(
+						`/api/locations/${survey.locationObjectId}`
+				  )
+				: Promise.resolve(null)
+		]);
 
 		return {
 			...survey,
 			employeeName: user
 				? `${user.firstName} ${user.lastName}`
 				: 'Unknown',
-			employeeId: user?._id ?? 'Unknown'
+			employeeId: user?._id ?? 'Unknown',
+			locationName: location?.hubName ?? 'Unknown'
 		};
 	};
 

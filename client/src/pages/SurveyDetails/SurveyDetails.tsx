@@ -18,10 +18,9 @@ export default function SurveyDetails() {
 	const { id } = useParams();
 	const { surveyService } = useApi();
 	const {
-		data: surveys,
+		data: survey,
 		isLoading: loading
-	} = surveyService.useSurveysWithUsersAndLocations() || {};
-	const survey = surveys?.find(s => s._id === id);
+	} = surveyService.useSurveyWithUser(id) || {};
 	const error = !loading && !survey;
 	const navigate = useNavigate();
 	const qrRefs = useRef<(HTMLDivElement | null)[]>([]);
