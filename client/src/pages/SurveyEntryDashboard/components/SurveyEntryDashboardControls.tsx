@@ -44,7 +44,7 @@ export default function SurveyEntryDashboardControls({
 			</Button>
 			<TextField
 				size="small"
-				placeholder="Search Employee, Location, Ref Code, Survey Data..."
+				placeholder="Search Survey Code, Location, Staff Name, ..."
 				value={searchTerm}
 				onChange={e => onSearchChange(e.target.value)}
 				sx={{ flexGrow: 1, minWidth: 300 }}
