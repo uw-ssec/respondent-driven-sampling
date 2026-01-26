@@ -165,7 +165,15 @@ export default function SurveyEntryDashboard() {
 				filterMode={filterMode}
 				selectedDate={selectedDate}
 				selectedLocation={selectedLocation}
-				locations={surveys?.map(s => s.locationName).filter((v, i, a) => a.indexOf(v) === i) ?? []}
+				locations={
+					Array.from(
+						new Set(
+							surveys
+								?.map(s => s.locationName)
+								.filter(Boolean)
+						)
+					) ?? []
+				}
 				onClose={() => setShowFilterPopup(false)}
 				onApply={(mode, date, location) => {
 					setFilterMode(mode);
