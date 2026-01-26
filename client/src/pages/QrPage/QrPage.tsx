@@ -24,7 +24,7 @@ export default function QrPage() {
 	return (
 		<div className="completed-survey-page">
 			<div className="completed-survey-container">
-				<h2>Referral QR Codes</h2>
+				<h2>Coupon Codes</h2>
 				<p>Provide these QR codes to referred individuals.</p>
 
 				{/* Display QR Codes */}

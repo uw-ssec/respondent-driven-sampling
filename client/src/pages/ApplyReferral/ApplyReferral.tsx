@@ -202,7 +202,7 @@ export default function ApplyReferral() {
 					onClick={handleStartSurvey}
 					disabled={loading}
 				>
-					{loading ? 'Checking...' : 'Start Survey with Referral'}
+					{loading ? 'Checking...' : 'Enter the Coupon Code'}
 				</button>
 
 				{/* QR Code Scanner Button */}
