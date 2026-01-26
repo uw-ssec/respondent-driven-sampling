@@ -1296,11 +1296,11 @@
             "Support to find permanent housing",
             {
               "value": "Support for decreasing substance use",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = 'Yes'"
             },
             {
               "value": "Support for mental health conditions",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = 'Yes'"
             },
             "On-site health services such as a nurse"
           ],
