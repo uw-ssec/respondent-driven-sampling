@@ -15,15 +15,16 @@ import {
 
 interface StaffMember {
 	id: string;
-	employeeId: string;
 	name: string;
 	position: string;
+	locationObjectId: string;
+	phone: string;
 	approvalStatus: string;
 }
 
 export default function StaffDashboard() {
 	const navigate = useNavigate();
-	const { userService } = useApi();
+	const { userService, locationService } = useApi();
 	const { userObjectId } = useAuthContext();
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filterRole, setFilterRole] = useState('');
@@ -38,6 +39,7 @@ export default function StaffDashboard() {
 	});
 
 	const { data: users, mutate } = userService.useUsers() || {};
+	const { data: locations } = locationService.useLocations() || {};
 
 	// Handlers
 	const handleApproval = async (id: string, status: string) => {
@@ -75,8 +77,13 @@ export default function StaffDashboard() {
 		}
 	};
 
+	// Create location lookup map
+	const locationMap = new Map(
+		locations?.map(loc => [loc._id, loc.hubName]) ?? []
+	);
+
 	// Data processing pipeline
-	const staffMembers = transformUsersToStaff(users ?? []);
+	const staffMembers = transformUsersToStaff(users ?? [], locationMap);
 	const filteredStaff = filterStaff(staffMembers, searchTerm, filterRole);
 	const sortedStaff = sortStaff(filteredStaff, sortConfig);
 	const currentStaff = paginateStaff(sortedStaff, currentPage, itemsPerPage);
