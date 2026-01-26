@@ -265,7 +265,6 @@
         {
           "type": "checkbox",
           "name": "personal_amenities",
-          "visibleIf": "{sleeping_situation} noneof ['small_vehicle', 'large_vehicle'] and {sleeping_situation} <> 'none' and {sleeping_situation} notempty",
           "title": "Do you generally have access to any of the following needs?",
           "choices": [
             "Drinking water",
