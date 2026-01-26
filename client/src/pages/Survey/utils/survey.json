@@ -484,6 +484,48 @@
       "elements": [
         {
           "type": "radiogroup",
+          "name": "winter_shelter",
+          "title": "In the last week, did you stay in a Winter / Severe Weather Shelter?  \n",
+          "description": "Please check all dates the respondent used a winter shelter.",
+          "choices": [
+            "Yes",
+            "No",
+            "Do not know"
+          ],
+          "showNoneItem": true,
+          "noneText": "Choose not to answer"
+        },
+        {
+          "type": "tagbox",
+          "name": "winter_shelter_dates",
+          "visibleIf": "{winter_shelter} = 'Yes'",
+          "title": "Which days did you stay in a Winter / Severe Weather Shelter? \n",
+          "choices": [
+            "January 17th, 2026",
+            "January 18th, 2026",
+            "January 19th, 2026",
+            "January 20th, 2026",
+            "January 21st, 2026",
+            "January 22nd, 2026",
+            "January 23rd, 2026",
+            "January 24th, 2026",
+            "January 25th, 2026",
+            "January 26th, 2026",
+            "January 27th, 2026",
+            "January 28th, 2026",
+            "January 29th, 2026",
+            "January 30th, 2026",
+            "January 31st, 2026",
+            "February 1st, 2026",
+            "February 2nd, 2026",
+            "February 3rd, 2026",
+            "February 4th, 2026",
+            "February 5th, 2026",
+            "February 6th, 2026"
+          ]
+        },
+        {
+          "type": "radiogroup",
           "name": "shelter_services",
           "title": "In the past 3 years, have you enrolled in an Emergency Shelter or received any other form of housing assistance from an organization that serves people experiencing homelessness? (Includes referrals, vouchers, hygiene support, etc.)",
           "choices": [
@@ -499,7 +541,7 @@
           "name": "shelter_services_details",
           "visibleIf": "{shelter_services} = 'Yes'",
           "title": "Housing Assistance Services",
-          "description": "Fill out the table below as much as possible.\\nIn case a respondent received a service multiple times, only include the last service received.",
+          "description": "Fill out the table below as much as possible. If a respondent received a service multiple times, include only the last service.",
           "validators": [
             {
               "type": "expression"
@@ -566,7 +608,7 @@
           "name": "age_group",
           "title": "How old are you?",
           "choices": [
-            "0-17",
+            "12-17",
             "18-24",
             "25-34",
             "35-44",
@@ -1189,16 +1231,34 @@
             "Foreclosure",
             "Incarceration/detention",
             "Illness/medical problem",
-            "Substance Use Disorder",
-            "Mental health issues",
-            "Hospitalization/treatment",
+            {
+              "value": "Substance Use Disorder",
+              "visibleIf": "{is_adult} == Yes"
+            },
+            {
+              "value": "Mental health issues",
+              "visibleIf": "{is_adult} == Yes"
+            },
+            {
+              "value": "Hospitalization/treatment",
+              "visibleIf": "{is_adult} == Yes"
+            },
             "Divorce/separation/breakup",
             "Could not afford rent increase",
-            "Argument with family/friend/roommate",
-            "Family domestic violence",
+            {
+              "value": "Argument with family/friend/roommate",
+              "visibleIf": "{is_adult} == Yes"
+            },
+            {
+              "value": "Family domestic violence",
+              "visibleIf": "{is_adult} == Yes"
+            },
             "Family/friend's housing wouldn't let me stay",
             "Family/friend couldn't afford to let me stay",
-            "Safety",
+            {
+              "value": "Safety",
+              "visibleIf": "{is_adult} == Yes"
+            },
             "Resettlement transition",
             "Aging out of foster care",
             "Death of a parent/spouse/child",
@@ -1207,7 +1267,8 @@
           "showOtherItem": true,
           "showNoneItem": true,
           "noneText": "Choose not to answer",
-          "otherText": "Other (please specify)"
+          "otherText": "Other (please specify)",
+          "searchMode": "startsWith"
         },
         {
           "type": "tagbox",
@@ -1228,8 +1289,14 @@
             "A private room",
             "Ability to return if I don't stay there one night",
             "Support to find permanent housing",
-            "Support for decreasing substance use",
-            "Support for mental health conditions",
+            {
+              "value": "Support for decreasing substance use",
+              "visibleIf": "{is_adult} == Yes"
+            },
+            {
+              "value": "Support for mental health conditions",
+              "visibleIf": "{is_adult} == Yes"
+            },
             "On-site health services such as a nurse"
           ],
           "showOtherItem": true,
@@ -1385,7 +1452,7 @@
           "requiredIf": "{email_phone_consent} contains 'phone'",
           "maskType": "pattern",
           "maskSettings": {
-            "pattern": "+1(999)-999-99-99"
+            "pattern": "(999) 999-9999"
           }
         }
       ]
