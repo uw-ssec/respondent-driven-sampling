@@ -28,17 +28,19 @@ export const getStatusColor = (
 };
 
 /**
- * Filter staff members by search term and role
+ * Filter staff members by search term, role, and location
  */
 export const filterStaff = (
 	staffMembers: StaffMember[],
 	searchTerm: string,
-	filterRole: string
+	filterRole: string,
+	filterLocation: string
 ): StaffMember[] => {
 	return staffMembers.filter(
 		(staff: StaffMember) =>
 			staff.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-			(filterRole ? staff.position === filterRole : true)
+			(filterRole ? staff.position === filterRole : true) &&
+			(filterLocation ? staff.locationObjectId === filterLocation : true)
 	);
 };
 
