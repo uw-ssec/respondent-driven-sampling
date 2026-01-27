@@ -65,19 +65,44 @@ const createQrCodePdf = (
 	return pdf;
 };
 
-export const printQrCodePdf = (
+export const printQrCodePdf = async (
 	qrRefs: (HTMLDivElement | null)[],
 	codes: string[]
-): void => {
+): Promise<void> => {
 	if (codes.length === 0) {
 		return;
 	}
 
 	const pdf = createQrCodePdf(qrRefs, codes);
 	const pdfBlob = pdf.output('blob');
-	const blobUrl = URL.createObjectURL(pdfBlob);
 
-	// Open PDF in a new window
+	// Try Web Share API first (works best on iOS/iPad)
+	const file = new File([pdfBlob], 'referral-qr-codes.pdf', {
+		type: 'application/pdf'
+	});
+
+	if (navigator.share && navigator.canShare?.({ files: [file] })) {
+		try {
+			await navigator.share({
+				files: [file],
+				title: 'Referral Coupon Codes'
+			});
+			return;
+		} catch (err) {
+			// User cancelled or share failed - fall through to window.open approach
+			if ((err as Error).name === 'AbortError') {
+				// User cancelled the share - don't fall through
+				return;
+			}
+			console.warn(
+				'Web Share failed, falling back to print window:',
+				err
+			);
+		}
+	}
+
+	// Fallback: Open PDF in a new window and trigger print (desktop browsers)
+	const blobUrl = URL.createObjectURL(pdfBlob);
 	const printWindow = window.open(blobUrl, '_blank');
 
 	if (printWindow) {
