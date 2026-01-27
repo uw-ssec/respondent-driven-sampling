@@ -76,28 +76,36 @@ export const printQrCodePdf = async (
 	const pdf = createQrCodePdf(qrRefs, codes);
 	const pdfBlob = pdf.output('blob');
 
-	// Try Web Share API first (works best on iOS/iPad)
-	const file = new File([pdfBlob], 'referral-qr-codes.pdf', {
-		type: 'application/pdf'
-	});
+	// Detect mobile devices (iOS/Android) where window.print() doesn't work well
+	const isMobile =
+		/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+		(navigator.maxTouchPoints > 0 &&
+			/Mobile|Tablet/i.test(navigator.userAgent));
 
-	if (navigator.share && navigator.canShare?.({ files: [file] })) {
-		try {
-			await navigator.share({
-				files: [file],
-				title: 'Referral Coupon Codes'
-			});
-			return;
-		} catch (err) {
-			// User cancelled or share failed - fall through to window.open approach
-			if ((err as Error).name === 'AbortError') {
-				// User cancelled the share - don't fall through
+	// Try Web Share API on mobile devices only (works best on iOS/iPad/Android)
+	if (isMobile) {
+		const file = new File([pdfBlob], 'coupon-qr-codes.pdf', {
+			type: 'application/pdf'
+		});
+
+		if (navigator.share && navigator.canShare?.({ files: [file] })) {
+			try {
+				await navigator.share({
+					files: [file],
+					title: 'Coupon QR Codes'
+				});
 				return;
+			} catch (err) {
+				// User cancelled or share failed - fall through to window.open approach
+				if ((err as Error).name === 'AbortError') {
+					// User cancelled the share - don't fall through
+					return;
+				}
+				console.warn(
+					'Web Share failed, falling back to print window:',
+					err
+				);
 			}
-			console.warn(
-				'Web Share failed, falling back to print window:',
-				err
-			);
 		}
 	}
 
