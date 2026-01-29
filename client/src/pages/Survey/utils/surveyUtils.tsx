@@ -18,7 +18,6 @@ export const initializeSurvey = (
 	if (isEditMode) {
 		// Edit mode only uses first 3 pages: volunteer-pre-screen, consent, survey-validation
 		surveyJson.title = 'Homelessness Experience Survey (Edit Mode)';
-		// surveyJson.pages = surveyJson.pages.slice(0, 4);
 		surveyJson.pages = [
 			...surveyJson.pages.slice(0, 4), 
 			surveyJson.pages[16], 
