@@ -215,6 +215,11 @@ The items listed below are features our team has identified out of scope for the
 
 -   Setup wizard
 
+## Funding Support
+- This project is supported by 
+    - NSF CAREER GRANT #SES-2142964 to Zack Almquist (PI)
+    - UW Population Health Grant Tier 3
+  
 ## Contributors
 
 Thanks to the following people for their work on this project: Ihsan Kahveci, June Yang, Emily Porter, Zack Almquist, Elizabeth Deng, KelliAnn Ramirez, Jasmine Vuong, Hannah Lam, Ella Weinberg, Arushi Agarwal, Devanshi Desai, Aryan Palave, Kaden Kapadia, Hrudhai Umashankar, Liya Finley Hutchison, Hana Amos, Zack Crouse, Kristen L Gustafson.
