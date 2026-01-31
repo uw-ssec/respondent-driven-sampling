@@ -271,7 +271,7 @@
       }
     ]
   },
-  "Vashon" : {
+  "vashon" : {
     "headerEn": "Vashon Survey Locations",
     "headerEs": "Ubicaciones en Vashon",
     "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
@@ -292,11 +292,11 @@
       },
       {
         "name": "Vashon Maury Community Food Bank",
-        "address": "17210 Vashon Hwy SW, Vashon, WA 98070",
-        "daysEn": "January 28 (Wednesday)",
-        "daysEs": "28 de enero (miércoles)",
-        "hoursEn": "10:30am to 3pm",
-        "hoursEs": "10:30am - 3pm"
+        "address": "10030 SW 210 St Vashon, WA 98070",
+        "daysEn": "January 28 (Wednesday), February 4 (Wednesday)",
+        "daysEs": "28 de enero (miércoles), 4 de febrero (miércoles)",
+        "hoursEn": "10:30am - 1pm",
+        "hoursEs": "10:30am - 1pm"
       }
 
     ]
