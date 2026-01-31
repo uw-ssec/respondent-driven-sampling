@@ -16,13 +16,25 @@ import { useApi } from '@/hooks/useApi';
 
 export default function SurveyDetails() {
 	const { id } = useParams();
-	const { surveyService } = useApi();
+	const { surveyService, locationService } = useApi();
 	const {
-		data: surveys,
-		isLoading: loading
-	} = surveyService.useSurveysWithUsersAndLocations() || {};
-	const survey = surveys?.find(s => s._id === id);
-	const error = !loading && !survey;
+		data: survey,
+		isLoading: surveyLoading,
+		error: surveyError
+	} = surveyService.useSurveyWithUser(id!) || {};
+	const { data: locations, isLoading: locationsLoading } =
+		locationService.useLocations() || {};
+
+	const loading = surveyLoading || locationsLoading;
+	const error = surveyError || (!loading && !survey);
+
+	// Find location name from locations
+	const locationName =
+		survey && locations
+			? locations.find(loc => loc._id === survey.locationObjectId)?.hubName ||
+			  'Unknown'
+			: 'Unknown';
+
 	const navigate = useNavigate();
 	const qrRefs = useRef<(HTMLDivElement | null)[]>([]);
 	const ability = useAbility();
@@ -34,23 +46,32 @@ export default function SurveyDetails() {
 	const canEdit = survey
 		? ability.can(ACTIONS.CASL.UPDATE, subject(SUBJECTS.SURVEY, survey))
 		: false;
-	// Fields to display in survey responses section
-	const displayFields = [
+	// Fields to display in survey details (top box)
+	const surveyDetailsFields = [
 		'first_two_letters_fname',
 		'first_two_letters_lname',
-		'date_of_birth',
+		'date_of_birth'
+	];
+
+	// Fields to display in gift card information section
+	const giftCardFields = [
 		'email_phone_consent',
 		'email',
-		'phone'
+		'phone',
+		'gift_card_number',
+		'gift_card_2'
 	];
 
 	const labelMap: Record<string, string> = {
 		first_two_letters_fname: 'First name initials',
 		first_two_letters_lname: 'Last name initials',
 		date_of_birth: 'Date of Birth',
+		survey_comments: 'Survey Comments',
 		email_phone_consent: 'Email/Phone Consent',
 		email: 'Email',
-		phone: 'Phone'
+		phone: 'Phone',
+		gift_card_number: 'Gift Card Number',
+		gift_card_2: 'Gift Card 2'
 	};
 
 	if (loading) return <p>Loading...</p>;
@@ -101,121 +122,253 @@ export default function SurveyDetails() {
 			<div className="survey-details-container">
 				<h2>Survey Details</h2>
 
-				<div className="survey-info">
-					<p>
-						<strong>Survey Code:</strong> {survey.surveyCode}
-					</p>
-					<p>
-						<strong>Staff Name:</strong> {survey.employeeName}
-					</p>
-					<p>
-						<strong>Location:</strong> {survey.locationName}
-					</p>
-					<p>
-						<strong>Date and Time:</strong>{' '}
-						{new Date(survey.createdAt).toLocaleString()}
-					</p>
+				<div style={{ marginBottom: '20px' }}>
+					<div
+						style={{
+							display: 'flex',
+							justifyContent: 'space-between',
+							alignItems: 'center',
+							marginBottom: '10px'
+						}}
+					>
+						<h3 style={{ margin: 0 }}>Survey Information</h3>
+						{/* Edit Survey Details Button */}
+						<Tooltip
+							title={
+								!canEdit
+									? "You don't have permission to edit this survey"
+									: ''
+							}
+						>
+							<span>
+								<button
+									className="edit-button"
+									disabled={!canEdit}
+									onClick={() =>
+										navigate(`/survey/${id}/edit?mode=details`)
+									}
+								>
+									Edit Survey Details
+								</button>
+							</span>
+						</Tooltip>
+					</div>
+					<div className="survey-info">
+						<p>
+							<strong>Survey Code:</strong> {survey.surveyCode}
+						</p>
+						<p>
+							<strong>Staff Name:</strong> {survey.employeeName}
+						</p>
+						<p>
+							<strong>Location:</strong> {locationName}
+						</p>
+						<p>
+							<strong>Date and Time:</strong>{' '}
+							{new Date(survey.createdAt).toLocaleString()}
+						</p>
+						{survey.responses &&
+							surveyDetailsFields
+								.filter(field => field in survey.responses)
+								.map((field, index) => {
+									const answer = survey.responses[field];
+									const label = labelMap[field] || field;
+									return (
+										<p key={index}>
+											<strong>{label}:</strong>{' '}
+											{answer ?? 'N/A'}
+										</p>
+									);
+								})}
+					</div>
 				</div>
 
 				{/* Gift Card Information */}
-				<div className="responses-section">
-					<h3>Gift Card Information</h3>
-					<pre>
-						{survey.responses &&
-							displayFields
-								.filter(field => field in survey.responses)
-								.map(field => {
-									const answer = survey.responses[field];
-									const label = labelMap[field] || field;
-									return `${label}: ${answer ?? 'N/A'}`;
-								})
-								.join('\n\n')}
-					</pre>
-				</div>
-				{/* Edit Pre-screen Questions Button */}
-				<Tooltip
-					title={
-						!canEdit
-							? "You don't have permission to edit this survey"
-							: ''
-					}
-				>
-					<span>
-						<button
-							className="edit-button"
-							disabled={!canEdit}
-							onClick={() => navigate(`/survey/${id}/edit`)}
+				<div style={{ marginBottom: '20px' }}>
+					<div
+						style={{
+							display: 'flex',
+							justifyContent: 'space-between',
+							alignItems: 'center',
+							marginBottom: '10px'
+						}}
+					>
+						<h3 style={{ margin: 0 }}>Gift Card Information</h3>
+						{/* Edit Gift Card Information Button */}
+						<Tooltip
+							title={
+								!canEdit
+									? "You don't have permission to edit this survey"
+									: ''
+							}
 						>
-							Edit Gift Card Information
-						</button>
-					</span>
-				</Tooltip>
-				{/* Coupon Code Information */}
-				<div className="referral-info">
-					<h3>Referral Information</h3>
-					<p>
-						<strong>Referred By Code:</strong>{' '}
-						{survey.parentSurveyCode ?? 'N/A'}
-					</p>
-
-					<p>
-						<strong>Generated Referral Codes:</strong>
-					</p>
-					{survey.childSurveyCodes &&
-					survey.childSurveyCodes.length > 0 ? (
-						<ul className="referral-list">
-							{survey.childSurveyCodes.map(
-								(code: string, index: number) => (
-									<li
-										key={index}
-										className="referral-code-tag"
-									>
-										{code}
-									</li>
-								)
-							)}
-						</ul>
-					) : (
-						<p>N/A</p>
-					)}
-					{/* Display QR Codes */}
-					<div className="print-area">
-						<div className="qr-code-container">
-							{survey.childSurveyCodes &&
-							survey.childSurveyCodes.length > 0 ? (
-								survey.childSurveyCodes.map(
-									(code: string, index: number) => {
-										const qrSurveyCode = code;
-										return (
-											<div
-												key={index}
-												className="qr-box"
-												ref={el => {
-													qrRefs.current[index] = el;
-												}}
-											>
-												<QRCodeCanvas
-													value={qrSurveyCode}
-													size={120}
-													level="M"
-												/>
-												<p className="qr-code-text">
-													{index + 1}. Coupon Code:{' '}
-													{code}
-												</p>
-											</div>
-										);
+							<span>
+								<button
+									className="edit-button"
+									disabled={!canEdit}
+									onClick={() =>
+										navigate(`/survey/${id}/edit?mode=giftcard`)
 									}
-								)
-							) : (
-								<p>No referral codes available.</p>
-							)}
-						</div>
+								>
+									Edit Gift Card Information
+								</button>
+							</span>
+						</Tooltip>
 					</div>
-					<div className="qr-buttons">
+					<div className="responses-section">
+						<pre>
+							{survey.responses &&
+								giftCardFields
+									.filter(field => field in survey.responses)
+									.map(field => {
+										const answer = survey.responses[field];
+										const label = labelMap[field] || field;
+										return `${label}: ${answer ?? 'N/A'}`;
+									})
+									.join('\n\n')}
+						</pre>
+					</div>
+				</div>
+				{/* Feedback Section */}
+				<div style={{ marginBottom: '20px' }}>
+					<div
+						style={{
+							display: 'flex',
+							justifyContent: 'space-between',
+							alignItems: 'center',
+							marginBottom: '10px'
+						}}
+					>
+						<h3 style={{ margin: 0 }}>Feedback</h3>
+						{/* Leave Feedback Button */}
+						<Tooltip
+							title={
+								!canEdit
+									? "You don't have permission to edit this survey"
+									: ''
+							}
+						>
+							<span>
+								<button
+									className="edit-button"
+									disabled={!canEdit}
+									onClick={() =>
+										navigate(`/survey/${id}/edit?mode=feedback`)
+									}
+								>
+									Leave Feedback
+								</button>
+							</span>
+						</Tooltip>
+					</div>
+					<div className="survey-info">
+						{survey.responses?.survey_comments ? (
+							<p style={{ whiteSpace: 'pre-wrap' }}>
+								<strong>Comments:</strong>{' '}
+								{survey.responses.survey_comments}
+							</p>
+						) : (
+							<p>
+								<strong>Comments:</strong> No feedback provided
+							</p>
+						)}
+					</div>
+				</div>
+
+				{/* Coupon Code Information */}
+				<div style={{ marginBottom: '20px' }}>
+					<div
+						style={{
+							display: 'flex',
+							justifyContent: 'space-between',
+							alignItems: 'center',
+							marginBottom: '10px'
+						}}
+					>
+						<h3 style={{ margin: 0 }}>Referral Information</h3>
 						<button className="generate-btn" onClick={handlePrint}>
 							Print Coupon Codes
 						</button>
+					</div>
+					<div className="referral-info">
+						<p>
+							<strong>Referred By Code:</strong>{' '}
+							{survey.parentSurveyCode ?? 'N/A'}
+						</p>
+
+						<div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+							<p style={{ margin: 0 }}>
+								<strong>Generated Referral Codes:</strong>
+							</p>
+							{survey.childSurveyCodes &&
+							survey.childSurveyCodes.length > 0 ? (
+								<ul className="referral-list" style={{ margin: 0 }}>
+									{survey.childSurveyCodes.map(
+										(code: string, index: number) => (
+											<li
+												key={index}
+												className="referral-code-tag"
+											>
+												{code}
+											</li>
+										)
+									)}
+								</ul>
+							) : (
+								<span>N/A</span>
+							)}
+						</div>
+						{/* Display QR Codes */}
+						<div className="print-area">
+							<div
+								className="qr-code-container"
+								style={{
+									display: 'flex',
+									flexWrap: 'wrap',
+									gap: '10px'
+								}}
+							>
+								{survey.childSurveyCodes &&
+								survey.childSurveyCodes.length > 0 ? (
+									survey.childSurveyCodes.map(
+										(code: string, index: number) => {
+											const qrSurveyCode = code;
+											return (
+												<div
+													key={index}
+													className="qr-box"
+													ref={el => {
+														qrRefs.current[index] = el;
+													}}
+													style={{
+														display: 'inline-block',
+														textAlign: 'center',
+														padding: '5px'
+													}}
+												>
+													<QRCodeCanvas
+														value={qrSurveyCode}
+														size={80}
+														level="M"
+													/>
+													<p
+														className="qr-code-text"
+														style={{
+															fontSize: '10px',
+															margin: '5px 0 0 0'
+														}}
+													>
+														{index + 1}. {code}
+													</p>
+												</div>
+											);
+										}
+									)
+								) : (
+									<p>No referral codes available.</p>
+								)}
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
