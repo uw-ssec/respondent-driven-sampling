@@ -29,6 +29,7 @@ const Survey = () => {
 	const { surveyService, seedService } = useApi();
 	const [searchParams] = useSearchParams();
 	const surveyCodeInUrl = searchParams.get('ref');
+	const editMode = searchParams.get('mode'); // 'details', 'giftcard', or 'feedback'
 	const { id: surveyObjectIdInUrl } = useParams();
 	const isEditMode = window.location.pathname.includes('/edit');
 
@@ -246,7 +247,8 @@ const Survey = () => {
 			surveyByRefCode as SurveyDocument | null,
 			surveyByObjectId as SurveyDocument | null,
 			parentSurvey as SurveyDocument | null,
-			isEditMode
+			isEditMode,
+			editMode as string | null
 		);
 		surveyRef.current = survey;
 
@@ -284,6 +286,13 @@ const Survey = () => {
 		const handlePopState = (event: { state: { pageNo: any } }) => {
 			const survey = surveyRef.current;
 			if (!survey) return;
+
+			// In edit mode, navigate to survey entries on back button
+			if (isEditMode) {
+				navigate('/survey-entries');
+				return;
+			}
+
 			const currentPageNo = survey.currentPageNo;
 			const targetPageNo = event.state?.pageNo;
 			if (typeof targetPageNo !== 'number') return;
@@ -292,7 +301,7 @@ const Survey = () => {
 		};
 		window.addEventListener('popstate', handlePopState);
 		return () => window.removeEventListener('popstate', handlePopState);
-	}, []);
+	}, [isEditMode, navigate]);
 
 	// Loading state (need to fetch all data)
 	const isLoading =

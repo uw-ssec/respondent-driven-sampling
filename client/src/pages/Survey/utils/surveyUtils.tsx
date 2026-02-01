@@ -10,15 +10,52 @@ export const initializeSurvey = (
 	surveyByRefCode: SurveyDocument | null,
 	surveyByObjectId: SurveyDocument | null,
 	parentSurvey: SurveyDocument | null,
-	isEditMode: boolean = false
+	isEditMode: boolean = false,
+	editMode: string | null = null
 ) => {
 	// Clone the survey JSON to avoid mutating the original
 	const surveyJson = JSON.parse(JSON.stringify(surveyJsonData));
 
 	if (isEditMode) {
-		// Edit mode only uses first 3 pages: volunteer-pre-screen, consent, survey-validation
-		surveyJson.title = 'Homelessness Experience Survey (Edit Mode)';
-		surveyJson.pages = surveyJson.pages.slice(0, 3);
+		let pageNames: string[] = [];
+		let title = 'Homelessness Experience Survey (Edit Mode)';
+
+		// Determine which pages to show based on edit mode
+		if (editMode === 'details') {
+			// Edit Survey Details
+			title = 'Edit Survey Details';
+			pageNames = [
+				'volunteer-pre-screen',
+				'age_check',
+				'consent',
+				'survey-validation',
+			];
+		} else if (editMode === 'giftcard') {
+			// Edit Gift Card Information
+			title = 'Edit Gift Card Information';
+			pageNames = ['giftCards', 'giftCards2'];
+		} else if (editMode === 'feedback') {
+			// Leave Feedback
+			title = 'Leave Feedback';
+			pageNames = ['end_page'];
+		} else {
+			// Default: all edit pages
+			pageNames = [
+				'volunteer-pre-screen',
+				'age_check',
+				'consent',
+				'survey-validation',
+				'giftCards',
+				'giftCards2',
+				'end_page',
+			];
+		}
+
+		surveyJson.title = title;
+		surveyJson.pages = surveyJson.pages.filter((page: any) =>
+			pageNames.includes(page.name)
+		);
+
 		// Remove any early stop triggers to allow full editing of survey
 		// Without this, the survey will stop early if consent is revoked, not allowing any edits to consecutive pages
 		if (surveyJson.triggers) {
