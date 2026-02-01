@@ -215,18 +215,20 @@ export default function SurveyDetails() {
 							</span>
 						</Tooltip>
 					</div>
-					<div className="responses-section">
-						<pre>
-							{survey.responses &&
-								giftCardFields
-									.filter(field => field in survey.responses)
-									.map(field => {
-										const answer = survey.responses[field];
-										const label = labelMap[field] || field;
-										return `${label}: ${answer ?? 'N/A'}`;
-									})
-									.join('\n\n')}
-						</pre>
+					<div className="survey-info">
+						{survey.responses &&
+							giftCardFields
+								.filter(field => field in survey.responses)
+								.map((field, index) => {
+									const answer = survey.responses[field];
+									const label = labelMap[field] || field;
+									return (
+										<p key={index}>
+											<strong>{label}:</strong>{' '}
+											{answer ?? 'N/A'}
+										</p>
+									);
+								})}
 					</div>
 				</div>
 				{/* Feedback Section */}
