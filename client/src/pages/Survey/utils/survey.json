@@ -1206,7 +1206,7 @@
           "type": "html",
           "name": "age_first_hmlss_instruction",
           "visibleIf": "{is_adult} = 'No'",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER: Because the respondent has indicated they are under 18, you may select 12-17 without asking the question.</strong></div>"
+          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER: Because the respondent has indicated they are under 18, you may select 0-17 without asking the question.</strong></div>"
         },
         {
           "type": "dropdown",
