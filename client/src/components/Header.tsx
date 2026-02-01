@@ -12,7 +12,7 @@ export function Header() {
 	const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 	const navigate = useNavigate();
 	const menuRef = useRef<HTMLDivElement | null>(null); // Ref to track the menu
-	const { userObjectId } = useAuthContext();
+	const { userObjectId, userRole } = useAuthContext();
 	// Function to toggle the profile menu
 	const toggleProfileMenu = () => {
 		setIsProfileMenuOpen(!isProfileMenuOpen);
@@ -27,15 +27,81 @@ export function Header() {
 	};
 
 	const goToPreviousPage = () => {
-		// Check if we're on the actual survey page (not survey-entries, survey-details, etc.)
 		const path = window.location.pathname;
-		const isSurveyPage = path === '/survey' || path.match(/^\/survey\/[^/]+\/edit$/);
 
-		if (isSurveyPage) {
-			navigate('/apply-referral');
-		} else {
-			navigate(-1);
+		// Define the navigation hierarchy
+		// /survey/{id}/edit -> /survey/{id}
+		if (path.includes('/edit')) {
+			const editMatch = path.match(/^\/survey\/([^/]+)\/edit$/);
+			if (editMatch) {
+				const surveyId = editMatch[1];
+				navigate(`/survey/${surveyId}`);
+				return;
+			}
 		}
+
+		// /survey/{id}/continue -> /survey-entries
+		if (path.includes('/continue')) {
+			navigate('/survey-entries');
+			return;
+		}
+
+		// /survey/{id} -> /survey-entries
+		const surveyDetailsMatch = path.match(/^\/survey\/([^/]+)$/);
+		if (surveyDetailsMatch) {
+			navigate('/survey-entries');
+			return;
+		}
+
+		// /survey (new survey) -> /apply-referral
+		if (path === '/survey') {
+			navigate('/apply-referral');
+			return;
+		}
+
+		// /survey-entries -> /dashboard
+		if (path === '/survey-entries') {
+			navigate('/dashboard');
+			return;
+		}
+
+		// /apply-referral -> /dashboard
+		if (path === '/apply-referral') {
+			navigate('/dashboard');
+			return;
+		}
+
+		// /profile/{userId} -> /admin-dashboard (staff) or /dashboard (volunteers)
+		const profileMatch = path.match(/^\/profile\/([^/]+)$/);
+		if (profileMatch) {
+			const isStaff =
+				userRole === 'MANAGER' ||
+				userRole === 'ADMIN' ||
+				userRole === 'SUPER_ADMIN';
+			navigate(isStaff ? '/admin-dashboard' : '/dashboard');
+			return;
+		}
+
+		// /admin-dashboard -> /dashboard
+		if (path === '/admin-dashboard') {
+			navigate('/dashboard');
+			return;
+		}
+
+		// /add-new-user -> /admin-dashboard
+		if (path === '/add-new-user') {
+			navigate('/admin-dashboard');
+			return;
+		}
+
+		// /qrcode -> /survey-entries
+		if (path === '/qrcode') {
+			navigate('/survey-entries');
+			return;
+		}
+
+		// Default: go to dashboard if no specific rule matches
+		navigate('/dashboard');
 	};
 
 	// Function to handle new entry navigation
