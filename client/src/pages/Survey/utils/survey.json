@@ -486,7 +486,6 @@
           "type": "radiogroup",
           "name": "winter_shelter",
           "title": "In the last week, did you stay in a Winter / Severe Weather Shelter?  \n",
-          "description": "Please check all dates the respondent used a winter shelter.",
           "choices": [
             "Yes",
             "No",
@@ -500,6 +499,7 @@
           "name": "winter_shelter_dates",
           "visibleIf": "{winter_shelter} = 'Yes'",
           "title": "Which days did you stay in a Winter / Severe Weather Shelter? \n",
+          "description": "Please check all dates the respondent used a winter shelter.",
           "choices": [
             "January 17th, 2026",
             "January 18th, 2026",
@@ -602,7 +602,7 @@
           "type": "html",
           "name": "demographics_instruction",
           "visibleIf": "{is_adult} = 'No'",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER: Because the respondent has already indicated they are under 18, you may select 0-17 without asking this question.</strong></div>"
+          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER: Because the respondent has already indicated they are under 18, you may select 12-17 without asking this question.</strong></div>"
         },
         {
           "type": "radiogroup",
@@ -1236,31 +1236,31 @@
             "Illness/medical problem",
             {
               "value": "Substance Use Disorder",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = 'Yes'"
             },
             {
               "value": "Mental health issues",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = 'Yes'"
             },
             {
               "value": "Hospitalization/treatment",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = 'Yes'"
             },
             "Divorce/separation/breakup",
             "Could not afford rent increase",
             {
               "value": "Argument with family/friend/roommate",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = 'Yes'"
             },
             {
               "value": "Family domestic violence",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = 'Yes'"
             },
             "Family/friend's housing wouldn't let me stay",
             "Family/friend couldn't afford to let me stay",
             {
               "value": "Safety",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = 'Yes'"
             },
             "Resettlement transition",
             "Aging out of foster care",
@@ -1294,11 +1294,11 @@
             "Support to find permanent housing",
             {
               "value": "Support for decreasing substance use",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = 'Yes'"
             },
             {
               "value": "Support for mental health conditions",
-              "visibleIf": "{is_adult} == Yes"
+              "visibleIf": "{is_adult} = 'Yes'"
             },
             "On-site health services such as a nurse"
           ],
