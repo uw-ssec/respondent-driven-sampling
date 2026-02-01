@@ -16,17 +16,21 @@ import { useApi } from '@/hooks/useApi';
 
 export default function SurveyDetails() {
 	const { id } = useParams();
+	const navigate = useNavigate();
 	const { surveyService, locationService } = useApi();
 	const {
 		data: survey,
 		isLoading: surveyLoading,
 		error: surveyError
-	} = surveyService.useSurveyWithUser(id!) || {};
-	const { data: locations, isLoading: locationsLoading } =
-		locationService.useLocations() || {};
+	} = surveyService.useSurveyWithUser(id ?? '') || {};
+	const {
+		data: locations,
+		isLoading: locationsLoading,
+		error: locationsError
+	} = locationService.useLocations() || {};
 
 	const loading = surveyLoading || locationsLoading;
-	const error = surveyError || (!loading && !survey);
+	const error = surveyError || locationsError || (!loading && !survey);
 
 	// Find location name from locations
 	const locationName =
@@ -34,8 +38,6 @@ export default function SurveyDetails() {
 			? locations.find(loc => loc._id === survey.locationObjectId)?.hubName ||
 			  'Unknown'
 			: 'Unknown';
-
-	const navigate = useNavigate();
 	const qrRefs = useRef<(HTMLDivElement | null)[]>([]);
 	const ability = useAbility();
 

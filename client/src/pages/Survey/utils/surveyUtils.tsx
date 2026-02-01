@@ -47,7 +47,7 @@ export const initializeSurvey = (
 				'survey-validation',
 				'giftCards',
 				'giftCards2',
-				'end_page'
+				'end_page',
 			];
 		}
 
