@@ -88,6 +88,18 @@ export function Header() {
 			return;
 		}
 
+		// /add-new-user -> /admin-dashboard
+		if (path === '/add-new-user') {
+			navigate('/admin-dashboard');
+			return;
+		}
+
+		// /qrcode -> /survey-entries
+		if (path === '/qrcode') {
+			navigate('/survey-entries');
+			return;
+		}
+
 		// Default: go to dashboard if no specific rule matches
 		navigate('/dashboard');
 	};
