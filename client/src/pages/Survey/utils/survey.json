@@ -940,9 +940,15 @@
       "title": "Special Questions",
       "elements": [
         {
+          "type": "html",
+          "name": "travel_questions_instruction",
+          "visibleIf": "{location} = \"Mary's Place Phone Line\"",
+          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER NOTE: Please do not ask the travel-related questions below when surveying at Mary's Place Phone Line, as respondents are participating remotely via phone.</strong></div>"
+        },
+        {
           "type": "radiogroup",
           "name": "travel_location",
-          "visibleIf": "{location} != 'Marys Place Phone Line'",
+          "visibleIf": "{location} != \"Mary's Place Phone Line\"",
           "title": "Where did you travel from today? (Town or City)",
           "choices": [
             {
