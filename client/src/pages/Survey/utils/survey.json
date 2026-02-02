@@ -259,7 +259,6 @@
         {
           "type": "checkbox",
           "name": "personal_amenities",
-          "visibleIf": "{sleeping_situation} noneof ['small_vehicle', 'large_vehicle'] and {sleeping_situation} <> 'none' and {sleeping_situation} notempty",
           "title": "Do you generally have access to any of the following needs?",
           "choices": [
             "Drinking water",
@@ -879,8 +878,8 @@
             {
               "type": "radiogroup",
               "name": "hh_member_vet_status",
+              "visibleIf": "{household_members[0].hh_member_age} anyof ['18 - 24 years old', '25 –34 years old', '35- 44 years old', '45-54 years old', '55-64 years old', '65 or older']",
               "title": "Is {panel.hh_member_initials} a veteran?",
-              "enableIf": "{is_adult} = 'No' and {is_over12} = 'Yes'",
               "choices": [
                 "Yes",
                 "No",
@@ -904,7 +903,7 @@
             {
               "type": "radiogroup",
               "name": "hh_member_smi",
-              "visibleIf": "{is_adult} = 'Yes'",
+              "visibleIf": "{is_adult} = 'Yes' and {household_members[0].hh_member_age} anyof ['18 - 24 years old', '25 –34 years old', '35- 44 years old', '45-54 years old', '55-64 years old', '65 or older']",
               "title": "Does {panel.hh_member_initials} identify as having a severe mental illness?",
               "choices": [
                 "Yes",
@@ -917,7 +916,7 @@
             {
               "type": "radiogroup",
               "name": "hh_member_sud",
-              "visibleIf": "{is_adult} = 'Yes'",
+              "visibleIf": "{is_adult} = 'Yes' and {household_members[0].hh_member_age} anyof ['18 - 24 years old', '25 –34 years old', '35- 44 years old', '45-54 years old', '55-64 years old', '65 or older']",
               "title": "Does {panel.hh_member_initials} identify as having a substance use disorder?",
               "choices": [
                 "Yes",
@@ -941,24 +940,154 @@
       "title": "Special Questions",
       "elements": [
         {
-          "type": "dropdown",
+          "type": "radiogroup",
           "name": "travel_location",
+          "visibleIf": "{location} != 'Marys Place Phone Line'",
           "title": "Where did you travel from today? (Town or City)",
           "choices": [
-            "Tukwila",
-            "Burien",
-            "Renton",
-            "Kent",
-            "Auburn",
-            "SeaTac",
-            "Federal Way",
-            "Pacific",
-            "Algona",
-            "Normandy Park",
-            "Des Moines",
-            "Newcastle",
-            "Milton",
-            "Seattle"
+            {
+              "value": "Snoqualmie Valley",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Snoqualmie",
+                    "North Bend",
+                    "Carnation",
+                    "Duvall",
+                    "Preston",
+                    "Riverpoint",
+                    "Skykomish"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "North King County",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Shoreline",
+                    "Lake Forest Park",
+                    "Bothell",
+                    "Kenmore",
+                    "Lake City",
+                    "Woodinville"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "East King County",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Kirkland",
+                    "Redmond",
+                    "Bellevue",
+                    "Mercer Island",
+                    "Sammamish",
+                    "Beaux Arts Village",
+                    "Issaquah",
+                    "Clyde Hill",
+                    "Yarrow Point",
+                    "Medina"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "South King County",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Tukwila",
+                    "Burien",
+                    "Renton",
+                    "Kent",
+                    "Auburn",
+                    "SeaTac",
+                    "Federal Way",
+                    "Pacific",
+                    "Algona",
+                    "Normandy Park",
+                    "Des Moines",
+                    "Newcastle",
+                    "Milton"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "South East King County",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Maple Valley",
+                    "Black Diamond",
+                    "Enumclaw",
+                    "Covington"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "Unincorporated King County",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Bryn Mawr Skyway",
+                    "White Center",
+                    "South Park",
+                    "Fairwood",
+                    "East Renton Highlands",
+                    "Cottage Lake",
+                    "Fall City",
+                    "Hobart",
+                    "Union Hill"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "Seattle Metro",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Seattle Neighborhood A",
+                    "Seattle Neighborhood B",
+                    "Seattle Neighborhood C",
+                    "Seattle Neighborhood D",
+                    "Seattle Neighborhood E",
+                    "Seattle Neighborhood F",
+                    "Seattle Neighborhood G"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "Vashon-Maury Island"
+            }
           ],
           "showOtherItem": true,
           "showNoneItem": true,
@@ -968,6 +1097,7 @@
         {
           "type": "checkbox",
           "name": "travel_transport",
+          "visibleIf": "{location} != 'Marys Place Phone Line'",
           "title": "What transportation did you use to come to {location}?",
           "choices": [
             "Bus",
@@ -984,6 +1114,7 @@
           "type": "panel",
           "name": "travel_time",
           "title": "How long did it take you to travel to get to {location}?",
+          "visibleIf": "{location} != 'Marys Place Phone Line'",
           "elements": [
             {
               "type": "slider",
@@ -1003,6 +1134,7 @@
         {
           "type": "checkbox",
           "name": "travel_distance",
+          "visibleIf": "{location} != 'Marys Place Phone Line'",
           "title": "About how many miles did you travel to {location}?",
           "choices": [
             "Less than half a mile",
@@ -1267,6 +1399,7 @@
             "Death of a parent/spouse/child",
             "Do not know"
           ],
+          "choicesOrder": "random",
           "showOtherItem": true,
           "showNoneItem": true,
           "noneText": "Choose not to answer",
@@ -1302,6 +1435,7 @@
             },
             "On-site health services such as a nurse"
           ],
+          "choicesOrder": "random",
           "showOtherItem": true,
           "otherText": "Other (please specify)",
           "maxSelectedChoices": 5
@@ -1420,7 +1554,7 @@
         {
           "type": "html",
           "name": "referral_instruction",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\">\n\t\t\t\t<strong>Instructions:</strong> Please read the following information out loud to the respondent.\n\t\t\t</div>\n\t\t\t<br />\n\t\t\t<p>\n\t\t\t\tAt the end of this survey, we will give you <strong>referral coupons</strong>.\n\t\t\t\tPlease give them to other people experiencing homelessness.\n\t\t\t\tIf they come and take our survey using your coupon, we can send you <strong>$5 gift cards</strong> for each completed referral.\n\t\t\t\tTo receive these gift cards, we need either a <strong>phone number or email address</strong>.\n\t\t\t</p>"
+          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\">\n\t\t\t\t<strong>Instructions:</strong> Please read the following information out loud to the respondent.\n\t\t\t</div>\n\t\t\t<br />\n\t\t\t<p>\n\t\t\t\tAt the end of this survey, we will give you <strong>referral coupons</strong>.\n\t\t\t\tPlease give them to other people experiencing homelessness.\n\t\t\t\tIf they come and take our survey using your coupon, we can send you <strong>$5 gift cards</strong> for each completed referral.\n\t\t\t\tTo receive these gift cards, we need either a <strong>phone number or email address</strong>. We will begin issuing the additional funds at the end of February.\n\t\t\t</p>"
         },
         {
           "type": "checkbox",
