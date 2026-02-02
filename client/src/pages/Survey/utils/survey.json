@@ -943,7 +943,7 @@
           "type": "html",
           "name": "travel_questions_instruction",
           "visibleIf": "{location} = \"Mary's Place Phone Line\"",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER NOTE: Please do not ask the travel-related questions below when surveying at Mary's Place Phone Line, as respondents are participating remotely via phone.</strong></div>"
+          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\"><strong>INTERVIEWER NOTE: Please do not ask the travel-related questions below when surveying at Mary's Place Phone Line.</strong></div>"
         },
         {
           "type": "radiogroup",
@@ -1103,7 +1103,7 @@
         {
           "type": "checkbox",
           "name": "travel_transport",
-          "visibleIf": "{location} != 'Marys Place Phone Line'",
+          "visibleIf": "{location} != \"Mary's Place Phone Line\"",
           "title": "What transportation did you use to come to {location}?",
           "choices": [
             "Bus",
@@ -1120,7 +1120,7 @@
           "type": "panel",
           "name": "travel_time",
           "title": "How long did it take you to travel to get to {location}?",
-          "visibleIf": "{location} != 'Marys Place Phone Line'",
+          "visibleIf": "{location} != \"Mary's Place Phone Line\"",
           "elements": [
             {
               "type": "slider",
@@ -1140,7 +1140,7 @@
         {
           "type": "checkbox",
           "name": "travel_distance",
-          "visibleIf": "{location} != 'Marys Place Phone Line'",
+          "visibleIf": "{location} != \"Mary's Place Phone Line\"",
           "title": "About how many miles did you travel to {location}?",
           "choices": [
             "Less than half a mile",
