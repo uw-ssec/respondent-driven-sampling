@@ -1554,7 +1554,7 @@
         {
           "type": "html",
           "name": "referral_instruction",
-          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\">\n\t\t\t\t<strong>Instructions:</strong> Please read the following information out loud to the respondent.\n\t\t\t</div>\n\t\t\t<br />\n\t\t\t<p>\n\t\t\t\tAt the end of this survey, we will give you <strong>referral coupons</strong>.\n\t\t\t\tPlease give them to other people experiencing homelessness.\n\t\t\t\tIf they come and take our survey using your coupon, we can send you <strong>$5 gift cards</strong> for each completed referral.\n\t\t\t\tTo receive these gift cards, we need either a <strong>phone number or email address</strong>.\nWe will begin issuing the additional funds at the end of February.\n\t\t\t</p>"
+          "html": "<div style=\"background-color: #fff3cd; padding: 10px; margin: 10px 0;\">\n\t\t\t\t<strong>Instructions:</strong> Please read the following information out loud to the respondent.\n\t\t\t</div>\n\t\t\t<br />\n\t\t\t<p>\n\t\t\t\tAt the end of this survey, we will give you <strong>referral coupons</strong>.\n\t\t\t\tPlease give them to other people experiencing homelessness.\n\t\t\t\tIf they come and take our survey using your coupon, we can send you <strong>$5 gift cards</strong> for each completed referral.\n\t\t\t\tTo receive these gift cards, we need either a <strong>phone number or email address</strong>. We will begin issuing the additional funds at the end of February.\n\t\t\t</p>"
         },
         {
           "type": "checkbox",
