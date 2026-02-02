@@ -940,25 +940,154 @@
       "title": "Special Questions",
       "elements": [
         {
-          "type": "dropdown",
+          "type": "radiogroup",
           "name": "travel_location",
           "visibleIf": "{location} != 'Marys Place Phone Line'",
           "title": "Where did you travel from today? (Town or City)",
           "choices": [
-            "Tukwila",
-            "Burien",
-            "Renton",
-            "Kent",
-            "Auburn",
-            "SeaTac",
-            "Federal Way",
-            "Pacific",
-            "Algona",
-            "Normandy Park",
-            "Des Moines",
-            "Newcastle",
-            "Milton",
-            "Seattle"
+            {
+              "value": "Snoqualmie Valley",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Snoqualmie",
+                    "North Bend",
+                    "Carnation",
+                    "Duvall",
+                    "Preston",
+                    "Riverpoint",
+                    "Skykomish"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "North King County",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Shoreline",
+                    "Lake Forest Park",
+                    "Bothell",
+                    "Kenmore",
+                    "Lake City",
+                    "Woodinville"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "East King County",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Kirkland",
+                    "Redmond",
+                    "Bellevue",
+                    "Mercer Island",
+                    "Sammamish",
+                    "Beaux Arts Village",
+                    "Issaquah",
+                    "Clyde Hill",
+                    "Yarrow Point",
+                    "Medina"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "South King County",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Tukwila",
+                    "Burien",
+                    "Renton",
+                    "Kent",
+                    "Auburn",
+                    "SeaTac",
+                    "Federal Way",
+                    "Pacific",
+                    "Algona",
+                    "Normandy Park",
+                    "Des Moines",
+                    "Newcastle",
+                    "Milton"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "South East King County",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Maple Valley",
+                    "Black Diamond",
+                    "Enumclaw",
+                    "Covington"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "Unincorporated King County",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Bryn Mawr Skyway",
+                    "White Center",
+                    "South Park",
+                    "Fairwood",
+                    "East Renton Highlands",
+                    "Cottage Lake",
+                    "Fall City",
+                    "Hobart",
+                    "Union Hill"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "Seattle Metro",
+              "elements": [
+                {
+                  "type": "dropdown",
+                  "name": "question1",
+                  "title": "Which city?",
+                  "choices": [
+                    "Seattle Neighborhood A",
+                    "Seattle Neighborhood B",
+                    "Seattle Neighborhood C",
+                    "Seattle Neighborhood D",
+                    "Seattle Neighborhood E",
+                    "Seattle Neighborhood F",
+                    "Seattle Neighborhood G"
+                  ]
+                }
+              ]
+            },
+            {
+              "value": "Vashon-Maury Island"
+            }
           ],
           "showOtherItem": true,
           "showNoneItem": true,
