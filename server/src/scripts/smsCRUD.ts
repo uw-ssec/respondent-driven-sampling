@@ -35,16 +35,14 @@
  *     Writes sms-log-recovered-DATE.csv. Use --date to limit to a single day.
  *     Example: npm run sms -- fetch-logs --date 2026-02-19
  *
- *   check-status [--log-file <filename>] [--update]
- *     Fetch the latest delivery status from Twilio for every TwilioSID in log files.
- *     Without --update: creates sms-status-DATE.csv (SID + status snapshot).
- *     With --update:    creates an enriched CSV per send log with updated status +
- *                       dateSent, price, priceUnit, errorCode, errorMessage columns.
- *                       Original log is preserved. Prints delivery stats summary.
- *     --log-file limits the check to a single file (works with or without --update).
+ *   check-status [--log-file <filename>]
+ *     Fetch the latest delivery status from Twilio for every record in log files.
+ *     Creates an enriched CSV per source log with updated status + dateSent, price,
+ *     priceUnit, errorCode, errorMessage columns. Original log is preserved.
+ *     Prints a delivery stats summary per file.
+ *     --log-file limits the check to a single file.
  *     Example: npm run sms -- check-status
- *     Example: npm run sms -- check-status --update
- *     Example: npm run sms -- check-status --update --log-file sms-log-2026-02-19-gift_card_notice.csv
+ *     Example: npm run sms -- check-status --log-file sms-log-2026-02-19-gift_card_notice.csv
  */
 import fs from 'fs';
 import path from 'path';
@@ -414,18 +412,10 @@ async function fetchLogs(options: { date?: string }): Promise<void> {
 	);
 }
 
-const STATUS_LOGS_DIR = path.join(
-	path.dirname(new URL(import.meta.url).pathname),
-	'sms-logs'
-);
 
-async function checkStatus(
-	logFilename?: string,
-	update?: boolean
-): Promise<void> {
+async function checkStatus(logFilename?: string): Promise<void> {
 	console.log('\n🔄 Checking SMS delivery statuses via Twilio API...\n');
 
-	// Gather all TwilioSIDs from log files
 	const logFiles = listLogFiles();
 
 	if (logFiles.length === 0) {
@@ -433,7 +423,6 @@ async function checkStatus(
 		return;
 	}
 
-	// If a specific log file is given, only check that one
 	const filesToCheck = logFilename
 		? logFiles.filter(f => f.filename === logFilename)
 		: logFiles;
@@ -445,27 +434,57 @@ async function checkStatus(
 
 	const date = new Date().toISOString().split('T')[0];
 
-	if (update) {
-		// --update mode: create enriched CSV per source log file
-		for (const { filename } of filesToCheck) {
-			const sourceLogger = new CsvSmsLogger(filename);
-			const records = await sourceLogger.getLogs();
+	for (const { filename } of filesToCheck) {
+		const sourceLogger = new CsvSmsLogger(filename);
+		const records = await sourceLogger.getLogs();
 
-			const outputFilename =
-				filename.replace('.csv', '') + `-updated-${date}.csv`;
-			const outputLogger = new UpdatedCsvSmsLogger(outputFilename);
+		const outputFilename =
+			filename.replace('.csv', '') + `-updated-${date}.csv`;
+		const outputLogger = new UpdatedCsvSmsLogger(outputFilename);
 
-			const statusCounts = new Map<string, number>();
-			const total = records.length;
+		const statusCounts = new Map<string, number>();
+		const total = records.length;
 
-			console.log(`\nProcessing: ${filename} (${total} records)`);
+		console.log(`\nProcessing: ${filename} (${total} records)`);
 
-			for (let i = 0; i < records.length; i++) {
-				const record = records[i];
-				let updatedRecord: UpdatedSmsRecord;
+		for (let i = 0; i < records.length; i++) {
+			const record = records[i];
+			let updatedRecord: UpdatedSmsRecord;
 
-				if (!record.twilioSid) {
-					// No SID — write row with empty enriched fields
+			if (!record.twilioSid) {
+				statusCounts.set(
+					record.status,
+					(statusCounts.get(record.status) ?? 0) + 1
+				);
+				updatedRecord = {
+					...record,
+					dateSent: '',
+					price: '',
+					priceUnit: '',
+					errorCode: '',
+					errorMessage: ''
+				};
+			} else {
+				try {
+					const msg = await fetchMessageStatus(record.twilioSid);
+					statusCounts.set(
+						msg.status,
+						(statusCounts.get(msg.status) ?? 0) + 1
+					);
+					updatedRecord = {
+						...record,
+						status: msg.status,
+						dateSent: msg.dateSent?.toISOString() ?? '',
+						price: msg.price ?? '',
+						priceUnit: msg.priceUnit ?? '',
+						errorCode:
+							msg.errorCode != null ? String(msg.errorCode) : '',
+						errorMessage: msg.errorMessage ?? ''
+					};
+				} catch (err) {
+					const errorMsg =
+						err instanceof Error ? err.message : String(err);
+					console.warn(`  ⚠ ${record.twilioSid}: ${errorMsg}`);
 					statusCounts.set(
 						record.status,
 						(statusCounts.get(record.status) ?? 0) + 1
@@ -478,165 +497,32 @@ async function checkStatus(
 						errorCode: '',
 						errorMessage: ''
 					};
-				} else {
-					try {
-						const msg = await fetchMessageStatus(record.twilioSid);
-						statusCounts.set(
-							msg.status,
-							(statusCounts.get(msg.status) ?? 0) + 1
-						);
-						updatedRecord = {
-							...record,
-							status: msg.status,
-							dateSent: msg.dateSent?.toISOString() ?? '',
-							price: msg.price ?? '',
-							priceUnit: msg.priceUnit ?? '',
-							errorCode:
-								msg.errorCode != null
-									? String(msg.errorCode)
-									: '',
-							errorMessage: msg.errorMessage ?? ''
-						};
-					} catch (err) {
-						const errorMsg =
-							err instanceof Error ? err.message : String(err);
-						console.warn(
-							`  ⚠ ${record.twilioSid}: ${errorMsg}`
-						);
-						statusCounts.set(
-							record.status,
-							(statusCounts.get(record.status) ?? 0) + 1
-						);
-						updatedRecord = {
-							...record,
-							dateSent: '',
-							price: '',
-							priceUnit: '',
-							errorCode: '',
-							errorMessage: ''
-						};
-					}
-				}
-
-				await outputLogger.log(updatedRecord);
-
-				// Progress every 100 records
-				if ((i + 1) % 100 === 0 || i + 1 === total) {
-					const pct = (((i + 1) / total) * 100).toFixed(1);
-					const lastSid = record.twilioSid || '(no SID)';
-					const lastStatus = updatedRecord.status;
-					console.log(
-						`  [${i + 1}/${total}] ${pct}% — last: ${lastSid} → ${lastStatus}`
-					);
 				}
 			}
 
-			// Print delivery stats for this file
-			console.log('\n=== Delivery Statistics ===');
-			console.log(`File: ${filename} (${total} messages)`);
-			for (const [status, count] of [...statusCounts.entries()].sort(
-				(a, b) => b[1] - a[1]
-			)) {
-				const pct = ((count / total) * 100).toFixed(1);
+			await outputLogger.log(updatedRecord);
+
+			if ((i + 1) % 100 === 0 || i + 1 === total) {
+				const pct = (((i + 1) / total) * 100).toFixed(1);
+				const lastSid = record.twilioSid || '(no SID)';
 				console.log(
-					`  ${status.padEnd(14)} ${String(count).padStart(5)}  (${pct}%)`
+					`  [${i + 1}/${total}] ${pct}% — last: ${lastSid} → ${updatedRecord.status}`
 				);
 			}
-			console.log(`Updated log: ${outputLogger.getLogFilePath()}`);
 		}
-		return;
-	}
 
-	// Default (no --update): collect all unique SIDs and write a status snapshot CSV
-	const sidsToCheck: Set<string> = new Set();
-	for (const { filename } of filesToCheck) {
-		const logger = new CsvSmsLogger(filename);
-		const logs = await logger.getLogs();
-		for (const record of logs) {
-			if (record.twilioSid && record.twilioSid !== '') {
-				sidsToCheck.add(record.twilioSid);
-			}
+		console.log('\n=== Delivery Statistics ===');
+		console.log(`File: ${filename} (${total} messages)`);
+		for (const [status, count] of [...statusCounts.entries()].sort(
+			(a, b) => b[1] - a[1]
+		)) {
+			const pct = ((count / total) * 100).toFixed(1);
+			console.log(
+				`  ${status.padEnd(14)} ${String(count).padStart(5)}  (${pct}%)`
+			);
 		}
+		console.log(`Updated log: ${outputLogger.getLogFilePath()}`);
 	}
-
-	if (sidsToCheck.size === 0) {
-		console.log('No Twilio SIDs found in log files.');
-		return;
-	}
-
-	console.log(`Found ${sidsToCheck.size} message(s) to check.\n`);
-
-	interface StatusResult {
-		twilioSid: string;
-		lastStatus: string;
-		date: string;
-		errorCode: string;
-		errorMessage: string;
-		price: string;
-		priceUnit: string;
-		numSegments: string;
-		direction: string;
-	}
-
-	const results: StatusResult[] = [];
-
-	for (const sid of sidsToCheck) {
-		try {
-			const msg = await fetchMessageStatus(sid);
-			const msgDate = msg.dateUpdated
-				? msg.dateUpdated.toISOString()
-				: new Date().toISOString();
-			results.push({
-				twilioSid: sid,
-				lastStatus: msg.status,
-				date: msgDate,
-				errorCode: msg.errorCode != null ? String(msg.errorCode) : '',
-				errorMessage: msg.errorMessage ?? '',
-				price: msg.price ?? '',
-				priceUnit: msg.priceUnit ?? '',
-				numSegments: msg.numSegments,
-				direction: msg.direction
-			});
-			console.log(`  ✓ ${sid}: ${msg.status} (${msgDate})`);
-		} catch (err) {
-			const errorMsg = err instanceof Error ? err.message : String(err);
-			results.push({
-				twilioSid: sid,
-				lastStatus: 'error',
-				date: new Date().toISOString(),
-				errorCode: '',
-				errorMessage: errorMsg,
-				price: '',
-				priceUnit: '',
-				numSegments: '',
-				direction: ''
-			});
-			console.log(`  ✗ ${sid}: error - ${errorMsg}`);
-		}
-	}
-
-	// Write status report CSV
-	const outputFilename = `sms-status-${date}.csv`;
-	const outputPath = path.join(STATUS_LOGS_DIR, outputFilename);
-
-	if (!fs.existsSync(STATUS_LOGS_DIR)) {
-		fs.mkdirSync(STATUS_LOGS_DIR, { recursive: true });
-	}
-
-	const csvHeader =
-		'TwilioSID,Last Status,Date,Error Code,Error Message,Price,Price Unit,Num Segments,Direction';
-	const csvRows = results
-		.map(
-			r =>
-				`${r.twilioSid},${r.lastStatus},${r.date},${r.errorCode},"${r.errorMessage.replace(/"/g, '""')}",${r.price},${r.priceUnit},${r.numSegments},${r.direction}`
-		)
-		.join('\n');
-	fs.writeFileSync(outputPath, csvHeader + '\n' + csvRows + '\n');
-
-	console.log('\n' + '='.repeat(50));
-	console.log('Status Check Summary:');
-	console.log(`  Messages checked: ${results.length}`);
-	console.log(`  Status report: ${outputPath}`);
 }
 
 // ===== Argument Parsing Helpers =====
@@ -690,8 +576,7 @@ async function main(): Promise<void> {
 
 		if (operation === 'check-status') {
 			const logFile = getFlag(args, '--log-file');
-			const update = hasFlag(args, '--update');
-			await checkStatus(logFile, update);
+			await checkStatus(logFile);
 			return;
 		}
 
@@ -798,16 +683,13 @@ Operations:
     Writes sms-log-recovered-DATE.csv. Use --date to limit to a single day.
     Example: npm run sms -- fetch-logs --date 2026-02-19
 
-  check-status [--log-file <filename>] [--update]
-    Fetch the latest delivery status from Twilio for every TwilioSID in log files.
-    Without --update: creates sms-status-DATE.csv (SID + status snapshot).
-    With --update:    creates an enriched CSV per send log with updated status +
-                      dateSent, price, priceUnit, errorCode, errorMessage columns.
-                      Original log is preserved. Prints delivery stats summary.
-    --log-file limits the check to a single file (works with or without --update).
+  check-status [--log-file <filename>]
+    Fetch the latest delivery status from Twilio for every record in log files.
+    Creates an enriched CSV per source log with updated status + dateSent, price,
+    priceUnit, errorCode, errorMessage columns. Original log is preserved.
+    Prints a delivery stats summary per file.
     Example: npm run sms -- check-status
-    Example: npm run sms -- check-status --update
-    Example: npm run sms -- check-status --update --log-file sms-log-2026-02-19-gift_card_notice.csv
+    Example: npm run sms -- check-status --log-file sms-log-2026-02-19-gift_card_notice.csv
 	`);
 }
 
