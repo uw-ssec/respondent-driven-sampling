@@ -100,17 +100,18 @@ router.get(
 			if (!result) {
 				return res.status(404).json({ message: 'User not found' });
 			}
+			const userObject = result.toObject();
 			if (
 				!req.authorization?.can(
 					ACTIONS.CASL.READ,
-					subject(SUBJECTS.USER, result.toObject())
+					subject(SUBJECTS.USER, userObject)
 				)
 			) {
-				return res.status(404).json({ message: 'User not found' });
+				return res.status(403).json({ message: 'Forbidden' });
 			}
 			res.status(200).json({
 				message: 'User fetched successfully',
-				data: result.toObject(),
+				data: userObject,
 				serverTimezone: DEFAULT_TIMEZONE
 			});
 		} catch (err) {
