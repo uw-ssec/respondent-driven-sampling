@@ -29,6 +29,12 @@
  *     List all CSV log files in sms-logs/ directory with row counts.
  *     Example: npm run sms -- logs
  *
+ *   fetch-logs [--date YYYY-MM-DD]
+ *     Recover a send log by fetching all outbound messages from Twilio API.
+ *     Filters out inbound replies (direction === outbound-api only).
+ *     Writes sms-log-recovered-DATE.csv. Use --date to limit to a single day.
+ *     Example: npm run sms -- fetch-logs --date 2026-02-19
+ *
  *   check-status [--log-file <filename>] [--update]
  *     Fetch the latest delivery status from Twilio for every TwilioSID in log files.
  *     Without --update: creates sms-status-DATE.csv (SID + status snapshot).
@@ -52,7 +58,8 @@ import {
 	sendSms,
 	normalizePhoneToE164,
 	interpolateTemplate,
-	fetchMessageStatus
+	fetchMessageStatus,
+	listOutboundMessages
 } from '@/services/twilio';
 import {
 	CsvSmsLogger,
@@ -352,9 +359,60 @@ function showLogs(): void {
 	console.log('');
 }
 
-// TODO: Use the Twilio API to update the delivery status (delivered, undelivered, failed, etc.)
-// for each TwilioSID in existing log files. After every run, create a CSV with:
-// TwilioSID, Last Status, Date
+async function fetchLogs(options: { date?: string }): Promise<void> {
+	console.log('\n📥 Fetching outbound messages from Twilio API...\n');
+
+	let dateSentAfter: Date | undefined;
+	let dateSentBefore: Date | undefined;
+
+	if (options.date) {
+		// Treat the date as UTC to match Twilio's dateSent field
+		dateSentAfter = new Date(`${options.date}T00:00:00Z`);
+		dateSentBefore = new Date(`${options.date}T23:59:59Z`);
+		console.log(`  Filtering to date: ${options.date} (UTC)\n`);
+	}
+
+	const messages = await listOutboundMessages({ dateSentAfter, dateSentBefore });
+
+	if (messages.length === 0) {
+		console.log('No outbound messages found.');
+		return;
+	}
+
+	console.log(`  Found ${messages.length} outbound message(s).\n`);
+
+	const date = options.date ?? new Date().toISOString().split('T')[0];
+	const logFilename = `sms-log-recovered-${date}.csv`;
+	const logger = new CsvSmsLogger(logFilename);
+
+	for (let i = 0; i < messages.length; i++) {
+		const m = messages[i];
+		const record: SmsRecord = {
+			surveyCode: '',
+			phone: m.to,
+			templateName: '',
+			smsText: m.body,
+			datetime:
+				m.dateSent?.toISOString() ??
+				m.dateCreated?.toISOString() ??
+				'',
+			status: m.status,
+			twilioSid: m.sid,
+			numSegments: m.numSegments
+		};
+		await logger.log(record);
+
+		if ((i + 1) % 100 === 0 || i + 1 === messages.length) {
+			const pct = (((i + 1) / messages.length) * 100).toFixed(1);
+			console.log(`  [${i + 1}/${messages.length}] ${pct}%`);
+		}
+	}
+
+	console.log(`\n  Recovered log: ${logger.getLogFilePath()}`);
+	console.log(
+		`  Next step: npm run sms -- check-status --update --log-file ${logFilename}`
+	);
+}
 
 const STATUS_LOGS_DIR = path.join(
 	path.dirname(new URL(import.meta.url).pathname),
@@ -637,6 +695,12 @@ async function main(): Promise<void> {
 			return;
 		}
 
+		if (operation === 'fetch-logs') {
+			const date = getFlag(args, '--date');
+			await fetchLogs({ date });
+			return;
+		}
+
 		console.log('Connecting to database...');
 		await connectDB();
 		console.log('Connected to database ✓');
@@ -727,6 +791,12 @@ Operations:
   logs
     List all CSV log files in sms-logs/ directory with row counts.
     Example: npm run sms -- logs
+
+  fetch-logs [--date YYYY-MM-DD]
+    Recover a send log by fetching all outbound messages from Twilio API.
+    Filters out inbound replies (direction === outbound-api only).
+    Writes sms-log-recovered-DATE.csv. Use --date to limit to a single day.
+    Example: npm run sms -- fetch-logs --date 2026-02-19
 
   check-status [--log-file <filename>] [--update]
     Fetch the latest delivery status from Twilio for every TwilioSID in log files.

@@ -78,6 +78,61 @@ export async function fetchMessageStatus(
 	};
 }
 
+export interface OutboundMessageRecord {
+	sid: string;
+	to: string;
+	body: string;
+	status: string;
+	dateSent: Date | null;
+	dateCreated: Date | null;
+	numSegments: string;
+	direction: string;
+	errorCode: number | null;
+	errorMessage: string | null;
+	price: string | null;
+	priceUnit: string | null;
+}
+
+/**
+ * List all outbound messages sent from our Twilio number.
+ * Filters to direction === 'outbound-api' to exclude inbound replies.
+ */
+export async function listOutboundMessages(options?: {
+	dateSentAfter?: Date;
+	dateSentBefore?: Date;
+}): Promise<OutboundMessageRecord[]> {
+	if (!twilioPhoneNumber) {
+		throw new Error(
+			'TWILIO_PHONE_NUMBER is not configured. Set it in your .env file.'
+		);
+	}
+
+	const messages = await client.messages.list({
+		from: twilioPhoneNumber,
+		...(options?.dateSentAfter && { dateSentAfter: options.dateSentAfter }),
+		...(options?.dateSentBefore && {
+			dateSentBefore: options.dateSentBefore
+		})
+	});
+
+	return messages
+		.filter(m => m.direction === 'outbound-api')
+		.map(m => ({
+			sid: m.sid,
+			to: m.to,
+			body: m.body,
+			status: m.status,
+			dateSent: m.dateSent ?? null,
+			dateCreated: m.dateCreated ?? null,
+			numSegments: m.numSegments,
+			direction: m.direction,
+			errorCode: m.errorCode ?? null,
+			errorMessage: m.errorMessage ?? null,
+			price: m.price ?? null,
+			priceUnit: m.priceUnit ?? null
+		}));
+}
+
 /**
  * Normalizes a US phone number from various formats to E.164 (+1XXXXXXXXXX).
  * Handles: (555) 123-4567, 555-123-4567, 5551234567, +15551234567, etc.
