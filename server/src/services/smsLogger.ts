@@ -15,6 +15,15 @@ export interface SmsRecord {
 	datetime: string;
 	status: string;
 	twilioSid: string;
+	numSegments: string;
+}
+
+export interface UpdatedSmsRecord extends SmsRecord {
+	dateSent: string;
+	price: string;
+	priceUnit: string;
+	errorCode: string;
+	errorMessage: string;
 }
 
 export interface SmsLogger {
@@ -24,7 +33,11 @@ export interface SmsLogger {
 }
 
 const CSV_HEADER =
-	'surveyCode,phone,templateName,smsText,datetime,status,twilioSid';
+	'surveyCode,phone,templateName,smsText,datetime,status,twilioSid,numSegments';
+
+const UPDATED_CSV_HEADER =
+	'surveyCode,phone,templateName,smsText,datetime,status,twilioSid,numSegments,' +
+	'dateSent,price,priceUnit,errorCode,errorMessage';
 
 function escapeCsvField(value: string): string {
 	if (value.includes(',') || value.includes('"') || value.includes('\n')) {
@@ -41,7 +54,26 @@ function recordToCsvRow(record: SmsRecord): string {
 		escapeCsvField(record.smsText),
 		escapeCsvField(record.datetime),
 		escapeCsvField(record.status),
-		escapeCsvField(record.twilioSid)
+		escapeCsvField(record.twilioSid),
+		escapeCsvField(record.numSegments)
+	].join(',');
+}
+
+function updatedRecordToCsvRow(record: UpdatedSmsRecord): string {
+	return [
+		escapeCsvField(record.surveyCode),
+		escapeCsvField(record.phone),
+		escapeCsvField(record.templateName),
+		escapeCsvField(record.smsText),
+		escapeCsvField(record.datetime),
+		escapeCsvField(record.status),
+		escapeCsvField(record.twilioSid),
+		escapeCsvField(record.numSegments),
+		escapeCsvField(record.dateSent),
+		escapeCsvField(record.price),
+		escapeCsvField(record.priceUnit),
+		escapeCsvField(record.errorCode),
+		escapeCsvField(record.errorMessage)
 	].join(',');
 }
 
@@ -84,7 +116,8 @@ function parseCsvRow(row: string): SmsRecord | null {
 		smsText: fields[3],
 		datetime: fields[4],
 		status: fields[5],
-		twilioSid: fields[6]
+		twilioSid: fields[6],
+		numSegments: fields[7] ?? ''
 	};
 }
 
@@ -126,6 +159,35 @@ export class CsvSmsLogger implements SmsLogger {
 			.slice(1)
 			.map(parseCsvRow)
 			.filter((record): record is SmsRecord => record !== null);
+	}
+}
+
+export class UpdatedCsvSmsLogger {
+	private filePath: string;
+
+	constructor(filename: string) {
+		if (!fs.existsSync(SMS_LOGS_DIR)) {
+			fs.mkdirSync(SMS_LOGS_DIR, { recursive: true });
+		}
+		this.filePath = path.join(SMS_LOGS_DIR, filename);
+	}
+
+	getLogFilePath(): string {
+		return this.filePath;
+	}
+
+	async log(record: UpdatedSmsRecord): Promise<void> {
+		const fileExists = fs.existsSync(this.filePath);
+		const row = updatedRecordToCsvRow(record);
+
+		if (!fileExists) {
+			fs.writeFileSync(
+				this.filePath,
+				UPDATED_CSV_HEADER + '\n' + row + '\n'
+			);
+		} else {
+			fs.appendFileSync(this.filePath, row + '\n');
+		}
 	}
 }
 

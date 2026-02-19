@@ -11,6 +11,7 @@ export interface SmsSendResult {
 	status: string;
 	errorCode: string | null;
 	errorMessage: string | null;
+	numSegments: string;
 }
 
 /**
@@ -36,7 +37,8 @@ export async function sendSms(
 		sid: message.sid,
 		status: message.status,
 		errorCode: message.errorCode ? String(message.errorCode) : null,
-		errorMessage: message.errorMessage ?? null
+		errorMessage: message.errorMessage ?? null,
+		numSegments: message.numSegments
 	};
 }
 
@@ -49,6 +51,7 @@ export interface MessageStatusResult {
 	sid: string;
 	status: string;
 	dateUpdated: Date | null;
+	dateSent: Date | null;
 	errorCode: number | null;
 	errorMessage: string | null;
 	price: string | null;
@@ -65,6 +68,7 @@ export async function fetchMessageStatus(
 		sid: message.sid,
 		status: message.status,
 		dateUpdated: message.dateUpdated,
+		dateSent: message.dateSent ?? null,
 		errorCode: message.errorCode ?? null,
 		errorMessage: message.errorMessage ?? null,
 		price: message.price ?? null,
