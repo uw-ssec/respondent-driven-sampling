@@ -96,24 +96,28 @@ router.get(
 			return res.status(403).json({ message: 'Forbidden' });
 		}
 		try {
-			const result = await User.findOne({
-				_id: req.params.objectId,
-				...accessibleBy(req.authorization, ACTIONS.CASL.READ).ofType(
-					User.modelName
-				) // Dynamic filter for handling custom permissions
+			const result = await User.findById(req.params.objectId);
+			if (!result) {
+				return res.status(404).json({ message: 'User not found' });
+			}
+			const userObject = result.toObject();
+			if (
+				!req.authorization?.can(
+					ACTIONS.CASL.READ,
+					subject(SUBJECTS.USER, userObject)
+				)
+			) {
+				return res.status(403).json({ message: 'Forbidden' });
+			}
+			res.status(200).json({
+				message: 'User fetched successfully',
+				data: userObject,
+				serverTimezone: DEFAULT_TIMEZONE
 			});
-		if (!result) {
-			return res.status(404).json({ message: 'User not found' });
+		} catch (err) {
+			next(err);
 		}
-		res.status(200).json({
-			message: 'User fetched successfully',
-			data: result.toObject(),
-			serverTimezone: DEFAULT_TIMEZONE
-		});
-	} catch (err) {
-		next(err);
 	}
-}
 );
 
 /**
