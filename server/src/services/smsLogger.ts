@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { parse } from 'csv-parse/sync';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,50 +78,6 @@ function updatedRecordToCsvRow(record: UpdatedSmsRecord): string {
 	].join(',');
 }
 
-function parseCsvRow(row: string): SmsRecord | null {
-	// Simple CSV parser that handles quoted fields
-	const fields: string[] = [];
-	let current = '';
-	let inQuotes = false;
-
-	for (let i = 0; i < row.length; i++) {
-		const char = row[i];
-		if (inQuotes) {
-			if (char === '"' && row[i + 1] === '"') {
-				current += '"';
-				i++;
-			} else if (char === '"') {
-				inQuotes = false;
-			} else {
-				current += char;
-			}
-		} else {
-			if (char === '"') {
-				inQuotes = true;
-			} else if (char === ',') {
-				fields.push(current);
-				current = '';
-			} else {
-				current += char;
-			}
-		}
-	}
-	fields.push(current);
-
-	if (fields.length < 7) return null;
-
-	return {
-		surveyCode: fields[0],
-		phone: fields[1],
-		templateName: fields[2],
-		smsText: fields[3],
-		datetime: fields[4],
-		status: fields[5],
-		twilioSid: fields[6],
-		numSegments: fields[7] ?? ''
-	};
-}
-
 export class CsvSmsLogger implements SmsLogger {
 	private filePath: string;
 
@@ -152,13 +109,12 @@ export class CsvSmsLogger implements SmsLogger {
 		}
 
 		const content = fs.readFileSync(this.filePath, 'utf-8');
-		const lines = content.split('\n').filter(line => line.trim() !== '');
-
-		// Skip header row
-		return lines
-			.slice(1)
-			.map(parseCsvRow)
-			.filter((record): record is SmsRecord => record !== null);
+		return parse(content, {
+			columns: true,
+			skip_empty_lines: true,
+			relax_column_count: true,
+			cast: false
+		}) as SmsRecord[];
 	}
 }
 
@@ -205,12 +161,15 @@ export function listLogFiles(): { filename: string; rows: number }[] {
 		.map(filename => {
 			const filePath = path.join(SMS_LOGS_DIR, filename);
 			const content = fs.readFileSync(filePath, 'utf-8');
-			const lines = content
-				.split('\n')
-				.filter(line => line.trim() !== '');
+			const records = parse(content, {
+				columns: true,
+				skip_empty_lines: true,
+				relax_column_count: true,
+				cast: false
+			}) as unknown[];
 			return {
 				filename,
-				rows: Math.max(0, lines.length - 1) // subtract header
+				rows: records.length
 			};
 		});
 }
