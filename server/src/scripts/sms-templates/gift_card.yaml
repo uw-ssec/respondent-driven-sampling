@@ -1,5 +1,6 @@
 # SMS template for gift card delivery notifications
 # Variables: {surveyCode} is auto-populated from survey data
-name: gift_card
-description: Notify respondents about gift card delivery
-body: "Hi! Your survey code is {surveyCode}. Thank you for participating in the PIT Count!"
+name: gift_card_notice
+description: Notify respondents about gift card delays
+body: "Hi {surveyCode}, thank you for your participation in the PIT Count!\nWe are working on your gift cards and will send them via email and text this week.\nWe apologize for the delay and appreciate your patience!\n\nKing County Regional Homelessness Authority"
+

@@ -28,6 +28,13 @@
  *   logs
  *     List all CSV log files in sms-logs/ directory with row counts.
  *     Example: npm run sms -- logs
+ *
+ *   check-status [--log-file <filename>]
+ *     Fetch the latest delivery status from Twilio for every TwilioSID in log files.
+ *     Creates a CSV report (sms-status-YYYY-MM-DD.csv) with: TwilioSID, Last Status, Date,
+ *     Error Code, Error Message, Price, Price Unit, Num Segments, Direction.
+ *     Example: npm run sms -- check-status
+ *     Example: npm run sms -- check-status --log-file sms-log-2026-02-19-gift_card_notice.csv
  */
 import fs from 'fs';
 import path from 'path';
@@ -40,7 +47,8 @@ import Survey from '@/database/survey/mongoose/survey.model';
 import {
 	sendSms,
 	normalizePhoneToE164,
-	interpolateTemplate
+	interpolateTemplate,
+	fetchMessageStatus
 } from '@/services/twilio';
 import { CsvSmsLogger, listLogFiles } from '@/services/smsLogger';
 import type { SmsRecord } from '@/services/smsLogger';
@@ -333,6 +341,130 @@ function showLogs(): void {
 	console.log('');
 }
 
+// TODO: Use the Twilio API to update the delivery status (delivered, undelivered, failed, etc.)
+// for each TwilioSID in existing log files. After every run, create a CSV with:
+// TwilioSID, Last Status, Date
+
+const STATUS_LOGS_DIR = path.join(
+	path.dirname(new URL(import.meta.url).pathname),
+	'sms-logs'
+);
+
+async function checkStatus(logFilename?: string): Promise<void> {
+	console.log('\n🔄 Checking SMS delivery statuses via Twilio API...\n');
+
+	// Gather all TwilioSIDs from log files
+	const logFiles = listLogFiles();
+
+	if (logFiles.length === 0) {
+		console.log('No log files found. Send some messages first.');
+		return;
+	}
+
+	// If a specific log file is given, only check that one
+	const filesToCheck = logFilename
+		? logFiles.filter(f => f.filename === logFilename)
+		: logFiles;
+
+	if (filesToCheck.length === 0) {
+		console.log(`Log file "${logFilename}" not found.`);
+		return;
+	}
+
+	// Collect all unique TwilioSIDs from the selected log files
+	const sidsToCheck: Set<string> = new Set();
+	for (const { filename } of filesToCheck) {
+		const logger = new CsvSmsLogger(filename);
+		const logs = await logger.getLogs();
+		for (const record of logs) {
+			if (record.twilioSid && record.twilioSid !== '') {
+				sidsToCheck.add(record.twilioSid);
+			}
+		}
+	}
+
+	if (sidsToCheck.size === 0) {
+		console.log('No Twilio SIDs found in log files.');
+		return;
+	}
+
+	console.log(`Found ${sidsToCheck.size} message(s) to check.\n`);
+
+	// Fetch status for each SID and build results
+	interface StatusResult {
+		twilioSid: string;
+		lastStatus: string;
+		date: string;
+		errorCode: string;
+		errorMessage: string;
+		price: string;
+		priceUnit: string;
+		numSegments: string;
+		direction: string;
+	}
+
+	const results: StatusResult[] = [];
+
+	for (const sid of sidsToCheck) {
+		try {
+			const msg = await fetchMessageStatus(sid);
+			const date = msg.dateUpdated
+				? msg.dateUpdated.toISOString()
+				: new Date().toISOString();
+			results.push({
+				twilioSid: sid,
+				lastStatus: msg.status,
+				date,
+				errorCode: msg.errorCode != null ? String(msg.errorCode) : '',
+				errorMessage: msg.errorMessage ?? '',
+				price: msg.price ?? '',
+				priceUnit: msg.priceUnit ?? '',
+				numSegments: msg.numSegments,
+				direction: msg.direction
+			});
+			console.log(`  ✓ ${sid}: ${msg.status} (${date})`);
+		} catch (err) {
+			const errorMsg = err instanceof Error ? err.message : String(err);
+			results.push({
+				twilioSid: sid,
+				lastStatus: 'error',
+				date: new Date().toISOString(),
+				errorCode: '',
+				errorMessage: errorMsg,
+				price: '',
+				priceUnit: '',
+				numSegments: '',
+				direction: ''
+			});
+			console.log(`  ✗ ${sid}: error - ${errorMsg}`);
+		}
+	}
+
+	// Write status report CSV
+	const date = new Date().toISOString().split('T')[0];
+	const outputFilename = `sms-status-${date}.csv`;
+	const outputPath = path.join(STATUS_LOGS_DIR, outputFilename);
+
+	if (!fs.existsSync(STATUS_LOGS_DIR)) {
+		fs.mkdirSync(STATUS_LOGS_DIR, { recursive: true });
+	}
+
+	const csvHeader =
+		'TwilioSID,Last Status,Date,Error Code,Error Message,Price,Price Unit,Num Segments,Direction';
+	const csvRows = results
+		.map(
+			r =>
+				`${r.twilioSid},${r.lastStatus},${r.date},${r.errorCode},"${r.errorMessage.replace(/"/g, '""')}",${r.price},${r.priceUnit},${r.numSegments},${r.direction}`
+		)
+		.join('\n');
+	fs.writeFileSync(outputPath, csvHeader + '\n' + csvRows + '\n');
+
+	console.log('\n' + '='.repeat(50));
+	console.log('Status Check Summary:');
+	console.log(`  Messages checked: ${results.length}`);
+	console.log(`  Status report: ${outputPath}`);
+}
+
 // ===== Argument Parsing Helpers =====
 
 function getFlag(args: string[], flag: string): string | undefined {
@@ -376,9 +508,15 @@ async function main(): Promise<void> {
 
 		const operation = args[0].toLowerCase();
 
-		// 'logs' doesn't need DB connection
+		// 'logs' and 'check-status' don't need DB connection
 		if (operation === 'logs') {
 			showLogs();
+			return;
+		}
+
+		if (operation === 'check-status') {
+			const logFile = getFlag(args, '--log-file');
+			await checkStatus(logFile);
 			return;
 		}
 
@@ -472,6 +610,12 @@ Operations:
   logs
     List all CSV log files in sms-logs/ directory with row counts.
     Example: npm run sms -- logs
+
+  check-status [--log-file <filename>]
+    Fetch the latest delivery status from Twilio for every TwilioSID in log files.
+    Creates a CSV report (sms-status-YYYY-MM-DD.csv) with: TwilioSID, Last Status, Date.
+    Example: npm run sms -- check-status
+    Example: npm run sms -- check-status --log-file sms-log-2026-02-19-gift_card_notice.csv
 	`);
 }
 

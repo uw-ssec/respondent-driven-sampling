@@ -41,6 +41,40 @@ export async function sendSms(
 }
 
 /**
+ * Fetch the current status of a sent message by its Twilio SID.
+ * Uses the Twilio Messages API: client.messages(sid).fetch()
+ * Returns the latest status (e.g. "queued", "sent", "delivered", "undelivered", "failed").
+ */
+export interface MessageStatusResult {
+	sid: string;
+	status: string;
+	dateUpdated: Date | null;
+	errorCode: number | null;
+	errorMessage: string | null;
+	price: string | null;
+	priceUnit: string | null;
+	numSegments: string;
+	direction: string;
+}
+
+export async function fetchMessageStatus(
+	sid: string
+): Promise<MessageStatusResult> {
+	const message = await client.messages(sid).fetch();
+	return {
+		sid: message.sid,
+		status: message.status,
+		dateUpdated: message.dateUpdated,
+		errorCode: message.errorCode ?? null,
+		errorMessage: message.errorMessage ?? null,
+		price: message.price ?? null,
+		priceUnit: message.priceUnit ?? null,
+		numSegments: message.numSegments,
+		direction: message.direction
+	};
+}
+
+/**
  * Normalizes a US phone number from various formats to E.164 (+1XXXXXXXXXX).
  * Handles: (555) 123-4567, 555-123-4567, 5551234567, +15551234567, etc.
  * @throws Error if the phone number is not a valid 10-digit US number
