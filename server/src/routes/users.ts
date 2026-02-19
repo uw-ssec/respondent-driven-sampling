@@ -106,7 +106,7 @@ router.get(
 					subject(SUBJECTS.USER, result.toObject())
 				)
 			) {
-				return res.status(403).json({ message: 'Forbidden' });
+				return res.status(404).json({ message: 'User not found' });
 			}
 			res.status(200).json({
 				message: 'User fetched successfully',
