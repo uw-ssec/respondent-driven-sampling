@@ -11,6 +11,7 @@ export interface SmsSendResult {
 	status: string;
 	errorCode: string | null;
 	errorMessage: string | null;
+	/** Number of billing segments. Multi-segment messages cost more. */
 	numSegments: string;
 }
 
@@ -60,6 +61,11 @@ export interface MessageStatusResult {
 	direction: string;
 }
 
+/**
+ * Fetch the latest status of a previously sent message by Twilio SID.
+ * Includes delivery details (dateSent, price, errorCode) that are only
+ * available after the message leaves Twilio's network.
+ */
 export async function fetchMessageStatus(
 	sid: string
 ): Promise<MessageStatusResult> {

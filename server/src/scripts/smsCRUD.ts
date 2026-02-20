@@ -408,10 +408,9 @@ async function fetchLogs(options: { date?: string }): Promise<void> {
 
 	console.log(`\n  Recovered log: ${logger.getLogFilePath()}`);
 	console.log(
-		`  Next step: npm run sms -- check-status --update --log-file ${logFilename}`
+		`  Next step: npm run sms -- check-status --log-file ${logFilename}`
 	);
 }
-
 
 async function checkStatus(logFilename?: string): Promise<void> {
 	console.log('\n🔄 Checking SMS delivery statuses via Twilio API...\n');
@@ -568,7 +567,7 @@ async function main(): Promise<void> {
 
 		const operation = args[0].toLowerCase();
 
-		// 'logs' and 'check-status' don't need DB connection
+		// 'logs', 'fetch-logs', and 'check-status' don't need a DB connection
 		if (operation === 'logs') {
 			showLogs();
 			return;
