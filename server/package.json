@@ -16,7 +16,8 @@
 		"super-admin": "tsx --env-file=.env src/scripts/superAdminCRUD.ts",
 		"location": "tsx --env-file=.env src/scripts/locationCRUD.ts",
 		"generate-seeds": "tsx --env-file=.env src/scripts/generateSeeds.ts",
-		"generate-coupons": "tsx --env-file=.env src/scripts/generateCoupons.ts"
+		"generate-coupons": "tsx --env-file=.env src/scripts/generateCoupons.ts",
+		"sms": "tsx --env-file=.env src/scripts/smsCRUD.ts"
 	},
 	"keywords": [],
 	"author": "",
@@ -31,6 +32,7 @@
 		"bcryptjs": "^3.0.1",
 		"compression": "^1.8.0",
 		"cors": "^2.8.5",
+		"csv-parse": "^6.1.0",
 		"dotenv": "^16.4.7",
 		"express": "^4.21.2",
 		"helmet": "^8.1.0",
