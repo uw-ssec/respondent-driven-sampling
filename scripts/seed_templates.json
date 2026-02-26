@@ -1,0 +1,154 @@
+{
+  "metro": {
+    "headerEn": "HOLLYWOOD AND SOUTH LA HUB SITES (SPA 4 and 6)",
+    "headerEs": "CENTROS (HUBS) DE HOLLYWOOD Y SOUTH LA (SPA 4 y 6)",
+    "subheaderEn": "View all Hub Sites in LA County at youthcount.org/map",
+    "subheaderEs": "Vea los Centros (Hubs) en el Condado de Los Ángeles en youthcount.org/map",
+    "warningEn": "TIMES LISTED BELOW ARE DESIGNATED SURVEYING HOURS. AGENCIES OPEN OUTSIDE OF THESE HOURS.",
+    "warningEs": "LOS HORARIOS QUE SE INDICAN SON LAS HORAS DESIGNADAS PARA LAS ENCUESTAS. LAS AGENCIAS ESTÁN ABIERTAS FUERA DE ESTOS HORARIOS.",
+    "locations": [
+      {
+        "name": "EAST HOLLYWOOD: YP2F HQ",
+        "address": "4308 Burns Ave LA CA 90029",
+        "hoursEn": "SURVEYING: Tue and Thu 5:00 PM - 8:00 PM",
+        "hoursEs": "ENCUESTAS: Mar y Jue 5:00 PM - 8:00 PM"
+      },
+      {
+        "name": "HOLLYWOOD: My Friends Place",
+        "address": "5850 Hollywood Blvd, LA CA 90028",
+        "hoursEn": "SURVEYING: Tue, Thu, Fri 9:30 AM - 3:30 PM",
+        "hoursEs": "ENCUESTAS: Mar, Jue, Vie 9:30 AM - 3:30 PM"
+      },
+      {
+        "name": "SOUTH LA: Ruth's Place",
+        "address": "4775 S. Broadway Los Angeles 90007",
+        "hoursEn": "SURVEYING: Tue-Fri 10:00 AM - 4:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Vie 10:00 AM - 4:00 PM"
+      },
+      {
+        "name": "HOLLYWOOD: LA LGBT Center",
+        "address": "1118 N. McCadden Pl. LA, CA 90038",
+        "hoursEn": "SURVEYING: Mon-Fri 10:00 AM - 6:00 PM (Closed Mon Jan 19th), SAT, SUN 9:00 AM - 1:00 PM",
+        "hoursEs": "ENCUESTAS: Lun-Vie 10:00 AM - 6:00 PM (Cerrado el lunes 19 de enero); Sab, Dom 9:00 AM - 1:00 PM"
+      },
+      {
+        "name": "SOUTH LA: WATTS LABOR ACTION COMMUNITY",
+        "address": "958 E 108th Street, Los Angeles, CA 90059",
+        "hoursEn": "SURVEYING: Tue-Fri 9:00 AM - 3:30 PM",
+        "hoursEs": "ENCUESTAS: Mar-Vie 9:00 AM - 3:30 PM"
+      }
+    ]
+  },
+  "sfv": {
+    "headerEn": "SAN FERNANDO VALLEY HUB SITES (SPA 2)",
+    "headerEs": "CENTROS (HUBS) DE SAN FERNANDO VALLEY (SPA 2)",
+    "subheaderEn": "View all Hub Sites in LA County at youthcount.org/map",
+    "subheaderEs": "Vea los Centros (Hubs) en el Condado de Los Ángeles en youthcount.org/map",
+    "warningEn": "TIMES LISTED BELOW ARE DESIGNATED SURVEYING HOURS. AGENCIES OPEN OUTSIDE OF THESE HOURS.",
+    "warningEs": "LOS HORARIOS QUE SE INDICAN SON LAS HORAS DESIGNADAS PARA LAS ENCUESTAS. LAS AGENCIAS ESTÁN ABIERTAS FUERA DE ESTOS HORARIOS.",
+    "locations": [
+      {
+        "name": "PACOIMA: Volunteers Of America",
+        "address": "12502 Van Nuys Blvd., Suite 206 Pacoima",
+        "hoursEn": "SURVEYING: Tue-Fri 10:00 AM-4:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Vie 10:00 AM - 4:00 PM"
+      },
+      {
+        "name": "VAN NUYS/NORTH HOLLYWOOD: The Village Family Services",
+        "address": "6801 Coldwater Canyon, North Hollywood",
+        "hoursEn": "SURVEYING: Tue-Fri 10:00 AM-5:00 PM, Sat 10:00 AM-4:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Vie 10:00 AM - 5:00 PM, Sab 10:00 AM - 4:00 PM"
+      }
+    ]
+  },
+  "av": {
+    "headerEn": "ANTELOPE VALLEY HUB SITES (SPA 1)",
+    "headerEs": "CENTROS (HUBS) DE ANTELOPE VALLEY (SPA 1)",
+    "subheaderEn": "View all Hub Sites in LA County at youthcount.org/map",
+    "subheaderEs": "Vea los Centros (Hubs) en el Condado de Los Ángeles en youthcount.org/map",
+    "warningEn": "TIMES LISTED BELOW ARE DESIGNATED SURVEYING HOURS. AGENCIES OPEN OUTSIDE OF THESE HOURS.",
+    "warningEs": "LOS HORARIOS QUE SE INDICAN SON LAS HORAS DESIGNADAS PARA LAS ENCUESTAS. LAS AGENCIAS ESTÁN ABIERTAS FUERA DE ESTOS HORARIOS.",
+    "locations": [
+      {
+        "name": "LANCASTER: Penny Lane Centers",
+        "address": "43520 Division St, Lancaster CA 93535",
+        "hoursEn": "SURVEYING: Tue-Fri 2:00 PM-6:00 PM, Sat 9:00 AM-7:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Vie 2:00 PM - 6:00 PM, Sab 9:00 AM - 7:00 PM"
+      },
+      {
+        "name": "PALMDALE LANCASTER: Valley Oasis Thrift Shoppe",
+        "address": "3030 E Palmdale Blvd, Palmdale, CA 93550",
+        "hoursEn": "SURVEYING: Wed-Fri 11:00 AM-5:00 PM",
+        "hoursEs": "ENCUESTAS: Mie-Vie 11:00 AM - 5:00 PM"
+      }
+    ]
+  },
+  "east": {
+    "headerEn": "EAST LA AND SAN GABRIEL VALLEY HUB SITES (SPA 7 and SPA 3)",
+    "headerEs": "CENTROS (HUBS) DE EAST LA Y SAN GABRIEL VALLEY (SPA 7 y SPA 3)",
+    "subheaderEn": "View all Hub Sites in LA County at youthcount.org/map",
+    "subheaderEs": "Vea los Centros (Hubs) en el Condado de Los Ángeles en youthcount.org/map",
+    "warningEn": "TIMES LISTED BELOW ARE DESIGNATED SURVEYING HOURS. AGENCIES OPEN OUTSIDE OF THESE HOURS.",
+    "warningEs": "LOS HORARIOS QUE SE INDICAN SON LAS HORAS DESIGNADAS PARA LAS ENCUESTAS. LAS AGENCIAS ESTÁN ABIERTAS FUERA DE ESTOS HORARIOS.",
+    "locations": [
+      {
+        "name": "PASADENA: Youth Moving On",
+        "address": "456 E Orange Grove Blvd, Suite 140, Pasadena CA 91104",
+        "hoursEn": "SURVEYING: Tue-Fri 11:00 AM-4:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Vie 11:00 AM - 4:00 PM"
+      },
+      {
+        "name": "IRWINDALE: Hope Drop-in Center",
+        "address": "13001 Ramona Blvd. Suite I, Irwindale, 91706",
+        "hoursEn": "SURVEYING: Tue-Sat 10:00 AM-4:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Sab 10:00 AM - 4:00 PM"
+      },
+      {
+        "name": "WHITTIER: Jovenes Access Center",
+        "address": "9829 Carmenita Rd Suite H, Whittier CA 90605",
+        "hoursEn": "SURVEYING: Tue-Fri 10:00 AM-4:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Vie 10:00 AM - 4:00 PM"
+      },
+      {
+        "name": "POMONA: God's Pantry",
+        "address": "480 W Monterey Ave, Pomona, CA 91768",
+        "hoursEn": "SURVEYING: Tue-Thu 10:00 AM-3:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Jue 10:00 AM - 3:00 PM"
+      },
+      {
+        "name": "COMMERCE: Penny Lane Centers",
+        "address": "5628 E. Slauson Ave, Commerce, CA 90040",
+        "hoursEn": "SURVEYING: Tue-Fri 2:00 PM-6:00 PM, Sat 10:00 AM-7:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Vie 2:00 PM - 6:00 PM, Sab 10:00 AM - 7:00 PM"
+      }
+    ]
+  },
+  "sw": {
+    "headerEn": "WEST LA AND SOUTH BAY HUB SITES (SPA 5 and 8)",
+    "headerEs": "CENTROS (HUBS) DE WEST LA Y SOUTH BAY (SPA 5 y 8)",
+    "subheaderEn": "View all Hub Sites in LA County at youthcount.org/map",
+    "subheaderEs": "Vea los Centros (Hubs) en el Condado de Los Ángeles en youthcount.org/map",
+    "warningEn": "TIMES LISTED BELOW ARE DESIGNATED SURVEYING HOURS. AGENCIES OPEN OUTSIDE OF THESE HOURS.",
+    "warningEs": "LOS HORARIOS QUE SE INDICAN SON LAS HORAS DESIGNADAS PARA LAS ENCUESTAS. LAS AGENCIAS ESTÁN ABIERTAS FUERA DE ESTOS HORARIOS.",
+    "locations": [
+      {
+        "name": "VENICE: Safe Place For Youth",
+        "address": "2471 Lincoln Blvd Suite 101 Venice CA 90291",
+        "hoursEn": "SURVEYING: Tue-Fri 10:00 AM-6:00 PM, Sat 10:00 AM-3:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Vie 10:00 AM - 6:00 PM, Sab 10:00 AM - 3:00 PM"
+      },
+      {
+        "name": "HAWTHORNE: Sanctuary Of Hope",
+        "address": "13245 Hawthorne Blvd, Hawthorne, CA 90250",
+        "hoursEn": "SURVEYING: Tue-Sat 10:00 AM-4:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Sab 10:00 AM - 4:00 PM"
+      },
+      {
+        "name": "SAN PEDRO: Harbor Interfaith",
+        "address": "670 W 9th St, San Pedro, CA 90731",
+        "hoursEn": "SURVEYING: Tue-Fri 2:00 PM-5:00 PM",
+        "hoursEs": "ENCUESTAS: Mar-Vie 2:00 PM - 5:00 PM"
+      }
+    ]
+  }
+}

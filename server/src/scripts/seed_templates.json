@@ -1,0 +1,304 @@
+{
+  "seattle": {
+    "headerEn": "Seattle Survey Locations",
+    "headerEs": "Ubicaciones en Seattle",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible.",
+    "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
+    "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum de Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
+    "locations": [
+      {
+        "name": "Opportunity Center at North Seattle College",
+        "address": "9600 College Way N, Seattle, WA 98103",
+        "daysEn": "January 26-30 (Monday-Friday)",
+        "daysEs": "26-30 de enero (lunes-viernes)",
+        "hoursEn": "10:30am to 2:30pm",
+        "hoursEs": "10:30am - 2:30pm"
+      },
+      {
+        "name": "YouthCare Orion Center (Use Entrance on Stewart St.)",
+        "address": "1828 Yale Ave, Seattle, WA 98101",
+        "daysEn": "January 26-29 and February 2-5",
+        "daysEs": "26-29 de enero y 2-5 de febrero (lunes-jueves)",
+        "hoursEn": "Mon/Tue 10am to 2pm, Wed/Thu 2pm to 6pm",
+        "hoursEs": "lun/mar 10am - 2pm, miérc/juev 2pm - 6pm"
+      },
+      {
+        "name": "Lake City Library",
+        "address": "12501 28th Ave NE, Seattle, WA 98125",
+        "daysEn": "February 2-6 (Monday-Friday)",
+        "daysEs": "2-6 de febrero (lunes-viernes)",
+        "hoursEn": "10:30am to 2:30pm",
+        "hoursEs": "10:30am - 2:30pm"
+      },
+      {
+        "name": "Compass Day Center",
+        "address": "210 Alaskan Way , Seattle, WA 98104",
+        "daysEn": "February 2-6 (Monday-Friday)",
+        "daysEs": "2-6 de febrero (lunes-viernes)",
+        "hoursEn": "10:30am to 2:30pm",
+        "hoursEs": "10:30am - 2:30pm"
+      },
+      {
+        "name": "SVdP Georgetown Foodbank",
+        "address": "5972 4th Ave S, Seattle, WA 98108",
+        "daysEn": "January 27, 29-30 , February 3, 5-6 (Tue/Thu/Fri)",
+        "daysEs": "27, 29-30 de enero y 3, 5-6 de febrero (mar/juev/vier)",
+        "hoursEn": "11am to 2pm",
+        "hoursEs": "11am - 2pm"
+      },
+      {
+        "name": "St. James Cathedral",
+        "address": "804 9th Ave, Seattle, WA 98104",
+        "daysEn": "January 26-29 (Monday-Thursday)",
+        "daysEs": "26-29 de enero (lunes-jueves)",
+        "hoursEn": "1pm to 4pm",
+        "hoursEs": "1pm - 4pm"
+      },
+      {
+        "name": "South Lucile Street VA Center",
+        "address": "305 S Lucile St, STE 103, Seattle, WA 98104",
+        "daysEn": "February 2-6 (Monday-Friday)",
+        "daysEs": "2-6 de febrero (lunes-viernes)",
+        "hoursEn": "9am to 12pm",
+        "hoursEs": "9am - 12pm"
+      },
+      {
+        "name": "Allen Family Center (Families with Children Only)",
+        "address": "3190 Martin Luther King Jr Way S, Seattle, WA 98144",
+        "daysEn": "January 26 - February 6 (Weekdays only)",
+        "daysEs": "26 de enero - 6 de febrero (lunes-viernes)",
+        "hoursEn": "11:30am to 1:30pm",
+        "hoursEs": "11:30am - 1:30pm"
+      },
+      {
+        "name": "Southwest Library",
+        "address": "9010 35th Ave SW, Seattle, WA 98126",
+        "daysEn": "January 26-29 (Monday-Thursday)",
+        "daysEs": "26-29 de enero (lunes-jueves)",
+        "hoursEn": "Mon-Wed 1:30pm to 5:30pm, Thu 10:30am to 2:30pm",
+        "hoursEs": "lun-miérc 1:30pm - 5:30pm, jueves 10:30am - 2:30pm"
+      },
+      {
+        "name": "South Park Library",
+        "address": "8604 8th Ave S, Seattle, WA 98108",
+        "daysEn": "February 2-6 (Monday-Friday)",
+        "daysEs": "2-6 de febrero (lunes-viernes)",
+        "hoursEn": "Mon/Thu/Fri 10:30am to 2:30pm, Tue/Wed 1:30pm to 4:30pm",
+        "hoursEs": "lun/juev/vier 10:30am - 2:30pm, mar/miérc 1:30pm - 4:30pm"
+      }
+    ]
+  },
+  "north": {
+    "headerEn": "North King County Survey Locations",
+    "headerEs": "Ubicaciones en Condado de King del norte",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
+    "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
+    "locations": [
+      {
+        "name": "Shoreline Library",
+        "address": "345 NE 175th St, Shoreline, WA 98155",
+        "daysEn": "January 26, 28, 29 and February 2, 4",
+        "daysEs": "26, 28, 29 de enero y 2, 4 de febrero",
+        "hoursEn": "Mon/Fri 10:30am to 2:30pm, Wed 12:30pm to 4:30pm",
+        "hoursEs": "lun/vier 10:30am - 2:30pm, miércoles 12:30pm - 4:30pm"
+      },
+      {
+        "name": "Ronald United Methodist Church",
+        "address": "17839 Aurora Ave N, Shoreline, WA 98133",
+        "daysEn": "February 2-6 (Monday-Friday)",
+        "daysEs": "2-6 de febrero (lunes-viernes)",
+        "hoursEn": "3pm to 7pm",
+        "hoursEs": "3pm - 7pm"
+      }, 
+      {
+        "name": "Lake City Library",
+        "address": "12501 28th Ave NE, Seattle, WA 98125",
+        "daysEn": "February 2-6 (Monday-Friday)",
+        "daysEs": "2-6 de febrero (lunes-viernes)",
+        "hoursEn": "10:30am to 2:30 pm",
+        "hoursEs": "10:30am - 2:30 pm"
+      }
+    ]
+  },
+  "east": {
+    "headerEn": "East King County Survey Locations",
+    "headerEs": "Ubicaciones en Condado de King del este",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
+    "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
+    "locations": [
+      {
+        "name": "Overlake Christian Church",
+        "address": "9900 Willows Rd. NE, Redmond, WA 98052",
+        "daysEn":"January 27-29 and February 2-3 (Tue-Thu, Mon-Tue)",
+        "daysEs": "27-29 de enero, 2-3 de febrero (mar-juev, lun-mar)",
+        "hoursEn": "9am to 1pm",
+        "hoursEs": "9am - 1pm"
+      },
+      {
+        "name": "Kirkland Library",
+        "address": "308 Kirkland Ave, Kirkland, WA 98033",
+        "daysEn": "February 2-6 (Monday-Friday)",
+        "daysEs": "2-6 de febrero (lunes-viernes)",
+        "hoursEn": "Mon/Thu/Fri 1:30pm to 5:30pm, Tue/Wed 2pm to 6pm",
+        "hoursEs": "un/juev/vier 1:30pm - 5:30pm, mar/miérc 2pm - 6pm"
+      },
+      {
+        "name": "Issaquah Community Hall",
+        "address": "180 E Sunset Way, Issaquah, WA 98027",
+        "daysEn": "January 26-30 (Monday-Friday)",
+        "daysEs": "26-30 de enero (lunes-viernes)",
+        "hoursEn": "3pm to 6pm",
+        "hoursEs": "3pm - 6pm"
+      },
+      {
+        "name": "Bellevue Library",
+        "address": "111 110th Ave NE, Bellevue, WA 98004",
+        "daysEn": "January 26-30 (Monday-Friday)",
+        "daysEs": "26-30 de enero (lunes-viernes)",
+        "hoursEn": "Mon/Thu/Fri 11am to 2pm, Tue/Wed 1pm-5pm",
+        "hoursEs": "lun/juev/vier 11am - 2pm, mar/miérc 1pm - 5pm"
+      }
+    ]
+  },
+  "snoqualmie valley": {
+    "headerEn": "Snoqualmie Valley Survey Locations",
+    "headerEs": "Ubicaciones en Snoqualmie Valley",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
+    "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
+    "locations": [
+      {
+        "name": "Reclaim",
+        "address": "8224 Railroad Ave, Snoqualmie, WA 98065",
+        "daysEn": "January 26 - February 5 (Weekdays Only)",
+        "daysEs": "26 de enero - 5 de febrero (Solo entre semana)",
+        "hoursEn": "10am to 1pm",
+        "hoursEs": "10am - 1pm"
+      },
+      {
+        "name": "North Bend Library",
+        "address": "115 E 4th St, North Bend, WA 98045",
+        "daysEn": "February 2-6, (Monday-Friday)",
+        "daysEs": "2-6 de febrero (lunes-viernes)",
+        "hoursEn": "3pm to 5:30pm",
+        "hoursEs": "3pm - 5:30pm"
+      }
+    ]
+  },
+  "southeast": {
+    "headerEn": "Southeast King County Locations",
+    "headerEs": "Ubicaciones en Condado de King del sudeste",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
+    "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
+    "locations": [
+      {
+        "name": "Plateau Outreach Ministries",
+        "address": "1806 Cole St, Enumclaw, WA 98022",
+        "daysEn": "January 26-28 and February 2-4 (Monday-Wednesday)",
+        "daysEs": "26-28 de enero y 2-4 de febrero (lunes-miércoles)",
+        "hoursEn": "Mon 12 to 3pm, Tue/Wed 12 to 4pm",
+        "hoursEs": "Lunes 12pm - 3pm, mar/miérc 12pm - 4pm"
+      },
+      {
+        "name": "Maple Valley Food Bank",
+        "address": "21415 Renton-Maple Valley Rd, Maple Valley, WA 98038",
+        "daysEn": "January 26-28 and February 2-4 (Monday-Wednesday)",
+        "daysEs": "26-28 de enero y 2-4 de febrero (lunes-miércoles)",
+        "hoursEn": "9am to 1pm",
+        "hoursEs": "9am - 1pm"
+      }
+    ]
+  },
+  "south": {
+    "headerEn": "South King County Survey Locations",
+    "headerEs": "Ubicaciones en Condado de King del sur",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
+    "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
+    "locations": [
+      {
+        "name": "Renton Highlands Library",
+        "address": "2801 NE 10th St, Renton, WA 98056",
+        "daysEn": "February 2-6 (Monday-Friday)",
+        "daysEs": "2-6 de febrero (lunes-viernes)",
+        "hoursEn": "Mon/Thu/Fri 1:30pm to 5:30pm, Tue/Wed 2:30pm to 6:30pm ",
+        "hoursEs": "lun/juev/vier 1:30pm - 5:30pm, mar//miérc - 2:30pm - 6:30pm "
+      },
+      {
+        "name": "Kent Library",
+        "address": "212 2nd Ave N, Kent, WA 98032",
+        "daysEn": "January 26-30 (Monday-Friday)",
+        "daysEs": "26-30 de enero (lunes-viernes)",
+        "hoursEn": "12pm to 4pm, Thursday 12pm to 6pm",
+        "hoursEs": "12pm - 4pm, Jueves 12pm - 6pm"
+      },
+      {
+        "name": "Highline United Methodist Church",
+        "address": "13015 1st Ave S, Burien, WA 98168",
+        "daysEn": "Januray 27-28, February 2-4",
+        "daysEs": "27-28 de enero, 2-4 de febrero",
+        "hoursEn": "10am to 2pm",
+        "hoursEs": "10am - 2pm"
+      },
+      {
+        "name": "Federal Way Library",
+        "address": "34200 1st Way S, Federal Way, WA 98003",
+        "daysEn": "February 2-3, 5-6 (Monday-Tuesday, Thursday-Friday)",
+        "daysEs": "2-3, 5-6 de febrero (lunes-martes, jueves-viernes)",
+        "hoursEn": "11am to 5pm",
+        "hoursEs": "11am - 5pm"
+      }
+    ]
+  },
+  "vashon" : {
+    "headerEn": "Vashon Survey Locations",
+    "headerEs": "Ubicaciones en Vashon",
+    "subheaderEn": "Bring this coupon to one of the locations below during a date and time listed. Complete a survey about your experience being unsheltered (including living in an RV or car/vehicle) and receive a $20 Gift Card.",
+    "subheaderEs": "Lleve este cupón a una de las siguientes ubicaciones para completar una encuesta sobre su experiencia sin refugio (incluido vivir en un coche) y recibir una tarjeta de regalo de $20.",
+    "subsubheaderEn": "Language translation (including ASL) will be available. Pets and service animals welcome.",
+    "subsubheaderEs": "Todas las ubicaciones son accesibles con estacionamiento gratuito y portabicicletas. Habrá traducción de idiomas (incluido ASL) disponible. Mascotas y animales de servicio son bienvenidos.",
+    "warningEn": "Survey data results will be used by the King County Continuum of Care (CoC) to estimate the number of people living unsheltered in King County. Find out more at kcrha.org/pit.",
+    "warningEs": "Los resultados de la encuesta serán utilizados por el King County Continuum of Care (CoC) para estimar el número de personas viviendo sin refugio en King County. Descubre más en kcrha.org/pit",
+    "locations": [
+
+      {
+        "name": "Vashon Island Library",
+        "address": "17210 Vashon Hwy SW, Vashon, WA 98070",
+        "daysEn": "January 26, 27, 29 (Monday, Tuesday, Thursday)",
+        "daysEs": "26, 27, 29 de enero (lunes, martes, jueves)",
+        "hoursEn": "on/Thu 11:30am to 2:30pm, Tue 12:30pm to 2:30pm",
+        "hoursEs": "lun/juev 11:30pm - 2:30pm, mar 12:30pm - 2:30pm"
+      },
+      {
+        "name": "Vashon Maury Community Food Bank",
+        "address": "10030 SW 210 St Vashon, WA 98070",
+        "daysEn": "January 28 (Wednesday), February 4 (Wednesday)",
+        "daysEs": "28 de enero (miércoles), 4 de febrero (miércoles)",
+        "hoursEn": "10:30am - 1pm",
+        "hoursEs": "10:30am - 1pm"
+      }
+
+    ]
+  }
+}
