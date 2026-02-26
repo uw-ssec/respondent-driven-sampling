@@ -2,9 +2,10 @@ import { UserDocument } from '@/types/User';
 
 interface StaffMember {
 	id: string;
-	employeeId: string;
 	name: string;
 	position: string;
+	locationObjectId: string;
+	phone: string;
 	approvalStatus: string;
 }
 
@@ -84,15 +85,17 @@ export const paginateStaff = (
  * Transform users data to staff members format
  */
 export const transformUsersToStaff = (
-	users: UserDocument[] | undefined
+	users: UserDocument[] | undefined,
+	locationMap: Map<string, string>
 ): StaffMember[] => {
 	if (!users) return [];
 
 	return users.map((user: UserDocument) => ({
 		id: user._id,
-		employeeId: user._id ?? 'N/A',
 		name: `${user.firstName} ${user.lastName}`,
 		position: user.role,
+		locationObjectId: locationMap.get(user.locationObjectId?.toString() ?? '') ?? 'N/A',
+		phone: user.phone ?? 'N/A',
 		approvalStatus: user.approvalStatus ?? 'PENDING'
 	}));
 };
