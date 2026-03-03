@@ -1,0 +1,5 @@
+# SMS template for gift card redemption instructions
+# Variables: {surveyCode}, {amount}, {rewardCode}
+name: gift_card_redeem
+description: Send gift card redemption code and instructions to respondents
+body: "Dear Participant {surveyCode},\nThank you for taking the time to complete a survey as part of the 2026 Point in Time (PIT) count. Enclosed are instructions and your code to redeem your gift card. This card has a value of {amount}\n---\nGo to: MyPrepaidCenter.com/\nEnter the code below and follow the prompts.\n{rewardCode}"

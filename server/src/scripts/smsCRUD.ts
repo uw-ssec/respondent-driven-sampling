@@ -25,6 +25,14 @@
  *     Example: npm run sms -- send-bulk --template gift_card --dry-run
  *     Example: npm run sms -- send-bulk --template gift_card --location 507f1f77bcf86cd799439011
  *
+ *   send-csv --file <path> --template <name> [--dry-run]
+ *     Send SMS to recipients listed in an external CSV file.
+ *     CSV must have columns: surveyCode, phone, amount, Reward Code.
+ *     Deduplicates rows, skips rows with amount=0 or empty Reward Code.
+ *     Does NOT require a database connection.
+ *     Example: npm run sms -- send-csv --file ~/data/recipients.csv --template gift_card_redeem
+ *     Example: npm run sms -- send-csv --file ~/data/recipients.csv --template gift_card_redeem --dry-run
+ *
  *   logs
  *     List all CSV log files in sms-logs/ directory with row counts.
  *     Example: npm run sms -- logs
@@ -49,6 +57,7 @@ import path from 'path';
 import { randomBytes } from 'crypto';
 import mongoose from 'mongoose';
 import { parse as parseYaml } from 'yaml';
+import { parse as parseCsv } from 'csv-parse/sync';
 
 import connectDB from '@/database';
 import Survey from '@/database/survey/mongoose/survey.model';
@@ -341,6 +350,198 @@ async function sendBulk(options: {
 	console.log(`  Log file: ${logger.getLogFilePath()}`);
 }
 
+// ===== CSV-based Sending =====
+
+interface CsvRecipient {
+	surveyCode: string;
+	phone: string;
+	amount: string;
+	rewardCode: string;
+}
+
+function parseCsvFile(filePath: string): CsvRecipient[] {
+	if (!fs.existsSync(filePath)) {
+		throw new Error(`CSV file not found: ${filePath}`);
+	}
+
+	let content = fs.readFileSync(filePath, 'utf-8');
+	// Strip UTF-8 BOM if present (common in Excel-exported CSVs)
+	if (content.charCodeAt(0) === 0xfeff) {
+		content = content.slice(1);
+	}
+	const rawRows = parseCsv(content, {
+		columns: true,
+		skip_empty_lines: true,
+		trim: true,
+		relax_column_count: true,
+		cast: false
+	}) as Record<string, string>[];
+
+	// Map columns — handle the "Reward Code" header → rewardCode
+	const mapped = rawRows.map(row => ({
+		surveyCode: row['surveyCode'] ?? '',
+		phone: row['phone'] ?? '',
+		amount: row['amount'] ?? '',
+		rewardCode: row['Reward Code'] ?? row['RewardCode'] ?? row['rewardCode'] ?? ''
+	}));
+
+	// Deduplicate exact duplicate rows
+	const seen = new Set<string>();
+	const deduped = mapped.filter(r => {
+		const key = `${r.surveyCode}|${r.phone}|${r.amount}|${r.rewardCode}`;
+		if (seen.has(key)) return false;
+		seen.add(key);
+		return true;
+	});
+
+	// Filter out rows where amount is "0" or Reward Code is empty
+	return deduped.filter(r => r.amount !== '0' && r.rewardCode !== '');
+}
+
+function formatAmount(amount: string): string {
+	const num = parseInt(amount, 10);
+	if (isNaN(num)) {
+		throw new Error(`Invalid amount value: "${amount}"`);
+	}
+	return `$${num}`;
+}
+
+async function sendCsv(options: {
+	filePath: string;
+	templateName: string;
+	dryRun: boolean;
+}): Promise<void> {
+	const mode = options.dryRun ? '🔍 DRY RUN' : '📤 SENDING';
+	console.log(`\n${mode} — CSV Bulk SMS...\n`);
+
+	const template = loadTemplate(options.templateName);
+	const recipients = parseCsvFile(options.filePath);
+
+	if (recipients.length === 0) {
+		console.log('No valid recipients found in CSV. Nothing to send.');
+		return;
+	}
+
+	console.log(`Template: ${template.name}`);
+	console.log(`CSV file: ${options.filePath}`);
+	console.log(`Recipients: ${recipients.length} (after dedup & filtering)`);
+	console.log(`Message template: ${template.body}`);
+	console.log('');
+
+	if (options.dryRun) {
+		console.log('--- Dry run preview ---\n');
+		for (const r of recipients) {
+			try {
+				const normalizedPhone = normalizePhoneToE164(r.phone);
+				const variables: Record<string, string> = {
+					surveyCode: r.surveyCode,
+					amount: formatAmount(r.amount),
+					rewardCode: r.rewardCode
+				};
+				const renderedBody = interpolateTemplate(
+					template.body,
+					variables
+				);
+				console.log(
+					`  ✓ ${r.phone} → ${normalizedPhone}: "${renderedBody}"`
+				);
+			} catch (err) {
+				console.log(
+					`  ✗ ${r.phone}: ${err instanceof Error ? err.message : err}`
+				);
+			}
+		}
+		console.log(
+			`\n--- Dry run complete. ${recipients.length} message(s) would be sent. ---`
+		);
+		return;
+	}
+
+	// Actual send
+	const batchId = randomBytes(8).toString('hex').toUpperCase();
+	const date = new Date().toISOString().split('T')[0];
+	const logFilename = `sms-log-${date}-${template.name}.csv`;
+	const logger = new CsvSmsLogger(logFilename);
+
+	let successCount = 0;
+	let failCount = 0;
+
+	for (let i = 0; i < recipients.length; i++) {
+		const r = recipients[i];
+		const index = i + 1;
+
+		try {
+			const normalizedPhone = normalizePhoneToE164(r.phone);
+			const variables: Record<string, string> = {
+				surveyCode: r.surveyCode,
+				amount: formatAmount(r.amount),
+				rewardCode: r.rewardCode
+			};
+			const renderedBody = interpolateTemplate(
+				template.body,
+				variables
+			);
+
+			const result = await sendSms(normalizedPhone, renderedBody);
+
+			const record: SmsRecord = {
+				surveyCode: r.surveyCode,
+				phone: normalizedPhone,
+				templateName: template.name,
+				smsText: renderedBody,
+				datetime: new Date().toISOString(),
+				status: result.status,
+				twilioSid: result.sid,
+				numSegments: result.numSegments
+			};
+			await logger.log(record);
+
+			successCount++;
+			console.log(
+				`  ✓ [${index}/${recipients.length}] ${r.phone} → ${normalizedPhone} (SID: ${result.sid})`
+			);
+
+			if (result.errorCode) {
+				console.log(
+					`    Warning: ${result.errorCode} - ${result.errorMessage}`
+				);
+			}
+		} catch (err) {
+			failCount++;
+			const errorMessage =
+				err instanceof Error ? err.message : String(err);
+			console.log(
+				`  ✗ [${index}/${recipients.length}] ${r.phone}: ${errorMessage}`
+			);
+
+			// Log failures too
+			const record: SmsRecord = {
+				surveyCode: r.surveyCode,
+				phone: r.phone,
+				templateName: template.name,
+				smsText: '',
+				datetime: new Date().toISOString(),
+				status: 'failed',
+				twilioSid: '',
+				numSegments: ''
+			};
+			await logger.log(record);
+		}
+
+		// Rate limiting: 1.1s delay between messages (Twilio long-code limit: 1 msg/sec)
+		if (i < recipients.length - 1) {
+			await new Promise(resolve => setTimeout(resolve, 1100));
+		}
+	}
+
+	console.log('\n' + '='.repeat(50));
+	console.log('CSV Bulk SMS Summary:');
+	console.log(`  Batch ID: ${batchId}`);
+	console.log(`  ✓ Sent: ${successCount}`);
+	console.log(`  ✗ Failed: ${failCount}`);
+	console.log(`  Log file: ${logger.getLogFilePath()}`);
+}
+
 function showLogs(): void {
 	console.log('\n📋 SMS Log Files\n');
 
@@ -585,6 +786,22 @@ async function main(): Promise<void> {
 			return;
 		}
 
+		if (operation === 'send-csv') {
+			const filePath = getFlag(args, '--file');
+			if (!filePath) {
+				console.error('Error: send-csv requires --file <path>');
+				process.exit(1);
+			}
+			const templateName = getFlag(args, '--template');
+			if (!templateName) {
+				console.error('Error: send-csv requires --template <name>');
+				process.exit(1);
+			}
+			const dryRun = hasFlag(args, '--dry-run');
+			await sendCsv({ filePath, templateName, dryRun });
+			return;
+		}
+
 		console.log('Connecting to database...');
 		await connectDB();
 		console.log('Connected to database ✓');
@@ -671,6 +888,15 @@ Operations:
     Example: npm run sms -- send-bulk --template gift_card
     Example: npm run sms -- send-bulk --template gift_card --dry-run
     Example: npm run sms -- send-bulk --template gift_card --location 507f1f77bcf86cd799439011
+
+  send-csv --file <path> --template <name> [--dry-run]
+    Send SMS to recipients listed in an external CSV file.
+    CSV must have columns: surveyCode, phone, amount, Reward Code.
+    Deduplicates rows, skips rows with amount=0 or empty Reward Code.
+    Does NOT require a database connection.
+    --dry-run shows what would be sent without actually sending.
+    Example: npm run sms -- send-csv --file ~/data/recipients.csv --template gift_card_redeem
+    Example: npm run sms -- send-csv --file ~/data/recipients.csv --template gift_card_redeem --dry-run
 
   logs
     List all CSV log files in sms-logs/ directory with row counts.
