@@ -395,8 +395,8 @@ function parseCsvFile(filePath: string): CsvRecipient[] {
 		return true;
 	});
 
-	// Filter out rows where amount is "0" or Reward Code is empty
-	return deduped.filter(r => r.amount !== '0' && r.rewardCode !== '');
+	// Filter out rows where amount is zero/invalid or Reward Code is empty
+	return deduped.filter(r => Number(r.amount) > 0 && r.rewardCode !== '');
 }
 
 function formatAmount(amount: string): string {
