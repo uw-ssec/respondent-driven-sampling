@@ -54,6 +54,7 @@
  */
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { randomBytes } from 'crypto';
 import mongoose from 'mongoose';
 import { parse as parseYaml } from 'yaml';
@@ -83,10 +84,10 @@ interface SmsTemplate {
 	body: string;
 }
 
-const TEMPLATES_DIR = path.join(
-	path.dirname(new URL(import.meta.url).pathname),
-	'sms-templates'
-);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const TEMPLATES_DIR = path.join(__dirname, 'sms-templates');
 
 function loadTemplate(templateName: string): SmsTemplate {
 	const filePath = path.join(TEMPLATES_DIR, `${templateName}.yaml`);
