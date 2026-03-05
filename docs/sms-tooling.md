@@ -55,13 +55,32 @@ Sends to recipients listed in an external CSV file. Designed for gift card redem
 
 **Does not require a database connection.**
 
-Expected CSV columns: `surveyCode`, `phone`, `amount`, `Reward Code`
+#### CSV format
+
+The CSV must have these columns (header names are **case-sensitive**):
+
+| Column | Required | Notes |
+|---|---|---|
+| `surveyCode` | Yes | Respondent's survey code (used in template variables) |
+| `phone` | Yes | Any US phone format — normalized to E.164 automatically |
+| `amount` | Yes | Numeric gift card value (e.g. `25`, `50.00`) |
+| `Reward Code` | Yes | Gift card redemption code. Also accepts `RewardCode` or `rewardCode` |
+
+Example:
+
+```csv
+surveyCode,phone,amount,Reward Code
+ABC123,(206) 555-1234,25,TANGO-XYZ-001
+DEF456,2065559012,50,TANGO-XYZ-002
+```
+
+Preprocessing:
 
 - Strips UTF-8 BOM (common in Excel exports)
-- Handles `Reward Code` / `RewardCode` / `rewardCode` column name variants
 - Deduplicates exact duplicate rows
-- Skips rows with `amount=0` or empty Reward Code
-- Formats `amount` as `$N` (e.g. `25` → `$25`)
+- Filters out rows where `amount` is zero, empty, or non-numeric (`Number(amount) > 0`)
+- Filters out rows with an empty Reward Code
+- Formats `amount` as `$N` in the message (e.g. `25` → `$25`)
 
 Rate limit: 1.1 s between messages.
 
