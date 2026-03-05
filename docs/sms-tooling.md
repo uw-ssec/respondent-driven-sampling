@@ -195,4 +195,4 @@ Twilio billing is per segment (160 chars). Capturing it immediately from the sen
 Log files are the audit trail. `check-status` writes a new `*-updated-DATE.csv` instead of overwriting, so the original send record is always preserved.
 
 **Why does `send-csv` not require a database connection?**
-The gift card recipient list comes from an external system (Tango), not the RDS database. Keeping `send-csv` DB-free means it can be run from any machine with Twilio credentials, without needing a MongoDB connection.
+The gift card recipient list requires deduplication, removal of test entries, and an external list of Tango reward links — processing that happens outside the RDS database. In the future, this process should be automated for prompt delivery of gift cards. Keeping `send-csv` DB-free means it can be run from any machine with Twilio credentials, without needing a MongoDB connection.
