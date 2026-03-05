@@ -1,10 +1,22 @@
 import twilio from 'twilio';
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID as string;
-const authToken = process.env.TWILIO_AUTH_TOKEN as string;
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER as string;
 
-const client = twilio(accountSid, authToken);
+let _client: ReturnType<typeof twilio> | null = null;
+
+function getTwilioClient() {
+	if (!_client) {
+		const accountSid = process.env.TWILIO_ACCOUNT_SID;
+		const authToken = process.env.TWILIO_AUTH_TOKEN;
+		if (!accountSid || !authToken) {
+			throw new Error(
+				'TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN must be set in your .env file.'
+			);
+		}
+		_client = twilio(accountSid, authToken);
+	}
+	return _client;
+}
 
 export interface SmsSendResult {
 	sid: string;
@@ -28,7 +40,7 @@ export async function sendSms(
 		);
 	}
 
-	const message = await client.messages.create({
+	const message = await getTwilioClient().messages.create({
 		to,
 		from: twilioPhoneNumber,
 		body
@@ -69,7 +81,7 @@ export interface MessageStatusResult {
 export async function fetchMessageStatus(
 	sid: string
 ): Promise<MessageStatusResult> {
-	const message = await client.messages(sid).fetch();
+	const message = await getTwilioClient().messages(sid).fetch();
 	return {
 		sid: message.sid,
 		status: message.status,
@@ -113,7 +125,7 @@ export async function listOutboundMessages(options?: {
 		);
 	}
 
-	const messages = await client.messages.list({
+	const messages = await getTwilioClient().messages.list({
 		from: twilioPhoneNumber,
 		...(options?.dateSentAfter && { dateSentAfter: options.dateSentAfter }),
 		...(options?.dateSentBefore && {
