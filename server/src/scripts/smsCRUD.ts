@@ -763,7 +763,7 @@ async function main(): Promise<void> {
 
 		if (args.length === 0) {
 			printUsage();
-			process.exit(1);
+			throw new Error('No operation specified');
 		}
 
 		const operation = args[0].toLowerCase();
@@ -789,13 +789,11 @@ async function main(): Promise<void> {
 		if (operation === 'send-csv') {
 			const filePath = getFlag(args, '--file');
 			if (!filePath) {
-				console.error('Error: send-csv requires --file <path>');
-				process.exit(1);
+				throw new Error('send-csv requires --file <path>');
 			}
 			const templateName = getFlag(args, '--template');
 			if (!templateName) {
-				console.error('Error: send-csv requires --template <name>');
-				process.exit(1);
+				throw new Error('send-csv requires --template <name>');
 			}
 			const dryRun = hasFlag(args, '--dry-run');
 			await sendCsv({ filePath, templateName, dryRun });
@@ -815,10 +813,7 @@ async function main(): Promise<void> {
 
 			case 'send': {
 				if (args.length < 2) {
-					console.error(
-						'Error: send requires a phone number argument'
-					);
-					process.exit(1);
+					throw new Error('send requires a phone number argument');
 				}
 				const phone = args[1];
 				const templateName = getFlag(args, '--template');
@@ -832,8 +827,7 @@ async function main(): Promise<void> {
 			case 'send-bulk': {
 				const templateName = getFlag(args, '--template');
 				if (!templateName) {
-					console.error('Error: send-bulk requires --template <name>');
-					process.exit(1);
+					throw new Error('send-bulk requires --template <name>');
 				}
 				const locationObjectId = getFlag(args, '--location');
 				const dryRun = hasFlag(args, '--dry-run');
@@ -843,22 +837,20 @@ async function main(): Promise<void> {
 			}
 
 			default:
-				console.error(`Error: Unknown operation "${operation}"`);
 				printUsage();
-				process.exit(1);
+				throw new Error(`Unknown operation "${operation}"`);
 		}
 	} catch (error) {
 		console.error(
 			'\n✗ Error:',
 			error instanceof Error ? error.message : error
 		);
-		process.exit(1);
+		process.exitCode = 1;
 	} finally {
 		if (mongoose.connection.readyState === 1) {
 			await mongoose.connection.close();
 			console.log('\nDatabase connection closed.');
 		}
-		process.exit(0);
 	}
 }
 
